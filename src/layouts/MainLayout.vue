@@ -4,10 +4,6 @@ q-layout(view="hHh lpr fFf")
     q-toolbar
       q-img(no-spinner src="/subspacelogo.png" width="150px")
       q-toolbar-title
-        .row.justify-center
-          .col-1
-            //- div Desktop Farmer
-          .col-5
       div
         q-btn(@click="$router.push({ name: 'index' })" flat icon="settings" round)
   q-page-container
@@ -16,6 +12,7 @@ q-layout(view="hHh lpr fFf")
 
 <script lang="ts">
 import { defineComponent } from "vue"
+import * as global from "src/lib/global"
 
 export default defineComponent({
   name: "MainLayout",
@@ -23,11 +20,13 @@ export default defineComponent({
   components: {},
 
   data() {
-    return {}
+    return {
+      data: global.data,
+    }
   },
 
   methods: {
-    toggleLeftDrawer() {},
+    ...global.mutations,
   },
 })
 </script>
