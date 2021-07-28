@@ -1,8 +1,8 @@
 <template lang="pug">
-q-page(padding)
+q-page.q-pl-xl.q-pr-xl.q-pt-lg
   .row.justify-center
     h4 {{ lang.pageTitle }}
-  .row.justify-center.q-gutter-lg
+  .row.justify-center.q-gutter-lg.q-mt-md
     .col
       .row
         div {{ lang.securePassword }}
@@ -12,13 +12,12 @@ q-page(padding)
         q-input(input-class="pwinput" outlined type="password" v-model="pw2")
       .row.justify-center.q-mt-md(style="height: 50px")
         p(:class="statusMsgStyle" style="font-size: 20px") {{ pwStatusMsg }}
-    .col
+    .col.q-pt-md
       p {{ lang.infoDialog }}
   .row.justify-between.items-center.q-mt-lg.absolute-bottom.q-pa-lg
     .col
-      //- q-checkbox(label="I have backed up my private key." size="lg" v-model="userConfirm")
     .col-auto
-      q-btn(:disable="!passwordsMatch" @click="$router.replace({ name: 'saveKeys' })" label="continue >" outline size="md")
+      q-btn(:disable="!passwordsMatch" @click="$router.replace({ name: 'saveKeys' })" icon-right="arrow_forward" label="continue" outline size="md")
       q-tooltip.q-pa-md(v-if="!passwordsMatch")
         p.q-mb-lg {{ lang.tooltip }}
 </template>

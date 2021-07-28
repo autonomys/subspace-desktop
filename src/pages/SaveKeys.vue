@@ -1,8 +1,8 @@
 <template lang="pug">
-q-page.q-pa-lg(padding)
+q-page.q-pa-lg
   .row.justify-center
     h4 {{ lang.pageTitle }}
-  .row.justify-center.q-gutter-lg
+  .row.justify-center.q-gutter-lg.q-mt-md
     .col
       .row.justify-center
         .col-8
@@ -21,7 +21,7 @@ q-page.q-pa-lg(padding)
       q-checkbox(:label="lang.userConfirm" size="lg" v-model="userConfirm")
     .col-expand
     .col-auto
-      q-btn(:disable="!canContinue" label="continue >" outline size="md")
+      q-btn(:disable="!canContinue" @click="$router.replace({ name: 'setupPlot' })" icon-right="arrow_forward" label="continue" outline size="md")
       q-tooltip.q-pa-md(v-if="!canContinue")
         p.q-mb-lg {{ lang.tooltip }}
 </template>

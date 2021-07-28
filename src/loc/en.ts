@@ -20,3 +20,9 @@ export const saveKeys = {
   yourPrivateKey: "Your private key",
   userConfirm: "I have backed up my private key."
 }
+export const setupPlot = {
+  pageTitle: "Setup Plot",
+  infoDialog: "Subspace needs a place to store data files (Plots). Ideally you should choose a drive with at least 100 GB of extra space.",
+  tooltip: "Please select a valid directory before proceeding."
+
+}
