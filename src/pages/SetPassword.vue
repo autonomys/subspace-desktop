@@ -17,7 +17,7 @@ q-page.q-pl-xl.q-pr-xl.q-pt-lg
   .row.justify-between.items-center.q-mt-lg.absolute-bottom.q-pa-lg
     .col
     .col-auto
-      q-btn(:disable="!passwordsMatch" @click="$router.replace({ name: 'saveKeys' })" icon-right="arrow_forward" label="continue" outline size="md")
+      q-btn(:disable="!passwordsMatch" @click="$router.replace({ name: 'saveKeys' })" icon-right="arrow_forward" label="continue" outline size="lg")
       q-tooltip.q-pa-md(v-if="!passwordsMatch")
         p.q-mb-lg {{ lang.tooltip }}
 </template>

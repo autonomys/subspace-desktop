@@ -5,6 +5,8 @@ const routes: RouteRecordRaw[] = [
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
+
+      { name: "plottingProgress", path: '/plottingProgress', component: () => import('pages/PlottingProgress.vue') },
       { name: "saveKeys", path: '/saveKeys', component: () => import('pages/SaveKeys.vue') },
       { name: "setupPlot", path: '/setupPlot', component: () => import('pages/SetupPlot.vue') },
       { name: "setPassword", path: '/setPassword', component: () => import('pages/SetPassword.vue') },

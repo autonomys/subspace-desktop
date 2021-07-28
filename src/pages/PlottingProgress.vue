@@ -11,47 +11,46 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
       .row
         .col
           div Plots Directory
-          q-input.q-field--highlighted(color="blue" dense input-class="pkdisplay" outlined v-model="plotDirectory")
-            template(v-slot:after)
-              q-btn.shadow-0(color="blue" flat icon="folder" size="lg")
-        //- .col(style="padding-top: 18px")
-          //- q-btn(color="blue" flat icon="folder" size="md" style="height: 45px")
-      .row.items-center.q-gutter-md.q-pt-sm
-        .col-4
-          .row
-            .col.q-pr-md
-              .q-mt-sm Utilized
-              q-input(dense input-class="pkdisplay" outlined readonly suffix="GB" v-model="utilizedGB")
-              .q-mt-sm Free
-              q-input(dense input-class="pkdisplay" outlined readonly suffix="GB" v-model="freeGB")
-              .q-mt-sm Allocated for Plots
-              q-input.q-field--highlighted(color="blue" dense input-class="pkdisplay" outlined suffix="GB" type="number" v-model="allocatedGB")
-        .col.q-pr-md
-          .row.justify-center
-            .relative-position(style="height: 145px; width: 170px")
-              q-circular-progress.absolute-center(:thickness="0" :value="0" center-color="grey-4" size="120px")
-              q-circular-progress.absolute-center(:angle="diskPercentUsed * 3" :thickness="0.5" :value="allocatedGBChart" center-color="grey-3" color="blue" size="120px")
-              q-circular-progress.absolute-center(:thickness="0.5" :value="diskPercentUsed" center-color="grey-3" color="grey-9" size="120px")
-          .row.q-mt-lg
-            .col-1
-            .col
-              q-slider(:max="safeAvailableGB" :min="0" :step="100" color="blue" markers snap style="height: 25px" v-model="allocatedGB")
-            .col-1
+          q-input(dense input-class="pkdisplay" outlined readonly v-model="plotDirectory")
+      .row.items-center.q-gutter-md
+        .col.relative-position
+          q-linear-progress.rounded-borders(:value="0.2" animated stripe style="height: 40px" track-color="blue-2")
+            .absolute-full.flex.flex-center
+              q-badge(color="white" size="lg" text-color="black")
+                template(v-slot:default)
+                  .q-pa-xs(style="font-size: 18px") 20%
+          q-linear-progress.absolute-right(:value="0.9" color="blue-4" indeterminate style="height: 4px; width: 80%; top: 36px" track-color="blue-2")
+      .row.justify-center.q-gutter-md.q-pt-md
+        .col-1
+        .col-3.relative-position
+          q-icon.absolute(color="grey-3" name="downloading" size="180px" style="z-index: -100; right: 100px")
+          .q-mt-sm Plotted
+          q-input.bg-white(dense input-class="pkdisplay" outlined readonly suffix="GB" v-model="utilizedGB")
+          .q-mt-sm Remaining
+          q-input.bg-white(dense input-class="pkdisplay" outlined readonly suffix="GB" v-model="utilizedGB")
+        .col-2
+        .col-3.relative-position
+          q-icon.absolute(color="grey-3" name="schedule" size="180px" style="z-index: -100; right: 100px")
+          .q-mt-sm Elapsed Time
+          q-input.bg-white(dense input-class="pkdisplay" outlined readonly v-model="printElapsedTime")
+          .q-mt-sm Remaining Time
+          q-input.bg-white(dense input-class="pkdisplay" outlined readonly v-model="printRemainingTime")
   .row.justify-end.q-mt-lg.absolute-bottom.q-pb-lg
     .col-auto.q-ml-xl.q-pr-md
       div Hint:
     .col.q-pr-md
       //- small Hint:
-      div Increasing your plots size will improve Farmer profitability.
+      div Join the Subspace Discord while you wait, meet the community and earn some SSC
       //- div(style="height: 10px")
     .col-auto.q-pr-md
-      div Initial plotting time:
-      div(style="font-size: 20px") {{ printEstimatedTime }}
+      //- div Initial plotting time:
+      //- div(style="font-size: 20px") {{ printEstimatedTime }}
     .col-expand
     .col-auto
-      q-btn(:disable="!canContinue" @click="$router.replace({ name: 'plottingProgress' })" color="blue-8" icon-right="downloading" label="Start Plotting" outline size="lg")
+      q-loading
+      q-btn(:disable="!canContinue" color="blue-8" icon-right="pause" label="Pause Plotting" outline size="lg")
       q-tooltip.q-pa-md(v-if="!canContinue")
-        p.q-mb-lg {{ lang.tooltip }}
+        //- p.q-mb-lg {{ lang.tooltip }}
 </template>
 
 <style lang="sass">
@@ -63,7 +62,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import { setupPlot as lang } from "src/loc/en"
+import { plottingProgress as lang } from "src/loc/en"
 import { QInput, Dialog, Notify } from "quasar"
 import TimeAgo from "javascript-time-ago"
 import en from "javascript-time-ago/locale/en"
@@ -81,8 +80,20 @@ export default defineComponent({
     return { revealKey, userConfirm, lang, generatedPk, plotDirectory, allocatedGB }
   },
   computed: {
+    remainingTimeHr(): number {
+      return 12
+    },
+    printRemainingTime(): string {
+      return timeAgo.format(Date.now() + this.remainingTimeHr * 3600000, "long").split("in")[1]
+    },
+    printElapsedTime(): string {
+      return timeAgo.format(Date.now() + this.elapsedTimeHr * 3600000, "long").split("in")[1]
+    },
+    elapsedTimeHr(): number {
+      return 4
+    },
     printEstimatedTime(): string {
-      return timeAgo.format(Date.now() + this.plotTimeHr * 1000000, "long").split("in")[1]
+      return timeAgo.format(Date.now() + this.plotTimeHr * 3600000, "long").split("in")[1]
     },
     plotTimeHr(): number {
       return this.allocatedGB * 0.1

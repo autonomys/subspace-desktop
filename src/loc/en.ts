@@ -26,3 +26,7 @@ export const setupPlot = {
   tooltip: "You must allocate at least 100 GB for plots to continue."
 
 }
+export const plottingProgress = {
+  pageTitle: "Initial Plotting",
+  infoDialog: "This is a one-time process to prepare this device as a Subspace farmer."
+}

@@ -21,7 +21,7 @@ q-page.q-pa-lg
       q-checkbox(:label="lang.userConfirm" size="lg" v-model="userConfirm")
     .col-expand
     .col-auto
-      q-btn(:disable="!canContinue" @click="$router.replace({ name: 'setupPlot' })" icon-right="arrow_forward" label="continue" outline size="md")
+      q-btn(:disable="!canContinue" @click="$router.replace({ name: 'setupPlot' })" icon-right="arrow_forward" label="continue" outline size="lg")
       q-tooltip.q-pa-md(v-if="!canContinue")
         p.q-mb-lg {{ lang.tooltip }}
 </template>
