@@ -63,10 +63,11 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import { setupPlot as lang } from "src/loc/en"
 import { QInput, Dialog, Notify } from "quasar"
 import TimeAgo from "javascript-time-ago"
 import en from "javascript-time-ago/locale/en"
+import { data as gData, mutations as gMut } from "src/lib/global"
+const lang = gData.lang.setupPlot
 TimeAgo.addDefaultLocale(en)
 const timeAgo = new TimeAgo("en-US")
 

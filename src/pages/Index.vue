@@ -12,7 +12,6 @@ q-page(padding)
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import * as global from "src/lib/global"
 
 export default defineComponent({
   name: "PageIndex",

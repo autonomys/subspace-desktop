@@ -35,7 +35,9 @@ q-page.q-pa-lg
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import { saveKeys as lang } from "src/loc/en"
+// import { saveKeys as lang } from "src/loc/en"
+import { data as gData, mutations as gMut } from "src/lib/global"
+const lang = gData.lang.saveKeys
 import { QInput, Dialog, Notify } from "quasar"
 
 export default defineComponent({

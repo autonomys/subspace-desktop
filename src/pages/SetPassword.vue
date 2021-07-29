@@ -33,7 +33,9 @@ q-page.q-pl-xl.q-pr-xl.q-pt-lg
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import { setPassword as lang } from "src/loc/en"
+// import { setPassword as lang } from "src/loc/en"
+import { data as gData, mutations as gMut } from "src/lib/global"
+const lang = gData.lang.setPassword
 export default defineComponent({
   name: "PageIndex",
   data() {
