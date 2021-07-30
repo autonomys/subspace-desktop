@@ -8,12 +8,11 @@
     "quasar": "quasar",
     "tauri": "tauri",
     "dev": "quasar dev& tauri dev&",
-    "build": "quasar build --modern && tauri build -v"
+    "build": "quasar build -m pwa && tauri build -v"
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
     "@tauri-apps/api": "^1.0.0-beta.5",
-    "@types/vue": "^2.0.0",
     "core-js": "^3.6.5",
     "javascript-time-ago": "^2.3.8",
     "quasar": "^2.0.0"
@@ -21,21 +20,17 @@
   "devDependencies": {
     "@quasar/app": "^3.0.0",
     "@types/node": "^16.3.3",
+    "@types/vue": "^2.0.0",
     "pug": "^3.0.2",
     "pug-plain-loader": "^1.1.0",
     "strip-ansi": "=3.0.1",
-    "vue-cli-plugin-tauri": "~1.0.0-beta.3"
+    "workbox-webpack-plugin": "^6.1.5"
   },
   "browserslist": [
     "last 10 Chrome versions",
     "last 10 Firefox versions",
     "last 4 Edge versions",
-    "last 7 Safari versions",
-    "last 8 Android versions",
-    "last 8 ChromeAndroid versions",
-    "last 8 FirefoxAndroid versions",
-    "last 10 iOS versions",
-    "last 5 Opera versions"
+    "last 7 Safari versions"
   ],
   "engines": {
     "node": ">= 12.22.1",

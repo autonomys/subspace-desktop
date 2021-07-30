@@ -4,7 +4,7 @@
     "version": "0.1.0"
   },
   "build": {
-    "distDir": "../dist/spa",
+    "distDir": "../dist/pwa",
     "devPath": "http://localhost:8080/",
     "beforeDevCommand": "",
     "beforeBuildCommand": ""

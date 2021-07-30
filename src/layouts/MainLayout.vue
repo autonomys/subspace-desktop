@@ -2,7 +2,7 @@
 q-layout(view="hHh lpr fFf")
   q-header.bg-white.text-black(bordered)
     q-toolbar
-      q-img(no-spinner src="/subspacelogo.png" width="150px")
+      q-img(no-spinner src="subspacelogo.png" width="150px")
       q-toolbar-title
       div
         q-btn(@click="$router.push({ name: 'index' })" flat icon="settings" round)
