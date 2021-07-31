@@ -17,7 +17,8 @@ q-page.q-pl-xl.q-pr-xl.q-pt-lg
   .row.justify-between.items-center.q-mt-lg.absolute-bottom.q-pa-lg
     .col
     .col-auto
-      q-btn(:disable="!passwordsMatch" @click="$router.replace({ name: 'saveKeys' })" icon-right="arrow_forward" label="continue" outline size="lg")
+      q-btn(@click="testModal" label="tst modal")
+      q-btn(:disable="!passwordsMatch" @click="$router.replace({ name: 'setupPlot' })" icon-right="arrow_forward" label="continue" outline size="lg")
       q-tooltip.q-pa-md(v-if="!passwordsMatch")
         p.q-mb-lg {{ lang.tooltip }}
 </template>
@@ -34,15 +35,32 @@ q-page.q-pl-xl.q-pr-xl.q-pt-lg
 <script lang="ts">
 import { defineComponent } from "vue"
 // import { setPassword as lang } from "src/loc/en"
-import { data as gData, mutations as gMut } from "src/lib/global"
-const lang = gData.lang.setPassword
+import { Dialog } from "quasar"
+import app from "app.vue"
+import { showModal } from "src/lib/util"
+import * as global from "src/lib/global"
+const lang = global.data.loc.text.setPassword
 export default defineComponent({
-  name: "PageIndex",
   data() {
     let pw1: string = ""
     let pw2: string = ""
     let userConfirm: boolean = false
     return { pw1, pw2, userConfirm, lang }
+  },
+  methods: {
+    async testModal() {
+      console.log("tst modal")
+      const modal = await showModal("introModal")
+      modal?.onOk(() => {
+        console.log("ok")
+      })
+      // this.show
+      // this.$emit("showModal", "introModal")
+      // const app = <typeof app>this.$root
+    },
+  },
+  mounted() {
+    // Dialog.create({ message: "hello" })
   },
   computed: {
     pwStatusMsg(): string {

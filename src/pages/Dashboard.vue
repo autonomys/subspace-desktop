@@ -125,8 +125,8 @@ q-page.q-pl-xl.q-pr-xl.q-pt-md
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import { data as gData, mutations as gMut } from "src/lib/global"
-const lang = gData.lang.dashboard
+import * as global from "src/lib/global"
+const lang = global.data.loc.text.dashboard
 
 export default defineComponent({
   data() {

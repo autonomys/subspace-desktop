@@ -2,15 +2,15 @@ import { reactive } from "vue";
 const list: string[] = []
 import getLang from "../loc/lang"
 
-let lang: any
-export var data = reactive({ language: 'en', lang })
+let text: any
+export var data = reactive({ loc: { selected: 'en', text, } })
 export var mutations = {
   async changeLang(newLang: string) {
-    data.language = newLang
+    data.loc.selected = newLang
     await this.loadLangData()
   },
   async loadLangData() {
-    data.lang = await getLang(data.language)
+    data.loc.text = await getLang(data.loc.selected)
   }
 }
 

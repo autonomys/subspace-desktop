@@ -17,7 +17,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
               q-badge(color="white" size="lg" text-color="black")
                 template(v-slot:default)
                   .q-pa-xs(style="font-size: 18px") {{ progresspct }}%
-          q-linear-progress.absolute-right(:value="0.9" indeterminate style="height: 4px; top: 36px" track-color="transparent" v-if="plotting")
+          q-linear-progress.absolute-right(:value="0.9" indeterminate style="height: 1px; top: 39px" track-color="transparent" v-if="plotting")
       .row.justify-center.q-gutter-md.q-pt-md
         .col-1
         .col-3.relative-position
@@ -40,10 +40,13 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
       div {{ lang.hintInfo }}
     .col-auto.q-pr-md
     .col-expand
-    .col-auto
+    .col-auto(v-if="viewedIntro")
       q-btn.q-mr-md(@click="fakeProgress()" flat icon="arrow_right" round size="sm")
       q-btn(@click="pausePlotting(false)" color="blue-8" icon-right="play_arrow" label="Resume Plotting" outline size="lg" v-if="!plotting")
       q-btn(@click="pausePlotting(true)" color="blue-8" icon-right="pause" label="Pause Plotting" outline size="lg" v-else)
+    .col-auto(v-else)
+      q-btn.q-mr-md(@click="fakeProgress()" flat icon="arrow_right" round size="sm")
+      q-btn(@click="viewIntro()" color="blue-8" icon-right="play_arrow" label="Next" outline size="lg")
 </template>
 
 <style lang="sass">
@@ -57,8 +60,9 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
 import { defineComponent } from "vue"
 // import { plottingProgress as lang } from "src/loc/en"
 import { QInput, Dialog, Notify } from "quasar"
-import { data as gData, mutations as gMut } from "src/lib/global"
-const lang = gData.lang.plottingProgress
+import * as global from "src/lib/global"
+const lang = global.data.loc.text.plottingProgress
+import { showModal } from "src/lib/util"
 
 import TimeAgo from "javascript-time-ago"
 import en from "javascript-time-ago/locale/en"
@@ -66,22 +70,30 @@ TimeAgo.addDefaultLocale(en)
 const timeAgo = new TimeAgo("en-US")
 
 export default defineComponent({
+  inject: {
+    showModal: { from: "df", default: () => {} },
+  },
   data() {
     let plottingData = {
       finishedGB: 10.2,
       remainingGB: 32.3,
     }
+
     return {
       plotting: true,
       plottingData,
-
+      viewedIntro: false,
       lang,
       plotDirectory: "/Subspace/plots",
       allocatedGB: 100,
       progresspct: 20,
     }
   },
-
+  mounted() {
+    // setTimeout(async () => {
+    //   const modal = await showModal("introModal")
+    // }, 5000)
+  },
   computed: {
     remainingTimeHr(): number {
       return 12
@@ -109,6 +121,9 @@ export default defineComponent({
     },
   },
   methods: {
+    async viewIntro() {
+      const modal = await showModal("introModal")
+    },
     pausePlotting(plotting: boolean) {
       this.plotting = !plotting
     },

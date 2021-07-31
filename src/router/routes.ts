@@ -8,7 +8,7 @@ const routes: RouteRecordRaw[] = [
 
       { name: "dashboard", path: '/dashboard', component: () => import('pages/Dashboard.vue') },
       { name: "plottingProgress", path: '/plottingProgress', component: () => import('pages/PlottingProgress.vue') },
-      { name: "saveKeys", path: '/saveKeys', component: () => import('pages/SaveKeys.vue') },
+      // { name: "saveKeys", path: '/saveKeys', component: () => import('src/components/SaveKeys.vue') },
       { name: "setupPlot", path: '/setupPlot', component: () => import('pages/SetupPlot.vue') },
       { name: "setPassword", path: '/setPassword', component: () => import('pages/SetPassword.vue') },
       { name: "index", path: '', component: () => import('pages/Index.vue') },

@@ -1,8 +1,6 @@
 <template lang="pug">
-q-page.q-pa-lg
-  .row.justify-center
-    h4 {{ lang.pageTitle }}
-  .row.justify-center.q-gutter-lg.q-mt-md
+.full-width
+  .row.justify-center.q-gutter-lg
     .col
       .row.justify-center
         .col-8
@@ -16,14 +14,10 @@ q-page.q-pa-lg
           q-btn.full-width.full-width(@click="revealKey = true" flat label="reveal" size="lg")
       .row.justify-center.q-mt-md
         q-btn.full-width(@click="copyPk" label="copy to clipboard" outline style="max-width: 200px")
-  .row.justify-between.items-center.q-mt-lg.absolute-bottom.q-pa-lg
-    .col-auto.bg-grey-1.q-pr-md
-      q-checkbox(:label="lang.userConfirm" size="lg" v-model="userConfirm")
-    .col-expand
-    .col-auto
-      q-btn(:disable="!canContinue" @click="$router.replace({ name: 'setupPlot' })" icon-right="arrow_forward" label="continue" outline size="lg")
-      q-tooltip.q-pa-md(v-if="!canContinue")
-        p.q-mb-lg {{ lang.tooltip }}
+  .row.q-ma-md
+    p The private key is necessary to utilize Subspace and can't be recovered. Ensure the key is backed up to a secure location.
+  .row.q-mt-md
+    q-checkbox(:label="lang.userConfirm" size="lg" v-model="userConfirm")
 </template>
 
 <style lang="sass">
@@ -36,8 +30,8 @@ q-page.q-pa-lg
 <script lang="ts">
 import { defineComponent } from "vue"
 // import { saveKeys as lang } from "src/loc/en"
-import { data as gData, mutations as gMut } from "src/lib/global"
-const lang = gData.lang.saveKeys
+import * as global from "src/lib/global"
+const lang = global.data.loc.text.saveKeys
 import { QInput, Dialog, Notify } from "quasar"
 
 export default defineComponent({
@@ -68,6 +62,12 @@ export default defineComponent({
         // Dialog.create({ message: "Private Key copied to clipboard" })
         Notify.create({ message: "Private Key copied to clipboard. Backup key in a secure location.", icon: "content_copy" })
       })
+    },
+  },
+  emits: ["userConfirm"],
+  watch: {
+    userConfirm(val) {
+      this.$emit("userConfirm", val)
     },
   },
 })

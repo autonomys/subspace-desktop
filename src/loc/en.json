@@ -14,7 +14,7 @@
     "confirmMsg": "I have backed up my private key. I understand that my account can't be recovered without my private key.",
     "tooltip": "Please confirm you have backed up your private key first",
     "yourPrivateKey": "Your private key",
-    "userConfirm": "I have backed up my private key."
+    "userConfirm": "I have backed up my private key. I understand that my account can't be recovered without my private key."
   },
   "setupPlot": {
     "pageTitle": "Setup Plots",

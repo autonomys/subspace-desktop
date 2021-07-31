@@ -66,8 +66,8 @@ import { defineComponent } from "vue"
 import { QInput, Dialog, Notify } from "quasar"
 import TimeAgo from "javascript-time-ago"
 import en from "javascript-time-ago/locale/en"
-import { data as gData, mutations as gMut } from "src/lib/global"
-const lang = gData.lang.setupPlot
+import * as global from "src/lib/global"
+const lang = global.data.loc.text.setupPlot
 TimeAgo.addDefaultLocale(en)
 const timeAgo = new TimeAgo("en-US")
 
