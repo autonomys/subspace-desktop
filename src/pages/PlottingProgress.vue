@@ -66,7 +66,7 @@ import { showModal } from "src/lib/util"
 
 import TimeAgo from "javascript-time-ago"
 import en from "javascript-time-ago/locale/en"
-TimeAgo.addDefaultLocale(en)
+TimeAgo.addLocale(en)
 const timeAgo = new TimeAgo("en-US")
 
 export default defineComponent({
@@ -123,6 +123,9 @@ export default defineComponent({
   methods: {
     async viewIntro() {
       const modal = await showModal("introModal")
+      modal?.onDismiss(() => {
+        this.viewedIntro = true
+      })
     },
     pausePlotting(plotting: boolean) {
       this.plotting = !plotting

@@ -65,7 +65,11 @@ const component = defineComponent({
     "ok",
     "hide",
   ],
-
+  watch: {
+    currentPage(val) {
+      if (val > this.totalPages) this.hide()
+    },
+  },
   methods: {
     userConfirm(val) {
       console.log("usrConfirm", val)

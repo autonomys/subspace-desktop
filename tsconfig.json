@@ -4,6 +4,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "noImplicitAny": false,
+    "allowJs": false,
     "experimentalDecorators": true
   }
 }

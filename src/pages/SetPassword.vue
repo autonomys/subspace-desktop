@@ -17,20 +17,11 @@ q-page.q-pl-xl.q-pr-xl.q-pt-lg
   .row.justify-between.items-center.q-mt-lg.absolute-bottom.q-pa-lg
     .col
     .col-auto
-      q-btn(@click="testModal" label="tst modal")
+      //- q-btn(@click="testModal" label="tst modal")
       q-btn(:disable="!passwordsMatch" @click="$router.replace({ name: 'setupPlot' })" icon-right="arrow_forward" label="continue" outline size="lg")
       q-tooltip.q-pa-md(v-if="!passwordsMatch")
         p.q-mb-lg {{ lang.tooltip }}
 </template>
-
-<style lang="sass">
-.pwinput
-  font-size: 40px
-.greenMsg
-  color: $green
-.redMsg
-  color: $red
-</style>
 
 <script lang="ts">
 import { defineComponent } from "vue"
@@ -49,11 +40,11 @@ export default defineComponent({
   },
   methods: {
     async testModal() {
-      console.log("tst modal")
-      const modal = await showModal("introModal")
-      modal?.onOk(() => {
-        console.log("ok")
-      })
+      // console.log("tst modal")
+      // const modal = await showModal("introModal")
+      // modal?.onOk(() => {
+      //   console.log("ok")
+      // // })
       // this.show
       // this.$emit("showModal", "introModal")
       // const app = <typeof app>this.$root

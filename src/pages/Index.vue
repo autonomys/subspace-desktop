@@ -7,7 +7,7 @@ q-page(padding)
   .row.justify-center.q-mt-xl
     q-btn(@click="$router.push({ name: 'setPassword' })" label="Quick Start" outline size="xl")
   .row.justify-center.q-mt-sm
-    q-btn(color="grey" flat label="advanced")
+    q-btn(@click="$router.push({ name: 'advanced' })" color="grey" flat label="advanced")
 </template>
 
 <script lang="ts">

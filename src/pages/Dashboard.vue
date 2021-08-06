@@ -3,13 +3,14 @@ q-page.q-pl-xl.q-pr-xl.q-pt-md
   .row.justify-center
     //- h4 {{ lang.pageTitle }}
   .row.q-pb-sm.justify-center
-    .row
-      .col-auto.q-mr-md.relative-position
-        q-icon(color="green-5" name="trip_origin" size="60px" style="bottom: 5px; right: 5px")
-        //- q-spinner-oval(color="green" size="55px")
-      .col
-        .text-weight-light Farmer Status:
-        h6.no-margin Connected Synced and Farming
+    //- .row
+    //-   .col-auto.q-mr-md.relative-position
+    //-     q-icon(color="green-5" name="trip_origin" size="60px" style="bottom: 5px; right: 5px")
+    //-     //- q-spinner-oval(color="green" size="55px")
+    //-     q-tooltip
+    //-       .col
+    //-         p Farmer Status:
+    //-         h6.no-margin Connected Synced and Farming
   .row.q-gutter-md
     .col
       q-card(bordered flat)
@@ -100,7 +101,7 @@ q-page.q-pl-xl.q-pr-xl.q-pt-md
         q-separator
         .row.q-gutter-sm.q-pa-xs.q-ml-sm
           .col-2
-            p 32434324
+            p 20110350
           .col-auto
             q-separator(vertical)
           .col-4
@@ -112,7 +113,31 @@ q-page.q-pl-xl.q-pr-xl.q-pt-md
         q-separator
         .row.q-gutter-sm.q-pa-xs.q-ml-sm
           .col-2
-            p 32434324
+            p 18934324
+          .col-auto
+            q-separator(vertical)
+          .col-4
+            p {{ new Date().toLocaleString() }}
+          .col-2
+            p 5
+          .col-3
+            p 343.23 SSC
+        q-separator
+        .row.q-gutter-sm.q-pa-xs.q-ml-sm
+          .col-2
+            p 17434324
+          .col-auto
+            q-separator(vertical)
+          .col-4
+            p {{ new Date().toLocaleString() }}
+          .col-2
+            p 5
+          .col-3
+            p 343.23 SSC
+        q-separator
+        .row.q-gutter-sm.q-pa-xs.q-ml-sm
+          .col-2
+            p 14634324
           .col-auto
             q-separator(vertical)
           .col-4

@@ -10,10 +10,10 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
     .col
       .row
         .col
-          div Plots Directory
-          q-input.q-field--highlighted(color="blue" dense input-class="pkdisplay" outlined v-model="plotDirectory")
+          div Plots Directory {{ validPath }}
+          q-input.q-field--highlighted(:error="!validPath" color="blue" dense input-class="pkdisplay" outlined v-model="plotDirectory")
             template(v-slot:after)
-              q-btn.shadow-0(color="blue" flat icon="folder" size="lg")
+              q-btn.shadow-0(@click="selectDir()" color="blue" flat icon="folder" size="lg")
         //- .col(style="padding-top: 18px")
           //- q-btn(color="blue" flat icon="folder" size="md" style="height: 45px")
       .row.items-center.q-gutter-md.q-pt-sm
@@ -62,8 +62,13 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
 </style>
 
 <script lang="ts">
+import * as dialog from "@tauri-apps/api/dialog"
+import * as fs from "@tauri-apps/api/fs"
+import * as path from "@tauri-apps/api/path"
+const tauri = { dialog, fs, path }
 import { defineComponent } from "vue"
-import { QInput, Dialog, Notify } from "quasar"
+import { native } from "src/lib/util"
+import { debounce } from "quasar"
 import TimeAgo from "javascript-time-ago"
 import en from "javascript-time-ago/locale/en"
 import * as global from "src/lib/global"
@@ -79,7 +84,22 @@ export default defineComponent({
     let revealKey = false
     let allocatedGB = 100
     let plotDirectory = "/Subspace/plots"
-    return { revealKey, userConfirm, lang, generatedPk, plotDirectory, allocatedGB }
+    let defaultPath = ""
+    return { revealKey, userConfirm, lang, generatedPk, plotDirectory, allocatedGB, validPath: true, defaultPath }
+  },
+  async mounted() {
+    this.defaultPath = (await tauri.path.homeDir()) + ".subspace-farmer-demo"
+    this.plotDirectory = this.defaultPath
+  },
+  async created() {
+    this.$watch(
+      "plotDirectory",
+      debounce(async (val) => {
+        console.log(val)
+        if (this.plotDirectory == this.defaultPath) return (this.validPath = true)
+        this.validPath = await native.dirExists(val)
+      }, 500)
+    )
   },
   computed: {
     printEstimatedTime(): string {
@@ -114,21 +134,16 @@ export default defineComponent({
     },
   },
   methods: {
-    copyPk() {
-      const displaypk = this.$refs["pkDisplay"] as QInput
-      const previousState = this.revealKey
-      this.revealKey = true
-      this.$nextTick(() => {
-        displaypk.focus()
-        displaypk.select()
-        var successful = document.execCommand("copy")
-        var msg = successful ? "successful" : "unsuccessful"
-        console.log(msg)
-        this.revealKey = previousState
-        // Dialog.create({ message: "Private Key copied to clipboard" })
-        Notify.create({ message: "Private Key copied to clipboard. Backup key in a secure location.", icon: "content_copy" })
-      })
+    async selectDir() {
+      const result = await native.selectDir(this.plotDirectory).catch(console.error)
+      if (result) this.plotDirectory = result
     },
+  },
+  watch: {
+    // async plotDirectory(val) {
+    //   console.log(val)
+    //   this.validPath = await native.dirExists(val)
+    // },
   },
 })
 </script>
