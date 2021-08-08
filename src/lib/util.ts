@@ -1,10 +1,13 @@
 import introModal from "components/introModal.vue"
 import { Dialog, DialogChainObject } from "quasar"
+
 import * as global from "src/lib/global"
 import * as dialog from "@tauri-apps/api/dialog"
 import * as fs from "@tauri-apps/api/fs"
 import * as path from "@tauri-apps/api/path"
-const tauri = { dialog, fs, path }
+import { invoke } from '@tauri-apps/api/tauri'
+
+const tauri = { dialog, fs, path, invoke }
 
 const modalComponents: { [index: string]: any } = {
   introModal
@@ -34,5 +37,9 @@ export const native = {
   },
   async dirExists(dir: string): Promise<boolean> {
     return (await tauri.fs.readDir(dir, { recursive: false }).catch(console.error)) ? true : false
+  },
+  async driveStats(dir: string) {
+    const result = await tauri.invoke('get_disk_stats', { dir: 'Hello!' })
+    console.log(result);
   }
 }
