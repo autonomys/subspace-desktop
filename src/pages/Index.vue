@@ -22,9 +22,9 @@ export default defineComponent({
     return { global: global.data, native }
   },
   methods: {
-    testNative() {
-      const result = this.native.driveStats("dope")
-      console.log(result)
+    async testNative() {
+      const result = await native.driveStats("/")
+      console.log("result", result)
     },
   },
 })

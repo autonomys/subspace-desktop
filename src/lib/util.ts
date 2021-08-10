@@ -27,6 +27,12 @@ export async function showModal(componentName: string, props: propsType = {}): P
   })
 }
 
+
+export interface DriveStats {
+  freeBytes: number,
+  totalBytes: number
+}
+
 export const native = {
   async selectDir(defaultPath: undefined | string): Promise<string | null> {
     let exists: boolean = false
@@ -38,8 +44,9 @@ export const native = {
   async dirExists(dir: string): Promise<boolean> {
     return (await tauri.fs.readDir(dir, { recursive: false }).catch(console.error)) ? true : false
   },
-  async driveStats(dir: string) {
-    const result = await tauri.invoke('get_disk_stats', { dir: 'Hello!' })
-    console.log(result);
+  async driveStats(dir: string): Promise<DriveStats> {
+    const result = await tauri.invoke('get_disk_stats', { dir }) as any
+    const stats: DriveStats = { freeBytes: result.free_bytes, totalBytes: result.total_bytes }
+    return stats
   }
 }

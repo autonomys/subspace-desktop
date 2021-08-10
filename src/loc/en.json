@@ -19,7 +19,7 @@
   "setupPlot": {
     "pageTitle": "Setup Plots",
     "infoDialog": "Subspace needs a place to store data files (Plots).",
-    "tooltip": "You must allocate at least 100 GB for plots to continue."
+    "tooltip": "You must allocate at least 1 GB of plot data to continue."
   },
   "plottingProgress": {
     "pageTitle": "Initial Plotting",

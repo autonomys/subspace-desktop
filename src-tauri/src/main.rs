@@ -2,12 +2,25 @@
   all(not(debug_assertions), target_os = "windows"),
   windows_subsystem = "windows"
 )]
+use serde::Serialize;
+// use std::ffi::OsStr;
+// use std::path::Path;
 
+#[derive(Serialize)]
+
+struct S {
+  free_bytes: u64,
+  total_bytes: u64,
+}
 #[tauri::command]
-fn get_disk_stats(dir: String) -> String {
-  // const file: u64 = fs2::free_space(dir).expect("error"); // need to return data from fs2
-  println!("I was invoked from JS!");
-  return "testing".to_string();
+fn get_disk_stats(dir: String) -> S {
+  println!("{}", dir.to_string());
+  let free: u64 = fs2::available_space(&dir).expect("error");
+  let total: u64 = fs2::total_space(&dir).expect("error");
+  return S {
+    free_bytes: free,
+    total_bytes: total,
+  };
 }
 
 fn main() {

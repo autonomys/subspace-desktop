@@ -7,19 +7,23 @@
   "scripts": {
     "quasar": "quasar",
     "tauri": "tauri",
-    "dev": "quasar dev& tauri dev&",
+    "dev": "quasar dev",
     "build": "quasar build -m pwa && tauri build -v"
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
     "@tauri-apps/api": "^1.0.0-beta.5",
+    "@tsmx/human-readable": "^1.0.6",
+    "apexcharts": "^3.27.3",
     "core-js": "^3.6.5",
     "javascript-time-ago": "^2.3.8",
-    "quasar": "^2.0.0"
+    "quasar": "^2.0.0",
+    "vue3-apexcharts": "^1.4.1"
   },
   "devDependencies": {
     "@quasar/app": "^3.0.0",
     "@tauri-apps/cli": "^1.0.0-beta.6",
+    "@types/": "tsmx/human-readable",
     "@types/node": "^16.3.3",
     "@types/vue": "^2.0.0",
     "pug": "^3.0.2",
