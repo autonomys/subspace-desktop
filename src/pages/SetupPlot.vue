@@ -9,9 +9,9 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
   .row.justify-center.q-mr-lg.q-ml-lg
     .col
       .row
-        .col
-          div Plots Directory {{ validPath }}
-          q-input.q-field--highlighted(:error="!validPath" color="blue" dense input-class="pkdisplay" outlined v-model="plotDirectory")
+        .col.q-mt-sm
+          div Plots Directory
+          q-input.q-field--highlighted(:error="!validPath" color="blue" dense error-message="Invalid Directory" input-class="pkdisplay" outlined v-model="plotDirectory")
             template(v-slot:after)
               q-btn.shadow-0(@click="selectDir()" color="blue" flat icon="folder" size="lg")
         //- .col(style="padding-top: 18px")
@@ -20,20 +20,17 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
         .col-4
           .row
             .col.q-pr-md
-              .q-mt-sm Used
-              q-input(dense input-class="pkdisplay" outlined readonly suffix="GB" v-model="utilizedGB")
-              .q-mt-sm Free
+              .q-mt-sm Utilized
+              q-input.bg-grey-3(dense input-class="pkdisplay" outlined readonly suffix="GB" v-model="utilizedGB")
+              .q-mt-sm Available
               q-input(:error="unsafeFree" dense hide-bottom-space input-class="pkdisplay" outlined readonly suffix="GB" v-model="freeGB")
-                q-tooltip
+                q-tooltip.q-pa-sm
                   p We suggest you retain at least 20 GB of free available space on this drive.
               .q-mt-sm Allocated for Plot
               q-input.q-field--highlighted(color="blue" dense input-class="pkdisplay" outlined suffix="GB" type="number" v-model="allocatedGB")
         .col.q-pr-md
-          .row.justify-center
+          .row.justify-center(style="transform: scale(-1, 1)")
             apexchart(:options="chartOptions" :series="chartData" type="donut" width="200px")
-            //- q-circular-progress.absolute-center(:thickness="0" :value="0" center-color="grey-4" size="120px")
-            //- q-circular-progress.absolute-center(:angle="diskPercentUsed * 3" :thickness="0.5" :value="allocatedGBChart" center-color="grey-3" color="blue" size="120px")
-            //- q-circular-progress.absolute-center(:thickness="0.5" :value="diskPercentUsed" center-color="grey-3" color="grey-9" size="120px")
           .row.q-mt-lg
             .col-1
             .col
@@ -43,15 +40,13 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
     .col-auto.q-ml-xl.q-pr-md
       div Hint:
     .col.q-pr-md
-      //- small Hint:
       div Increasing your plots size will improve Farmer profitability.
-      //- div(style="height: 10px")
     .col-auto.q-pr-md
       div Initial plotting time:
       div(style="font-size: 20px") {{ printEstimatedTime }}
     .col-expand
     .col-auto
-      q-btn(:disable="!canContinue" @click="$router.replace({ name: 'plottingProgress' })" color="blue-8" icon-right="downloading" label="Start Plotting" outline size="lg")
+      q-btn(:disable="!canContinue" @click="startPlotting()" color="blue-8" icon-right="downloading" label="Start Plotting" outline size="lg")
       q-tooltip.q-pa-md(v-if="!canContinue")
         p.q-mb-lg {{ lang.tooltip }}
 </template>
@@ -69,7 +64,7 @@ import * as fs from "@tauri-apps/api/fs"
 import * as path from "@tauri-apps/api/path"
 const tauri = { dialog, fs, path }
 import { defineComponent } from "vue"
-import { native, DriveStats } from "src/lib/util"
+import * as util from "src/lib/util"
 import { debounce } from "quasar"
 import TimeAgo from "javascript-time-ago"
 import en from "javascript-time-ago/locale/en"
@@ -79,13 +74,12 @@ TimeAgo.addDefaultLocale(en)
 const timeAgo = new TimeAgo("en-US")
 import { ApexOptions } from "apexcharts"
 const chartOptions: ApexOptions = {
-  chart: { height: "100px" },
   legend: { show: false },
-  colors: ["#E2E2E2", "#2081F0"],
-  plotOptions: { pie: { startAngle: 0, endAngle: 360, donut: { size: "70px" } } },
+  colors: ["#E0E0E0", "#FFFFFF", "#2081F0"],
+  plotOptions: { pie: { startAngle: 0, endAngle: 360, expandOnClick: false, donut: { size: "40px" } } },
   dataLabels: { enabled: false },
   labels: [],
-  markers: { hover: { size: 0 } },
+  markers: { hover: { size: 100 } },
   tooltip: { enabled: false },
 }
 
@@ -97,7 +91,7 @@ export default defineComponent({
     let allocatedGB = 1
     let plotDirectory = "/Subspace/plots"
     let defaultPath = ""
-    let driveStats: DriveStats = { freeBytes: 0, totalBytes: 0 }
+    let driveStats: util.DriveStats = { freeBytes: 0, totalBytes: 0 }
     return { chartOptions, revealKey, userConfirm, lang, generatedPk, plotDirectory, allocatedGB, validPath: true, defaultPath, driveStats }
   },
   async mounted() {
@@ -113,20 +107,20 @@ export default defineComponent({
       debounce(async (val) => {
         console.log(val)
         if (this.plotDirectory == this.defaultPath) return (this.validPath = true)
-        this.validPath = await native.dirExists(val)
+        this.validPath = await util.native.dirExists(val)
         if (this.validPath) await this.updateDriveStats()
       }, 500)
     )
   },
   computed: {
     chartData(): any {
-      return [this.utilizedGB, this.allocatedGB]
+      return [this.utilizedGB, this.freeGB, this.allocatedGB]
     },
     printEstimatedTime(): string {
-      return timeAgo.format(Date.now() + this.plotTimeHr * 1000000, "long").split("in")[1]
+      return timeAgo.format(Date.now() + this.plotTimeHr).split("in")[1]
     },
     plotTimeHr(): number {
-      return this.allocatedGB * 0.1
+      return util.plotTimeMsEstimate(this.allocatedGB)
     },
     totalDiskSizeGB(): number {
       return parseFloat((this.driveStats.totalBytes / 1e9).toFixed(2))
@@ -150,20 +144,27 @@ export default defineComponent({
       return parseFloat((this.safeAvailableGB - this.allocatedGB).toFixed(2))
     },
     canContinue(): boolean {
-      return this.allocatedGB >= 1
+      return this.allocatedGB >= 1 && this.validPath
     },
     unsafeFree(): boolean {
       return this.freeGB < 20
     },
   },
   methods: {
+    async startPlotting() {
+      await util.native.createDir(this.defaultPath).catch(console.error)
+      const config: util.ConfigFile = { plot: { sizeGB: this.allocatedGB, location: this.plotDirectory + "/subspace.plot" } }
+      await util.config.write(this.defaultPath, config)
+      if (this.defaultPath != this.plotDirectory) await util.native.createDir(this.plotDirectory)
+      this.$router.replace({ name: "plottingProgress" })
+    },
     async updateDriveStats() {
-      const stats = await native.driveStats(this.plotDirectory)
+      const stats = await util.native.driveStats(this.plotDirectory)
       console.log("Drive Stats:", stats)
       this.driveStats = stats
     },
     async selectDir() {
-      const result = await native.selectDir(this.plotDirectory).catch(console.error)
+      const result = await util.native.selectDir(this.plotDirectory).catch(console.error)
       if (result) this.plotDirectory = result
     },
   },

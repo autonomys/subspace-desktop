@@ -7,8 +7,8 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
   .row.justify-center.q-mr-lg.q-ml-lg
     .col
       .row
-        .col
-          div {{ lang.plotsDirectory }}
+        .col.q-mt-sm
+          div {{ lang.plotsDirectory }} {{ plotFinished }}
           q-input(dense input-class="pkdisplay" outlined readonly v-model="plotDirectory")
       .row.items-center.q-gutter-md
         .col.relative-position
@@ -41,11 +41,10 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
     .col-auto.q-pr-md
     .col-expand
     .col-auto(v-if="viewedIntro")
-      q-btn.q-mr-md(@click="fakeProgress()" flat icon="arrow_right" round size="sm")
-      q-btn(@click="pausePlotting(false)" color="blue-8" icon-right="play_arrow" label="Resume Plotting" outline size="lg" v-if="!plotting")
-      q-btn(@click="pausePlotting(true)" color="blue-8" icon-right="pause" label="Pause Plotting" outline size="lg" v-else)
+      q-btn(@click="$router.replace({ name: 'dashboard' })" color="blue-8" icon-right="play_arrow" label="Finish" outline size="lg" v-if="plotFinished")
+      q-btn(@click="startPlotting()" color="blue-8" icon-right="play_arrow" label="Resume Plotting" outline size="lg" v-else-if="!plotting")
+      q-btn(@click="pausePlotting()" color="blue-8" icon-right="pause" label="Pause Plotting" outline size="lg" v-else)
     .col-auto(v-else)
-      q-btn.q-mr-md(@click="fakeProgress()" flat icon="arrow_right" round size="sm")
       q-btn(@click="viewIntro()" color="blue-8" icon-right="play_arrow" label="Next" outline size="lg")
 </template>
 
@@ -62,82 +61,105 @@ import { defineComponent } from "vue"
 import { QInput, Dialog, Notify } from "quasar"
 import * as global from "src/lib/global"
 const lang = global.data.loc.text.plottingProgress
-import { showModal } from "src/lib/util"
+import * as util from "src/lib/util"
 
 import TimeAgo from "javascript-time-ago"
 import en from "javascript-time-ago/locale/en"
 TimeAgo.addLocale(en)
 const timeAgo = new TimeAgo("en-US")
+let interval
+let timer
 
 export default defineComponent({
-  inject: {
-    showModal: { from: "df", default: () => {} },
-  },
   data() {
     let plottingData = {
-      finishedGB: 10.2,
-      remainingGB: 32.3,
+      finishedGB: 0,
+      remainingGB: 0,
     }
 
     return {
+      elapsedms: 0,
       plotting: true,
       plottingData,
       viewedIntro: false,
       lang,
+      plotFinished: false,
       plotDirectory: "/Subspace/plots",
-      allocatedGB: 100,
-      progresspct: 20,
+      allocatedGB: 0,
     }
   },
-  mounted() {
-    // setTimeout(async () => {
-    //   const modal = await showModal("introModal")
-    // }, 5000)
+  async mounted() {
+    // this.fakeProgress()
+    this.startPlotting()
+    // timer = setInterval(() => this.elapsedms++, 1)
+    await this.getPlotConfig()
   },
   computed: {
-    remainingTimeHr(): number {
-      return 12
+    progresspct(): number {
+      return parseFloat(((this.plottingData.finishedGB / this.allocatedGB) * 100).toFixed(2))
+    },
+    remainingTime(): number {
+      return util.toFixed(this.plotTimeEstimate - this.elapsedTime, 2)
     },
     printRemainingTime(): string {
-      return timeAgo.format(Date.now() + this.remainingTimeHr * 3600000, "long").split("in")[1]
+      return util.formatMS(this.remainingTime)
     },
     printElapsedTime(): string {
-      return timeAgo.format(Date.now() + this.elapsedTimeHr * 3600000, "long").split("in")[1]
+      return util.formatMS(this.elapsedms)
     },
-    elapsedTimeHr(): number {
-      return 4
+    elapsedTime(): number {
+      return this.elapsedms
     },
-    printEstimatedTime(): string {
-      return timeAgo.format(Date.now() + this.plotTimeHr * 3600000, "long").split("in")[1]
-    },
-    plotTimeHr(): number {
-      return this.allocatedGB * 0.1
+    plotTimeEstimate(): number {
+      return util.plotTimeMsEstimate(this.allocatedGB)
     },
     totalDiskSizeGB(): number {
       return 4000
     },
-    canContinue(): boolean {
-      return this.allocatedGB > 100
-    },
+  },
+  unmounted() {
+    if (interval) clearInterval(interval)
+    if (timer) clearInterval(timer)
   },
   methods: {
+    async getPlotConfig() {
+      const config = await util.config.read()
+      console.log(config)
+      this.allocatedGB = config.plot.sizeGB
+      this.plotDirectory = config.plot.location
+    },
+    startPlotting() {
+      this.plotting = true
+      this.fakeProgress()
+      timer = setInterval(() => (this.elapsedms += 100), 100)
+    },
+    pausePlotting() {
+      this.plotting = false
+      clearInterval(interval)
+      clearInterval(timer)
+    },
+    async fakeProgress() {
+      interval = setInterval(() => {
+        this.plottingData.finishedGB += util.random(0, 50) / 40
+        console.log(this.plottingData)
+        if (this.plottingData.finishedGB >= this.allocatedGB) this.pausePlotting()
+      }, util.random(200, 1000))
+    },
     async viewIntro() {
-      const modal = await showModal("introModal")
+      const modal = await util.showModal("introModal")
       modal?.onDismiss(() => {
         this.viewedIntro = true
       })
     },
-    pausePlotting(plotting: boolean) {
-      this.plotting = !plotting
-    },
-    fakeProgress() {
-      if (!this.plotting) return
-      this.progresspct += 10
-    },
   },
   watch: {
-    progresspct() {
-      if (this.progresspct >= 100) this.$router.replace({ name: "dashboard" })
+    "plottingData.finishedGB"(val) {
+      this.plottingData.finishedGB = parseFloat(this.plottingData.finishedGB.toFixed(2))
+      this.plottingData.remainingGB = parseFloat((this.allocatedGB - val).toFixed(2))
+      if (this.plottingData.finishedGB >= this.allocatedGB) {
+        this.plotFinished = true
+        this.plottingData.finishedGB = this.allocatedGB
+      }
     },
   },
 })

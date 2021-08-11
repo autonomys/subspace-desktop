@@ -6,8 +6,6 @@ q-page(padding)
     p Subspace Farmer is the easiest way to particpate as a farmer in the Subspace Network.
   .row.justify-center.q-mt-xl
     q-btn(@click="$router.push({ name: 'setPassword' })" label="Quick Start" outline size="xl")
-  .row.justify-center.q-mt-xl
-    q-btn(@click="testNative()" label="Native Test" outline size="md")
   .row.justify-center.q-mt-sm
     q-btn(@click="$router.push({ name: 'advanced' })" color="grey" flat label="advanced")
 </template>
