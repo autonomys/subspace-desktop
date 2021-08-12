@@ -15,6 +15,7 @@
     "@tauri-apps/api": "^1.0.0-beta.5",
     "@tsmx/human-readable": "^1.0.6",
     "apexcharts": "^3.27.3",
+    "bcryptjs": "^2.4.3",
     "core-js": "^3.6.5",
     "javascript-time-ago": "^2.3.8",
     "quasar": "^2.0.0",
@@ -24,6 +25,7 @@
     "@quasar/app": "^3.0.0",
     "@tauri-apps/cli": "^1.0.0-beta.6",
     "@types/": "tsmx/human-readable",
+    "@types/bcryptjs": "^2.4.2",
     "@types/node": "^16.3.3",
     "@types/vue": "^2.0.0",
     "pug": "^3.0.2",
@@ -35,7 +37,7 @@
   "browserslist": [
     "last 10 Chrome versions",
     "last 10 Firefox versions",
-    "last 4 Edge versions",
+    "last 6 Edge versions",
     "last 7 Safari versions"
   ],
   "engines": {

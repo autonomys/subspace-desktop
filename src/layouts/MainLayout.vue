@@ -13,7 +13,15 @@ q-layout(view="hHh lpr fFf")
                 p Farmer Status:
                 h6.no-margin Connected Synced and Farming
       div
-        q-btn(@click="$router.push({ name: 'index' })" flat icon="settings" round)
+        q-btn(flat icon="settings" round)
+          q-menu(auto-close)
+            q-list(style="min-width: 150px")
+              q-item(@click="reset()" clickable)
+                .row.items-center
+                  .col-auto.q-mr-md
+                    q-icon(color="red" name="refresh")
+                  .col
+                    p.text-red Reset
   q-page-container
     router-view
 </template>
@@ -21,6 +29,8 @@ q-layout(view="hHh lpr fFf")
 <script lang="ts">
 import { defineComponent } from "vue"
 import * as global from "src/lib/global"
+import * as util from "src/lib/util"
+import { Dialog } from "quasar"
 
 export default defineComponent({
   name: "MainLayout",
@@ -30,11 +40,29 @@ export default defineComponent({
   data() {
     return {
       data: global.data,
+      util,
     }
   },
 
   methods: {
     ...global.mutations,
+    reset() {
+      Dialog.create({
+        message: `
+        <h6>
+          Are you sure you want to reset?
+        </h6>
+        <div style="height:10px;">
+        </div>
+        <p>
+          You will need to re-import your existing private key in order to recover any existing plot or funds.
+        </p>
+        `,
+        html: true,
+        ok: { label: "reset", icon: "refresh", flat: true, color: "red" },
+        cancel: true,
+      }).onOk(util.reset)
+    },
   },
 })
 </script>

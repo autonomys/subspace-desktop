@@ -6,6 +6,7 @@ import * as dialog from "@tauri-apps/api/dialog"
 import * as fs from "@tauri-apps/api/fs"
 import * as path from "@tauri-apps/api/path"
 import { invoke } from '@tauri-apps/api/tauri'
+import * as bcrypt from 'bcryptjs'
 
 const tauri = { dialog, fs, path, invoke }
 
@@ -36,21 +37,49 @@ export function plotTimeMsEstimate(gb: number): number {
   return gb * 5e4
 }
 
-export interface ConfigFile {
-  plot: { sizeGB: number, location: string }
+export async function reset() {
+  const configData = await config.read()
+  if (configData?.plot?.location) await tauri.fs.removeFile(configData.plot.location)
+  config.clear()
 }
+
+export interface ConfigFile {
+  plot?: { sizeGB?: number, location?: string }, account?: { pubkey?: string, passHash?: string }
+}
+const emptyConfig: ConfigFile = { plot: { sizeGB: 0, location: "" }, account: { pubkey: "", passHash: "" } }
 export const config = {
+  validate(config: ConfigFile): boolean {
+    const acctValid = config.account ? true : false
+    const plotValid = config.plot ? true : false
+    console.log('acctValid', acctValid);
+    console.log('plotValid', acctValid);
+
+    return (acctValid && plotValid)
+  },
   async read(dir?: string): Promise<ConfigFile> {
     if (!dir) dir = (await tauri.path.homeDir()) + ".subspace-farmer-demo"
-    await native.createDir(dir)
     const result = await tauri.fs.readTextFile(dir + "/config.json")
     const config: ConfigFile = JSON.parse(result)
     return config
   },
   async write(dir: string = "", config: ConfigFile) {
     if (dir == "") dir = (await tauri.path.homeDir()) + ".subspace-farmer-demo"
-    await native.createDir(dir)
+    await native.createDir(dir).catch(console.error)
     await tauri.fs.writeFile({ path: dir + "/config.json", contents: JSON.stringify(config, null, 2) })
+  },
+  async clear(dir?: string) {
+    if (!dir) dir = (await tauri.path.homeDir()) + ".subspace-farmer-demo"
+    await tauri.fs.removeFile(dir + "/config.json").catch(console.error)
+  },
+  async update(newData: ConfigFile, dir?: string) {
+    let config = await this.read(dir).catch(console.error) || emptyConfig
+    for (const [key, value] of Object.entries(newData)) {
+      config[key] = Object.assign(config[key], value)
+    }
+    await this.write(dir, config)
+  },
+  showErrorModal() {
+    return Dialog.create({ message: "Config file is corrupted, resetting..." })
   }
 }
 
@@ -97,5 +126,15 @@ export const native = {
     const result = await tauri.invoke('get_disk_stats', { dir }) as any
     const stats: DriveStats = { freeBytes: result.free_bytes, totalBytes: result.total_bytes }
     return stats
+  }
+}
+
+export const password = {
+  encrypt(pass: string): string {
+    const salt = bcrypt.genSaltSync(10)
+    const hash = bcrypt.hashSync(pass, salt)
+    return hash
+  }, check(pass: string, hash) {
+    return bcrypt.compareSync(pass, hash); // true
   }
 }

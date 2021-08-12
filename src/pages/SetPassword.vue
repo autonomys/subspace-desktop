@@ -18,7 +18,7 @@ q-page.q-pl-xl.q-pr-xl.q-pt-lg
     .col
     .col-auto
       //- q-btn(@click="testModal" label="tst modal")
-      q-btn(:disable="!passwordsMatch" @click="$router.replace({ name: 'setupPlot' })" icon-right="arrow_forward" label="continue" outline size="lg")
+      q-btn(:disable="!passwordsMatch" @click="continue" icon-right="arrow_forward" label="continue" outline size="lg")
       q-tooltip.q-pa-md(v-if="!passwordsMatch")
         p.q-mb-lg {{ lang.tooltip }}
 </template>
@@ -30,6 +30,7 @@ import { Dialog } from "quasar"
 import app from "app.vue"
 import { showModal } from "src/lib/util"
 import * as global from "src/lib/global"
+import * as util from "src/lib/util"
 const lang = global.data.loc.text.setPassword
 export default defineComponent({
   data() {
@@ -39,15 +40,11 @@ export default defineComponent({
     return { pw1, pw2, userConfirm, lang }
   },
   methods: {
-    async testModal() {
-      // console.log("tst modal")
-      // const modal = await showModal("introModal")
-      // modal?.onOk(() => {
-      //   console.log("ok")
-      // // })
-      // this.show
-      // this.$emit("showModal", "introModal")
-      // const app = <typeof app>this.$root
+    async continue() {
+      console.log("cont")
+      const passHash = util.password.encrypt(this.pw1)
+      await util.config.update({ account: { passHash } })
+      this.$router.replace({ name: "setupPlot" })
     },
   },
   mounted() {

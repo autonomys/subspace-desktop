@@ -33,6 +33,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
           q-input.bg-white(dense input-class="pkdisplay" outlined readonly v-model="printElapsedTime")
           .q-mt-sm {{ lang.remainingTime }}
           q-input.bg-white(dense input-class="pkdisplay" outlined readonly v-model="printRemainingTime")
+
   .row.justify-end.q-mt-lg.absolute-bottom.q-pb-lg
     .col-auto.q-ml-xl.q-pr-md
       div {{ lang.hint }}
@@ -90,19 +91,19 @@ export default defineComponent({
   },
   async mounted() {
     // this.fakeProgress()
+    await this.getPlotConfig()
     this.startPlotting()
     // timer = setInterval(() => this.elapsedms++, 1)
-    await this.getPlotConfig()
   },
   computed: {
     progresspct(): number {
       return parseFloat(((this.plottingData.finishedGB / this.allocatedGB) * 100).toFixed(2))
     },
     remainingTime(): number {
-      return util.toFixed(this.plotTimeEstimate - this.elapsedTime, 2)
+      return util.toFixed(((this.plotTimeEstimate - this.elapsedTime) / this.progresspct) * 2, 2)
     },
     printRemainingTime(): string {
-      return util.formatMS(this.remainingTime)
+      return this.plotFinished ? util.formatMS(0) : util.formatMS(this.remainingTime)
     },
     printElapsedTime(): string {
       return util.formatMS(this.elapsedms)
@@ -124,6 +125,16 @@ export default defineComponent({
   methods: {
     async getPlotConfig() {
       const config = await util.config.read()
+      console.log(config)
+
+      if (!config.plot || !config.plot.sizeGB || !config.plot.location) {
+        const modal = util.config.showErrorModal()
+        modal.onOk(async () => {
+          await util.config.clear()
+          this.$router.replace({ name: "index" })
+        })
+        return
+      }
       console.log(config)
       this.allocatedGB = config.plot.sizeGB
       this.plotDirectory = config.plot.location

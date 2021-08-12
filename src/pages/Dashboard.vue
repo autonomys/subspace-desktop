@@ -150,12 +150,29 @@ q-page.q-pl-xl.q-pr-xl.q-pt-md
 
 <script lang="ts">
 import { defineComponent } from "vue"
+import { QInput, Dialog, Notify } from "quasar"
 import * as global from "src/lib/global"
+import * as util from "src/lib/util"
 const lang = global.data.loc.text.dashboard
 
 export default defineComponent({
   data() {
     return { lang }
+  },
+  async mounted() {
+    const config = await util.config.read()
+    const valid = util.config.validate(config)
+    if (!valid) {
+      Dialog.create({
+        message: "Config file is corrupted, resetting farmer...",
+        noEscDismiss: true,
+        noBackdropDismiss: true,
+        noRouteDismiss: true,
+      }).onOk(async () => {
+        await util.config.clear()
+        this.$router.replace({ name: "index" })
+      })
+    }
   },
 })
 </script>

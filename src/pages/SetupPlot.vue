@@ -75,11 +75,13 @@ const timeAgo = new TimeAgo("en-US")
 import { ApexOptions } from "apexcharts"
 const chartOptions: ApexOptions = {
   legend: { show: false },
+
   colors: ["#E0E0E0", "#FFFFFF", "#2081F0"],
   plotOptions: { pie: { startAngle: 0, endAngle: 360, expandOnClick: false, donut: { size: "40px" } } },
   dataLabels: { enabled: false },
   labels: [],
-  markers: { hover: { size: 100 } },
+  states: { active: { filter: { type: "none" } }, hover: { filter: { type: "none" } } },
+  markers: { hover: { size: 0 } },
   tooltip: { enabled: false },
 }
 
@@ -152,9 +154,7 @@ export default defineComponent({
   },
   methods: {
     async startPlotting() {
-      await util.native.createDir(this.defaultPath).catch(console.error)
-      const config: util.ConfigFile = { plot: { sizeGB: this.allocatedGB, location: this.plotDirectory + "/subspace.plot" } }
-      await util.config.write(this.defaultPath, config)
+      await util.config.update({ plot: { sizeGB: this.allocatedGB, location: this.plotDirectory + "/subspace.plot" } })
       if (this.defaultPath != this.plotDirectory) await util.native.createDir(this.plotDirectory)
       this.$router.replace({ name: "plottingProgress" })
     },
