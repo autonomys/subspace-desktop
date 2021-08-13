@@ -9,6 +9,7 @@ Built with Quasar + Tauri
 - rustc
 
 Stuck?
+
 https://tauri.studio/en/docs/getting-started/intro
 
 ## Install the dependencies
