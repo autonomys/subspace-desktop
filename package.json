@@ -1,38 +1,44 @@
 {
   "name": "subspace-desktop",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "description": "Simple desktop app for Subspace farmers.",
   "author": "",
   "scripts": {
     "quasar": "quasar",
     "tauri": "tauri",
-    "dev": "quasar dev& tauri dev&",
-    "build": "quasar build --modern && tauri build -v"
+    "dev": "quasar dev",
+    "build": "quasar build -m pwa && tauri build -v"
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
     "@tauri-apps/api": "^1.0.0-beta.5",
+    "@tsmx/human-readable": "^1.0.6",
+    "apexcharts": "^3.27.3",
+    "bcryptjs": "^2.4.3",
     "core-js": "^3.6.5",
-    "quasar": "^2.0.0"
+    "javascript-time-ago": "^2.3.8",
+    "quasar": "^2.0.0",
+    "vue3-apexcharts": "^1.4.1"
   },
   "devDependencies": {
     "@quasar/app": "^3.0.0",
+    "@tauri-apps/cli": "^1.0.0-beta.6",
+    "@types/": "tsmx/human-readable",
+    "@types/bcryptjs": "^2.4.2",
     "@types/node": "^16.3.3",
+    "@types/vue": "^2.0.0",
     "pug": "^3.0.2",
     "pug-plain-loader": "^1.1.0",
-    "vue-cli-plugin-tauri": "~1.0.0-beta.3"
+    "strip-ansi": "=3.0.1",
+    "typescript": "^4.3.5",
+    "workbox-webpack-plugin": "^6.1.5"
   },
   "browserslist": [
     "last 10 Chrome versions",
     "last 10 Firefox versions",
-    "last 4 Edge versions",
-    "last 7 Safari versions",
-    "last 8 Android versions",
-    "last 8 ChromeAndroid versions",
-    "last 8 FirefoxAndroid versions",
-    "last 10 iOS versions",
-    "last 5 Opera versions"
+    "last 6 Edge versions",
+    "last 7 Safari versions"
   ],
   "engines": {
     "node": ">= 12.22.1",

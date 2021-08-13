@@ -1,11 +1,11 @@
 {
   "package": {
-    "productName": "yarn tauri info",
+    "productName": "Subspace Farmer Demo",
     "version": "0.1.0"
   },
   "build": {
-    "distDir": "../dist/spa",
-    "devPath": "http://localhost:8080/",
+    "distDir": "../dist/pwa",
+    "devPath": "http://localhost:8080",
     "beforeDevCommand": "",
     "beforeBuildCommand": ""
   },
@@ -49,23 +49,14 @@
       "active": false
     },
     "allowlist": {
-      "all": false,
-      "shell": {
-        "execute": false,
-        "open": false
-      },
-      "fs": {
-        "readBinaryFile": false,
-        "readTextFile": false,
-        "writeFile": true
-      }
+      "all": true
     },
     "windows": [
       {
-        "title": "Subspace",
+        "title": "Subspace Farmer Demo",
         "width": 800,
         "height": 600,
-        "resizable": true,
+        "resizable": false,
         "fullscreen": false
       }
     ],

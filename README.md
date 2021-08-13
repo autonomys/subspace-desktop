@@ -2,23 +2,40 @@
 
 Built with Quasar + Tauri
 
+## Prerequisites
+
+- nodejs
+- yarn
+- rustc
+
 ## Install the dependencies
+
 ```bash
 yarn
 ```
 
-### Start the app in development mode (starts Quasar and Tauri in dev mode)
+### Start the app in development mode
+
+Terminal 1
+
 ```bash
-yarn dev
+yarn quasar dev
 ```
 
+Terminal 2
+
+```bash
+yarn tauri dev
+```
 
 ### Build the app for production (Builds Quasar and Tauri)
+
 ```bash
 yarn build
 ```
 
 ### Access Tauri or Quasar specific commands
+
 ```bash
 yarn quasar --help
 yarn tauri --help
