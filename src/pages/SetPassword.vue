@@ -37,14 +37,18 @@ export default defineComponent({
     let pw1: string = ""
     let pw2: string = ""
     let userConfirm: boolean = false
-    return { pw1, pw2, userConfirm, lang }
+    let passHash = ""
+    return { pw1, pw2, userConfirm, lang, passHash }
   },
   methods: {
     async continue() {
-      console.log("cont")
-      const passHash = util.password.encrypt(this.pw1)
-      await util.config.update({ account: { passHash } })
       this.$router.replace({ name: "setupPlot" })
+      this.$nextTick(() => {
+        setTimeout(() => {
+          const passHash = util.password.encrypt(this.pw1)
+          util.config.update({ account: { passHash } })
+        }, 3000)
+      })
     },
   },
   mounted() {

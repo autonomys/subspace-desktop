@@ -3,7 +3,7 @@ const list: string[] = []
 import getLang from "../loc/lang"
 
 let text: any
-export var data = reactive({ loc: { selected: 'en', text, } })
+export var data = reactive({ status: { state: "loading", message: "loading" }, loc: { selected: 'en', text, } })
 export var mutations = {
   async changeLang(newLang: string) {
     data.loc.selected = newLang

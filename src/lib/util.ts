@@ -30,6 +30,7 @@ export async function showModal(componentName: string, props: propsType = {}): P
 }
 
 export function toFixed(num: number, precision: number) {
+  if (!num) return 0
   return parseFloat(num.toFixed(precision))
 }
 
@@ -38,8 +39,8 @@ export function plotTimeMsEstimate(gb: number): number {
 }
 
 export async function reset() {
-  const configData = await config.read()
-  if (configData?.plot?.location) await tauri.fs.removeFile(configData.plot.location)
+  const configData = await config.read().catch(console.error)
+  if (configData?.plot?.location) await tauri.fs.removeFile(configData.plot.location).catch(console.error)
   config.clear()
 }
 
@@ -51,9 +52,8 @@ export const config = {
   validate(config: ConfigFile): boolean {
     const acctValid = config.account ? true : false
     const plotValid = config.plot ? true : false
-    console.log('acctValid', acctValid);
-    console.log('plotValid', acctValid);
-
+    // console.log('acctValid', acctValid);
+    // console.log('plotValid', acctValid);
     return (acctValid && plotValid)
   },
   async read(dir?: string): Promise<ConfigFile> {

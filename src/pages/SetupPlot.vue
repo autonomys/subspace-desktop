@@ -154,6 +154,7 @@ export default defineComponent({
   },
   methods: {
     async startPlotting() {
+      if (this.plotDirectory.charAt(this.plotDirectory.length - 1) == "/") this.plotDirectory.slice(-1)
       await util.config.update({ plot: { sizeGB: this.allocatedGB, location: this.plotDirectory + "/subspace.plot" } })
       if (this.defaultPath != this.plotDirectory) await util.native.createDir(this.plotDirectory)
       this.$router.replace({ name: "plottingProgress" })

@@ -6,12 +6,13 @@ q-layout(view="hHh lpr fFf")
       q-toolbar-title
         .row(v-if="$route.name == 'dashboard'")
           .col-auto.q-mr-md.relative-position
-            q-icon(color="green-5" name="trip_origin" size="40px" style="bottom: 0px; right: 5px")
+            q-icon(color="green-5" name="trip_origin" size="40px" style="bottom: 0px; right: 5px" v-if="global.status.state == 'live'")
+            q-icon(color="yellow-8" name="trip_origin" size="40px" style="bottom: 0px; right: 5px" v-if="global.status.state == 'loading'")
             //- q-spinner-oval(color="green" size="55px")
             q-tooltip
               .col
                 p Farmer Status:
-                h6.no-margin Connected Synced and Farming
+                h6.no-margin {{ global.status.message }}
       div
         q-btn(flat icon="settings" round)
           q-menu(auto-close)
@@ -39,7 +40,7 @@ export default defineComponent({
 
   data() {
     return {
-      data: global.data,
+      global: global.data,
       util,
     }
   },
@@ -61,7 +62,10 @@ export default defineComponent({
         html: true,
         ok: { label: "reset", icon: "refresh", flat: true, color: "red" },
         cancel: true,
-      }).onOk(util.reset)
+      }).onOk(async () => {
+        util.reset()
+        this.$router.replace({ name: "index" })
+      })
     },
   },
 })
