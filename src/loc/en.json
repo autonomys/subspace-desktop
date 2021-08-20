@@ -1,5 +1,12 @@
 {
+  "index": {
+    "pageTitle": "Welcome",
+    "quickStart": "Quick Start",
+    "subtitle": "Subspace Farmer is the easiest way to particpate as a farmer in the Subspace Network.",
+    "advanced": "advanced"
+  },
   "setPassword": {
+    "continue": "continue",
     "pageTitle": "Setup Password",
     "infoDialog": "This password will be used to encrypt your keys. If you lose your password then the only way to recover your account is to re-import your private keys.",
     "securePassword": "Secure Password",
@@ -11,15 +18,27 @@
   },
   "saveKeys": {
     "pageTitle": "Backup Private Key",
-    "confirmMsg": "I have backed up my private key. I understand that my account can't be recovered without my private key.",
     "tooltip": "Please confirm you have backed up your private key first",
     "yourPrivateKey": "Your private key",
-    "userConfirm": "I have backed up my private key. I understand that my account can't be recovered without my private key."
+    "userConfirm": "I have backed up my private key. I understand that my account can't be recovered without my private key.",
+    "saved": "Private Key copied to clipboard. Backup key in a secure location.",
+    "privateKey": "Private Key",
+    "reveal": "reveal",
+    "copy": "copy to clipboard"
   },
   "setupPlot": {
     "pageTitle": "Setup Plots",
     "infoDialog": "Subspace needs a place to store data files (Plots).",
-    "tooltip": "Ensure you have selected a valid directory and allocated at least 1 GB of space for plotting."
+    "tooltip": "Ensure you have selected a valid directory and allocated at least 1 GB of space for plotting.",
+    "invalidDir": "Invalid Directory",
+    "available": "Available",
+    "utilized": "Utilized",
+    "allocated": "Allocated:",
+    "hint": "Hint:",
+    "hint2": "Increasing your plots size will improve Farmer profitability.",
+    "initial": "Initial plotting time:",
+    "suggest": "We suggest you retain at least 20 GB of free available space on this drive.",
+    "plotsDirectory": "Plots Directory"
   },
   "plottingProgress": {
     "pageTitle": "Initial Plotting",
@@ -28,14 +47,48 @@
     "plotted": "Plotted",
     "elapsedTime": "Elapsed Time",
     "remainingTime": "Remaining Time",
+    "finish": "Finish",
     "hint": "Hint:",
+    "resume": "Resume Plotting",
     "hintInfo": "Join the Subspace Discord while you wait, meet the community and earn some SSC",
-    "remaining": "Remaining"
+    "pause": "Pause Plotting",
+    "remaining": "Remaining",
+    "next": "Next"
   },
   "dashboard": {
-    "pageTitle": "Dashboard"
+    "pageTitle": "Dashboard",
+    "plot": "Plot",
+    "status": "Status:",
+    "allocated": "Allocated:",
+    "network": "Network",
+    "initializing": "initializing...",
+    "corrupt": "Config file is corrupted, resetting farmer...",
+    "verifyingPlot": "Verifying plot data...",
+    "plotActive": "Plot active",
+    "syncedMsg": "synced and farming",
+    "searchPeers": "Searching for peers...",
+    "synced": "Synced and connected",
+    "farming": "synced and farming",
+    "farmedBlock": "Farmed Block",
+    "reward": "Reward",
+    "farmedBlocks": "Farmed Blocks",
+    "blockNum": "Block Number",
+    "time": "time",
+    "transactions": "# Transactions",
+    "rewards": "Block Reward + Fees"
   },
   "importKey": {
-    "tooltip": "Please provide a valid key first."
+    "tooltip": "Please provide a valid key first.",
+    "pageTitle": "Import Private Key",
+    "privateKey": "Private Key",
+    "validKey": "Valid Key",
+    "importing": "Importing private key...",
+    "imported": "Private Key Imported",
+    "continue": "continue"
+  },
+  "advanced": {
+    "pageTitle": "Advanced",
+    "importKey": "Import Private Key",
+    "back": "back"
   }
 }

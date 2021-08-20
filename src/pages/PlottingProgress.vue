@@ -42,11 +42,11 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
     .col-auto.q-pr-md
     .col-expand
     .col-auto(v-if="viewedIntro")
-      q-btn(@click="$router.replace({ name: 'dashboard' })" color="blue-8" icon-right="play_arrow" label="Finish" outline size="lg" v-if="plotFinished")
-      q-btn(@click="startPlotting()" color="blue-8" icon-right="play_arrow" label="Resume Plotting" outline size="lg" v-else-if="!plotting")
-      q-btn(@click="pausePlotting()" color="blue-8" icon-right="pause" label="Pause Plotting" outline size="lg" v-else)
+      q-btn(:label="lang.finish" @click="$router.replace({ name: 'dashboard' })" color="blue-8" icon-right="play_arrow" outline size="lg" v-if="plotFinished")
+      q-btn(:label="lang.resume" @click="startPlotting()" color="blue-8" icon-right="play_arrow" outline size="lg" v-else-if="!plotting")
+      q-btn(:label="lang.pause" @click="pausePlotting()" color="blue-8" icon-right="pause" outline size="lg" v-else)
     .col-auto(v-else)
-      q-btn(@click="viewIntro()" color="blue-8" icon-right="play_arrow" label="Next" outline size="lg")
+      q-btn(:label="lang.next" @click="viewIntro()" color="blue-8" icon-right="play_arrow" outline size="lg")
 </template>
 
 <style lang="sass">

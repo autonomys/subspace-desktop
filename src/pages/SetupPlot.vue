@@ -4,29 +4,25 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
     .text-h4 {{ lang.pageTitle }}
   .row.justify-center
     p {{ lang.infoDialog }}
-  //- .row.justify-center.q-mb-md
-    //- .text-h6 Plot Directory
   .row.justify-center.q-mr-lg.q-ml-lg
     .col
       .row
         .col.q-mt-sm
-          div Plots Directory
-          q-input.q-field--highlighted(:error="!validPath" color="blue" dense error-message="Invalid Directory" input-class="pkdisplay" outlined v-model="plotDirectory")
+          div {{ lang.plotsDirectory }}
+          q-input.q-field--highlighted(:error="!validPath" :error-message="lang.invalidDir" color="blue" dense input-class="pkdisplay" outlined v-model="plotDirectory")
             template(v-slot:after)
               q-btn.shadow-0(@click="selectDir()" color="blue" flat icon="folder" size="lg")
-        //- .col(style="padding-top: 18px")
-          //- q-btn(color="blue" flat icon="folder" size="md" style="height: 45px")
       .row.items-center.q-gutter-md.q-pt-sm
         .col-4
           .row
             .col.q-pr-md
-              .q-mt-sm Utilized
-              q-input.bg-grey-3(dense input-class="pkdisplay" outlined readonly suffix="GB" v-model="utilizedGB")
-              .q-mt-sm Available
-              q-input(:error="unsafeFree" dense hide-bottom-space input-class="pkdisplay" outlined readonly suffix="GB" v-model="freeGB")
+              .q-mt-sm {{ lang.utilized }}
+              q-input.bg-grey-3(dense input-class="pkdisplay" outlined readonly suffix="GB" v-model="stats.utilizedGB")
+              .q-mt-sm {{ lang.available }}
+              q-input(:error="unsafeFree" dense hide-bottom-space input-class="pkdisplay" outlined readonly suffix="GB" v-model="stats.freeGB")
                 q-tooltip.q-pa-sm
-                  p We suggest you retain at least 20 GB of free available space on this drive.
-              .q-mt-sm Allocated for Plot
+                  p {{ lang.suggest }}
+              .q-mt-sm {{ lang.allocated }}
               q-input.q-field--highlighted(color="blue" dense input-class="pkdisplay" outlined suffix="GB" type="number" v-model="allocatedGB")
         .col.q-pr-md
           .row.justify-center(style="transform: scale(-1, 1)")
@@ -34,15 +30,15 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
           .row.q-mt-lg
             .col-1
             .col
-              q-slider(:max="safeAvailableGB" :min="0" :step="1" color="blue" markers snap style="height: 25px" v-model="allocatedGB")
+              q-slider(:max="stats.safeAvailableGB" :min="0" :step="1" color="blue" markers snap style="height: 25px" v-model="allocatedGB")
             .col-1
   .row.justify-end.q-mt-lg.absolute-bottom.q-pb-lg
     .col-auto.q-ml-xl.q-pr-md
-      div Hint:
+      div {{ lang.hint }}
     .col.q-pr-md
-      div Increasing your plots size will improve Farmer profitability.
+      div {{ lang.hint2 }}
     .col-auto.q-pr-md
-      div Initial plotting time:
+      div {{ lang.initial }}
       div(style="font-size: 20px") {{ printEstimatedTime }}
     .col-expand
     .col-auto
@@ -59,23 +55,22 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
 </style>
 
 <script lang="ts">
-import * as dialog from "@tauri-apps/api/dialog"
-import * as fs from "@tauri-apps/api/fs"
 import * as path from "@tauri-apps/api/path"
-const tauri = { dialog, fs, path }
+const tauri = { path }
 import { defineComponent } from "vue"
 import * as util from "src/lib/util"
 import { debounce } from "quasar"
-import TimeAgo from "javascript-time-ago"
-import en from "javascript-time-ago/locale/en"
 import * as global from "src/lib/global"
 const lang = global.data.loc.text.setupPlot
+
+import TimeAgo from "javascript-time-ago"
+import en from "javascript-time-ago/locale/en"
 TimeAgo.addDefaultLocale(en)
 const timeAgo = new TimeAgo("en-US")
+
 import { ApexOptions } from "apexcharts"
 const chartOptions: ApexOptions = {
   legend: { show: false },
-
   colors: ["#E0E0E0", "#FFFFFF", "#2081F0"],
   plotOptions: { pie: { startAngle: 0, endAngle: 360, expandOnClick: false, donut: { size: "40px" } } },
   dataLabels: { enabled: false },
@@ -116,7 +111,7 @@ export default defineComponent({
   },
   computed: {
     chartData(): any {
-      return [this.utilizedGB, this.freeGB, this.allocatedGB]
+      return [this.stats.utilizedGB, this.stats.freeGB, this.allocatedGB]
     },
     printEstimatedTime(): string {
       return timeAgo.format(Date.now() + this.plotTimeHr).split("in")[1]
@@ -124,32 +119,24 @@ export default defineComponent({
     plotTimeHr(): number {
       return util.plotTimeMsEstimate(this.allocatedGB)
     },
-    totalDiskSizeGB(): number {
-      return parseFloat((this.driveStats.totalBytes / 1e9).toFixed(2))
-    },
-    diskPercentAvailable(): number {
-      return (this.safeAvailableGB / this.totalDiskSizeGB) * 100
-    },
-    diskPercentUsed(): number {
-      return 100 - this.diskPercentAvailable
-    },
-    allocatedGBChart(): number {
-      return (this.allocatedGB / this.safeAvailableGB) * 100
-    },
-    safeAvailableGB(): number {
-      return this.driveStats.freeBytes / 1e9
-    },
-    utilizedGB(): number {
-      return parseFloat((this.totalDiskSizeGB - this.safeAvailableGB).toFixed(2))
-    },
-    freeGB(): number {
-      return parseFloat((this.safeAvailableGB - this.allocatedGB).toFixed(2))
+    stats(): any {
+      const totalDiskSizeGB = util.toFixed(this.driveStats.totalBytes / 1e9, 2)
+      const safeAvailableGB = this.driveStats.freeBytes / 1e9
+      const utilizedGB = util.toFixed(totalDiskSizeGB - safeAvailableGB, 2)
+      const freeGB = util.toFixed(safeAvailableGB - this.allocatedGB, 2)
+
+      return {
+        totalDiskSizeGB,
+        safeAvailableGB,
+        utilizedGB,
+        freeGB,
+      }
     },
     canContinue(): boolean {
       return this.allocatedGB >= 1 && this.validPath
     },
     unsafeFree(): boolean {
-      return this.freeGB < 20
+      return this.stats.freeGB < 20
     },
   },
   methods: {
@@ -171,9 +158,10 @@ export default defineComponent({
   },
   watch: {
     allocatedGB(val) {
-      if (val > this.safeAvailableGB) {
+      if (!this.stats?.safeAvailableGB) return
+      if (val > this.stats?.safeAvailableGB) {
         this.$nextTick(() => {
-          this.allocatedGB = parseFloat(this.safeAvailableGB.toFixed(0))
+          this.allocatedGB = parseFloat(this.stats?.safeAvailableGB.toFixed(0))
         })
       }
     },
