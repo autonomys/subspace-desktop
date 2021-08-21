@@ -4,3 +4,4 @@ export interface MinedBlock {
   transactions: number
   blockReward: number
 }
+
