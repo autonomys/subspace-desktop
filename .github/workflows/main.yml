@@ -24,6 +24,18 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y webkit2gtk-4.0
+    - name: Codesign OSX Build
+      if: matrix.platform == 'macos-latest'
+      env:
+        MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+        MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+      run: |
+          echo $MACOS_CERTIFICATE | base64 —decode > certificate.p12
+          security create-keychain -p <your-password> build.keychain security default-keychain -s build.keychain
+          security unlock-keychain -p <your-password> build.keychain
+          security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k <your-password> build.keychain
+          /usr/bin/codesign --force -s <identity-id> ./path/to/you/app -v
     - name: install app dependencies and build it
       run: yarn && yarn build
     - uses: tauri-apps/tauri-action@v0
