@@ -2,14 +2,21 @@
 q-page.q-pl-xl.q-pr-xl.q-pt-md
   .row.justify-center
   .row.q-pb-sm.justify-center
-  .row.q-gutter-md.q-pb-md(v-if="!expanded")
-    .col
-      plotCard(:config="config" :plot="plot")
-    .col
-      netCard(:config="config" :network="network")
-  .row.q-gutter-md
-    .col
-      farmedList(:expanded="expanded" :minedBlocksList="minedBlocksList" :minedTotalEarned="minedTotalEarned" @expand="expand")
+  div(v-if="!loading")
+    .row.q-gutter-md.q-pb-md(v-if="!expanded")
+      .col
+        plotCard(:config="config" :plot="plot")
+      .col
+        netCard(:config="config" :network="network")
+    .row.q-gutter-md
+      .col
+        farmedList(:expanded="expanded" :minedBlocksList="minedBlocksList" :minedTotalEarned="minedTotalEarned" @expand="expand")
+  div(v-else)
+    .flex
+      .absolute-center
+        .row.justify-center
+          q-spinner-orbit(color="grey" size="120px")
+        h4 Connecting to client...
 </template>
 
 <script lang="ts">
@@ -21,8 +28,14 @@ import farmedList from "components/farmedList.vue"
 import netCard from "components/netCard.vue"
 import plotCard from "components/plotCard.vue"
 import { MinedBlock } from "src/lib/types"
+import { ClientType, Client } from "src/lib/client"
+import { ApiPromise } from "@polkadot/api"
+import { Header } from "@polkadot/types/interfaces/runtime"
+import { VoidFn } from "@polkadot/api/types"
 const lang = global.data.loc.text.dashboard
+let api: ApiPromise
 let mineBlocksInterval
+let clientInterval
 export default defineComponent({
   components: { farmedList, netCard, plotCard },
   data() {
@@ -41,7 +54,8 @@ export default defineComponent({
       message: lang.initializing,
     }
     let minedBlocks: MinedBlock[] = []
-    return { lang, config, network, plot, global: global.data, globalState, expanded: false, minedBlocks, util }
+    let unsubscribe: VoidFn = () => {}
+    return { lang, config, network, plot, global: global.data, globalState, expanded: false, minedBlocks, util, loading: true, unsubscribe }
   },
   async mounted() {
     const config = await util.config.read()
@@ -74,8 +88,44 @@ export default defineComponent({
   },
   unmounted() {
     if (mineBlocksInterval) clearInterval(mineBlocksInterval)
+    this.unsubscribe()
+  },
+  created() {
+    this.$watch(
+      "global.client",
+      (val) => {
+        console.log("api rdy")
+        if (val) {
+          this.loading = false
+          api = val.api
+          this.testClient()
+        } else this.loading = true
+      },
+      { immediate: true }
+    )
   },
   methods: {
+    async testClient() {
+      if (!api) return
+      const ready = await api.isConnected
+      console.log("api:", ready)
+      const state = await api.query.system.number
+      console.log("state:", state)
+      const time = await api.query.timestamp.now()
+      console.log("time:", time.toHuman())
+      const chain = await api.rpc.system.chain()
+      const lastHeader = await api.rpc.chain.getHeader()
+
+      const peers = await api.rpc.net.peerCount
+      console.log("Peers", peers) // this is undefined?
+      this.unsubscribe()
+      this.unsubscribe = await api.rpc.chain.subscribeNewHeads((lastHeader) => {
+        const type = typeof lastHeader
+        console.log(`${chain}: last block #${lastHeader.number} has hash ${lastHeader.hash}`)
+        this.mineBlock(lastHeader)
+      })
+    },
+
     expand(val: boolean) {
       this.expanded = val
     },
@@ -125,23 +175,24 @@ export default defineComponent({
             this.global.status.state = "live"
             this.global.status.message = lang.farming
           }
-          mineBlocksInterval = setInterval(() => {
-            const mine = util.random(1, 100)
-            if (mine > 30) {
-              setTimeout(() => {
-                this.mineBlock()
-              }, util.random(2000, 8000))
-            }
-          }, 5000)
+          // mineBlocksInterval = setInterval(() => {
+          //   const mine = util.random(1, 100)
+          //   if (mine > 30) {
+          //     setTimeout(() => {
+          //       this.mineBlock()
+          //     }, util.random(2000, 8000))
+          //   }
+          // }, 5000)
         }, util.random(3000, 6000))
       }, util.random(1000, 3000))
     },
-    mineBlock() {
+    mineBlock(block: Header) {
+      console.log(block.toJSON())
       const minedBlock: MinedBlock = {
-        blockNum: util.toFixed(Date.now() / 1000 + util.random(5, 10), 0),
+        blockNum: block.number.toNumber(),
         time: Date.now(),
-        transactions: util.random(5, 1000),
-        blockReward: util.random(1, 140),
+        transactions: 0,
+        blockReward: 0,
       }
       this.minedBlocks.unshift(minedBlock)
       Notify.create({

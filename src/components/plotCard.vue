@@ -11,7 +11,7 @@ q-card(bordered flat)
       .col-auto.q-mr-md(v-if="plot.state == 'verifying'")
         q-spinner-box(color="grey" size="40px")
       .col-auto.q-mr-md(v-if="plot.state == 'starting'")
-        q-spinner-orbit(colorfff="grey" size="40px")
+        q-spinner-orbit(color="grey" size="40px")
       .col
         .text-weight-light {{ lang.status }}
         p {{ plot.message }}

@@ -63,7 +63,7 @@ import { QInput, Dialog, Notify } from "quasar"
 import * as global from "src/lib/global"
 const lang = global.data.loc.text.plottingProgress
 import * as util from "src/lib/util"
-
+import introModal from "components/introModal.vue"
 import TimeAgo from "javascript-time-ago"
 import en from "javascript-time-ago/locale/en"
 TimeAgo.addLocale(en)
@@ -90,10 +90,8 @@ export default defineComponent({
     }
   },
   async mounted() {
-    // this.fakeProgress()
     await this.getPlotConfig()
     this.startPlotting()
-    // timer = setInterval(() => this.elapsedms++, 1)
   },
   computed: {
     progresspct(): number {
@@ -157,7 +155,7 @@ export default defineComponent({
       }, util.random(200, 1000))
     },
     async viewIntro() {
-      const modal = await util.showModal("introModal")
+      const modal = await util.showModal(introModal)
       modal?.onDismiss(() => {
         this.viewedIntro = true
       })

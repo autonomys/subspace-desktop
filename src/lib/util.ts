@@ -1,4 +1,3 @@
-import introModal from "components/introModal.vue"
 import { Dialog, DialogChainObject } from "quasar"
 
 import * as global from "src/lib/global"
@@ -7,22 +6,20 @@ import * as fs from "@tauri-apps/api/fs"
 import * as path from "@tauri-apps/api/path"
 import { invoke } from '@tauri-apps/api/tauri'
 import * as bcrypt from 'bcryptjs'
+import { VueInstance } from "@vueuse/core"
 
 const tauri = { dialog, fs, path, invoke }
 
-const modalComponents: { [index: string]: any } = {
-  introModal
-}
 export const random = (min, max) => Math.floor(Math.random() * (max - min)) + min;
 
 interface propsType {
   [index: string]: any
 }
-export async function showModal(componentName: string, props: propsType = {}): Promise<DialogChainObject | null> {
+export async function showModal(component: any, props: propsType = {}): Promise<DialogChainObject | null> {
   console.log("Show Modal")
   return Dialog.create({
     message: "Testing",
-    component: modalComponents[componentName],
+    component,
     componentProps: {
       ...props,
     },

@@ -4,7 +4,9 @@ import * as global from 'src/lib/global'
 import VueApexCharts from "vue3-apexcharts";
 
 export default boot(async ({ app, router }) => {
+  await gMut.loadLangData()
+  gMut.initClient()
   app.config.globalProperties.$txt = global.data.loc.text
   app.use(VueApexCharts)
-  await gMut.loadLangData()
+
 })

@@ -1,3 +1,8 @@
+import { ApiPromise, WsProvider } from '@polkadot/api';
+
+
+
+
 export interface PeerData {
   status: "disconnected" | "unstable" | "connected" | string
   name: string // do peers have some string identifier?
@@ -49,23 +54,43 @@ let data: ClientData = {
   network: { details: {}, peers: [], status: "" }
 }
 
-
-export const client = {
-  data,
+export interface Client {
+  api: ApiPromise | null
+  data: ClientData
   getStatus: {
-    async farming() { client.data.farming = await getFarmingData() },
-    async plot() { client.data.plot = await getPlotData() },
-    async network() { client.data.network = await getNetworkData() }
+    farming: Function
+    plot: Function
+    network: Function
   },
-  do: {
-    // startPlotting()
-    // stopPlotting()
-    // startFarming()
-    // stopFarming()
-    // restartClient()
-    // stopClient()
-    // startClient()
+  do?: any
+}
+export type ClientType = Client | null
+
+
+export const Client = async () => {
+  const wsProvider = new WsProvider();
+  const api = await ApiPromise.create({ provider: wsProvider });
+  console.log(api.genesisHash.toHex());
+  console.log('init client...');
+  const client = <Client>{
+    api,
+    data,
+    getStatus: {
+      async farming() { client.data.farming = await getFarmingData() },
+      async plot() { client.data.plot = await getPlotData() },
+      async network() { client.data.network = await getNetworkData() }
+    },
+    do: {
+      // startPlotting()
+      // stopPlotting()
+      // startFarming()
+      // stopFarming()
+      // restartClient()
+      // stopClient()
+      // startClient()
+    }
   }
+  return client
 }
 
 
