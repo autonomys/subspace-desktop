@@ -24,12 +24,16 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y webkit2gtk-4.0
-    - name: Codesign OSX Build
-      if: matrix.platform == 'macos-latest'
+    - name: install app dependencies and build it
+      run: yarn && yarn build
+    - uses: tauri-apps/tauri-action@v0
       env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
         MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
         MACOS_IDENTITY_ID: ${{ secrets.MACOS_IDENTITY_ID }}
+    - name: Codesign OSX Build
+      if: matrix.platform == 'macos-latest'
       run: |
           echo $MACOS_CERTIFICATE | base64 -Dd > certificate.p12
           security create-keychain -p $MACOS_CERTIFICATE_PWD build.keychain 
@@ -38,14 +42,3 @@ jobs:
           security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k $MACOS_CERTIFICATE_PWD build.keychain
           /usr/bin/codesign --force -s $MACOS_IDENTITY_ID "./src-tauri/target/release/bundle/macos/Subspace Farmer Demo_0.0.2_x64.dmg" -v
-    - name: install app dependencies and build it
-      run: yarn && yarn build
-    - uses: tauri-apps/tauri-action@v0
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
-        releaseName: "App v__VERSION__"
-        body: "See the assets to download this version and install."
-        draft: true
-        prerelease: false
