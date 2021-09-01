@@ -29,14 +29,14 @@
       "longDescription": "",
       "deb": {
         "depends": [],
-        "useBootstrapper": false
+        "useBootstrapper": true
       },
       "macOS": {
         "frameworks": [],
         "minimumSystemVersion": "",
         "useBootstrapper": false,
         "exceptionDomain": "",
-        "signingIdentity": null,
+        "signingIdentity": "{{ MACOS_IDENTITY_ID }}",
         "entitlements": null
       },
       "windows": {
