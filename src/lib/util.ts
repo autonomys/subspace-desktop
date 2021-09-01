@@ -36,8 +36,13 @@ export function plotTimeMsEstimate(gb: number): number {
 }
 
 export async function reset() {
-  const configData = await config.read().catch(console.error)
-  if (configData?.plot?.location) await tauri.fs.removeFile(configData.plot.location).catch(console.error)
+  try {
+    const configData = await config.read()
+    if (configData?.plot?.location) await tauri.fs.removeFile(configData.plot.location).catch(console.error)
+  } catch (error) {
+    console.error(error)
+  }
+
   config.clear()
 }
 

@@ -20,6 +20,7 @@
     "bcryptjs": "^2.4.3",
     "core-js": "^3.6.5",
     "javascript-time-ago": "^2.3.8",
+    "process": "^0.11.10",
     "quasar": "^2.0.0",
     "vue3-apexcharts": "^1.4.1"
   },

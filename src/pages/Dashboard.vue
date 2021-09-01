@@ -1,5 +1,6 @@
 <template lang="pug">
-q-page.q-pl-xl.q-pr-xl.q-pt-md
+q-page.q-pl-lg.q-pr-lg.q-pt-md
+  //- div {{ clientData }}
   .row.justify-center
   .row.q-pb-sm.justify-center
   div(v-if="!loading")
@@ -10,7 +11,7 @@ q-page.q-pl-xl.q-pr-xl.q-pt-md
         netCard(:config="config" :network="network")
     .row.q-gutter-md
       .col
-        farmedList(:expanded="expanded" :minedBlocksList="minedBlocksList" :minedTotalEarned="minedTotalEarned" @expand="expand")
+        farmedList(:expanded="expanded" :farmedTotalEarned="farmedTotalEarned" @expand="expand")
   div(v-else)
     .flex
       .absolute-center
@@ -27,14 +28,10 @@ import * as util from "src/lib/util"
 import farmedList from "components/farmedList.vue"
 import netCard from "components/netCard.vue"
 import plotCard from "components/plotCard.vue"
-import { MinedBlock } from "src/lib/types"
-import { ClientType, Client } from "src/lib/client"
-import { ApiPromise } from "@polkadot/api"
-import { Header } from "@polkadot/types/interfaces/runtime"
+import { FarmedBlock } from "src/lib/types"
+import { ClientType, Client, ClientData, emptyData } from "src/lib/client"
 import { VoidFn } from "@polkadot/api/types"
 const lang = global.data.loc.text.dashboard
-let api: ApiPromise
-let mineBlocksInterval
 let clientInterval
 export default defineComponent({
   components: { farmedList, netCard, plotCard },
@@ -53,9 +50,9 @@ export default defineComponent({
       state: "starting",
       message: lang.initializing,
     }
-    let minedBlocks: MinedBlock[] = []
     let unsubscribe: VoidFn = () => {}
-    return { lang, config, network, plot, global: global.data, globalState, expanded: false, minedBlocks, util, loading: true, unsubscribe }
+    let clientData: ClientData = emptyData
+    return { lang, config, network, plot, global: global.data, globalState, expanded: false, util, loading: true, unsubscribe, clientData }
   },
   async mounted() {
     const config = await util.config.read()
@@ -77,18 +74,17 @@ export default defineComponent({
     this.fakeStart()
   },
   computed: {
-    minedBlocksList(): any {
-      return this.minedBlocks
-    },
-    minedTotalEarned(): number {
-      return this.minedBlocks.reduce((agg, val) => {
-        return val.blockReward + agg
+    farmedTotalEarned(): number {
+      if (!this.global.client) return 0
+      return this.global.client.data.farming.farmed.reduce((agg, val) => {
+        return val.blockReward + val.feeReward + agg
       }, 0)
     },
   },
   unmounted() {
-    if (mineBlocksInterval) clearInterval(mineBlocksInterval)
     this.unsubscribe()
+    this.global.client?.do?.blockSubscription.stop()
+    this.global.client?.data?.farming.events.off("farmedBlock", this.farmBlock)
   },
   created() {
     this.$watch(
@@ -97,7 +93,7 @@ export default defineComponent({
         console.log("api rdy")
         if (val) {
           this.loading = false
-          api = val.api
+          this.clientData = val.data
           this.testClient()
         } else this.loading = true
       },
@@ -106,24 +102,8 @@ export default defineComponent({
   },
   methods: {
     async testClient() {
-      if (!api) return
-      const ready = await api.isConnected
-      console.log("api:", ready)
-      const state = await api.query.system.number
-      console.log("state:", state)
-      const time = await api.query.timestamp.now()
-      console.log("time:", time.toHuman())
-      const chain = await api.rpc.system.chain()
-      const lastHeader = await api.rpc.chain.getHeader()
-
-      const peers = await api.rpc.net.peerCount
-      console.log("Peers", peers) // this is undefined?
-      this.unsubscribe()
-      this.unsubscribe = await api.rpc.chain.subscribeNewHeads((lastHeader) => {
-        const type = typeof lastHeader
-        console.log(`${chain}: last block #${lastHeader.number} has hash ${lastHeader.hash}`)
-        this.mineBlock(lastHeader)
-      })
+      this.global.client?.do?.runTest()
+      this.global.client?.data?.farming.events.on("farmedBlock", this.farmBlock)
     },
 
     expand(val: boolean) {
@@ -175,30 +155,14 @@ export default defineComponent({
             this.global.status.state = "live"
             this.global.status.message = lang.farming
           }
-          // mineBlocksInterval = setInterval(() => {
-          //   const mine = util.random(1, 100)
-          //   if (mine > 30) {
-          //     setTimeout(() => {
-          //       this.mineBlock()
-          //     }, util.random(2000, 8000))
-          //   }
-          // }, 5000)
         }, util.random(3000, 6000))
       }, util.random(1000, 3000))
     },
-    mineBlock(block: Header) {
-      console.log(block.toJSON())
-      const minedBlock: MinedBlock = {
-        blockNum: block.number.toNumber(),
-        time: Date.now(),
-        transactions: 0,
-        blockReward: 0,
-      }
-      this.minedBlocks.unshift(minedBlock)
+    farmBlock(block: FarmedBlock) {
       Notify.create({
         color: "green",
         progress: true,
-        message: `${lang.farmedBlock}: ${minedBlock.blockNum} ${lang.reward} ${minedBlock.blockReward} SSC`,
+        message: `${lang.farmedBlock}: ${block.blockNum} ${lang.reward} ${block.blockReward + block.feeReward} SSC`,
         position: "bottom-right",
       })
     },

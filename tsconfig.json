@@ -5,6 +5,7 @@
     "baseUrl": ".",
     "noImplicitAny": false,
     "allowJs": false,
+    "strictNullChecks": false,
     "experimentalDecorators": true
   }
 }

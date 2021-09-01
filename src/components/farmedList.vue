@@ -7,13 +7,12 @@ q-card(bordered flat)
           q-icon.q-mr-sm(color="grey" name="grid_view" size="40px")
           .text-h6.text-weight-light {{ lang.farmedBlocks }}:
       .col-auto.q-mr-md
-        h6 {{ minedBlocksList?.length }}
+        h6 {{ farmedBlocksList?.length }}
       .col-auto.q-mr-md
         .text-weight-light Total Earned
-        p {{ minedTotalEarned }} SSC
+        p {{ farmedTotalEarned }} SSC
       q-space
       .col.col-auto
-        //- .row
         .row.justify-center
           q-btn(@click="$emit('expand', true)" color="grey-10" flat icon-right="list" size="md" stretch v-if="!expanded")
           q-btn(@click="$emit('expand', false)" color="grey-10" flat icon-right="south" size="md" stretch v-else)
@@ -26,7 +25,7 @@ q-card(bordered flat)
     .col-3 {{ lang.rewards }}
   q-scroll-area(:style="blocksListStyle")
     transition-group(appear enter-active-class="animated slideInTop " name="list")
-      .bg-white(:key="block.time" v-for="block of minedBlocksList")
+      .bg-white(:key="block.time" v-for="block of farmedBlocksList")
         q-separator
         .row.q-gutter-sm.q-pa-xs.q-ml-sm
           .col-2
@@ -50,19 +49,22 @@ import { defineComponent, PropType } from "vue"
 import * as util from "src/lib/util"
 import * as global from "src/lib/global"
 const lang = global.data.loc.text.dashboard
-import { MinedBlock } from "src/lib/types"
+import { FarmedBlock } from "src/lib/types"
 
 export default defineComponent({
   emits: ["expand"],
   data() {
-    return { lang, util }
+    return { lang, util, global: global.data }
   },
   props: {
     expanded: { type: Boolean, default: false },
-    minedBlocksList: { type: Object as PropType<MinedBlock[]>, default: [] },
-    minedTotalEarned: { type: Number, default: 0 },
+    // farmedBlocksList: { type: Object as PropType<FarmedBlock[]>, default: [] },
+    farmedTotalEarned: { type: Number, default: 0 },
   },
   computed: {
+    farmedBlocksList(): FarmedBlock[] {
+      return this.global.client?.data?.farming.farmed || []
+    },
     blocksListStyle(): any {
       return this.expanded ? { height: "370px" } : { height: "185px" }
     },
