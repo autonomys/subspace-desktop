@@ -36,7 +36,7 @@
         "minimumSystemVersion": "",
         "useBootstrapper": false,
         "exceptionDomain": "",
-        "signingIdentity": $MACOS_IDENTITY_ID
+        "signingIdentity": "Developer ID Application: Dardan Bujupaj (XXXXXXXXXX)",
         "entitlements": null
       },
       "windows": {
