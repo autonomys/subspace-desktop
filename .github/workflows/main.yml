@@ -19,6 +19,28 @@ jobs:
       uses: actions-rs/toolchain@v1
       with:
         toolchain: stable
+    - name: Check whether code signing should be enabled
+          id: enablecodesigning
+          env:
+              ENABLE_CODE_SIGNING: ${{ secrets.MACOS_CERTIFICATE }}
+          run: |
+              echo "Enable code signing: ${{ env.ENABLE_CODE_SIGNING != '' }}"
+              echo "::set-output name=enabled::${{ env.ENABLE_CODE_SIGNING != '' }}"
+    - name: build sample artifacts + code signing (updater)
+        if: steps.enablecodesigning.outputs.enabled == 'true'
+        run: |
+          yarn install
+        env:
+          # Notarization (disabled)
+          # FIXME: enable only on `dev` push maybe? as it take some times...
+          #
+          # APPLE_ID: ${{ secrets.APPLE_ID }}
+          # APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+
+          # Apple code signing testing
+          APPLE_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.MACOS_IDENTITY_ID }}
     - name: install webkit2gtk (ubuntu only)
       if: matrix.platform == 'ubuntu-latest'
       run: |
@@ -38,3 +60,26 @@ jobs:
         body: "See the assets to download this version and install."
         draft: true
         prerelease: false
+
+
+
+
+      # run only on tauri-apps/tauri repo (require secrets)
+      - name: build sample artifacts + code signing (updater)
+        if: steps.enablecodesigning.outputs.enabled == 'true'
+        working-directory: ./examples/updater
+        run: |
+          yarn install
+          node ../../tooling/cli.js/bin/tauri build
+        env:
+          # Notarization (disabled)
+          # FIXME: enable only on `dev` push maybe? as it take some times...
+          #
+          # APPLE_ID: ${{ secrets.APPLE_ID }}
+          # APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+
+          # Apple code signing testing
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+        

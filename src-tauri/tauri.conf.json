@@ -36,7 +36,7 @@
         "minimumSystemVersion": "",
         "useBootstrapper": false,
         "exceptionDomain": "",
-        "signingIdentity": "Developer ID Application: Subspace Labs, Inc. (95PT9284T9)",
+        "signingIdentity": null,
         "entitlements": null
       },
       "windows": {
