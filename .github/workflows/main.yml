@@ -31,7 +31,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         ENABLE_CODE_SIGNING: ${{ secrets.MACOS_CERTIFICATE }}
         APPLE_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
-        APPLE_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+        APPLE_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
         APPLE_SIGNING_IDENTITY: ${{ secrets.MACOS_IDENTITY_ID }}
       with:
         tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
