@@ -1,4 +1,4 @@
-name: "publish"
+name: "build-osx"
 on: workflow_dispatch
 
 jobs:
