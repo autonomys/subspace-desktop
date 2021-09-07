@@ -33,9 +33,11 @@ jobs:
         APPLE_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
         APPLE_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
         APPLE_SIGNING_IDENTITY: ${{ secrets.MACOS_IDENTITY_ID }}
+        APPLE_ID: ${{ secrets.APPLE_ID }}
+        APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
       with:
-        tagName: app-v__VERSION__-code-sign # the action automatically replaces \_\_VERSION\_\_ with the app version
-        releaseName: "App v__VERSION__-code-sign"
+        tagName: app-v__VERSION__-code-sign-notorized # the action automatically replaces \_\_VERSION\_\_ with the app version
+        releaseName: "App v__VERSION__-code-sign-notorized"
         body: " Code Sign Test Prerelease, see the assets to download this version and install."
         draft: true
         prerelease: true
