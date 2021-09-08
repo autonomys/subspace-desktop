@@ -109,7 +109,7 @@ export const Client = async () => {
   console.log(api.genesisHash.toHex());
   console.log('init client...');
   let unsubscribe: VoidFn = () => { }
-  clearStored()
+  // clearStored()
   let farmed: FarmedBlock[] = getStoredBlocks()
   let clientData = reactive(emptyData)
   let clearTauriDestroy: event.UnlistenFn = () => { }
@@ -158,6 +158,8 @@ export const Client = async () => {
             client.data.farming.farmed = [block].concat(client.data.farming.farmed)
             storeBlocks(farmed)
             client.data.farming.events.emit('farmedBlock', block)
+            const peers = await client.api.rpc.net.peerCount
+            console.log("Peers", peers) // this is undefined?
           })
           process.on('beforeExit', this.stopOnReload);
           window.addEventListener('unload', this.stopOnReload)
@@ -192,8 +194,7 @@ export const Client = async () => {
         // const chain = await client.api.rpc.system.chain()
         // const lastHeader = await client.api.rpc.chain.getHeader()
 
-        // const peers = await client.api.rpc.net.peerCount
-        // console.log("Peers", peers) // this is undefined?
+
         // this.unsubscribe()
         // const farmed = client.data.farming.farmed
 
