@@ -23,12 +23,12 @@ q-layout(view="hHh lpr fFf")
                     q-icon(color="red" name="refresh")
                   .col
                     p.text-red Reset
-              q-item(@click="initClient()" clickable)
-                .row.items-center
-                  .col-auto.q-mr-md
-                    q-icon(color="grey-9" name="restart_alt")
-                  .col
-                    p.text-grey-9 Reconnect
+              //- q-item(@click="initClient()" clickable)
+              //-   .row.items-center
+              //-     .col-auto.q-mr-md
+              //-       q-icon(color="grey-9" name="restart_alt")
+              //-     .col
+              //-       p.text-grey-9 Reconnect
   q-page-container
     router-view
 </template>

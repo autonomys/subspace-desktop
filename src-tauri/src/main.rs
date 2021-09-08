@@ -4,8 +4,13 @@
 )]
 use serde::Serialize;
 use tauri::{
-  CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
-  WindowBuilder, WindowUrl,
+  CustomMenuItem,
+  Manager,
+  SystemTray,
+  SystemTrayEvent,
+  SystemTrayMenu,
+  SystemTrayMenuItem,
+  // WindowBuilder, WindowUrl,
 };
 
 // use tauri::{api, CustomMenuItem, Menu, MenuItem, Submenu, WindowBuilder, WindowUrl};
@@ -29,51 +34,37 @@ fn get_disk_stats(dir: String) -> S {
 
 fn main() {
   let quit = CustomMenuItem::new("quit".to_string(), "Quit");
-  let hide = CustomMenuItem::new("hide".to_string(), "Hide");
-  let show = CustomMenuItem::new("show".to_string(), "Show");
+  let toggle_visibility = CustomMenuItem::new("toggle_visibility".to_string(), "Hide");
 
   let tray_menu = SystemTrayMenu::new()
-    .add_item(quit)
+    .add_item(toggle_visibility)
     .add_native_item(SystemTrayMenuItem::Separator)
-    .add_item(hide)
-    .add_item(show);
+    .add_item(quit);
   let tray = SystemTray::new().with_menu(tray_menu);
 
   tauri::Builder::default()
     .system_tray(tray)
     .on_system_tray_event(|app, event| match event {
-      SystemTrayEvent::MenuItemClick { id, .. } => match id.as_str() {
-        "quit" => {
-          std::process::exit(0);
-        }
-        "hide" => {
-          let window = app.get_window("main").unwrap();
-          // window.close().unwrap();
-          // window
+      SystemTrayEvent::MenuItemClick { id, .. } => {
+        let item_handle = app.tray_handle().get_item(&id);
 
-          window.hide().unwrap();
+        match id.as_str() {
+          "quit" => {
+            std::process::exit(0);
+          }
+          "toggle_visibility" => {
+            let window = app.get_window("main").unwrap();
+            if window.is_visible().unwrap() {
+              window.hide().unwrap();
+              item_handle.set_title("Show").unwrap();
+            } else {
+              window.show().unwrap();
+              item_handle.set_title("Hide").unwrap();
+            }
+          }
+          _ => {}
         }
-        "show" => {
-          let window = app.get_window("main").unwrap();
-          // window.create_window("label", "/").unwrap();
-          // window.o
-          window.show().unwrap();
-          // window.create_window("main".to_string(), WindowUrl::default(), |win, webview| {
-          //   let win = win
-          //     .title("Test")
-          //     .resizable(true)
-          //     .transparent(false)
-          //     .decorations(true)
-          //     .always_on_top(false)
-          //     .inner_size(800.0, 600.0)
-          //     .min_inner_size(300.0, 150.0)
-          //     .skip_taskbar(false)
-          //     .fullscreen(false);
-          //   return (win, webview);
-          // });
-        }
-        _ => {}
-      },
+      }
       _ => {}
     })
     .invoke_handler(tauri::generate_handler![get_disk_stats])
