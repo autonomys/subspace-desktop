@@ -29,7 +29,7 @@
       "longDescription": "",
       "deb": {
         "depends": [],
-        "useBootstrapper": true
+        "useBootstrapper": false
       },
       "macOS": {
         "frameworks": [],
