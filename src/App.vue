@@ -4,6 +4,12 @@
 <script lang="ts">
 import { defineComponent } from "vue"
 import * as util from "src/lib/util"
+import AutoLaunch from "src/lib/autoLaunch/index"
+// var autoL = new AutoLaunch({
+//   name: "Minecraft",
+//   path: "/Applications/Subspace Farmer Demo.app",
+// })
+// autoL.enable()
 export default defineComponent({
   name: "App",
   data() {

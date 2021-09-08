@@ -59,6 +59,7 @@ import * as path from "@tauri-apps/api/path"
 const tauri = { path }
 import { defineComponent } from "vue"
 import * as util from "src/lib/util"
+import * as native from "src/lib/native"
 import { debounce } from "quasar"
 import * as global from "src/lib/global"
 const lang = global.data.loc.text.setupPlot
@@ -88,7 +89,7 @@ export default defineComponent({
     let allocatedGB = 1
     let plotDirectory = "/Subspace/plots"
     let defaultPath = ""
-    let driveStats: util.DriveStats = { freeBytes: 0, totalBytes: 0 }
+    let driveStats: native.DriveStats = { freeBytes: 0, totalBytes: 0 }
     return { chartOptions, revealKey, userConfirm, lang, generatedPk, plotDirectory, allocatedGB, validPath: true, defaultPath, driveStats }
   },
   async mounted() {
@@ -104,7 +105,7 @@ export default defineComponent({
       debounce(async (val) => {
         console.log(val)
         if (this.plotDirectory == this.defaultPath) return (this.validPath = true)
-        this.validPath = await util.native.dirExists(val)
+        this.validPath = await native.dirExists(val)
         if (this.validPath) await this.updateDriveStats()
       }, 500)
     )
@@ -143,16 +144,16 @@ export default defineComponent({
     async startPlotting() {
       if (this.plotDirectory.charAt(this.plotDirectory.length - 1) == "/") this.plotDirectory.slice(-1)
       await util.config.update({ plot: { sizeGB: this.allocatedGB, location: this.plotDirectory + "/subspace.plot" } })
-      if (this.defaultPath != this.plotDirectory) await util.native.createDir(this.plotDirectory)
+      if (this.defaultPath != this.plotDirectory) await native.createDir(this.plotDirectory)
       this.$router.replace({ name: "plottingProgress" })
     },
     async updateDriveStats() {
-      const stats = await util.native.driveStats(this.plotDirectory)
+      const stats = await native.driveStats(this.plotDirectory)
       console.log("Drive Stats:", stats)
       this.driveStats = stats
     },
     async selectDir() {
-      const result = await util.native.selectDir(this.plotDirectory).catch(console.error)
+      const result = await native.selectDir(this.plotDirectory).catch(console.error)
       if (result) this.plotDirectory = result
     },
   },
