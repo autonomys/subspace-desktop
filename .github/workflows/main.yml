@@ -1,8 +1,5 @@
 name: "publish"
-on:
-  push:
-    branches:
-      - release
+on: workflow_dispatch
 
 jobs:
   publish-tauri:
@@ -32,9 +29,16 @@ jobs:
     - uses: tauri-apps/tauri-action@v0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
-        releaseName: "App v__VERSION__"
-        body: "See the assets to download this version and install."
-        draft: true
-        prerelease: false
+        MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+        MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+        MACOS_IDENTITY_ID: ${{ secrets.MACOS_IDENTITY_ID }}
+    - name: Codesign OSX Build
+      if: matrix.platform == 'macos-latest'
+      run: |
+          echo $MACOS_CERTIFICATE | base64 -Dd > certificate.p12
+          security create-keychain -p $MACOS_CERTIFICATE_PWD build.keychain 
+          security default-keychain -s build.keychain
+          security unlock-keychain -p $MACOS_CERTIFICATE_PWD build.keychain
+          security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k $MACOS_CERTIFICATE_PWD build.keychain
+          /usr/bin/codesign --force -s $MACOS_IDENTITY_ID "./src-tauri/target/release/bundle/macos/Subspace Farmer Demo_0.0.2_x64.dmg" -v

@@ -8,6 +8,10 @@ Built with Quasar + Tauri
 - yarn
 - rustc
 
+Stuck?
+
+https://tauri.studio/en/docs/getting-started/intro
+
 ## Install the dependencies
 
 ```bash
@@ -41,5 +45,8 @@ yarn quasar --help
 yarn tauri --help
 ```
 
-### Customize the configuration
+### Customize Quasar config
 See [Configuring quasar.conf.js](https://v2.quasar.dev/quasar-cli/quasar-conf-js).
+
+### Customize Tauri config
+https://tauri.studio/en/docs/api/config
