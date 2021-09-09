@@ -41,3 +41,4 @@ jobs:
         body: "See the assets to download this version and install."
         draft: true
         prerelease: true
+        
