@@ -2,7 +2,7 @@ name: "ci tests"
 on: [push, pull_request]
 
 jobs:
-  publish-tauri:
+  test-tauri:
     strategy:
       fail-fast: false
       matrix:
