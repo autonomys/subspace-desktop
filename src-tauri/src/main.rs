@@ -40,12 +40,16 @@ fn main() {
   tauri::Builder::default()
     .setup(|app| {
       let window = app.get_window("main").unwrap();
-      window.on_window_event(|event| match event {
-        WindowEvent::CloseRequested => {
-          println!("Close requested");
-          // app.trigger_global("window-closed", Some(String::from("hi"))); // this causes a problem
+      window.on_window_event({
+        let window = window.clone();
+
+        move |event| match event {
+          WindowEvent::CloseRequested => {
+            println!("Close requested");
+            window.trigger_global("window-closed", Some(String::from("hi"))); // this causes a problem
+          }
+          _ => {}
         }
-        _ => {}
       });
       Ok(())
     })
