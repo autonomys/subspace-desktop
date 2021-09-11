@@ -43,6 +43,7 @@ fn main() {
       window.on_window_event(|event| match event {
         WindowEvent::CloseRequested => {
           println!("Close requested");
+
           // app.trigger_global("window-closed", Some(String::from("hi"))); // this causes a problem
         }
         _ => {}
