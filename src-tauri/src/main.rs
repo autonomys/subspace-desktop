@@ -2,15 +2,11 @@
   all(not(debug_assertions), target_os = "windows"),
   windows_subsystem = "windows"
 )]
+
 use serde::Serialize;
 use tauri::{
-  CustomMenuItem,
-  Manager,
-  SystemTray,
-  SystemTrayEvent,
-  SystemTrayMenu,
-  SystemTrayMenuItem,
-  // WindowBuilder, WindowUrl,
+  CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
+  WindowEvent,
 };
 
 // use tauri::{api, CustomMenuItem, Menu, MenuItem, Submenu, WindowBuilder, WindowUrl};
@@ -41,16 +37,26 @@ fn main() {
     .add_native_item(SystemTrayMenuItem::Separator)
     .add_item(quit);
   let tray = SystemTray::new().with_menu(tray_menu);
-
   tauri::Builder::default()
+    .setup(|app| {
+      let window = app.get_window("main").unwrap();
+      window.on_window_event(|event| match event {
+        WindowEvent::CloseRequested => {
+          println!("Close requested");
+          // app.trigger_global("window-closed", Some(String::from("hi"))); // this causes a problem
+        }
+        _ => {}
+      });
+      Ok(())
+    })
     .system_tray(tray)
+    // .on_window_event(handler)
     .on_system_tray_event(|app, event| match event {
       SystemTrayEvent::MenuItemClick { id, .. } => {
         let item_handle = app.tray_handle().get_item(&id);
-
         match id.as_str() {
           "quit" => {
-            std::process::exit(0);
+            std::process::exit(0); // hide window
           }
           "toggle_visibility" => {
             let window = app.get_window("main").unwrap();
