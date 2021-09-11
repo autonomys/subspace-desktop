@@ -8,6 +8,13 @@ Built with Quasar + Tauri
 - yarn
 - rustc
 
+### Linux
+
+On Linux you'll have to install development version of `libwebkit2gtk-4.0` package, which can be done on Ubuntu with:
+```bash
+sudo apt-get install --no-install-recommends libwebkit2gtk-4.0-dev
+```
+
 Stuck?
 
 https://tauri.studio/en/docs/getting-started/intro
