@@ -3,7 +3,7 @@ import * as event from "@tauri-apps/api/event"
 import { reactive } from 'vue'
 import { LocalStorage } from 'quasar'
 const tauri = { event }
-import { Header } from "@polkadot/types/interfaces/runtime"
+// import { Header } from "@polkadot/types/interfaces/runtime"
 import { VoidFn } from "@polkadot/api/types"
 import * as process from "process"
 import mitt, { Emitter } from 'mitt'

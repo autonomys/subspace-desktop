@@ -11,8 +11,6 @@ use tauri::{
   WindowEvent,
 };
 
-// use tauri::{api, CustomMenuItem, Menu, MenuItem, Submenu, WindowBuilder, WindowUrl};
-
 #[derive(Serialize)]
 struct S {
   free_bytes: u64,
@@ -34,13 +32,6 @@ fn get_disk_stats(dir: String) -> S {
 fn get_this_binary() -> PathBuf {
   let bin = api::process::current_binary();
   return bin.unwrap();
-  // println!("{}", dir.to_string());
-  // let free: u64 = fs2::available_space(&dir).expect("error");
-  // let total: u64 = fs2::total_space(&dir).expect("error");
-  // return S {
-  //   free_bytes: free,
-  //   total_bytes: total,
-  // };
 }
 
 fn main() {
@@ -61,7 +52,7 @@ fn main() {
         move |event| match event {
           WindowEvent::CloseRequested => {
             println!("Close requested");
-            window.trigger_global("window-closed", Some(String::from("hi"))); // this causes a problem
+            window.trigger_global("window-closed", Some(String::from("hi")));
           }
           _ => {}
         }
@@ -93,7 +84,6 @@ fn main() {
       _ => {}
     })
     .invoke_handler(tauri::generate_handler![get_disk_stats, get_this_binary])
-    // .invoke_handler(tauri::generate_handler![get_this_binary])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }

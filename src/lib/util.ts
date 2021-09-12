@@ -9,11 +9,8 @@ const tauri = { dialog, fs, path, invoke }
 import * as native from './native'
 
 import * as bcrypt from 'bcryptjs'
-import { VueInstance } from "@vueuse/core"
-
 
 export const random = (min, max) => Math.floor(Math.random() * (max - min)) + min;
-
 interface propsType {
   [index: string]: any
 }

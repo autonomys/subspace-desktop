@@ -5,7 +5,6 @@
 // });
 // path = require 'path'
 import path from 'path'
-import fileUtils from './fileUtils'
 import * as native from '../native'
 
 module.exports = {

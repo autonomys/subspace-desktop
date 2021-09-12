@@ -1,5 +1,4 @@
 
-import fileUtils from './fileUtils'
 import * as native from '../native'
 interface AutoLaunchParams { appName: string, appPath: string, hidden: boolean }
 import * as applescript from "src/lib/osUtils/applescript"

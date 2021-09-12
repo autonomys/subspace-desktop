@@ -3,6 +3,6 @@
   "vetur.experimental.templateInterpolationService": true,
   "rust-analyzer.procMacro.enable": true,
   "rust-analyzer.diagnostics.disabled": [
-    "unresolved-macro-call"
+    "unresolved-macro-call",
   ]
 }
