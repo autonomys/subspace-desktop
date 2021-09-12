@@ -10,9 +10,9 @@ Built with Quasar + Tauri
 
 ### Linux
 
-On Linux you'll have to install development version of `libwebkit2gtk-4.0` and `libappindicator3-dev` package, which can be done on Ubuntu with:
+On Linux you'll have to install development version of `libwebkit2gtk-4.0` and `libappindicator` packages, which can be done on Ubuntu with:
 ```bash
-sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.0-dev libappindicator3-dev
+sudo apt-get install --no-install-recommends libwebkit2gtk-4.0-dev libappindicator3-dev
 ```
 
 Stuck?
