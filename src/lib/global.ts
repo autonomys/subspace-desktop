@@ -2,16 +2,21 @@ import { reactive } from "vue";
 const list: string[] = []
 import getLang from "../loc/lang"
 import { Client, ClientType } from "src/lib/client"
+import { autoLaunch, AutoLaunchType } from "src/lib/native"
 
 
 let text: any
 let client!: ClientType
-export var data = reactive({ status: { state: "loading", message: "loading" }, loc: { selected: 'en', text, }, client })
+let launchOnBoot!: AutoLaunchType
+export var data = reactive({ status: { state: "loading", message: "loading" }, loc: { selected: 'en', text, }, client, launchOnBoot })
 export var mutations = {
   async initClient() {
     data.client = null
     const client = await Client()
     data.client = client
+  },
+  async initLaunchOnBoot() {
+    data.launchOnBoot = await autoLaunch()
   },
   async changeLang(newLang: string) {
     data.loc.selected = newLang

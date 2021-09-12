@@ -3,28 +3,56 @@ import * as fs from "@tauri-apps/api/fs"
 import * as path from "@tauri-apps/api/path"
 import * as shell from "@tauri-apps/api/shell"
 import * as app from "@tauri-apps/api/app"
+import * as os from "@tauri-apps/api/os"
+import * as window from "@tauri-apps/api/window"
+import * as tProcess from "@tauri-apps/api/process"
+// import { invokeTauriCommand } from "@tauri-apps/api/"
 import { invoke } from '@tauri-apps/api/tauri'
 import macAL from "src/lib/autoLaunch/macAutoLaunch"
-const tauri = { app, dialog, fs, path, invoke, shell }
+import winAL from "src/lib/autoLaunch/macAutoLaunch"
+import linAL from "src/lib/autoLaunch/macAutoLaunch"
+type osAL = typeof macAL | typeof winAL | typeof linAL
+const tauri = { app, dialog, fs, path, invoke, shell, os, window, process: tProcess }
 export interface DriveStats {
-  freeBytes: number,
+  freeBytes: number
   totalBytes: number
 }
+export interface AutoLaunchType {
+  isEnabled(): Promise<boolean>
+  enable(): Promise<any>
+  disable(): Promise<any>
+}
 
-export async function autoLaunch(enable: boolean) {
-  try {
-    const appName = (await tauri.app.getName()).toString()
-    // const appPath = (await tauri.path.appDir()).toString()
-    const appPath = "/bin/bash"
-    if (enable) macAL.enable({ appName, appPath, hidden: false })
-    else macAL.disable(appName)
-  } catch (error) {
-    console.error('native.autoLaunch error:', error.toString());
+export async function autoLaunch(): Promise<AutoLaunchType> {
+  const appName = process.env.DEV ? "app" : (await tauri.app.getName()).toString()
+  const os = (await tauri.os.type())
+  const appPath = await tauri.invoke('get_this_binary') as string
+  console.log('get_this_binary', appPath);
+  console.log(appPath);
+  let autoLauncher: osAL
+  if (os == 'Darwin') autoLauncher = macAL
+  else if (os == 'Windows_NT') autoLauncher = winAL
+  else autoLauncher = linAL
+  return <AutoLaunchType>{
+    async isEnabled(): Promise<boolean> {
+      const result = await autoLauncher.isEnabled(appName)
+      return result
+    },
+    async enable(): Promise<any> {
+      const child = await autoLauncher.enable({ appName, appPath, hidden: false })
+      return child
+    },
+    async disable(): Promise<any> {
+      const child = autoLauncher.disable(appName)
+      return child
+    }
   }
 }
 
-export async function execString(cmd: string) {
-  const command = new tauri.shell.Command('mkdir', 'derp')
+
+
+export async function execString(executable: string, args: string[] | string) {
+  const command = new tauri.shell.Command(executable, args)
   command.on('close', data => {
     console.log(`command finished with code ${data.code} and signal ${data.signal}`)
   })

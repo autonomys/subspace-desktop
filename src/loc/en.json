@@ -90,5 +90,11 @@
     "pageTitle": "Advanced",
     "importKey": "Import Private Key",
     "back": "back"
+  },
+  "mainMenu": {
+    "reset": "Reset",
+    "autoStart": "Start on Boot",
+    "willAutoLaunch": "Subspace will launch automatically during boot",
+    "willNotAutoLaunch": "Subspace will not launch automatically during boot"
   }
 }

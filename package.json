@@ -8,7 +8,8 @@
     "quasar": "quasar",
     "tauri": "tauri",
     "dev": "quasar dev",
-    "build": "quasar build -m pwa && tauri build -v"
+    "build": "quasar build -m pwa && tauri build -v",
+    "build:debug": "quasar build -m pwa && tauri build -v --debug"
   },
   "dependencies": {
     "@polkadot/api": "^5.6.1",

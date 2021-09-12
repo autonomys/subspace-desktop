@@ -1,10 +1,10 @@
-# subspace (subspace-desktop)
+# subspace / desktop-farmer
 
 Built with Quasar + Tauri
 
 ## Prerequisites
 
-- nodejs
+- nodejs 14+
 - yarn
 - rustc
 

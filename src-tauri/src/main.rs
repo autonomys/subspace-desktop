@@ -3,9 +3,11 @@
   windows_subsystem = "windows"
 )]
 
+use std::path::PathBuf;
+
 use serde::Serialize;
 use tauri::{
-  CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
+  api, CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
   WindowEvent,
 };
 
@@ -26,6 +28,19 @@ fn get_disk_stats(dir: String) -> S {
     free_bytes: free,
     total_bytes: total,
   };
+}
+
+#[tauri::command]
+fn get_this_binary() -> PathBuf {
+  let bin = api::process::current_binary();
+  return bin.unwrap();
+  // println!("{}", dir.to_string());
+  // let free: u64 = fs2::available_space(&dir).expect("error");
+  // let total: u64 = fs2::total_space(&dir).expect("error");
+  // return S {
+  //   free_bytes: free,
+  //   total_bytes: total,
+  // };
 }
 
 fn main() {
@@ -77,7 +92,8 @@ fn main() {
       }
       _ => {}
     })
-    .invoke_handler(tauri::generate_handler![get_disk_stats])
+    .invoke_handler(tauri::generate_handler![get_disk_stats, get_this_binary])
+    // .invoke_handler(tauri::generate_handler![get_this_binary])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
