@@ -7,3 +7,4 @@ export interface FarmedBlock {
   id: string
 }
 
+export interface AutoLaunchParams { appName: string, appPath: string, hidden: boolean }

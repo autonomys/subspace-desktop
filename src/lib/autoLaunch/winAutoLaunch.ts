@@ -6,10 +6,11 @@
 // path = require 'path'
 import path from 'path'
 import * as native from '../native'
+import { AutoLaunchParams } from '../types'
 
 module.exports = {
 
-  enable({ appName, appPath, isHiddenOnLaunch }) {
+  enable({ appName, appPath, hidden }: AutoLaunchParams) {
     // return new Promise(function (resolve, reject) {
     //   let pathToAutoLaunchedApp = appPath;
     //   let args = '';
@@ -29,7 +30,7 @@ module.exports = {
     //   });
     // });
   },
-  disable(appName) {
+  disable(appName: string) {
     // return new Promise((resolve, reject) => regKey.remove(appName, function (err) {
     //   if (err != null) {
     //     // The registry key should exist but in case it fails because it doesn't exist, resolve false instead
@@ -45,7 +46,7 @@ module.exports = {
 
 
 
-  isEnabled(appName) {
+  isEnabled(appName: string) {
     // return new Promise((resolve, reject) => regKey.get(appName, function (err, item) {
     //   if (err != null) { return resolve(false); }
     //   return resolve(item != null);

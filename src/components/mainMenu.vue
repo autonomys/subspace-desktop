@@ -64,7 +64,7 @@ export default defineComponent({
     },
     async initMenu() {
       console.log("Init Menu")
-      this.autoLaunch = await this.launchOnBoot.isEnabled()
+      this.autoLaunch = this.launchOnBoot.enabled
     },
   },
 })

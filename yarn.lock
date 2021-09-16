@@ -1576,6 +1576,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/javascript-time-ago@^2.0.3":
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/@types/javascript-time-ago/-/javascript-time-ago-2.0.3.tgz#0cb6afd91f0a8fd876b4d7ffae1d080f2d8e8193"
+  integrity sha512-G6SdYh6gHxgCTU0s4cMIRHwRO4p3f7jQSZbDPfUOZpUAG1od3rTjT0e8rxGThUiTTWQHwpBRws8eHO8D2QqfkA==
+
 "@types/json-schema@*", "@types/json-schema@^7.0.4", "@types/json-schema@^7.0.5", "@types/json-schema@^7.0.8":
   version "7.0.9"
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.9.tgz#97edc9037ea0c38585320b28964dde3b39e4660d"
@@ -1592,6 +1597,11 @@
   version "1.3.2"
   resolved "https://registry.yarnpkg.com/@types/mime/-/mime-1.3.2.tgz#93e25bf9ee75fe0fd80b594bc4feb0e862111b5a"
   integrity sha512-YATxVxgRqNH6nHEIsvg6k2Boc1JHI9ZbH5iWFFv/MTkchz3b1ieGDa5T0a9RznNdI0KhVbdbWSN+KWWrQZRxTw==
+
+"@types/ms@^0.7.31":
+  version "0.7.31"
+  resolved "https://registry.yarnpkg.com/@types/ms/-/ms-0.7.31.tgz#31b7ca6407128a3d2bbc27fe2d21b345397f6197"
+  integrity sha512-iiUgKzV9AuaEkZqkOLDIvlQiL6ltuZd9tGcW3gwpnX8JbuiuhFlEGmmFXEXkN50Cvq7Os88IY2v0dkDqXYWVgA==
 
 "@types/node-fetch@^2.5.12":
   version "2.5.12"
@@ -2687,10 +2697,15 @@ caniuse-api@^3.0.0:
     lodash.memoize "^4.1.2"
     lodash.uniq "^4.5.0"
 
-caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001243, caniuse-lite@^1.0.30001251:
+caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001243:
   version "1.0.30001252"
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001252.tgz#cb16e4e3dafe948fc4a9bb3307aea054b912019a"
   integrity sha512-I56jhWDGMtdILQORdusxBOH+Nl/KgQSdDmpJezYddnAkVOmnoU8zwjTV9xAjMIYxr0iPreEAVylCGcmHCjfaOw==
+
+caniuse-lite@^1.0.30001248:
+  version "1.0.30001257"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001257.tgz#150aaf649a48bee531104cfeda57f92ce587f6e5"
+  integrity sha512-JN49KplOgHSXpIsVSF+LUyhD8PUp6xPpAXeRrrcBh4KBeP7W864jHn6RvzJgDlrReyeVjMFJL3PLpPvKIxlIHA==
 
 caniuse-lite@^1.0.30001254:
   version "1.0.30001256"
@@ -3722,10 +3737,10 @@ electron-osx-sign@^0.4.11:
     minimist "^1.2.0"
     plist "^3.0.1"
 
-electron-to-chromium@^1.3.811:
-  version "1.3.825"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.825.tgz#5d361eeaaf591bb2ce06cfeff86354b429d662b8"
-  integrity sha512-BO3FfWVeH8GQ0DBbi4HCL09OPgvN+0goqWlgKOCmCXcnrlgL5GA69nb7ZyjpWgpFUacBftg8BrXU2WLOSuHAxQ==
+electron-to-chromium@^1.3.793:
+  version "1.3.840"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.840.tgz#3f2a1df97015d9b1db5d86a4c6bd4cdb920adcbb"
+  integrity sha512-yRoUmTLDJnkIJx23xLY7GbSvnmDCq++NSuxHDQ0jiyDJ9YZBUGJcrdUqm+ZwZFzMbCciVzfem2N2AWiHJcWlbw==
 
 electron-to-chromium@^1.3.830:
   version "1.3.836"
@@ -6220,7 +6235,7 @@ node-loader@2.0.0:
   dependencies:
     loader-utils "^2.0.0"
 
-node-releases@^1.1.75:
+node-releases@^1.1.73, node-releases@^1.1.75:
   version "1.1.75"
   resolved "https://registry.yarnpkg.com/node-releases/-/node-releases-1.1.75.tgz#6dd8c876b9897a1b8e5a02de26afa79bb54ebbfe"
   integrity sha512-Qe5OUajvqrqDSy6wrWFmMwfJ0jVgwiw4T3KqmbTcZ62qW0gQkheXYhcFM1+lOVcGUoRxcEcfyvFMAnDgaF1VWw==

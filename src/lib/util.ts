@@ -10,7 +10,7 @@ import * as native from './native'
 
 import * as bcrypt from 'bcryptjs'
 
-export const random = (min, max) => Math.floor(Math.random() * (max - min)) + min;
+export const random = (min: number, max: number) => Math.floor(Math.random() * (max - min)) + min;
 interface propsType {
   [index: string]: any
 }
@@ -46,6 +46,7 @@ export async function reset() {
 }
 
 export interface ConfigFile {
+  [index: string]: any
   plot?: { sizeGB?: number, location?: string }, account?: { pubkey?: string, passHash?: string }
 }
 const emptyConfig: ConfigFile = { plot: { sizeGB: 0, location: "" }, account: { pubkey: "", passHash: "" } }
@@ -74,7 +75,8 @@ export const config = {
   },
   async update(newData: ConfigFile, dir?: string) {
     let config = await this.read(dir).catch(console.error) || emptyConfig
-    for (const [key, value] of Object.entries(newData)) {
+    for (let [key, value] of Object.entries(newData)) {
+      key = key as string
       config[key] = Object.assign(config[key], value)
     }
     await this.write(dir, config)
@@ -111,7 +113,7 @@ export const password = {
     const salt = bcrypt.genSaltSync(10)
     const hash = bcrypt.hashSync(pass, salt)
     return hash
-  }, check(pass: string, hash) {
+  }, check(pass: string, hash: string) {
     return bcrypt.compareSync(pass, hash); // true
   }
 }

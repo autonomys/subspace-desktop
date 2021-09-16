@@ -89,7 +89,7 @@ export default defineComponent({
   created() {
     this.$watch(
       "global.client",
-      (val) => {
+      (val: ClientType) => {
         console.log("api rdy")
         if (val) {
           this.loading = false

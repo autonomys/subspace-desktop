@@ -81,14 +81,14 @@ function getStoredBlocks(): FarmedBlock[] {
     for (let [num, block] of Object.entries(blocks)) {
       mined.push(block as FarmedBlock)
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error(error.toString(), 'error reading stored blocks');
   }
   return mined
 }
 
 function storeBlocks(blocks: FarmedBlock[]) {
-  let mined: {} = {}
+  let mined: { [index: string]: any } = {}
   for (const block of blocks) {
     mined[block.id] = block
   }
@@ -158,7 +158,7 @@ export const Client = async () => {
             client.data.farming.farmed = [block].concat(client.data.farming.farmed)
             storeBlocks(farmed)
             client.data.farming.events.emit('farmedBlock', block)
-            const peers = await client.api.rpc.net.peerCount
+            const peers = await client?.api?.rpc.net.peerCount
             console.log("Peers", peers) // this is undefined?
           })
           process.on('beforeExit', this.stopOnReload);

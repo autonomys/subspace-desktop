@@ -1,9 +1,8 @@
 
 import * as native from '../native'
-interface AutoLaunchParams { appName: string, appPath: string, hidden: boolean }
 import * as applescript from "src/lib/osUtils/applescript"
+import { AutoLaunchParams } from '../types'
 const macAutoLaunch = {
-
   enable({ appName, appPath, hidden }: AutoLaunchParams) {
     const isHiddenValue = hidden ? 'true' : 'false';
     const properties = `{path:"${appPath}", hidden:${isHiddenValue}, name:"${appName}"}`;
@@ -22,7 +21,7 @@ const macAutoLaunch = {
 
     return exists
   },
-  execApplescriptCommand(commandSuffix) {
+  execApplescriptCommand(commandSuffix: string) {
     const result = applescript.execString(`tell application "System Events" to ${commandSuffix}`)
     return result
   }
