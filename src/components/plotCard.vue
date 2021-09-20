@@ -26,7 +26,7 @@ q-card(bordered flat)
 <script lang="ts" >
 import { defineComponent } from "vue"
 import * as util from "src/lib/util"
-import * as global from "src/lib/global"
+import { globalState as global } from "src/lib/global"
 const lang = global.data.loc.text.dashboard
 
 export default defineComponent({

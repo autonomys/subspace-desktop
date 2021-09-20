@@ -9,21 +9,20 @@ import * as tProcess from "@tauri-apps/api/process"
 // import { invokeTauriCommand } from "@tauri-apps/api/"
 import { invoke } from '@tauri-apps/api/tauri'
 import macAL from "src/lib/autoLaunch/macAutoLaunch"
-import winAL from "src/lib/autoLaunch/macAutoLaunch"
-import linAL from "src/lib/autoLaunch/macAutoLaunch"
+import winAL from "src/lib/autoLaunch/nullAutoLaunch"
+import linAL from "src/lib/autoLaunch/nullAutoLaunch"
 import nullAL from "src/lib/autoLaunch/nullAutoLaunch"
+import { ChildReturnData } from "./types"
 type osAL = typeof macAL | typeof winAL | typeof linAL | typeof nullAL
 const tauri = { app, dialog, fs, path, invoke, shell, os, window, process: tProcess }
 export interface DriveStats {
   freeBytes: number
   totalBytes: number
 }
-export interface AutoLaunchType {
-  isEnabled(): Promise<boolean>
-  enable(): Promise<any>
-  disable(): Promise<any>
+export interface TauriDriveStats {
+  free_bytes: number
+  total_bytes: number
 }
-
 export class AutoLauncher {
   protected autoLauncher: osAL = nullAL
   appName: string = 'app'
@@ -34,11 +33,11 @@ export class AutoLauncher {
     this.enabled = result
     return result
   }
-  async enable(): Promise<any> {
+  async enable(): Promise<void | ChildReturnData> {
     const child = await this.autoLauncher.enable({ appName: this.appName, appPath: this.appPath, hidden: false })
     return child
   }
-  async disable(): Promise<any> {
+  async disable(): Promise<void | ChildReturnData> {
     const child = this.autoLauncher.disable(this.appName)
     return child
   }
@@ -51,7 +50,7 @@ export class AutoLauncher {
     if (os == 'Darwin') this.autoLauncher = macAL
     else if (os == 'Windows_NT') this.autoLauncher = winAL
     else this.autoLauncher = linAL
-    this.enabled = await this.isEnabled()
+    this.enabled = (await this.isEnabled())
   }
 }
 
@@ -85,7 +84,7 @@ export async function dirExists(dir: string): Promise<boolean> {
   return (await tauri.fs.readDir(dir, { recursive: false }).catch(console.error)) ? true : false
 }
 export async function driveStats(dir: string): Promise<DriveStats> {
-  const result = await tauri.invoke('get_disk_stats', { dir }) as any
+  const result = (await tauri.invoke('get_disk_stats', { dir })) as TauriDriveStats
   const stats: DriveStats = { freeBytes: result.free_bytes, totalBytes: result.total_bytes }
   return stats
 }

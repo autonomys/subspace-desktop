@@ -47,7 +47,7 @@ q-card(bordered flat)
 <script lang="ts">
 import { defineComponent, PropType } from "vue"
 import * as util from "src/lib/util"
-import * as global from "src/lib/global"
+import { globalState as global } from "src/lib/global"
 const lang = global.data.loc.text.dashboard
 import { FarmedBlock } from "src/lib/types"
 
@@ -65,7 +65,7 @@ export default defineComponent({
     farmedBlocksList(): FarmedBlock[] {
       return this.global.client?.data?.farming.farmed || []
     },
-    blocksListStyle(): any {
+    blocksListStyle(): { [index: string]: string } {
       return this.expanded ? { height: "370px" } : { height: "185px" }
     },
   },

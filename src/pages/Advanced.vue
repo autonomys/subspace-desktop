@@ -11,7 +11,7 @@ q-page(padding)
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import * as global from "src/lib/global"
+import { globalState as global } from "src/lib/global"
 const lang = global.data.loc.text.advanced
 export default defineComponent({
   data() {

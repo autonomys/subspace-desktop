@@ -4,7 +4,7 @@ q-menu(auto-close)
     q-item
       .row.items-center
         .col-auto.q-mr-md
-          q-toggle(@click="toggleClicked()" v-model="autoLaunch")
+          q-toggle(:disable="disableAutoLaunch" @click="toggleClicked()" v-model="autoLaunch")
         .col
           p.text-grey(v-if="!autoLaunch") {{ lang.autoStart }}
           p.text-black(v-else) {{ lang.autoStart }}
@@ -20,18 +20,22 @@ q-menu(auto-close)
 import { defineComponent } from "vue"
 import { Dialog, Notify } from "quasar"
 import * as util from "src/lib/util"
-import * as global from "src/lib/global"
+import { globalState as global } from "src/lib/global"
 const lang = global.data.loc.text.mainMenu
 
 export default defineComponent({
   data() {
-    return { lang, autoLaunch: false, launchOnBoot: global.data.launchOnBoot }
+    return { lang, autoLaunch: false, launchOnBoot: global.data.launchOnBoot, disableAutoLaunch: false }
   },
   mounted() {
     this.initMenu()
   },
   methods: {
     async toggleClicked() {
+      if (this.disableAutoLaunch) {
+        Notify.create({ message: "Launch on Boot is not supported on this system.", icon: "info" })
+        return
+      }
       console.log("toggle Clicked", this.autoLaunch)
       if (this.autoLaunch) Notify.create({ message: lang.willAutoLaunch, icon: "info", group: 1, badgeStyle: "visibility:hidden;" })
       else Notify.create({ message: lang.willNotAutoLaunch, icon: "info", group: 1, badgeStyle: "visibility:hidden;" })
@@ -63,8 +67,13 @@ export default defineComponent({
       })
     },
     async initMenu() {
-      console.log("Init Menu")
-      this.autoLaunch = this.launchOnBoot.enabled
+      console.log("Init Menu", typeof this.launchOnBoot.enabled)
+      // this.disableAutoLaunch = true
+      if (this.launchOnBoot.enabled != undefined) this.autoLaunch = this.launchOnBoot.enabled
+      else {
+        this.autoLaunch = false
+        this.disableAutoLaunch = true
+      }
     },
   },
 })

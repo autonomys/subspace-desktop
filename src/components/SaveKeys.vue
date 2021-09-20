@@ -29,7 +29,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import * as global from "src/lib/global"
+import { globalState as global } from "src/lib/global"
 const lang = global.data.loc.text.saveKeys
 // const lang = {}
 import { QInput, Notify } from "quasar"

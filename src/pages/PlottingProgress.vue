@@ -60,7 +60,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
 import { defineComponent } from "vue"
 // import { plottingProgress as lang } from "src/loc/en"
 import { QInput, Dialog, Notify } from "quasar"
-import * as global from "src/lib/global"
+import { globalState as global } from "src/lib/global"
 const lang = global.data.loc.text.plottingProgress
 import * as util from "src/lib/util"
 import introModal from "components/introModal.vue"

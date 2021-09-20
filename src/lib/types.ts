@@ -8,3 +8,6 @@ export interface FarmedBlock {
 }
 
 export interface AutoLaunchParams { appName: string, appPath: string, hidden: boolean }
+
+
+export interface ChildReturnData { stdout: string[], stderr: string[] }

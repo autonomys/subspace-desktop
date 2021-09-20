@@ -61,7 +61,7 @@ import { defineComponent } from "vue"
 import * as util from "src/lib/util"
 import * as native from "src/lib/native"
 import { debounce } from "quasar"
-import * as global from "src/lib/global"
+import { globalState as global } from "src/lib/global"
 const lang = global.data.loc.text.setupPlot
 
 import TimeAgo from "javascript-time-ago"
@@ -107,6 +107,7 @@ export default defineComponent({
         if (this.plotDirectory == this.defaultPath) return (this.validPath = true)
         this.validPath = await native.dirExists(val)
         if (this.validPath) await this.updateDriveStats()
+        return
       }, 500)
     )
   },

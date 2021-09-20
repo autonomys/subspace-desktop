@@ -7,6 +7,7 @@
     "noImplicitAny": true,
     "allowJs": false,
     "strictNullChecks": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "noImplicitReturns": true
   }
 }

@@ -23,7 +23,7 @@ q-page.q-pl-lg.q-pr-lg.q-pt-md
 <script lang="ts">
 import { defineComponent } from "vue"
 import { Dialog, Notify } from "quasar"
-import * as global from "src/lib/global"
+import { globalState as global } from "src/lib/global"
 import * as util from "src/lib/util"
 import farmedList from "components/farmedList.vue"
 import netCard from "components/netCard.vue"
@@ -72,6 +72,7 @@ export default defineComponent({
     }
     await this.readConfig()
     this.fakeStart()
+    return
   },
   computed: {
     farmedTotalEarned(): number {

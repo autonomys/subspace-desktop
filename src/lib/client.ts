@@ -81,18 +81,18 @@ function getStoredBlocks(): FarmedBlock[] {
     for (let [num, block] of Object.entries(blocks)) {
       mined.push(block as FarmedBlock)
     }
-  } catch (error: any) {
-    console.error(error.toString(), 'error reading stored blocks');
+  } catch (error) {
+    console.error(error, 'error reading stored blocks');
   }
   return mined
 }
 
 function storeBlocks(blocks: FarmedBlock[]) {
-  let mined: { [index: string]: any } = {}
+  let farmed: { [index: string]: FarmedBlock } = {}
   for (const block of blocks) {
-    mined[block.id] = block
+    farmed[block.id] = block
   }
-  LocalStorage.set('farmedBlocks', mined)
+  LocalStorage.set('farmedBlocks', farmed)
 }
 
 function clearStored() {

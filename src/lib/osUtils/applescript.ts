@@ -1,13 +1,14 @@
 
 import * as shell from "@tauri-apps/api/shell"
-interface ReturnData { stdout: string[], stderr: string[] }
-export async function execString(command: string) {
+import { ChildReturnData } from "../types";
+
+export async function execString(command: string): Promise<ChildReturnData> {
   let args = ['-e', command]
   console.log("Executing applescript:", args);
 
   const child = new shell.Command('osascript', args)
   return new Promise((res) => {
-    let returnData = <ReturnData>{ stdout: [], stderr: [] }
+    let returnData = <ChildReturnData>{ stdout: [], stderr: [] }
     child.on('close', data => {
       console.log(`command finished with code ${data.code} and signal ${data.signal}`)
       res(returnData)

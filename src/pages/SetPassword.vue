@@ -25,7 +25,7 @@ q-page.q-pl-xl.q-pr-xl.q-pt-lg
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import * as global from "src/lib/global"
+import { globalState as global } from "src/lib/global"
 import * as util from "src/lib/util"
 const lang = global.data.loc.text.setPassword
 export default defineComponent({

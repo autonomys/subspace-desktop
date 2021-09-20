@@ -24,7 +24,7 @@ q-page(padding)
 <script lang="ts">
 import { defineComponent } from "vue"
 import { Loading } from "quasar"
-import * as global from "src/lib/global"
+import { globalState as global } from "src/lib/global"
 const lang = global.data.loc.text.importKey
 import ms from "ms"
 export default defineComponent({
