@@ -1,4 +1,4 @@
-import { ApiPromise, WsProvider } from '@polkadot/api';
+import { ApiPromise, WsProvider } from '@polkadot/api'
 import * as event from "@tauri-apps/api/event"
 import { reactive } from 'vue'
 import { LocalStorage } from 'quasar'
@@ -8,7 +8,7 @@ import { VoidFn } from "@polkadot/api/types"
 import * as process from "process"
 import mitt, { Emitter } from 'mitt'
 import { FarmedBlock } from "./types"
-import { FarmerId, PoCPreDigest, Solution } from './customTypes/types';
+import { FarmerId, PoCPreDigest, Solution } from './customTypes/types'
 import customTypes from "./customTypes/customTypes.json"
 
 export interface PeerData {
@@ -83,7 +83,7 @@ function getStoredBlocks(): FarmedBlock[] {
       mined.push(block as FarmedBlock)
     }
   } catch (error) {
-    console.error(error, 'error reading stored blocks');
+    console.error(error, 'error reading stored blocks')
   }
   return mined
 }
@@ -105,10 +105,10 @@ function clearStored() {
 }
 
 export const Client = async () => {
-  const wsProvider = new WsProvider();
-  const api = await ApiPromise.create({ provider: wsProvider, types: customTypes });
-  console.log(api.genesisHash.toHex());
-  console.log('init client...');
+  const wsProvider = new WsProvider()
+  const api = await ApiPromise.create({ provider: wsProvider, types: customTypes })
+  console.log(api.genesisHash.toHex())
+  console.log('init client...')
   let unsubscribe: VoidFn = () => { }
   // clearStored()
   let farmed: FarmedBlock[] = getStoredBlocks()
@@ -139,16 +139,16 @@ export const Client = async () => {
           if (!client.api) throw (Error("Api Missing, can't start block subscription yet."))
 
 
-            
+
           this.unsubscribe = await client.api.rpc.chain.subscribeNewHeads(async (lastHeader) => {
-            const signedBlock = await api.rpc.chain.getBlock(lastHeader.hash);
+            const signedBlock = await api.rpc.chain.getBlock(lastHeader.hash)
             for (const log of signedBlock.block.header.digest.logs) {
               if (log.isPreRuntime) {
-                const [type, data] = log.asPreRuntime;
+                const [type, data] = log.asPreRuntime
                 if (type.toString() === 'POC_') {
-                  const poCPreDigest:PoCPreDigest = api.registry.createType('PoCPreDigest', data);
-                  const solution:Solution = api.registry.createType('Solution', poCPreDigest.solution);
-                  const farmerId:FarmerId = api.registry.createType('FarmerId', solution.public_key)
+                  const poCPreDigest: PoCPreDigest = api.registry.createType('PoCPreDigest', data)
+                  const solution: Solution = api.registry.createType('Solution', poCPreDigest.solution)
+                  const farmerId: FarmerId = api.registry.createType('FarmerId', solution.public_key)
                   console.log("farmerId: ", farmerId.toString())
                 }
               }
@@ -158,21 +158,21 @@ export const Client = async () => {
             client.data.farming.farmed = [block].concat(client.data.farming.farmed)
             storeBlocks(farmed)
             client.data.farming.events.emit('farmedBlock', block)
-            
-            const peers = await api.rpc.system.peers();
-            console.log("Peers: ", peers);
-            console.log("PeersCount: ", peers.length);
+
+            const peers = await api.rpc.system.peers()
+            console.log("Peers: ", peers)
+            console.log("PeersCount: ", peers.length)
           })
-          process.on('beforeExit', this.stopOnReload);
+          process.on('beforeExit', this.stopOnReload)
           window.addEventListener('unload', this.stopOnReload)
           this.clearTauriDestroy = await tauri.event.once('tauri://destroyed', (data) => {
-            console.log('Destroyed event!');
+            console.log('Destroyed event!')
 
             storeBlocks(client.data.farming.farmed)
           })
         },
         stop() {
-          console.log('block subscription stop triggered');
+          console.log('block subscription stop triggered')
           this.unsubscribe()
           try {
             this.clearTauriDestroy()

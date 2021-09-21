@@ -1,5 +1,5 @@
-import { AccountId } from '@polkadot/types/interfaces/runtime';
-import type { Bytes, Struct, U8aFixed, u64 } from '@polkadot/types';
+import { AccountId } from '@polkadot/types/interfaces/runtime'
+import type { Bytes, Struct, U8aFixed, u64 } from '@polkadot/types'
 
 export interface FarmerId extends AccountId { }
 
