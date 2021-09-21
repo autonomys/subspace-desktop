@@ -1,5 +1,4 @@
 import { reactive } from "vue";
-const list: string[] = []
 import getLang from "../loc/lang"
 import { Client, ClientType } from "src/lib/client"
 import { AutoLauncher } from "src/lib/native"
@@ -9,23 +8,15 @@ let text: { [index: string]: { [index: string]: string } } = {}
 let client!: ClientType
 let launchOnBoot!: AutoLauncher
 
-
-export interface GlobalMutations {
-  initClient(): void
-  initLaunchOnBoot(): void
-  changeLang(newLang: string): void
-  loadLangData(): void
-}
 export class Global {
   data = reactive({ status: { state: "loading", message: "loading" }, loc: { selected: 'en', text, }, client, launchOnBoot })
-  mutations: GlobalMutations = {
+  mutations = {
     initClient: this.initClient,
     initLaunchOnBoot: this.initLaunchOnBoot,
     changeLang: this.changeLang,
     loadLangData: this.loadLangData
   }
   protected async initClient() {
-    this.data.client = null
     const client = await Client()
     this.data.client = client
   }

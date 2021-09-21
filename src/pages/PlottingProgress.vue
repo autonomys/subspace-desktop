@@ -58,8 +58,6 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
 
 <script lang="ts">
 import { defineComponent } from "vue"
-// import { plottingProgress as lang } from "src/loc/en"
-import { QInput, Dialog, Notify } from "quasar"
 import { globalState as global } from "src/lib/global"
 const lang = global.data.loc.text.plottingProgress
 import * as util from "src/lib/util"
@@ -67,9 +65,8 @@ import introModal from "components/introModal.vue"
 import TimeAgo from "javascript-time-ago"
 import en from "javascript-time-ago/locale/en"
 TimeAgo.addLocale(en)
-const timeAgo = new TimeAgo("en-US")
-let interval: NodeJS.Timer
-let timer: NodeJS.Timer
+let interval: number
+let timer: number
 
 export default defineComponent({
   data() {
@@ -140,7 +137,7 @@ export default defineComponent({
     startPlotting() {
       this.plotting = true
       this.fakeProgress()
-      timer = setInterval(() => (this.elapsedms += 100), 100)
+      timer = window.setInterval(() => (this.elapsedms += 100), 100)
     },
     pausePlotting() {
       this.plotting = false
@@ -148,7 +145,7 @@ export default defineComponent({
       clearInterval(timer)
     },
     async fakeProgress() {
-      interval = setInterval(() => {
+      interval = window.setInterval(() => {
         this.plottingData.finishedGB += util.random(0, 50) / 40
         console.log(this.plottingData)
         if (this.plottingData.finishedGB >= this.allocatedGB) this.pausePlotting()

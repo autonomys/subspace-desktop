@@ -1,4 +1,3 @@
-import { reactive } from "vue";
 let loadedLangString: string
 let loadedLang: any
 export default async function getLang(langString: string) {

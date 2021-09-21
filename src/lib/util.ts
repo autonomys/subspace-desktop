@@ -1,15 +1,11 @@
 import { Dialog, DialogChainObject, LooseDictionary } from "quasar"
-
-import * as global from "src/lib/global"
 import * as dialog from "@tauri-apps/api/dialog"
 import * as fs from "@tauri-apps/api/fs"
 import * as path from "@tauri-apps/api/path"
 import { invoke } from '@tauri-apps/api/tauri'
 const tauri = { dialog, fs, path, invoke }
 import * as native from './native'
-
 import * as bcrypt from 'bcryptjs'
-import { VueInstance } from "@vueuse/core"
 
 export const random = (min: number, max: number) => Math.floor(Math.random() * (max - min)) + min;
 
