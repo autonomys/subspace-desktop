@@ -8,7 +8,8 @@ import { VoidFn } from "@polkadot/api/types"
 import * as process from "process"
 import mitt, { Emitter } from 'mitt'
 import { FarmedBlock } from "./types"
-
+import { FarmerId, PoCPreDigest, Solution } from './customTypes/types';
+import customTypes from "./customTypes/customTypes.json"
 
 export interface PeerData {
   status: "disconnected" | "unstable" | "connected" | string
@@ -105,7 +106,7 @@ function clearStored() {
 
 export const Client = async () => {
   const wsProvider = new WsProvider();
-  const api = await ApiPromise.create({ provider: wsProvider });
+  const api = await ApiPromise.create({ provider: wsProvider, types: customTypes });
   console.log(api.genesisHash.toHex());
   console.log('init client...');
   let unsubscribe: VoidFn = () => { }
@@ -137,29 +138,30 @@ export const Client = async () => {
         async start() {
           if (!client.api) throw (Error("Api Missing, can't start block subscription yet."))
 
-          api.derive.chain.subscribeNewHeads((header) => {
-            console.log(`#${header.number} AUTHOR: ${header.author}`);
-          });
 
+            
           this.unsubscribe = await client.api.rpc.chain.subscribeNewHeads(async (lastHeader) => {
-            const type = typeof lastHeader
-            console.log(`last block #${lastHeader.number} has hash ${lastHeader.hash}`)
             const signedBlock = await api.rpc.chain.getBlock(lastHeader.hash);
-            // signedBlock.block.
-            console.log(`signedBlock:`, signedBlock);
-            const allRecords = await api.query.system.events.at(signedBlock.block.header.hash)
-            signedBlock.block.extrinsics.forEach(({ method: { method, section } }, index) => {
-              const events = allRecords.filter(({ phase }) => phase.isApplyExtrinsic && phase.asApplyExtrinsic.eq(index))
-                .map(({ event }) => `${event.section}.${event.method}`)
-              console.log(`${section}.${method}:: ${events.join(', ') || 'no events'}`)
-            })
+            for (const log of signedBlock.block.header.digest.logs) {
+              if (log.isPreRuntime) {
+                const [type, data] = log.asPreRuntime;
+                if (type.toString() === 'POC_') {
+                  const poCPreDigest:PoCPreDigest = api.registry.createType('PoCPreDigest', data);
+                  const solution:Solution = api.registry.createType('Solution', poCPreDigest.solution);
+                  const farmerId:FarmerId = api.registry.createType('FarmerId', solution.public_key)
+                  console.log("farmerId: ", farmerId.toString())
+                }
+              }
+            }
 
             const block: FarmedBlock = { id: lastHeader.hash.toString(), time: Date.now(), transactions: 0, blockNum: lastHeader.number.toNumber(), blockReward: 0, feeReward: 0 }
             client.data.farming.farmed = [block].concat(client.data.farming.farmed)
             storeBlocks(farmed)
             client.data.farming.events.emit('farmedBlock', block)
-            const peers = await client?.api?.rpc.net.peerCount
-            console.log("Peers", peers) // this is undefined?
+            
+            const peers = await api.rpc.system.peers();
+            console.log("Peers: ", peers);
+            console.log("PeersCount: ", peers.length);
           })
           process.on('beforeExit', this.stopOnReload);
           window.addEventListener('unload', this.stopOnReload)
