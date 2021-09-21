@@ -1,18 +1,18 @@
 import { ApiPromise, WsProvider } from '@polkadot/api'
-import * as event from "@tauri-apps/api/event"
+import * as event from '@tauri-apps/api/event'
 import { reactive } from 'vue'
 import { LocalStorage } from 'quasar'
 const tauri = { event }
-// import { Header } from "@polkadot/types/interfaces/runtime"
-import { VoidFn } from "@polkadot/api/types"
-import * as process from "process"
+// import { Header } from '@polkadot/types/interfaces/runtime'
+import { VoidFn } from '@polkadot/api/types'
+import * as process from 'process'
 import mitt, { Emitter } from 'mitt'
-import { FarmedBlock } from "./types"
+import { FarmedBlock } from './types'
 import { FarmerId, PoCPreDigest, Solution } from './customTypes/types'
-import customTypes from "./customTypes/customTypes.json"
+import customTypes from './customTypes/customTypes.json'
 
 export interface PeerData {
-  status: "disconnected" | "unstable" | "connected" | string
+  status: 'disconnected' | 'unstable' | 'connected' | string
   name: string // do peers have some string identifier?
   ip: string
   receivedBytes: number
@@ -20,7 +20,7 @@ export interface PeerData {
 }
 
 export interface ClientNetwork {
-  status: "disconnected" | "unstable" | "connected" | string
+  status: 'disconnected' | 'unstable' | 'connected' | string
   peers: PeerData[]
   details: {
     // physical network interface
@@ -29,7 +29,7 @@ export interface ClientNetwork {
 }
 
 export interface ClientPlot {
-  status: "active" | "verifying" | "corrupted" | "syncing" | string
+  status: 'active' | 'verifying' | 'corrupted' | 'syncing' | string
   plotSizeBytes: number // size of the plot file in Bytes
   plotFile: string // drive directory where the plot file is located
   details: {
@@ -46,7 +46,7 @@ export interface Block {
 }
 
 export interface ClientFarming {
-  status: "active" | "paused" | string
+  status: 'active' | 'paused' | string
   farmed: FarmedBlock[],
   events: Emitter<any>
 }
@@ -58,9 +58,9 @@ export interface ClientData {
 }
 
 export const emptyData: ClientData = {
-  plot: { details: {}, plotFile: "", plotSizeBytes: 0, status: "" },
-  farming: { farmed: [], status: "", events: mitt() },
-  network: { details: {}, peers: [], status: "" }
+  plot: { details: {}, plotFile: '', plotSizeBytes: 0, status: '' },
+  farming: { farmed: [], status: '', events: mitt() },
+  network: { details: {}, peers: [], status: '' }
 }
 
 export interface Client {
@@ -100,7 +100,7 @@ function clearStored() {
   try {
     LocalStorage.remove('farmedBlocks')
   } catch (error) {
-    console.error("error clearing mined blocks")
+    console.error('error clearing mined blocks')
   }
 }
 
@@ -136,7 +136,7 @@ export const Client = async () => {
           client.do.blockSubscription.stop()
         },
         async start() {
-          if (!client.api) throw (Error("Api Missing, can't start block subscription yet."))
+          if (!client.api) throw (Error(`Api Missing, can't start block subscription yet.`))
 
 
 
@@ -149,7 +149,7 @@ export const Client = async () => {
                   const poCPreDigest: PoCPreDigest = api.registry.createType('PoCPreDigest', data)
                   const solution: Solution = api.registry.createType('Solution', poCPreDigest.solution)
                   const farmerId: FarmerId = api.registry.createType('FarmerId', solution.public_key)
-                  console.log("farmerId: ", farmerId.toString())
+                  console.log('farmerId: ', farmerId.toString())
                 }
               }
             }
@@ -160,8 +160,8 @@ export const Client = async () => {
             client.data.farming.events.emit('farmedBlock', block)
 
             const peers = await api.rpc.system.peers()
-            console.log("Peers: ", peers)
-            console.log("PeersCount: ", peers.length)
+            console.log('Peers: ', peers)
+            console.log('PeersCount: ', peers.length)
           })
           process.on('beforeExit', this.stopOnReload)
           window.addEventListener('unload', this.stopOnReload)
@@ -188,11 +188,11 @@ export const Client = async () => {
         client.do?.blockSubscription.start()
         // if (!client.api) return
         // const ready = await client.api.isConnected
-        // console.log("api:", ready)
+        // console.log('api:', ready)
         // const state = await client.api.query.system.number
-        // console.log("state:", state)
+        // console.log('state:', state)
         // const time = await client.api.query.timestamp.now()
-        // console.log("time:", time.toHuman())
+        // console.log('time:', time.toHuman())
         // const chain = await client.api.rpc.system.chain()
         // const lastHeader = await client.api.rpc.chain.getHeader()
 
@@ -202,8 +202,8 @@ export const Client = async () => {
 
         // const subscribeNewBlocks = client.api.derive.chain.subscribeNewBlocks
         // subscribeNewBlocks((block) => {
-        //   console.log("block Events:", block.events.length)
-        //   console.log("block author:", block.author)
+        //   console.log('block Events:', block.events.length)
+        //   console.log('block author:', block.author)
         // })
       }
       // startPlotting()
