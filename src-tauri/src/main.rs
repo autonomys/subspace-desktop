@@ -10,6 +10,12 @@ use tauri::{
   WindowEvent,
 };
 
+extern crate winreg;
+// use std::io;
+// use std::path::Path;
+use winreg::enums::*;
+use winreg::RegKey;
+
 #[derive(Serialize)]
 struct S {
   free_bytes: u64,
@@ -31,6 +37,67 @@ fn get_disk_stats(dir: String) -> S {
 fn get_this_binary() -> PathBuf {
   let bin = api::process::current_binary();
   return bin.unwrap();
+}
+
+#[tauri::command]
+fn winreg_get(sub_key: String, value: String) -> String {
+  let hkcu = RegKey::predef(HKEY_CURRENT_USER);
+  let subkey = hkcu.open_subkey(sub_key).unwrap();
+  let val = subkey.get_value(value);
+  let result: String;
+  match val {
+    Ok(content) => {
+      println!("File content: {}", content);
+      result = content;
+    }
+    Err(error) => {
+      println!("There was an error: {}", error);
+      result = error.to_string();
+    }
+  }
+
+  return result;
+}
+
+#[tauri::command]
+fn winreg_set(sub_key: String, set_key: String, value: String) -> String {
+  let hkcu = RegKey::predef(HKEY_CURRENT_USER);
+  // let subkey = hkcu.open_subkey(sub_key).unwrap();
+  let (subkey, disp) = hkcu.create_subkey(&sub_key).unwrap();
+  match disp {
+    REG_CREATED_NEW_KEY => println!("A new key has been created"),
+    REG_OPENED_EXISTING_KEY => println!("An existing key has been opened"),
+  }
+  let val = subkey.set_value(set_key, &value);
+  let mut result: String = "success".to_string();
+  match val {
+    Ok(()) => {}
+    Err(error) => {
+      println!("There was an error: {}", error);
+      result = error.to_string();
+    }
+  }
+  return result;
+}
+
+#[tauri::command]
+fn winreg_delete(sub_key: String, set_key: String) -> String {
+  let hkcu = RegKey::predef(HKEY_CURRENT_USER);
+  let (subkey, disp) = hkcu.create_subkey(&sub_key).unwrap();
+  match disp {
+    REG_CREATED_NEW_KEY => println!("A new key has been created"),
+    REG_OPENED_EXISTING_KEY => println!("An existing key has been opened"),
+  }
+  let val = subkey.delete_value(set_key);
+  let mut result: String = "success".to_string();
+  match val {
+    Ok(()) => {}
+    Err(error) => {
+      println!("There was an error: {}", error);
+      result = error.to_string();
+    }
+  }
+  return result;
 }
 
 fn main() {
@@ -90,7 +157,13 @@ fn main() {
       }
       _ => {}
     })
-    .invoke_handler(tauri::generate_handler![get_disk_stats, get_this_binary])
+    .invoke_handler(tauri::generate_handler![
+      get_disk_stats,
+      get_this_binary,
+      winreg_get,
+      winreg_set,
+      winreg_delete
+    ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
