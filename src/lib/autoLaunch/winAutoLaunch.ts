@@ -1,56 +1,29 @@
-/* eslint-disable no-unused-vars */
-
-// const regKey = new Winreg({
-//     hive: Winreg.HKCU,
-//     key:  '\\Software\\Microsoft\\Windows\\CurrentVersion\\Run'
-// });
-// path = require 'path'
-import path from 'path'
+import { AutoLaunchParams, ChildReturnData } from '../types'
 import * as native from '../native'
-import { AutoLaunchParams } from '../types'
 
-module.exports = {
+const subKey = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
 
-  enable({ appName, appPath, hidden }: AutoLaunchParams) {
-    // return new Promise(function (resolve, reject) {
-    //   let pathToAutoLaunchedApp = appPath;
-    //   let args = '';
-    //   const updateDotExe = path.join(path.dirname(process.execPath), '..', 'update.exe');
-
-    //   if (((process.versions != null ? process.versions.electron : undefined) != null) && native.dirExists(updateDotExe)) {
-    //     pathToAutoLaunchedApp = updateDotExe;
-    //     args = ` --processStart \"${path.basename(process.execPath)}\"`;
-    //     if (isHiddenOnLaunch) { args += ' --process-start-args "--hidden"'; }
-    //   } else {
-    //     if (isHiddenOnLaunch) { args += ' --hidden'; }
-    //   }
-
-    //   return regKey.set(appName, Winreg.REG_SZ, `\"${pathToAutoLaunchedApp}\"${args}`, function (err) {
-    //     if (err != null) { return reject(err); }
-    //     return resolve();
-    //   });
-    // });
+const winAutoLaunch = {
+  // eslint-disable-next-line no-unused-vars
+  async enable({ appName, appPath, hidden }: AutoLaunchParams): Promise<ChildReturnData> {
+    let returnVal = <ChildReturnData>{ stdout: [], stderr: [] }
+    const result = <string>(await native.winregSet(subKey, appName, appPath))
+    if (result.search('success') > -1) returnVal.stdout.push(result)
+    else returnVal.stderr.push(result)
+    return returnVal
   },
-  disable(appName: string) {
-    // return new Promise((resolve, reject) => regKey.remove(appName, function (err) {
-    //   if (err != null) {
-    //     // The registry key should exist but in case it fails because it doesn't exist, resolve false instead
-    //     // rejecting with an error
-    //     if (err.message.indexOf('The system was unable to find the specified registry key or value') !== -1) {
-    //       return resolve(false);
-    //     }
-    //     return reject(err);
-    //   }
-    //   return resolve();
-    // }));
+  async disable(appName: string): Promise<ChildReturnData> {
+    let returnVal = <ChildReturnData>{ stdout: [], stderr: [] }
+    const result = <string>(await native.winregDelete(subKey, appName))
+    if (result.search('success') > -1) returnVal.stdout.push(result)
+    else returnVal.stderr.push(result)
+    return returnVal
   },
-
-
-
-  isEnabled(appName: string) {
-    // return new Promise((resolve, reject) => regKey.get(appName, function (err, item) {
-    //   if (err != null) { return resolve(false); }
-    //   return resolve(item != null);
-    // }));
+  async isEnabled(appName: string): Promise<boolean> {
+    const result = <string>(await native.winregGet(subKey, appName))
+    console.log('isEnabled result:', result);
+    if (result.search('The system cannot find the file specified.') > -1) return false
+    else return true
   }
-};
+}
+export default winAutoLaunch
