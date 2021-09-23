@@ -5,7 +5,7 @@ import { AutoLauncher } from "src/lib/native"
 
 
 let text: { [index: string]: { [index: string]: string } } = {}
-export interface GlobalMutations {
+export type GlobalMutations = {
   initClient(): void
   initLaunchOnBoot(): void
   changeLang(newLang: string): void
