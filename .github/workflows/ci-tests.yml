@@ -29,9 +29,3 @@ jobs:
     - uses: tauri-apps/tauri-action@v0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        ENABLE_CODE_SIGNING: ${{ secrets.MACOS_CERTIFICATE }}
-        APPLE_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
-        APPLE_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
-        APPLE_SIGNING_IDENTITY: ${{ secrets.MACOS_IDENTITY_ID }}
-        APPLE_ID: ${{ secrets.APPLE_ID }}
-        APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
