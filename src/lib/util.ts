@@ -70,8 +70,8 @@ export const config = {
   },
   async update(newData: ConfigFile, dir?: string) {
     let config = await this.read(dir).catch(console.error) || emptyConfig
-    for (let [key, value] of Object.entries(newData)) {
-      config[key] = Object.assign(config[key], value)
+    for (const [key, value] of Object.entries(newData)) {
+      Object.assign(config[key], value)
     }
     await this.write(dir, config)
   },

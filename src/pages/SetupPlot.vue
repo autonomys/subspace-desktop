@@ -69,6 +69,13 @@ import en from "javascript-time-ago/locale/en"
 TimeAgo.addDefaultLocale(en)
 const timeAgo = new TimeAgo("en-US")
 
+interface StatsType {
+  totalDiskSizeGB: number
+  safeAvailableGB: number
+  utilizedGB: number
+  freeGB: number
+}
+type ChartDataType = number[]
 import { ApexOptions } from "apexcharts"
 const chartOptions: ApexOptions = {
   legend: { show: false },
@@ -102,17 +109,20 @@ export default defineComponent({
   async created() {
     this.$watch(
       "plotDirectory",
-      debounce(async (val) => {
+      debounce(async (val): Promise<null> => {
         console.log(val)
-        if (this.plotDirectory == this.defaultPath) return (this.validPath = true)
+        if (this.plotDirectory == this.defaultPath) {
+          this.validPath = true
+          return null
+        }
         this.validPath = await native.dirExists(val)
         if (this.validPath) await this.updateDriveStats()
-        return
+        return null
       }, 500)
     )
   },
   computed: {
-    chartData(): any {
+    chartData(): ChartDataType {
       return [this.stats.utilizedGB, this.stats.freeGB, this.allocatedGB]
     },
     printEstimatedTime(): string {
@@ -121,7 +131,7 @@ export default defineComponent({
     plotTimeHr(): number {
       return util.plotTimeMsEstimate(this.allocatedGB)
     },
-    stats(): any {
+    stats(): StatsType {
       const totalDiskSizeGB = util.toFixed(this.driveStats.totalBytes / 1e9, 2)
       const safeAvailableGB = this.driveStats.freeBytes / 1e9
       const utilizedGB = util.toFixed(totalDiskSizeGB - safeAvailableGB, 2)

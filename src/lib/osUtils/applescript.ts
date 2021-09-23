@@ -8,7 +8,7 @@ export async function execString(command: string): Promise<ChildReturnData> {
 
   const child = new shell.Command('osascript', args)
   return new Promise((res) => {
-    let returnData = <ChildReturnData>{ stdout: [], stderr: [] }
+    const returnData: ChildReturnData = { stdout: [], stderr: [] }
     child.on('close', data => {
       console.log(`command finished with code ${data.code} and signal ${data.signal}`)
       res(returnData)

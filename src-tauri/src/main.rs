@@ -45,13 +45,21 @@ fn main() {
   tauri::Builder::default()
     .setup(|app| {
       let window = app.get_window("main").unwrap();
+
+      // app.listen_global("window-closed", |data| {
+      //   println!("{:?}", data.payload());
+      //   let item_handle = app.tray_handle().get_item(&"toggle_visibility");
+      // });
+
       window.on_window_event({
         let window = window.clone();
-
         move |event| match event {
           WindowEvent::CloseRequested => {
             println!("Close requested");
             window.trigger_global("window-closed", Some(String::from("hi")));
+            // let item_handle = app.tray_handle().get_item(&"toggle_visibility");
+            // window.hide().unwrap();
+            // item_handle.set_title("Show").unwrap();
           }
           _ => {}
         }

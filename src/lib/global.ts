@@ -5,12 +5,17 @@ import { AutoLauncher } from "src/lib/native"
 
 
 let text: { [index: string]: { [index: string]: string } } = {}
-let client!: ClientType
-let launchOnBoot!: AutoLauncher
+export interface GlobalMutations {
+  initClient(): void
+  initLaunchOnBoot(): void
+  changeLang(newLang: string): void
+  loadLangData(): void
+}
 
 export class Global {
-  data = reactive({ status: { state: "loading", message: "loading" }, loc: { selected: 'en', text, }, client, launchOnBoot })
-  mutations = {
+  private client!: ClientType
+  data = reactive({ status: { state: "loading", message: "loading" }, loc: { selected: 'en', text }, launchOnBoot: new AutoLauncher, client: this.client })
+  mutations: GlobalMutations = {
     initClient: this.initClient,
     initLaunchOnBoot: this.initLaunchOnBoot,
     changeLang: this.changeLang,
@@ -21,7 +26,6 @@ export class Global {
     this.data.client = client
   }
   protected async initLaunchOnBoot() {
-    this.data.launchOnBoot = new AutoLauncher
     this.data.launchOnBoot.appName = 'app'
     await this.data.launchOnBoot.init()
   }
