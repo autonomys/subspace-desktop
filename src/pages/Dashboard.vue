@@ -51,10 +51,11 @@ export default defineComponent({
     }
     let unsubscribe: VoidFn = () => {}
     let clientData: ClientData = emptyData
+    // TODO remove this.client after invariants are protected
     return { lang, config, network, plot, global: global.data, client: global.client, globalState, expanded: false, util, loading: true, unsubscribe, clientData }
   },
   async mounted() {
-    this.client.init()
+    this.client.init() // TODO remove once invariants are protected
     const config = await util.config.read()
     const valid = util.config.validate(config)
     this.global.status.state = "loading"
@@ -84,8 +85,8 @@ export default defineComponent({
   },
   unmounted() {
     this.unsubscribe()
-    this.client.do?.blockSubscription.stop()
-    this.client.data?.farming.events.off("farmedBlock", this.farmBlock)
+    this.client.do.blockSubscription.stop()
+    this.client.data.farming.events.off("farmedBlock", this.farmBlock)
   },
   created() {
     this.$watch(
@@ -103,8 +104,8 @@ export default defineComponent({
   },
   methods: {
     async testClient() {
-      this.client?.do?.blockSubscription.runTest()
-      this.client?.data?.farming.events.on("farmedBlock", this.farmBlock)
+      this.client.do.blockSubscription.runTest()
+      this.client.data.farming.events.on("farmedBlock", this.farmBlock)
     },
 
     expand(val: boolean) {

@@ -104,24 +104,18 @@ function clearStored() {
   }
 }
 
+//TODO should be refactored to not rely on the .init() method to be valid
 export class Client {
-  wsProvider = new WsProvider
-  api: ApiPromise = new ApiPromise
-  farmed = getStoredBlocks()
-  clientData = reactive(emptyData)
-  data = emptyData
-  clearTauriDestroy: event.UnlistenFn = () => { }
-  unsubscribe: event.UnlistenFn = () => { }
-  constructor() {
-    this.clientData.farming.farmed = this.farmed
-  }
-  async init() {
-    this.api = await ApiPromise.create({ provider: this.wsProvider, types: customTypes })
-  }
+  protected wsProvider = new WsProvider
+  protected api: ApiPromise = new ApiPromise
+  protected farmed = getStoredBlocks()
+  protected clearTauriDestroy: event.UnlistenFn = () => { }
+  protected unsubscribe: event.UnlistenFn = () => { }
+  data = reactive(emptyData)
   status = {
-    farming: () => { }, // return some farming status info
-    plot: () => { }, // return some plot status info
-    net: () => { } // return some net status info
+    farming: () => { }, // TODO return some farming status info
+    plot: () => { }, // TODO return some plot status info
+    net: () => { } // TODO return some net status info
   }
   do = {
     blockSubscription: {
@@ -174,5 +168,11 @@ export class Client {
         this.start()
       }
     }
+  }
+  constructor() {
+    this.data.farming.farmed = this.farmed
+  }
+  async init() {
+    this.api = await ApiPromise.create({ provider: this.wsProvider, types: customTypes })
   }
 }

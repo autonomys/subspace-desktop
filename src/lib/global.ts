@@ -4,6 +4,7 @@ import { Client } from "src/lib/client"
 import { AutoLauncher } from "src/lib/native"
 
 let text: { [index: string]: { [index: string]: string } } = {}
+// TODO use dependency injection to ensure methods and properties can't be accessed unless they are initialized and valid
 export class Global {
   client = new Client
   autoLauncher = new AutoLauncher
