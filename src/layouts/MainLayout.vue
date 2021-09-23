@@ -40,8 +40,6 @@ export default defineComponent({
     }
   },
 
-  methods: {
-    ...global.mutations,
-  },
+  methods: {},
 })
 </script>

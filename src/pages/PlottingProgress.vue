@@ -8,7 +8,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
     .col
       .row
         .col.q-mt-sm
-          div {{ lang.plotsDirectory }} {{ plotFinished }}
+          div {{ lang.plotsDirectory }}
           q-input(dense input-class="pkdisplay" outlined readonly v-model="plotDirectory")
       .row.items-center.q-gutter-md
         .col.relative-position

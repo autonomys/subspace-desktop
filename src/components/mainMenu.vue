@@ -25,7 +25,7 @@ const lang = global.data.loc.text.mainMenu
 
 export default defineComponent({
   data() {
-    return { lang, autoLaunch: false, launchOnBoot: global.data.launchOnBoot, disableAutoLaunch: false }
+    return { lang, autoLaunch: false, launchOnBoot: global.autoLauncher, disableAutoLaunch: false }
   },
   mounted() {
     this.initMenu()

@@ -54,7 +54,7 @@ import { FarmedBlock } from "src/lib/types"
 export default defineComponent({
   emits: ["expand"],
   data() {
-    return { lang, util, global: global.data }
+    return { lang, util, global: global.data, client: global.client }
   },
   props: {
     expanded: { type: Boolean, default: false },
@@ -62,7 +62,7 @@ export default defineComponent({
   },
   computed: {
     farmedBlocksList(): FarmedBlock[] {
-      return this.global.client?.data?.farming.farmed || []
+      return this.client?.data?.farming.farmed || []
     },
     blocksListStyle(): { [index: string]: string } {
       return this.expanded ? { height: "370px" } : { height: "185px" }

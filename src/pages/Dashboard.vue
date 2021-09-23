@@ -51,9 +51,10 @@ export default defineComponent({
     }
     let unsubscribe: VoidFn = () => {}
     let clientData: ClientData = emptyData
-    return { lang, config, network, plot, global: global.data, globalState, expanded: false, util, loading: true, unsubscribe, clientData }
+    return { lang, config, network, plot, global: global.data, client: global.client, globalState, expanded: false, util, loading: true, unsubscribe, clientData }
   },
   async mounted() {
+    this.client.init()
     const config = await util.config.read()
     const valid = util.config.validate(config)
     this.global.status.state = "loading"
@@ -75,16 +76,16 @@ export default defineComponent({
   },
   computed: {
     farmedTotalEarned(): number {
-      if (!this.global.client) return 0
-      return this.global.client.data.farming.farmed.reduce((agg, val) => {
+      if (!this.client) return 0
+      return this.client.data.farming.farmed.reduce((agg, val) => {
         return val.blockReward + val.feeReward + agg
       }, 0)
     },
   },
   unmounted() {
     this.unsubscribe()
-    this.global.client?.do?.blockSubscription.stop()
-    this.global.client?.data?.farming.events.off("farmedBlock", this.farmBlock)
+    this.client.do?.blockSubscription.stop()
+    this.client.data?.farming.events.off("farmedBlock", this.farmBlock)
   },
   created() {
     this.$watch(
@@ -102,8 +103,8 @@ export default defineComponent({
   },
   methods: {
     async testClient() {
-      this.global.client?.do?.runTest()
-      this.global.client?.data?.farming.events.on("farmedBlock", this.farmBlock)
+      this.client?.do?.blockSubscription.runTest()
+      this.client?.data?.farming.events.on("farmedBlock", this.farmBlock)
     },
 
     expand(val: boolean) {
