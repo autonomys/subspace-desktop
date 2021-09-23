@@ -12,7 +12,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
           q-input.q-field--highlighted(:error="!validPath" :error-message="lang.invalidDir" color="blue" dense input-class="pkdisplay" outlined v-model="plotDirectory")
             template(v-slot:after)
               q-btn.shadow-0(@click="selectDir()" color="blue" flat icon="folder" size="lg")
-      .row.items-center.q-gutter-md.q-pt-sm
+      .row.items-center.q-gutter-md
         .col-4
           .row
             .col.q-pr-md
@@ -27,13 +27,13 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
         .col.q-pr-md
           .row.justify-center(style="transform: scale(-1, 1)")
             apexchart(:options="chartOptions" :series="chartData" type="donut" width="200px")
-          .row.q-mt-lg
+          .row.q-mt-md
             .col-1
             .col
               q-slider(:max="stats.safeAvailableGB" :min="0" :step="1" color="blue" markers snap style="height: 25px" v-model="allocatedGB")
             .col-1
-  .row.justify-end.q-mt-lg.absolute-bottom.q-pb-lg
-    .col-auto.q-ml-xl.q-pr-md
+  .row.justify-end.q-mt-sm.absolute-bottom.q-pb-md
+    .col-auto.q-pr-md
       div {{ lang.hint }}
     .col.q-pr-md
       div {{ lang.hint2 }}
@@ -135,7 +135,11 @@ export default defineComponent({
       const totalDiskSizeGB = util.toFixed(this.driveStats.totalBytes / 1e9, 2)
       const safeAvailableGB = this.driveStats.freeBytes / 1e9
       const utilizedGB = util.toFixed(totalDiskSizeGB - safeAvailableGB, 2)
-      const freeGB = util.toFixed(safeAvailableGB - this.allocatedGB, 2)
+      const freeGB = (() => {
+        const val = util.toFixed(safeAvailableGB - this.allocatedGB, 2)
+        if (val >= 0) return val
+        else return 0
+      })()
 
       return {
         totalDiskSizeGB,
@@ -169,11 +173,23 @@ export default defineComponent({
     },
   },
   watch: {
+    "stats.freeGB"(val) {
+      if (val < 0) {
+        this.$nextTick(() => {
+          this.stats.freeGB = 0
+          console.log(this.stats.freeGB)
+        })
+      }
+    },
     allocatedGB(val) {
       if (!this.stats?.safeAvailableGB) return
       if (val > this.stats?.safeAvailableGB) {
         this.$nextTick(() => {
           this.allocatedGB = parseFloat(this.stats?.safeAvailableGB.toFixed(0))
+        })
+      } else {
+        this.$nextTick(() => {
+          this.allocatedGB = util.toFixed(this.allocatedGB, 2)
         })
       }
     },

@@ -5,6 +5,9 @@
   "description": "Simple desktop app for Subspace farmers.",
   "author": "",
   "scripts": {
+    "lint": "yarn eslint --quiet ./src/",
+    "lint:all": "yarn eslint ./src/",
+    "lint:fix": "yarn eslint --fix ./src/",
     "quasar": "quasar",
     "tauri": "tauri",
     "dev": "quasar dev",

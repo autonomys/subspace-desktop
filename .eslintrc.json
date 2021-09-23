@@ -1,0 +1,33 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true,
+    "shared-node-browser": true
+  },
+  "extends": [
+    "plugin:vue/essential",
+    "eslint:recommended"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "src/**/*.ts",
+        "src/**/*.vue"
+      ]
+    }
+  ],
+  "parserOptions": {
+    "ecmaVersion": 12,
+    "parser": "@typescript-eslint/parser",
+    "sourceType": "module"
+  },
+  "plugins": [
+    "vue",
+    "@typescript-eslint"
+  ],
+  "rules": {
+    "no-unused-vars": "warn",
+    "no-useless-escape": "off"
+  }
+}

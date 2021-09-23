@@ -1,5 +1,4 @@
 
-import * as native from '../native'
 import * as applescript from "src/lib/osUtils/applescript"
 import { AutoLaunchParams } from '../types'
 const macAutoLaunch = {

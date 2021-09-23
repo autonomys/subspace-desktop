@@ -29,10 +29,9 @@ import farmedList from "components/farmedList.vue"
 import netCard from "components/netCard.vue"
 import plotCard from "components/plotCard.vue"
 import { FarmedBlock } from "src/lib/types"
-import { ClientType, Client, ClientData, emptyData } from "src/lib/client"
+import { ClientType, ClientData, emptyData } from "src/lib/client"
 import { VoidFn } from "@polkadot/api/types"
 const lang = global.data.loc.text.dashboard
-let clientInterval
 export default defineComponent({
   components: { farmedList, netCard, plotCard },
   data() {

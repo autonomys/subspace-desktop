@@ -45,7 +45,7 @@ q-card(bordered flat)
                 q-btn(color="grey" flat icon="info" size="sm")
 </template>df
 <script lang="ts">
-import { defineComponent, PropType } from "vue"
+import { defineComponent } from "vue"
 import * as util from "src/lib/util"
 import { globalState as global } from "src/lib/global"
 const lang = global.data.loc.text.dashboard
@@ -58,7 +58,6 @@ export default defineComponent({
   },
   props: {
     expanded: { type: Boolean, default: false },
-    // farmedBlocksList: { type: Object as PropType<FarmedBlock[]>, default: [] },
     farmedTotalEarned: { type: Number, default: 0 },
   },
   computed: {
