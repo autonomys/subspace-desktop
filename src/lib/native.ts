@@ -66,8 +66,6 @@ export async function execString(executable: string, args: string[] | string) {
   const child = await command.spawn()
 
   console.log('pid:', child.pid)
-
-  return true
 }
 export async function createDir(path: string) {
   const result = await tauri.fs.createDir(path).catch(console.error)

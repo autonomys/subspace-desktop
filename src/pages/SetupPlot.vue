@@ -12,7 +12,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
           q-input.q-field--highlighted(:error="!validPath" :error-message="lang.invalidDir" color="blue" dense input-class="pkdisplay" outlined v-model="plotDirectory")
             template(v-slot:after)
               q-btn.shadow-0(@click="selectDir()" color="blue" flat icon="folder" size="lg")
-      .row.items-center.q-gutter-md.q-pt-sm
+      .row.items-center.q-gutter-md
         .col-4
           .row
             .col.q-pr-md
@@ -27,13 +27,13 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
         .col.q-pr-md
           .row.justify-center(style="transform: scale(-1, 1)")
             apexchart(:options="chartOptions" :series="chartData" type="donut" width="200px")
-          .row.q-mt-lg
+          .row.q-mt-md
             .col-1
             .col
               q-slider(:max="stats.safeAvailableGB" :min="0" :step="1" color="blue" markers snap style="height: 25px" v-model="allocatedGB")
             .col-1
-  .row.justify-end.q-mt-lg.absolute-bottom.q-pb-lg
-    .col-auto.q-ml-xl.q-pr-md
+  .row.justify-end.q-mt-sm.absolute-bottom.q-pb-md
+    .col-auto.q-pr-md
       div {{ lang.hint }}
     .col.q-pr-md
       div {{ lang.hint2 }}
@@ -69,6 +69,13 @@ import en from "javascript-time-ago/locale/en"
 TimeAgo.addDefaultLocale(en)
 const timeAgo = new TimeAgo("en-US")
 
+interface StatsType {
+  totalDiskSizeGB: number
+  safeAvailableGB: number
+  utilizedGB: number
+  freeGB: number
+}
+type ChartDataType = number[]
 import { ApexOptions } from "apexcharts"
 const chartOptions: ApexOptions = {
   legend: { show: false },
@@ -102,17 +109,20 @@ export default defineComponent({
   async created() {
     this.$watch(
       "plotDirectory",
-      debounce(async (val) => {
+      debounce(async (val): Promise<null> => {
         console.log(val)
-        if (this.plotDirectory == this.defaultPath) return (this.validPath = true)
+        if (this.plotDirectory == this.defaultPath) {
+          this.validPath = true
+          return null
+        }
         this.validPath = await native.dirExists(val)
         if (this.validPath) await this.updateDriveStats()
-        return
+        return null
       }, 500)
     )
   },
   computed: {
-    chartData(): any {
+    chartData(): ChartDataType {
       return [this.stats.utilizedGB, this.stats.freeGB, this.allocatedGB]
     },
     printEstimatedTime(): string {
@@ -121,11 +131,15 @@ export default defineComponent({
     plotTimeHr(): number {
       return util.plotTimeMsEstimate(this.allocatedGB)
     },
-    stats(): any {
+    stats(): StatsType {
       const totalDiskSizeGB = util.toFixed(this.driveStats.totalBytes / 1e9, 2)
       const safeAvailableGB = this.driveStats.freeBytes / 1e9
       const utilizedGB = util.toFixed(totalDiskSizeGB - safeAvailableGB, 2)
-      const freeGB = util.toFixed(safeAvailableGB - this.allocatedGB, 2)
+      const freeGB = (() => {
+        const val = util.toFixed(safeAvailableGB - this.allocatedGB, 2)
+        if (val >= 0) return val
+        else return 0
+      })()
 
       return {
         totalDiskSizeGB,
@@ -159,11 +173,23 @@ export default defineComponent({
     },
   },
   watch: {
+    "stats.freeGB"(val) {
+      if (val < 0) {
+        this.$nextTick(() => {
+          this.stats.freeGB = 0
+          console.log(this.stats.freeGB)
+        })
+      }
+    },
     allocatedGB(val) {
       if (!this.stats?.safeAvailableGB) return
       if (val > this.stats?.safeAvailableGB) {
         this.$nextTick(() => {
           this.allocatedGB = parseFloat(this.stats?.safeAvailableGB.toFixed(0))
+        })
+      } else {
+        this.$nextTick(() => {
+          this.allocatedGB = util.toFixed(this.allocatedGB, 2)
         })
       }
     },

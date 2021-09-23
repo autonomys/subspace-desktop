@@ -63,7 +63,7 @@ export const emptyData: ClientData = {
   network: { details: {}, peers: [], status: '' }
 }
 
-export interface Client {
+export interface ClientType {
   api: ApiPromise | null
   data: ClientData
   getStatus: {
@@ -71,14 +71,15 @@ export interface Client {
     plot: Function
     network: Function
   },
-  do?: any
+  do?: { [index: string]: any }
 }
-export type ClientType = Client | null
+
 
 function getStoredBlocks(): FarmedBlock[] {
   let mined: FarmedBlock[] = []
   try {
     const blocks = LocalStorage.getItem('farmedBlocks') as {}
+    // eslint-disable-next-line no-unused-vars
     for (let [num, block] of Object.entries(blocks)) {
       mined.push(block as FarmedBlock)
     }
@@ -116,7 +117,7 @@ export const Client = async () => {
   let clearTauriDestroy: event.UnlistenFn = () => { }
   clientData.farming.farmed = farmed
 
-  const client = <Client>{
+  const client = <ClientType>{
     api,
     data: clientData,
     getStatus: {
@@ -133,7 +134,7 @@ export const Client = async () => {
         clearTauriDestroy,
         stopOnReload(this: any, ev: Event) {
           ev.preventDefault()
-          client.do.blockSubscription.stop()
+          client.do?.blockSubscription.stop()
         },
         async start() {
           if (!client.api) throw (Error(`Api Missing, can't start block subscription yet.`))
@@ -165,7 +166,7 @@ export const Client = async () => {
           })
           process.on('beforeExit', this.stopOnReload)
           window.addEventListener('unload', this.stopOnReload)
-          this.clearTauriDestroy = await tauri.event.once('tauri://destroyed', (data) => {
+          this.clearTauriDestroy = await tauri.event.once('tauri://destroyed', () => {
             console.log('Destroyed event!')
 
             storeBlocks(client.data.farming.farmed)

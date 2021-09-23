@@ -1,4 +1,3 @@
-import * as native from '../native'
 
 module.exports = {
 
