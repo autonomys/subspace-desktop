@@ -18,18 +18,14 @@ q-page.q-pl-xl.q-pr-xl.q-pt-lg
     .col
     .col-auto
       //- q-btn(@click="testModal" label="tst modal")
-      q-btn(:disable="!passwordsMatch" @click="continue" icon-right="arrow_forward" label="continue" outline size="lg")
+      q-btn(:disable="!passwordsMatch" @click="continue" icon-right="arrow_forward" :label="lang.continue" outline size="lg")
       q-tooltip.q-pa-md(v-if="!passwordsMatch")
         p.q-mb-lg {{ lang.tooltip }}
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue"
-// import { setPassword as lang } from "src/loc/en"
-import { Dialog } from "quasar"
-import app from "app.vue"
-import { showModal } from "src/lib/util"
-import * as global from "src/lib/global"
+import { globalState as global } from "src/lib/global"
 import * as util from "src/lib/util"
 const lang = global.data.loc.text.setPassword
 export default defineComponent({

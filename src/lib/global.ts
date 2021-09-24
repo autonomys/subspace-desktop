@@ -1,18 +1,31 @@
 import { reactive } from "vue";
-const list: string[] = []
 import getLang from "../loc/lang"
+import { Client } from "src/lib/client"
+import { AutoLauncher } from "src/lib/native"
 
-let text: any
-export var data = reactive({ status: { state: "loading", message: "loading" }, loc: { selected: 'en', text, } })
-export var mutations = {
+let text: { [index: string]: { [index: string]: string } } = {}
+// TODO use dependency injection to ensure methods and properties can't be accessed unless they are initialized and valid
+export class Global {
+  client = new Client
+  autoLauncher = new AutoLauncher
+  data = reactive({ status: { state: "loading", message: "loading" }, loc: { selected: 'en', text } })
   async changeLang(newLang: string) {
-    data.loc.selected = newLang
+    this.data.loc.selected = newLang
     await this.loadLangData()
-  },
+  }
   async loadLangData() {
-    data.loc.text = await getLang(data.loc.selected)
+    this.data.loc.text = await getLang(this.data.loc.selected)
+  }
+  async init() {
+    await Promise.all(
+      [
+        // this.client.init(),
+        this.autoLauncher.init(),
+        this.loadLangData()
+      ]
+    )
   }
 }
 
-
+export let globalState = new Global
 

@@ -1,28 +1,19 @@
-import introModal from "components/introModal.vue"
-import { Dialog, DialogChainObject } from "quasar"
-
-import * as global from "src/lib/global"
+import { Dialog, DialogChainObject, LooseDictionary } from "quasar"
 import * as dialog from "@tauri-apps/api/dialog"
 import * as fs from "@tauri-apps/api/fs"
 import * as path from "@tauri-apps/api/path"
 import { invoke } from '@tauri-apps/api/tauri'
+const tauri = { dialog, fs, path, invoke }
+import * as native from './native'
 import * as bcrypt from 'bcryptjs'
 
-const tauri = { dialog, fs, path, invoke }
+export const random = (min: number, max: number) => Math.floor(Math.random() * (max - min)) + min;
 
-const modalComponents: { [index: string]: any } = {
-  introModal
-}
-export const random = (min, max) => Math.floor(Math.random() * (max - min)) + min;
-
-interface propsType {
-  [index: string]: any
-}
-export async function showModal(componentName: string, props: propsType = {}): Promise<DialogChainObject | null> {
+export async function showModal(component: any, props: LooseDictionary = {}): Promise<DialogChainObject | null> {
   console.log("Show Modal")
   return Dialog.create({
     message: "Testing",
-    component: modalComponents[componentName],
+    component,
     componentProps: {
       ...props,
     },
@@ -39,12 +30,18 @@ export function plotTimeMsEstimate(gb: number): number {
 }
 
 export async function reset() {
-  const configData = await config.read().catch(console.error)
-  if (configData?.plot?.location) await tauri.fs.removeFile(configData.plot.location).catch(console.error)
+  try {
+    const configData = await config.read()
+    if (configData?.plot?.location) await tauri.fs.removeFile(configData.plot.location).catch(console.error)
+  } catch (error) {
+    console.error(error)
+  }
+
   config.clear()
 }
 
 export interface ConfigFile {
+  [index: string]: any
   plot?: { sizeGB?: number, location?: string }, account?: { pubkey?: string, passHash?: string }
 }
 const emptyConfig: ConfigFile = { plot: { sizeGB: 0, location: "" }, account: { pubkey: "", passHash: "" } }
@@ -74,7 +71,7 @@ export const config = {
   async update(newData: ConfigFile, dir?: string) {
     let config = await this.read(dir).catch(console.error) || emptyConfig
     for (const [key, value] of Object.entries(newData)) {
-      config[key] = Object.assign(config[key], value)
+      Object.assign(config[key], value)
     }
     await this.write(dir, config)
   },
@@ -83,10 +80,7 @@ export const config = {
   }
 }
 
-export interface DriveStats {
-  freeBytes: number,
-  totalBytes: number
-}
+
 
 export function formatMS(duration: number) {
   duration /= 1000
@@ -107,34 +101,13 @@ export function formatMS(duration: number) {
   return ret
 }
 
-export const native = {
-  async createDir(path: string) {
-    const result = await tauri.fs.createDir(path).catch(console.error)
-    return result
-  },
-  async selectDir(defaultPath: undefined | string): Promise<string | null> {
-    let exists: boolean = false
-    if (defaultPath) exists = await this.dirExists(defaultPath)
-    if (!exists) defaultPath = undefined
-    const result = (await tauri.dialog.open({ directory: true, defaultPath })) as null | string
-    return result
-  },
-  async dirExists(dir: string): Promise<boolean> {
-    return (await tauri.fs.readDir(dir, { recursive: false }).catch(console.error)) ? true : false
-  },
-  async driveStats(dir: string): Promise<DriveStats> {
-    const result = await tauri.invoke('get_disk_stats', { dir }) as any
-    const stats: DriveStats = { freeBytes: result.free_bytes, totalBytes: result.total_bytes }
-    return stats
-  }
-}
 
 export const password = {
   encrypt(pass: string): string {
     const salt = bcrypt.genSaltSync(10)
     const hash = bcrypt.hashSync(pass, salt)
     return hash
-  }, check(pass: string, hash) {
+  }, check(pass: string, hash: string) {
     return bcrypt.compareSync(pass, hash); // true
   }
 }

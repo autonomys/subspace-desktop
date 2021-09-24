@@ -1,18 +1,18 @@
-# subspace (subspace-desktop)
+# subspace / desktop-farmer
 
 Built with Quasar + Tauri
 
 ## Prerequisites
 
-- nodejs
+- nodejs 14+
 - yarn
 - rustc
 
 ### Linux
 
-On Linux you'll have to install development version of `libwebkit2gtk-4.0` package, which can be done on Ubuntu with:
+On Linux you'll have to install development version of `libwebkit2gtk-4.0` and `libappindicator` packages, which can be done on Ubuntu with:
 ```bash
-sudo apt-get install --no-install-recommends libwebkit2gtk-4.0-dev
+sudo apt-get install --no-install-recommends libwebkit2gtk-4.0-dev libappindicator3-dev
 ```
 
 Stuck?

@@ -2,9 +2,12 @@
   "extends": "@quasar/app/tsconfig-preset",
   "experimentalDecorators": true,
   "compilerOptions": {
+    "strict": true,
     "baseUrl": ".",
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "allowJs": false,
-    "experimentalDecorators": true
+    "strictNullChecks": true,
+    "experimentalDecorators": true,
+    "noImplicitReturns": true
   }
 }

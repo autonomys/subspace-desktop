@@ -1,7 +1,7 @@
 {
   "package": {
     "productName": "Subspace Farmer Demo",
-    "version": "0.0.2.1"
+    "version": "0.0.3"
   },
   "build": {
     "distDir": "../dist/pwa",
@@ -10,6 +10,10 @@
     "beforeBuildCommand": ""
   },
   "tauri": {
+    "systemTray": {
+      "iconPath": "icons/icon.png",
+      "iconAsTemplate": true
+    },
     "bundle": {
       "active": true,
       "targets": "all",

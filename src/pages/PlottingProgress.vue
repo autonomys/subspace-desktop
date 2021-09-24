@@ -8,7 +8,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
     .col
       .row
         .col.q-mt-sm
-          div {{ lang.plotsDirectory }} {{ plotFinished }}
+          div {{ lang.plotsDirectory }}
           q-input(dense input-class="pkdisplay" outlined readonly v-model="plotDirectory")
       .row.items-center.q-gutter-md
         .col.relative-position
@@ -42,11 +42,11 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
     .col-auto.q-pr-md
     .col-expand
     .col-auto(v-if="viewedIntro")
-      q-btn(@click="$router.replace({ name: 'dashboard' })" color="blue-8" icon-right="play_arrow" label="Finish" outline size="lg" v-if="plotFinished")
-      q-btn(@click="startPlotting()" color="blue-8" icon-right="play_arrow" label="Resume Plotting" outline size="lg" v-else-if="!plotting")
-      q-btn(@click="pausePlotting()" color="blue-8" icon-right="pause" label="Pause Plotting" outline size="lg" v-else)
+      q-btn(:label="lang.finish" @click="$router.replace({ name: 'dashboard' })" color="blue-8" icon-right="play_arrow" outline size="lg" v-if="plotFinished")
+      q-btn(:label="lang.resume" @click="startPlotting()" color="blue-8" icon-right="play_arrow" outline size="lg" v-else-if="!plotting")
+      q-btn(:label="lang.pause" @click="pausePlotting()" color="blue-8" icon-right="pause" outline size="lg" v-else)
     .col-auto(v-else)
-      q-btn(@click="viewIntro()" color="blue-8" icon-right="play_arrow" label="Next" outline size="lg")
+      q-btn(:label="lang.next" @click="viewIntro()" color="blue-8" icon-right="play_arrow" outline size="lg")
 </template>
 
 <style lang="sass">
@@ -58,18 +58,15 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
 
 <script lang="ts">
 import { defineComponent } from "vue"
-// import { plottingProgress as lang } from "src/loc/en"
-import { QInput, Dialog, Notify } from "quasar"
-import * as global from "src/lib/global"
+import { globalState as global } from "src/lib/global"
 const lang = global.data.loc.text.plottingProgress
 import * as util from "src/lib/util"
-
+import introModal from "components/introModal.vue"
 import TimeAgo from "javascript-time-ago"
 import en from "javascript-time-ago/locale/en"
 TimeAgo.addLocale(en)
-const timeAgo = new TimeAgo("en-US")
-let interval
-let timer
+let interval: number
+let timer: number
 
 export default defineComponent({
   data() {
@@ -90,10 +87,8 @@ export default defineComponent({
     }
   },
   async mounted() {
-    // this.fakeProgress()
     await this.getPlotConfig()
     this.startPlotting()
-    // timer = setInterval(() => this.elapsedms++, 1)
   },
   computed: {
     progresspct(): number {
@@ -142,7 +137,7 @@ export default defineComponent({
     startPlotting() {
       this.plotting = true
       this.fakeProgress()
-      timer = setInterval(() => (this.elapsedms += 100), 100)
+      timer = window.setInterval(() => (this.elapsedms += 100), 100)
     },
     pausePlotting() {
       this.plotting = false
@@ -150,14 +145,14 @@ export default defineComponent({
       clearInterval(timer)
     },
     async fakeProgress() {
-      interval = setInterval(() => {
+      interval = window.setInterval(() => {
         this.plottingData.finishedGB += util.random(0, 50) / 40
         console.log(this.plottingData)
         if (this.plottingData.finishedGB >= this.allocatedGB) this.pausePlotting()
       }, util.random(200, 1000))
     },
     async viewIntro() {
-      const modal = await util.showModal("introModal")
+      const modal = await util.showModal(introModal)
       modal?.onDismiss(() => {
         this.viewedIntro = true
       })

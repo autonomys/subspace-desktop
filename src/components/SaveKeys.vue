@@ -1,21 +1,21 @@
 <template lang="pug">
 .full-width
   .row.justify-center.q-gutter-lg
+    .col-auto
+      q-icon(color="blue-3" name="vpn_key" size="80px")
+      p.q-ml-sm {{ lang.privateKey }}
     .col
       .row.justify-center
         .col-8
-          div {{ lang.yourPrivateKey }}
-  .row.justify-center
-    .col-8
-      .row.justify-center(style="height: 70px")
-        .row.justify-center.q-mb-md.full-width
-          q-input(input-class="pkdisplay" outlined readonly ref="pkDisplay" style="width: 800px; height: 80px" type="textarea" v-model="generatedPk" v-show="revealKey")
-        .row.justify-center.q-mb-lg.full-width.bg-grey-2(v-if="!revealKey")
-          q-btn.full-width.full-width(@click="revealKey = true" flat label="reveal" size="lg")
-      .row.justify-center.q-mt-md
-        q-btn.full-width(@click="copyPk" label="copy to clipboard" outline style="max-width: 200px")
-  .row.q-ma-md
-    p The private key is necessary to utilize Subspace and can't be recovered. Ensure the key is backed up to a secure location.
+          .row.justify-center(style="height: 70px")
+            .row.justify-center.q-mb-md.full-width
+              q-input(input-class="pkdisplay" outlined readonly ref="pkDisplay" style="width: 800px; height: 80px" type="textarea" v-model="generatedPk" v-show="revealKey")
+            .row.justify-center.q-mb-lg.full-width.bg-grey-2(v-if="!revealKey")
+              q-btn.full-width.full-width(:label="lang.reveal" @click="revealKey = true" flat size="lg")
+          .row.justify-center.q-mt-md
+            q-btn.full-width(:label="lang.copy" @click="copyPk" outline style="max-width: 200px")
+    .row.q-ma-md.q-pa-md
+      p Private keys are your password for your subspace farmer and wallet, this cannot be changed, guessed(easily), or reset if lost. It is imperitive that this is stored in a secure, safe location. Without the Private Key you will not have access to your funds. Furthermore, anyone who steals your private keys will be able to do as they please with your funds.
   .row.q-mt-md
     q-checkbox(:label="lang.userConfirm" size="lg" v-model="userConfirm")
 </template>
@@ -29,10 +29,10 @@
 
 <script lang="ts">
 import { defineComponent } from "vue"
-// import { saveKeys as lang } from "src/loc/en"
-import * as global from "src/lib/global"
+import { globalState as global } from "src/lib/global"
 const lang = global.data.loc.text.saveKeys
-import { QInput, Dialog, Notify } from "quasar"
+// const lang = {}
+import { QInput, Notify } from "quasar"
 
 export default defineComponent({
   name: "PageIndex",
@@ -59,8 +59,7 @@ export default defineComponent({
         var msg = successful ? "successful" : "unsuccessful"
         console.log(msg)
         this.revealKey = previousState
-        // Dialog.create({ message: "Private Key copied to clipboard" })
-        Notify.create({ message: "Private Key copied to clipboard. Backup key in a secure location.", icon: "content_copy" })
+        Notify.create({ message: lang.saved, icon: "content_copy" })
       })
     },
   },

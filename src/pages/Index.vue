@@ -1,29 +1,24 @@
 <template lang="pug">
 q-page(padding)
   .row.justify-center.q-mt-xl
-    .text-h4 Welcome
+    .text-h4 {{ lang.pageTitle }}
   .row.justify-center.q-mt-lg
-    p Subspace Farmer is the easiest way to particpate as a farmer in the Subspace Network.
+    p {{ lang.subtitle }}
   .row.justify-center.q-mt-xl
-    q-btn(@click="$router.push({ name: 'setPassword' })" label="Quick Start" outline size="xl")
+    q-btn(:label="lang.quickStart" @click="$router.push({ name: 'setPassword' })" outline size="xl")
   .row.justify-center.q-mt-sm
-    q-btn(@click="$router.push({ name: 'advanced' })" color="grey" flat label="advanced")
+    q-btn(:label="lang.advanced" @click="$router.push({ name: 'advanced' })" color="grey" flat)
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import { native } from "src/lib/util"
+import { globalState as global } from "src/lib/global"
+const lang = global.data.loc.text.index
 
 export default defineComponent({
-  name: "PageIndex",
   data() {
-    return { global: global.data, native }
+    return { lang }
   },
-  methods: {
-    async testNative() {
-      const result = await native.driveStats("/")
-      console.log("result", result)
-    },
-  },
+  methods: {},
 })
 </script>

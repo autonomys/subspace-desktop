@@ -15,58 +15,31 @@ q-layout(view="hHh lpr fFf")
                 h6.no-margin {{ global.status.message }}
       div
         q-btn(flat icon="settings" round)
-          q-menu(auto-close)
-            q-list(style="min-width: 150px")
-              q-item(@click="reset()" clickable)
-                .row.items-center
-                  .col-auto.q-mr-md
-                    q-icon(color="red" name="refresh")
-                  .col
-                    p.text-red Reset
+          MainMenu
+
   q-page-container
     router-view
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import * as global from "src/lib/global"
+import { globalState as global } from "src/lib/global"
 import * as util from "src/lib/util"
-import { Dialog } from "quasar"
+import MainMenu from "components/mainMenu.vue"
 
 export default defineComponent({
   name: "MainLayout",
 
-  components: {},
+  components: { MainMenu },
 
   data() {
     return {
       global: global.data,
       util,
+      autoLaunch: false,
     }
   },
 
-  methods: {
-    ...global.mutations,
-    reset() {
-      Dialog.create({
-        message: `
-        <h6>
-          Are you sure you want to reset?
-        </h6>
-        <div style="height:10px;">
-        </div>
-        <p>
-          You will need to re-import your existing private key in order to recover any existing plot or funds.
-        </p>
-        `,
-        html: true,
-        ok: { label: "reset", icon: "refresh", flat: true, color: "red" },
-        cancel: true,
-      }).onOk(async () => {
-        util.reset()
-        this.$router.replace({ name: "index" })
-      })
-    },
-  },
+  methods: {},
 })
 </script>
