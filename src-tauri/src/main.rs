@@ -5,16 +5,17 @@
 use std::path::PathBuf;
 
 use serde::Serialize;
+
 use tauri::{
   api, CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
   WindowEvent,
 };
 
+#[cfg(target_os = "windows")]
 extern crate winreg;
-// use std::io;
-// use std::path::Path;
-use winreg::enums::*;
-use winreg::RegKey;
+
+#[cfg(target_os = "windows")]
+use {winreg::enums::*, winreg::RegKey};
 
 #[derive(Serialize)]
 struct S {
@@ -38,7 +39,7 @@ fn get_this_binary() -> PathBuf {
   let bin = api::process::current_binary();
   return bin.unwrap();
 }
-
+#[cfg(target_os = "windows")]
 #[tauri::command]
 fn winreg_get(sub_key: String, value: String) -> String {
   let hkcu = RegKey::predef(HKEY_CURRENT_USER);
@@ -59,6 +60,7 @@ fn winreg_get(sub_key: String, value: String) -> String {
   return result;
 }
 
+#[cfg(target_os = "windows")]
 #[tauri::command]
 fn winreg_set(sub_key: String, set_key: String, value: String) -> String {
   let hkcu = RegKey::predef(HKEY_CURRENT_USER);
@@ -80,6 +82,7 @@ fn winreg_set(sub_key: String, set_key: String, value: String) -> String {
   return result;
 }
 
+#[cfg(target_os = "windows")]
 #[tauri::command]
 fn winreg_delete(sub_key: String, set_key: String) -> String {
   let hkcu = RegKey::predef(HKEY_CURRENT_USER);
@@ -157,13 +160,18 @@ fn main() {
       }
       _ => {}
     })
-    .invoke_handler(tauri::generate_handler![
-      get_disk_stats,
-      get_this_binary,
-      winreg_get,
-      winreg_set,
-      winreg_delete
-    ])
+    .invoke_handler(
+      #[cfg(target_os = "windows")]
+      tauri::generate_handler![
+        get_disk_stats,
+        get_this_binary,
+        winreg_get,
+        winreg_set,
+        winreg_delete,
+      ],
+      #[cfg(not(target_os = "windows"))]
+      tauri::generate_handler![get_disk_stats, get_this_binary],
+    )
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
