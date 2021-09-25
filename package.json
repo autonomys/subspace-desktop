@@ -43,8 +43,6 @@
     "@typescript-eslint/parser": "^4.31.2",
     "eslint": "^7.32.0",
     "eslint-plugin-vue": "^7.18.0",
-    "i": "^0.3.6",
-    "npm": "^7.24.0",
     "pug": "^3.0.2",
     "pug-plain-loader": "^1.1.0",
     "strip-ansi": "=3.0.1",
