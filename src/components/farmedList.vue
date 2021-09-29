@@ -29,15 +29,15 @@ q-card(bordered flat)
       .bg-white(:key="block.time" v-for="block of farmedBlocksList")
         q-separator
         .row.q-gutter-sm.q-pa-xs.q-ml-sm
-          .col-2
+          .col-2.ellipsis
             p {{ block.author }}
-          .col-2
+          .col-1
             p {{ block.blockNum }}
           .col-auto
             q-separator(vertical)
-          .col-3
+          .col-4
             p {{ new Date(block.time).toLocaleString() }}
-          .col-2
+          .col-1
             p {{ block.transactions }}
           .col-2
             p {{ block.blockReward }} SSC

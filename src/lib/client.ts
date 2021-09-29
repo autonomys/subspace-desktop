@@ -116,14 +116,16 @@ export class Client {
   protected wsProvider = new WsProvider("wss://dev-rpc.subspace.network");
   protected api: ApiPromise = new ApiPromise({ provider: this.wsProvider });
   protected farmed = getStoredBlocks();
-  protected clearTauriDestroy: event.UnlistenFn = () => {};
-  protected unsubscribe: event.UnlistenFn = () => {};
+  protected clearTauriDestroy: event.UnlistenFn = () => { };
+  protected unsubscribe: event.UnlistenFn = () => { };
   data = reactive(emptyData);
 
   status = {
     farming: () => { }, // TODO return some farming status info
     plot: () => { }, // TODO return some plot status info
-    net: () => { } // TODO return some net status info
+    net: () => {
+      return this.api.rpc.system.peers()
+    } // TODO return some net status info
   }
   do = {
     blockSubscription: {
@@ -174,13 +176,13 @@ export class Client {
             // console.log('Peers: ', peers)
             // console.log('PeersCount: ', peers.length)
           })
-          process.on('beforeExit', this.do.blockSubscription.stopOnReload)
-          window.addEventListener('unload', this.do.blockSubscription.stopOnReload)
-          this.clearTauriDestroy = await tauri.event.once('tauri://destroyed', () => {
-            console.log('Destroyed event!')
-            storeBlocks(this.data.farming.farmed)
-          })
-        },
+        process.on('beforeExit', this.do.blockSubscription.stopOnReload)
+        window.addEventListener('unload', this.do.blockSubscription.stopOnReload)
+        this.clearTauriDestroy = await tauri.event.once('tauri://destroyed', () => {
+          console.log('Destroyed event!')
+          storeBlocks(this.data.farming.farmed)
+        })
+      },
       stop: () => {
         console.log('block subscription stop triggered')
         this.unsubscribe()
