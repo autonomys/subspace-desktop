@@ -2,26 +2,29 @@
   all(not(debug_assertions), target_os = "windows"),
   windows_subsystem = "windows"
 )]
-use std::path::PathBuf;
+
+#[cfg(target_os = "windows")]
+mod windows;
 
 use serde::Serialize;
+use std::path::PathBuf;
 use tauri::{
   api, CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
   WindowEvent,
 };
 
 #[derive(Serialize)]
-struct S {
+struct DiskStats {
   free_bytes: u64,
   total_bytes: u64,
 }
 
 #[tauri::command]
-fn get_disk_stats(dir: String) -> S {
+fn get_disk_stats(dir: String) -> DiskStats {
   println!("{}", dir.to_string());
   let free: u64 = fs2::available_space(&dir).expect("error");
   let total: u64 = fs2::total_space(&dir).expect("error");
-  return S {
+  return DiskStats {
     free_bytes: free,
     total_bytes: total,
   };
@@ -42,7 +45,7 @@ fn main() {
     .add_native_item(SystemTrayMenuItem::Separator)
     .add_item(quit);
   let tray = SystemTray::new().with_menu(tray_menu);
-  tauri::Builder::default()
+  let builder = tauri::Builder::default()
     .setup(|app| {
       let window = app.get_window("main").unwrap();
 
@@ -90,7 +93,16 @@ fn main() {
       }
       _ => {}
     })
-    .invoke_handler(tauri::generate_handler![get_disk_stats, get_this_binary])
+    .invoke_handler(tauri::generate_handler![get_disk_stats, get_this_binary]);
+
+  #[cfg(target_os = "windows")]
+  let builder = builder.invoke_handler(tauri::generate_handler![
+    windows::winreg_get,
+    windows::winreg_set,
+    windows::winreg_delete,
+  ]);
+
+  builder
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
