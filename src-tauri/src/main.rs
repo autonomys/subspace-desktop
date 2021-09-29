@@ -5,9 +5,10 @@
 use std::path::PathBuf;
 
 use serde::Serialize;
+
 use tauri::{
-  api, generate_handler, CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu,
-  SystemTrayMenuItem, WindowEvent,
+  api, CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
+  WindowEvent,
 };
 
 #[cfg(target_os = "windows")]
@@ -103,17 +104,6 @@ fn winreg_delete(sub_key: String, set_key: String) -> String {
 }
 
 fn main() {
-  let handlers: () = match cfg!(target_os = "windows") {
-    true => tauri::generate_handler![
-      get_disk_stats,
-      get_this_binary,
-      winreg_get,
-      winreg_set,
-      winreg_delete,
-    ],
-    false => tauri::generate_handler![get_disk_stats, get_this_binary],
-  };
-
   let quit = CustomMenuItem::new("quit".to_string(), "Quit");
   let toggle_visibility = CustomMenuItem::new("toggle_visibility".to_string(), "Hide");
 
@@ -170,7 +160,18 @@ fn main() {
       }
       _ => {}
     })
-    .invoke_handler(handlers())
+    .invoke_handler(
+      #[cfg(target_os = "windows")]
+      tauri::generate_handler![
+        get_disk_stats,
+        get_this_binary,
+        winreg_get,
+        winreg_set,
+        winreg_delete,
+      ],
+      #[cfg(not(target_os = "windows"))]
+      tauri::generate_handler![get_disk_stats, get_this_binary],
+    )
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
