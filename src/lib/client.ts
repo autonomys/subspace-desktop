@@ -106,12 +106,20 @@ function clearStored() {
 
 //TODO should be refactored to not rely on the .init() method to be valid
 export class Client {
-  protected wsProvider = new WsProvider
-  protected api: ApiPromise = new ApiPromise
-  protected farmed = getStoredBlocks()
-  protected clearTauriDestroy: event.UnlistenFn = () => { }
-  protected unsubscribe: event.UnlistenFn = () => { }
-  data = reactive(emptyData)
+  // TODO: Find a way to provide ApiPromise over a Context Pattern like in react.context
+  // This actually opens instantly a connection to a localhost websocket
+
+  // protected wsProvider = new WsProvider
+  // protected api: ApiPromise = new ApiPromise
+
+  // Also load this ws url from an env var
+  protected wsProvider = new WsProvider("wss://dev-rpc.subspace.network");
+  protected api: ApiPromise = new ApiPromise({ provider: this.wsProvider });
+  protected farmed = getStoredBlocks();
+  protected clearTauriDestroy: event.UnlistenFn = () => {};
+  protected unsubscribe: event.UnlistenFn = () => {};
+  data = reactive(emptyData);
+
   status = {
     farming: () => { }, // TODO return some farming status info
     plot: () => { }, // TODO return some plot status info
@@ -125,34 +133,54 @@ export class Client {
         this.stop()
       },
       start: async () => {
-        this.unsubscribe = await this.api.rpc.chain.subscribeNewHeads(async (lastHeader) => {
-          const signedBlock = await this.api.rpc.chain.getBlock(lastHeader.hash)
-          for (const log of signedBlock.block.header.digest.logs) {
-            if (log.isPreRuntime) {
-              const [type, data] = log.asPreRuntime
-              if (type.toString() === 'POC_') {
-                const poCPreDigest: PoCPreDigest = this.api.registry.createType('PoCPreDigest', data)
-                const solution: Solution = this.api.registry.createType('Solution', poCPreDigest.solution)
-                const farmerId: FarmerId = this.api.registry.createType('FarmerId', solution.public_key)
-                console.log('farmerId: ', farmerId.toString())
+        this.unsubscribe = await this.api.rpc.chain.subscribeNewHeads(
+          async (lastHeader) => {
+            const signedBlock = await this.api.rpc.chain.getBlock(
+              lastHeader.hash
+            );
+            for (const log of signedBlock.block.header.digest.logs) {
+              if (log.isPreRuntime) {
+                const [type, data] = log.asPreRuntime;
+                if (type.toString() === "POC_") {
+                  const poCPreDigest: PoCPreDigest =
+                    this.api.registry.createType("PoCPreDigest", data);
+                  const solution: Solution = this.api.registry.createType(
+                    "Solution",
+                    poCPreDigest.solution
+                  );
+                  const farmerId: FarmerId = this.api.registry.createType(
+                    "FarmerId",
+                    solution.public_key
+                  );
+                  console.log("farmerId: ");
+                  const block: FarmedBlock = {
+                    author: farmerId.toString(),
+                    id: lastHeader.hash.toString(),
+                    time: Date.now(),
+                    transactions: 0,
+                    blockNum: lastHeader.number.toNumber(),
+                    blockReward: 0,
+                    feeReward: 0,
+                  };
+                  this.data.farming.farmed = [block].concat(
+                    this.data.farming.farmed
+                  );
+                  storeBlocks(this.farmed);
+                }
               }
             }
-          }
-          const block: FarmedBlock = { id: lastHeader.hash.toString(), time: Date.now(), transactions: 0, blockNum: lastHeader.number.toNumber(), blockReward: 0, feeReward: 0 }
-          this.data.farming.farmed = [block].concat(this.data.farming.farmed)
-          storeBlocks(this.farmed)
-          // this.data.farming.events.emit('farmedBlock', block)
-          // const peers = await this.api.rpc.system.peers()
-          // console.log('Peers: ', peers)
-          // console.log('PeersCount: ', peers.length)
-        })
-        process.on('beforeExit', this.do.blockSubscription.stopOnReload)
-        window.addEventListener('unload', this.do.blockSubscription.stopOnReload)
-        this.clearTauriDestroy = await tauri.event.once('tauri://destroyed', () => {
-          console.log('Destroyed event!')
-          storeBlocks(this.data.farming.farmed)
-        })
-      },
+            // this.data.farming.events.emit('farmedBlock', block)
+            // const peers = await this.api.rpc.system.peers()
+            // console.log('Peers: ', peers)
+            // console.log('PeersCount: ', peers.length)
+          })
+          process.on('beforeExit', this.do.blockSubscription.stopOnReload)
+          window.addEventListener('unload', this.do.blockSubscription.stopOnReload)
+          this.clearTauriDestroy = await tauri.event.once('tauri://destroyed', () => {
+            console.log('Destroyed event!')
+            storeBlocks(this.data.farming.farmed)
+          })
+        },
       stop: () => {
         console.log('block subscription stop triggered')
         this.unsubscribe()
