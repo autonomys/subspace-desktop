@@ -106,14 +106,7 @@ function clearStored() {
 
 //TODO should be refactored to not rely on the .init() method to be valid
 export class Client {
-  // TODO: Find a way to provide ApiPromise over a Context Pattern like in react.context
-  // This actually opens instantly a connection to a localhost websocket
-
-  // protected wsProvider = new WsProvider
-  // protected api: ApiPromise = new ApiPromise
-
-  // Also load this ws url from an env var
-  protected wsProvider = new WsProvider("wss://dev-rpc.subspace.network");
+  protected wsProvider = new WsProvider("ws://localhost:9944");
   protected api: ApiPromise = new ApiPromise({ provider: this.wsProvider });
   protected farmed = getStoredBlocks();
   protected clearTauriDestroy: event.UnlistenFn = () => { };
@@ -171,10 +164,6 @@ export class Client {
                 }
               }
             }
-            // this.data.farming.events.emit('farmedBlock', block)
-            // const peers = await this.api.rpc.system.peers()
-            // console.log('Peers: ', peers)
-            // console.log('PeersCount: ', peers.length)
           })
         process.on('beforeExit', this.do.blockSubscription.stopOnReload)
         window.addEventListener('unload', this.do.blockSubscription.stopOnReload)
