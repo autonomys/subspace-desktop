@@ -12,7 +12,7 @@
     "tauri": "tauri",
     "dev": "quasar dev",
     "build:quasar": "quasar build -m pwa",
-    "build": "quasar build -m pwa && tauri build -v",
+    "build": "yarn lint && quasar build -m pwa && tauri build -v",
     "build:debug": "quasar build -m pwa && tauri build -v --debug"
   },
   "dependencies": {

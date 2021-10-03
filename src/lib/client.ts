@@ -118,8 +118,8 @@ export class Client {
   data = reactive(emptyData);
 
   status = {
-    farming: () => { }, // TODO return some farming status info
-    plot: () => { }, // TODO return some plot status info
+    farming: ():void => { }, // TODO return some farming status info
+    plot: ():void => { }, // TODO return some plot status info
     net: async ():Promise<NetStatus> => {
       const peers = await this.api.rpc.system.peers()
       return {peers}
@@ -131,7 +131,7 @@ export class Client {
       stopOnReload():void {
         this.stop()
       },
-      start: async () => {
+      start: async ():Promise<void> => {
         this.unsubscribe = await this.api.rpc.chain.subscribeNewHeads(
           async (lastHeader) => {
             const signedBlock = await this.api.rpc.chain.getBlock(
