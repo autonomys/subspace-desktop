@@ -72,10 +72,11 @@
     "farmedBlock": "Farmed Block",
     "reward": "Reward",
     "farmedBlocks": "Farmed Blocks",
-    "blockNum": "Block Number",
-    "time": "time",
+    "farmedBy": "Farmed By",
+    "blockNum": "Block #",
+    "time": "Time",
     "transactions": "# Transactions",
-    "rewards": "Block Reward + Fees"
+    "rewards": "Reward + Fees"
   },
   "importKey": {
     "tooltip": "Please provide a valid key first.",
