@@ -32,18 +32,6 @@ export default defineComponent({
     let keyInput: string = ""
     return { global: global.data, lang, keyInput }
   },
-  methods: {
-    importKey() {
-      Loading.show({ message: lang.importing, boxClass: "bg-grey-2 text-grey-9" })
-      setTimeout(() => {
-        Loading.show({ message: lang.imported, boxClass: "bg-grey-2 text-grey-9", spinnerColor: "green" })
-      }, ms("2s"))
-      setTimeout(() => {
-        this.$router.replace({ name: "setupPlot" })
-        Loading.hide()
-      }, ms("3s"))
-    },
-  },
   computed: {
     KeyStatusMsg(): string {
       if (this.keyInput.length > 0) return lang.validKey
@@ -56,6 +44,18 @@ export default defineComponent({
     statusMsgStyle(): string[] {
       if (this.validKey) return ["greenMsg"]
       else return ["redMsg"]
+    },
+  },
+  methods: {
+    importKey() {
+      Loading.show({ message: lang.importing, boxClass: "bg-grey-2 text-grey-9" })
+      setTimeout(() => {
+        Loading.show({ message: lang.imported, boxClass: "bg-grey-2 text-grey-9", spinnerColor: "green" })
+      }, ms("2s"))
+      setTimeout(() => {
+        this.$router.replace({ name: "setupPlot" })
+        Loading.hide()
+      }, ms("3s"))
     },
   },
 })

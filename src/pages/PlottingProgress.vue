@@ -49,13 +49,6 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
       q-btn(:label="lang.next" @click="viewIntro()" color="blue-8" icon-right="play_arrow" outline size="lg")
 </template>
 
-<style lang="sass">
-.pkdisplay
-  font-size: 20px
-  padding-top: 5px
-  margin-top: 0px
-</style>
-
 <script lang="ts">
 import { defineComponent } from "vue"
 import { globalState as global } from "src/lib/global"
@@ -86,10 +79,6 @@ export default defineComponent({
       allocatedGB: 0,
     }
   },
-  async mounted() {
-    await this.getPlotConfig()
-    this.startPlotting()
-  },
   computed: {
     progresspct(): number {
       return parseFloat(((this.plottingData.finishedGB / this.allocatedGB) * 100).toFixed(2))
@@ -112,6 +101,20 @@ export default defineComponent({
     totalDiskSizeGB(): number {
       return 4000
     },
+  },
+  watch: {
+    "plottingData.finishedGB"(val) {
+      this.plottingData.finishedGB = parseFloat(this.plottingData.finishedGB.toFixed(2))
+      this.plottingData.remainingGB = parseFloat((this.allocatedGB - val).toFixed(2))
+      if (this.plottingData.finishedGB >= this.allocatedGB) {
+        this.plotFinished = true
+        this.plottingData.finishedGB = this.allocatedGB
+      }
+    },
+  },
+  async mounted() {
+    await this.getPlotConfig()
+    this.startPlotting()
   },
   unmounted() {
     if (interval) clearInterval(interval)
@@ -158,15 +161,11 @@ export default defineComponent({
       })
     },
   },
-  watch: {
-    "plottingData.finishedGB"(val) {
-      this.plottingData.finishedGB = parseFloat(this.plottingData.finishedGB.toFixed(2))
-      this.plottingData.remainingGB = parseFloat((this.allocatedGB - val).toFixed(2))
-      if (this.plottingData.finishedGB >= this.allocatedGB) {
-        this.plotFinished = true
-        this.plottingData.finishedGB = this.allocatedGB
-      }
-    },
-  },
 })
 </script>
+<style lang="sass">
+.pkdisplay
+  font-size: 20px
+  padding-top: 5px
+  margin-top: 0px
+</style>

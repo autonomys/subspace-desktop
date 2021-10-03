@@ -135,7 +135,7 @@ export default defineComponent({
       const totalDiskSizeGB = util.toFixed(this.driveStats.totalBytes / 1e9, 2)
       const safeAvailableGB = this.driveStats.freeBytes / 1e9
       const utilizedGB = util.toFixed(totalDiskSizeGB - safeAvailableGB, 2)
-      const freeGB = (() => {
+      const freeGB = (():number => {
         const val = util.toFixed(safeAvailableGB - this.allocatedGB, 2)
         if (val >= 0) return val
         else return 0
