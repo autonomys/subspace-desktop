@@ -16,6 +16,13 @@ The main entry point for the Vue app. This file is mostly just for holding the r
 Inside the router directory there is `index.ts` and `routes.ts`. Logic which needs to run during route changes can be added in `index.ts`. `routes.ts` is where routes are registered. Generally each registered route is a component inside the `/pages` directory. Read the [Vue Router Documentation](https://router.vuejs.org/).
 
 ### [`/layouts/MainLayout.vue`](src/layouts/MainLayout.vue)
-Main Layout is the frame that all pages are rendered inside of. This includes the top navigation bar and menu elements.
+Main Layout is the frame that all pages are rendered inside of. This includes the top navigation bar and menu elements. If you wanted to add overlays or framing elements then you would place them here. You can also register multiple layouts in `router/routes.ts` if you want totally different layouts on different parts of the application. Read more about [layout component](https://quasar.dev/layout/layout).
 
 ### [`/pages`](src/pages)
+All Vue component pages go here. Usually the name of the .vue file should be the same as the router name listed in 'router/routes.ts`. The component template must start with the [q-page element](https://quasar.dev/layout/page).
+
+### [`/components`](src/components)
+Page components often contain other components which are registered here. Check the `Dashboard.vue` page for a good example of this.
+
+### [`/lib/native`](src/lib/native.ts)
+Contains utility functions for communicating with the native OS such as reading/writing files and device metadata. Contains the `AutoLauncher` class which handles registering the app to start on boot on various platforms.

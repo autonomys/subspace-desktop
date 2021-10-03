@@ -25,6 +25,7 @@ export interface TauriDriveStats {
   free_bytes: number
   total_bytes: number
 }
+// Handles registration of the app to launch on boot
 export class AutoLauncher {
   protected autoLauncher: osAL = nullAL
   appName: string = 'app'
