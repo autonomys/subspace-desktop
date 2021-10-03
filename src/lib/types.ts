@@ -1,4 +1,5 @@
 export interface FarmedBlock {
+  author: string
   blockNum: number
   time: number
   transactions: number
