@@ -29,8 +29,11 @@ const lang = global.data.loc.text.importKey
 import ms from "ms"
 export default defineComponent({
   data() {
-    let keyInput: string = ""
-    return { global: global.data, lang, keyInput }
+    return {
+      keyInput: "",
+      global: global.data,
+      lang,
+    }
   },
   computed: {
     KeyStatusMsg(): string {

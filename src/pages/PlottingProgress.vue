@@ -63,15 +63,13 @@ let timer: number
 
 export default defineComponent({
   data() {
-    let plottingData = {
-      finishedGB: 0,
-      remainingGB: 0,
-    }
-
     return {
       elapsedms: 0,
       plotting: true,
-      plottingData,
+      plottingData: {
+        finishedGB: 0,
+        remainingGB: 0,
+      },
       viewedIntro: false,
       lang,
       plotFinished: false,

@@ -17,6 +17,5 @@ export default defineComponent({
   data() {
     return { global: global.data, lang }
   },
-  mounted() {},
 })
 </script>

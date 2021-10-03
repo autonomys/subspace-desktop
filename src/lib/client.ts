@@ -67,19 +67,19 @@ export interface ClientType {
   data: ClientData
   getStatus: {
     farming: ()=>void,
-    plot: Function
+    plot: ()=>void,
     network: ()=>void
   },
   do?: { [index: string]: any }
 }
 
 function getStoredBlocks(): FarmedBlock[] {
-  let mined: FarmedBlock[] = []
+  const mined: FarmedBlock[] = []
   try {
     const blocks = LocalStorage.getItem('farmedBlocks')
     if (!blocks) return []
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    for (let [num, block] of Object.entries(blocks)) {
+    for (const [num, block] of Object.entries(blocks)) {
       mined.push(block as FarmedBlock)
     }
   } catch (error) {
@@ -89,7 +89,7 @@ function getStoredBlocks(): FarmedBlock[] {
 }
 
 function storeBlocks(blocks: FarmedBlock[]):void {
-  let farmed: { [index: string]: FarmedBlock } = {}
+  const farmed: { [index: string]: FarmedBlock } = {}
   for (const block of blocks) {
     farmed[block.id] = block
   }
@@ -120,8 +120,7 @@ export class Client {
   do = {
     blockSubscription: {
       clearStored,
-      stopOnReload(this: any, ev: Event):void {
-        ev.preventDefault()
+      stopOnReload():void {
         this.stop()
       },
       start: async ():Promise<void> => {

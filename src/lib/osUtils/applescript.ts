@@ -3,7 +3,7 @@ import * as shell from "@tauri-apps/api/shell"
 import { ChildReturnData } from "../types";
 
 export async function execString(command: string): Promise<ChildReturnData> {
-  let args = ['-e', command]
+  const args = ['-e', command]
   console.log("Executing applescript:", args);
 
   const child = new shell.Command('osascript', args)

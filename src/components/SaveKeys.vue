@@ -27,13 +27,14 @@ const lang = global.data.loc.text.saveKeys
 // const lang = {}
 import { QInput, Notify } from "quasar"
 
+// @vue/component
 export default defineComponent({
   name: "PageIndex",
   emits: ["userConfirm"],
   data() {
-    let userConfirm: boolean = false
-    let generatedPk = "98da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f"
-    let revealKey = false
+    const userConfirm = false
+    const generatedPk = "98da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f"
+    const revealKey = false
     return { revealKey, userConfirm, lang, generatedPk }
   },
   computed: {
@@ -60,6 +61,7 @@ export default defineComponent({
         this.revealKey = previousState
         Notify.create({ message: lang.saved, icon: "content_copy" })
       })
+      return 3
     },
   },
 })

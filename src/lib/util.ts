@@ -1,4 +1,5 @@
 import { Dialog, DialogChainObject, LooseDictionary } from "quasar"
+import {Component} from 'vue'
 import * as dialog from "@tauri-apps/api/dialog"
 import * as fs from "@tauri-apps/api/fs"
 import * as path from "@tauri-apps/api/path"
@@ -9,7 +10,7 @@ import * as bcrypt from 'bcryptjs'
 
 export const random = (min: number, max: number):number => Math.floor(Math.random() * (max - min)) + min;
 
-export async function showModal(component: any, props: LooseDictionary = {}): Promise<DialogChainObject | null> {
+export async function showModal(component: Component, props: LooseDictionary = {}): Promise<DialogChainObject | null> {
   console.log("Show Modal")
   return Dialog.create({
     message: "Testing",
@@ -69,7 +70,7 @@ export const config = {
     await tauri.fs.removeFile(dir + "/config.json").catch(console.error)
   },
   async update(newData: ConfigFile, dir?: string):Promise<void> {
-    let config = await this.read(dir).catch(console.error) || emptyConfig
+    const config = await this.read(dir).catch(console.error) || emptyConfig
     for (const [key, value] of Object.entries(newData)) {
       Object.assign(config[key], value)
     }
@@ -85,12 +86,12 @@ export const config = {
 export function formatMS(duration: number):string {
   duration /= 1000
   // Hours, minutes and seconds
-  var hrs = ~~(duration / 3600)
-  var mins = ~~((duration % 3600) / 60)
-  var secs = ~~duration % 60
+  const hrs = ~~(duration / 3600)
+  const mins = ~~((duration % 3600) / 60)
+  const secs = ~~duration % 60
 
   // Output like "1:01" or "4:03:59" or "123:03:59"
-  var ret = ""
+  let ret = ""
 
   if (hrs > 0) {
     ret += "" + hrs + ":" + (mins < 10 ? "0" : "")

@@ -3,7 +3,7 @@ import {getLang,LangType} from "../loc/lang"
 import { Client } from "src/lib/client"
 import { AutoLauncher } from "src/lib/native"
 
-let text: LangType = {}
+const text: LangType = {}
 // TODO use dependency injection to ensure methods and properties can't be accessed unless they are initialized and valid
 export class Global {
   client = new Client
@@ -26,5 +26,5 @@ export class Global {
   }
 }
 
-export let globalState = new Global
+export const globalState = new Global
 

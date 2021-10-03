@@ -1,5 +1,5 @@
 let loadedLangString: string
-let loadedLang: any
+let loadedLang: LangType
 export type LangType = { [index: string]: { [index: string]: string } }
 export async function getLang(langString: string):Promise<LangType> {
   if (loadedLangString != langString || loadedLang == null) {

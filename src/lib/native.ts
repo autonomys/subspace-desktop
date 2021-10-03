@@ -27,9 +27,9 @@ export interface TauriDriveStats {
 }
 export class AutoLauncher {
   protected autoLauncher: osAL = nullAL
-  appName: string = 'app'
-  appPath: string = ''
-  enabled: boolean = false
+  appName = 'app'
+  appPath = ''
+  enabled = false
   async isEnabled(): Promise<boolean> {
     const result = await this.autoLauncher.isEnabled(this.appName)
     this.enabled = result

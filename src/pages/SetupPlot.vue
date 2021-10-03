@@ -85,14 +85,18 @@ const chartOptions: ApexOptions = {
 
 export default defineComponent({
   data() {
-    let userConfirm: boolean = false
-    let generatedPk = "98da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f"
-    let revealKey = false
-    let allocatedGB = 1
-    let plotDirectory = "/Subspace/plots"
-    let defaultPath = ""
-    let driveStats: native.DriveStats = { freeBytes: 0, totalBytes: 0 }
-    return { chartOptions, revealKey, userConfirm, lang, generatedPk, plotDirectory, allocatedGB, validPath: true, defaultPath, driveStats }
+    return {
+      revealKey: false,
+      userConfirm: false,
+      generatedPk: "98da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f",
+      plotDirectory: "/Subspace/plots",
+      allocatedGB: 1,
+      validPath: true,
+      defaultPath: "/",
+      driveStats: <native.DriveStats>{ freeBytes: 0, totalBytes: 0 },
+      lang,
+      chartOptions,
+    }
   },
   computed: {
     chartData(): ChartDataType {

@@ -7,6 +7,7 @@
 // https://v2.quasar.dev/quasar-cli/quasar-conf-js
 
 const { configure } = require('quasar/wrappers');
+const ESLintPlugin = require('eslint-plugin-vue')
 
 module.exports = configure(function (ctx) {
   return {
@@ -71,6 +72,8 @@ module.exports = configure(function (ctx) {
           .test(/\.pug$/)
           .use('pug-plain-loader')
           .loader('pug-plain-loader')
+          chain.plugin('eslint-webpack-plugin')
+          .use(ESLintPlugin, [{ extensions: [ 'js', 'vue' ] }])
       },
     },
 
@@ -222,3 +225,5 @@ module.exports = configure(function (ctx) {
     }
   }
 });
+
+

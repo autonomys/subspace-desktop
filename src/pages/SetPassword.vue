@@ -30,11 +30,13 @@ import * as util from "src/lib/util"
 const lang = global.data.loc.text.setPassword
 export default defineComponent({
   data() {
-    let pw1: string = ""
-    let pw2: string = ""
-    let userConfirm: boolean = false
-    let passHash = ""
-    return { pw1, pw2, userConfirm, lang, passHash }
+    return {
+      pw1: "",
+      pw2: "",
+      userConfirm: false,
+      passHash: "",
+      lang,
+    }
   },
   computed: {
     pwStatusMsg(): string {

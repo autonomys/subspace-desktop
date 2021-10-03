@@ -30,29 +30,35 @@ import netCard from "components/netCard.vue"
 import plotCard from "components/plotCard.vue"
 import { FarmedBlock } from "src/lib/types"
 import { ClientType, ClientData, emptyData } from "src/lib/client"
-import { VoidFn } from "@polkadot/api/types"
 const lang = global.data.loc.text.dashboard
 export default defineComponent({
   components: { farmedList, netCard, plotCard },
   data() {
-    let config: util.ConfigFile = {}
-    let globalState = {
-      state: "starting",
-      message: lang.initializing,
-    }
-    let network = {
-      state: "starting",
-      message: lang.initializing,
-      peers: 0,
-    }
-    let plot = {
-      state: "starting",
-      message: lang.initializing,
-    }
-    let unsubscribe: VoidFn = () => {}
-    let clientData: ClientData = emptyData
     // TODO remove this.client after invariants are protected
-    return { lang, config, network, plot, global: global.data, client: global.client, globalState, expanded: false, util, loading: true, unsubscribe, clientData }
+    return {
+      lang,
+      config: <util.ConfigFile>{},
+      network: {
+        state: "starting",
+        message: lang.initializing,
+        peers: 0,
+      },
+      plot: {
+        state: "starting",
+        message: lang.initializing,
+      },
+      global: global.data,
+      client: global.client,
+      globalState: {
+        state: "starting",
+        message: lang.initializing,
+      },
+      expanded: false,
+      util,
+      loading: true,
+      unsubscribe: (): void => {},
+      clientData: <ClientData>emptyData,
+    }
   },
   computed: {
     farmedTotalEarned(): number {
