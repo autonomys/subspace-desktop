@@ -52,13 +52,13 @@ const lang = global.data.loc.text.dashboard
 import { FarmedBlock } from "src/lib/types"
 
 export default defineComponent({
-  emits: ["expand"],
-  data() {
-    return { lang, util, global: global.data, client: global.client }
-  },
   props: {
     expanded: { type: Boolean, default: false },
     farmedTotalEarned: { type: Number, default: 0 },
+  },
+  emits: ["expand"],
+  data() {
+    return { lang, util, global: global.data, client: global.client }
   },
   computed: {
     farmedBlocksList(): FarmedBlock[] {

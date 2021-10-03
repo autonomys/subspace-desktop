@@ -36,20 +36,6 @@ export default defineComponent({
     let passHash = ""
     return { pw1, pw2, userConfirm, lang, passHash }
   },
-  methods: {
-    async continue() {
-      this.$router.replace({ name: "setupPlot" })
-      this.$nextTick(() => {
-        setTimeout(() => {
-          const passHash = util.password.encrypt(this.pw1)
-          util.config.update({ account: { passHash } })
-        }, 3000)
-      })
-    },
-  },
-  mounted() {
-    // Dialog.create({ message: "hello" })
-  },
   computed: {
     pwStatusMsg(): string {
       if (this.pw1.length == 0 || this.pw2.length == 0) return ""
@@ -69,6 +55,20 @@ export default defineComponent({
     passwordsMatch(): boolean {
       const matching = this.pw1 == this.pw2
       return this.passwordValid && matching
+    },
+  },
+  mounted() {
+    // Dialog.create({ message: "hello" })
+  },
+  methods: {
+    async continue() {
+      this.$router.replace({ name: "setupPlot" })
+      this.$nextTick(() => {
+        setTimeout(() => {
+          const passHash = util.password.encrypt(this.pw1)
+          util.config.update({ account: { passHash } })
+        }, 3000)
+      })
     },
   },
 })

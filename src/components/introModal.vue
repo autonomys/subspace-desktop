@@ -63,13 +63,6 @@ import saveKeys from "components/SaveKeys.vue"
 
 const component = defineComponent({
   components: { saveKeys },
-  data() {
-    return {
-      totalPages: 3,
-      currentPage: 1,
-      userConfirmed: false,
-    }
-  },
   props: {
     // ...your custom props
   },
@@ -79,6 +72,13 @@ const component = defineComponent({
     "ok",
     "hide",
   ],
+  data() {
+    return {
+      totalPages: 3,
+      currentPage: 1,
+      userConfirmed: false,
+    }
+  },
   watch: {
     currentPage(val) {
       if (val > this.totalPages) this.hide()

@@ -47,12 +47,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
         p.q-mb-lg {{ lang.tooltip }}
 </template>
 
-<style lang="sass">
-.pkdisplay
-  font-size: 20px
-  padding-top: 5px
-  margin-top: 0px
-</style>
+
 
 <script lang="ts">
 import * as path from "@tauri-apps/api/path"
@@ -99,28 +94,6 @@ export default defineComponent({
     let driveStats: native.DriveStats = { freeBytes: 0, totalBytes: 0 }
     return { chartOptions, revealKey, userConfirm, lang, generatedPk, plotDirectory, allocatedGB, validPath: true, defaultPath, driveStats }
   },
-  async mounted() {
-    const homeDir = await tauri.path.homeDir()
-    this.plotDirectory = homeDir
-    this.updateDriveStats()
-    this.defaultPath = (await tauri.path.homeDir()) + ".subspace-farmer-demo"
-    this.plotDirectory = this.defaultPath
-  },
-  async created() {
-    this.$watch(
-      "plotDirectory",
-      debounce(async (val): Promise<null> => {
-        console.log(val)
-        if (this.plotDirectory == this.defaultPath) {
-          this.validPath = true
-          return null
-        }
-        this.validPath = await native.dirExists(val)
-        if (this.validPath) await this.updateDriveStats()
-        return null
-      }, 500)
-    )
-  },
   computed: {
     chartData(): ChartDataType {
       return [this.stats.utilizedGB, this.stats.freeGB, this.allocatedGB]
@@ -135,7 +108,7 @@ export default defineComponent({
       const totalDiskSizeGB = util.toFixed(this.driveStats.totalBytes / 1e9, 2)
       const safeAvailableGB = this.driveStats.freeBytes / 1e9
       const utilizedGB = util.toFixed(totalDiskSizeGB - safeAvailableGB, 2)
-      const freeGB = (():number => {
+      const freeGB = ((): number => {
         const val = util.toFixed(safeAvailableGB - this.allocatedGB, 2)
         if (val >= 0) return val
         else return 0
@@ -153,23 +126,6 @@ export default defineComponent({
     },
     unsafeFree(): boolean {
       return this.stats.freeGB < 20
-    },
-  },
-  methods: {
-    async startPlotting() {
-      if (this.plotDirectory.charAt(this.plotDirectory.length - 1) == "/") this.plotDirectory.slice(-1)
-      await util.config.update({ plot: { sizeGB: this.allocatedGB, location: this.plotDirectory + "/subspace.plot" } })
-      if (this.defaultPath != this.plotDirectory) await native.createDir(this.plotDirectory)
-      this.$router.replace({ name: "plottingProgress" })
-    },
-    async updateDriveStats() {
-      const stats = await native.driveStats(this.plotDirectory)
-      console.log("Drive Stats:", stats)
-      this.driveStats = stats
-    },
-    async selectDir() {
-      const result = await native.selectDir(this.plotDirectory).catch(console.error)
-      if (result) this.plotDirectory = result
     },
   },
   watch: {
@@ -194,5 +150,51 @@ export default defineComponent({
       }
     },
   },
+  async mounted() {
+    const homeDir = await tauri.path.homeDir()
+    this.plotDirectory = homeDir
+    this.updateDriveStats()
+    this.defaultPath = (await tauri.path.homeDir()) + ".subspace-farmer-demo"
+    this.plotDirectory = this.defaultPath
+  },
+  async created() {
+    this.$watch(
+      "plotDirectory",
+      debounce(async (val): Promise<null> => {
+        console.log(val)
+        if (this.plotDirectory == this.defaultPath) {
+          this.validPath = true
+          return null
+        }
+        this.validPath = await native.dirExists(val)
+        if (this.validPath) await this.updateDriveStats()
+        return null
+      }, 500)
+    )
+  },
+  methods: {
+    async startPlotting() {
+      if (this.plotDirectory.charAt(this.plotDirectory.length - 1) == "/") this.plotDirectory.slice(-1)
+      await util.config.update({ plot: { sizeGB: this.allocatedGB, location: this.plotDirectory + "/subspace.plot" } })
+      if (this.defaultPath != this.plotDirectory) await native.createDir(this.plotDirectory)
+      this.$router.replace({ name: "plottingProgress" })
+    },
+    async updateDriveStats() {
+      const stats = await native.driveStats(this.plotDirectory)
+      console.log("Drive Stats:", stats)
+      this.driveStats = stats
+    },
+    async selectDir() {
+      const result = await native.selectDir(this.plotDirectory).catch(console.error)
+      if (result) this.plotDirectory = result
+    },
+  },
 })
 </script>
+
+<style lang="sass">
+.pkdisplay
+  font-size: 20px
+  padding-top: 5px
+  margin-top: 0px
+</style>

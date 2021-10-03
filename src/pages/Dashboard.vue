@@ -54,6 +54,15 @@ export default defineComponent({
     // TODO remove this.client after invariants are protected
     return { lang, config, network, plot, global: global.data, client: global.client, globalState, expanded: false, util, loading: true, unsubscribe, clientData }
   },
+  computed: {
+    farmedTotalEarned(): number {
+      if (!this.client) return 0
+      return this.client.data.farming.farmed.reduce((agg, val) => {
+        return val.blockReward + val.feeReward + agg
+      }, 0)
+    },
+  },
+  watch: {},
   async mounted() {
     this.client.init() // TODO remove once invariants are protected
     const config = await util.config.read()
@@ -74,14 +83,6 @@ export default defineComponent({
     await this.readConfig()
     this.fakeStart()
     return
-  },
-  computed: {
-    farmedTotalEarned(): number {
-      if (!this.client) return 0
-      return this.client.data.farming.farmed.reduce((agg, val) => {
-        return val.blockReward + val.feeReward + agg
-      }, 0)
-    },
   },
   unmounted() {
     this.unsubscribe()
@@ -169,7 +170,6 @@ export default defineComponent({
       })
     },
   },
-  watch: {},
 })
 </script>
 

@@ -20,13 +20,6 @@
     q-checkbox(:label="lang.userConfirm" size="lg" v-model="userConfirm")
 </template>
 
-<style lang="sass">
-.pkdisplay
-  font-size: 20px
-  padding-top: 0px
-  margin-top: 0px
-</style>
-
 <script lang="ts">
 import { defineComponent } from "vue"
 import { globalState as global } from "src/lib/global"
@@ -36,6 +29,7 @@ import { QInput, Notify } from "quasar"
 
 export default defineComponent({
   name: "PageIndex",
+  emits: ["userConfirm"],
   data() {
     let userConfirm: boolean = false
     let generatedPk = "98da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f"
@@ -45,6 +39,11 @@ export default defineComponent({
   computed: {
     canContinue(): boolean {
       return this.userConfirm
+    },
+  },
+  watch: {
+    userConfirm(val) {
+      this.$emit("userConfirm", val)
     },
   },
   methods: {
@@ -63,11 +62,13 @@ export default defineComponent({
       })
     },
   },
-  emits: ["userConfirm"],
-  watch: {
-    userConfirm(val) {
-      this.$emit("userConfirm", val)
-    },
-  },
 })
 </script>
+
+
+<style lang="sass">
+.pkdisplay
+  font-size: 20px
+  padding-top: 0px
+  margin-top: 0px
+</style>
