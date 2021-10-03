@@ -111,7 +111,7 @@ export default defineComponent({
       const netData = await global.client.status.net()
       console.log(netData)
 
-      this.network.peers = netData.length
+      this.network.peers = netData.peers.length
     },
     async testClient() {
       this.client.do.blockSubscription.runTest()

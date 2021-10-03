@@ -1,4 +1,6 @@
-import { ApiPromise, WsProvider } from '@polkadot/api'
+import { ApiPromise, WsProvider, } from '@polkadot/api'
+import { Vec } from '@polkadot/types/codec'
+import { PeerInfo } from '@polkadot/types/interfaces/system'
 import * as event from '@tauri-apps/api/event'
 import { reactive } from 'vue'
 import { LocalStorage } from 'quasar'
@@ -9,6 +11,8 @@ import mitt, { Emitter } from 'mitt'
 import { FarmedBlock } from './types'
 import { FarmerId, PoCPreDigest, Solution } from './customTypes/types'
 import customTypes from './customTypes/customTypes.json'
+
+export interface NetStatus {peers:Vec<PeerInfo>}
 
 export interface PeerData {
   status: 'disconnected' | 'unstable' | 'connected' | string
@@ -116,9 +120,10 @@ export class Client {
   status = {
     farming: () => { }, // TODO return some farming status info
     plot: () => { }, // TODO return some plot status info
-    net: () => {
-      return this.api.rpc.system.peers()
-    } // TODO return some net status info
+    net: async ():Promise<NetStatus> => {
+      const peers = await this.api.rpc.system.peers()
+      return {peers}
+    }
   }
   do = {
     blockSubscription: {
