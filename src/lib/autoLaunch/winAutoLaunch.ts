@@ -4,16 +4,16 @@ import * as native from '../native'
 const subKey = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
 
 const winAutoLaunch = {
-  // eslint-disable-next-line no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async enable({ appName, appPath, hidden }: AutoLaunchParams): Promise<ChildReturnData> {
-    let returnVal = <ChildReturnData>{ stdout: [], stderr: [] }
+    const returnVal = <ChildReturnData>{ stdout: [], stderr: [] }
     const result = await native.winregSet(subKey, appName, appPath)
     if (result.search('success') > -1) returnVal.stdout.push(result)
     else returnVal.stderr.push(result)
     return returnVal
   },
   async disable(appName: string): Promise<ChildReturnData> {
-    let returnVal = <ChildReturnData>{ stdout: [], stderr: [] }
+    const returnVal = <ChildReturnData>{ stdout: [], stderr: [] }
     const result = <string>(await native.winregDelete(subKey, appName))
     if (result.search('success') > -1) returnVal.stdout.push(result)
     else returnVal.stderr.push(result)
