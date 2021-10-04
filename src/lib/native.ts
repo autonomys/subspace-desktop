@@ -6,11 +6,10 @@ import * as app from "@tauri-apps/api/app"
 import * as os from "@tauri-apps/api/os"
 import * as window from "@tauri-apps/api/window"
 import * as tProcess from "@tauri-apps/api/process"
-// import { invokeTauriCommand } from "@tauri-apps/api/"
 import { invoke } from '@tauri-apps/api/tauri'
 import macAL from "src/lib/autoLaunch/macAutoLaunch"
 import winAL from "src/lib/autoLaunch/winAutoLaunch"
-import linAL from "src/lib/autoLaunch/nullAutoLaunch"
+import linAL from "src/lib/autoLaunch/linuxAutoLaunch"
 import nullAL from "src/lib/autoLaunch/nullAutoLaunch"
 import * as applescript from "src/lib/osUtils/applescript"
 
@@ -43,7 +42,7 @@ export class AutoLauncher {
     const child = this.autoLauncher.disable(this.appName)
     return child
   }
-  async init():Promise<void> {
+  async init(): Promise<void> {
     this.appName = process.env.DEV ? "app" : (await tauri.app.getName()).toString()
     const os = await tauri.os.type()
     this.appPath = await tauri.invoke('get_this_binary') as string
@@ -56,7 +55,7 @@ export class AutoLauncher {
   }
 }
 
-export async function execString(executable: string, args: string[] | string):Promise<void> {
+export async function execString(executable: string, args: string[] | string): Promise<void> {
   const command = new tauri.shell.Command(executable, args)
   command.on('close', data => {
     console.log(`command finished with code ${data.code} and signal ${data.signal}`)
@@ -69,7 +68,7 @@ export async function execString(executable: string, args: string[] | string):Pr
 
   console.log('pid:', child.pid)
 }
-export async function createDir(path: string):Promise<void> {
+export async function createDir(path: string): Promise<void> {
   await tauri.fs.createDir(path).catch(console.error)
 }
 export async function selectDir(defaultPath: undefined | string): Promise<string | null> {
