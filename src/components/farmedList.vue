@@ -19,22 +19,25 @@ q-card(bordered flat)
 
   q-separator
   .row.q-gutter-sm.q-pa-md
+    .col-2 {{ lang.farmedBy }}
     .col-2 {{ lang.blockNum }}
-    .col-4 {{ lang.time }}
+    .col-3 {{ lang.time }}
     .col-2 {{ lang.transactions }}
-    .col-3 {{ lang.rewards }}
+    .col-2 {{ lang.rewards }}
   q-scroll-area(:style="blocksListStyle")
     transition-group(appear enter-active-class="animated slideInTop " name="list")
       .bg-white(:key="block.time" v-for="block of farmedBlocksList")
         q-separator
         .row.q-gutter-sm.q-pa-xs.q-ml-sm
-          .col-2
+          .col-2.ellipsis
+            p {{ block.author }}
+          .col-1
             p {{ block.blockNum }}
           .col-auto
             q-separator(vertical)
           .col-4
             p {{ new Date(block.time).toLocaleString() }}
-          .col-2
+          .col-1
             p {{ block.transactions }}
           .col-2
             p {{ block.blockReward }} SSC
@@ -52,13 +55,13 @@ const lang = global.data.loc.text.dashboard
 import { FarmedBlock } from "src/lib/types"
 
 export default defineComponent({
-  emits: ["expand"],
-  data() {
-    return { lang, util, global: global.data, client: global.client }
-  },
   props: {
     expanded: { type: Boolean, default: false },
     farmedTotalEarned: { type: Number, default: 0 },
+  },
+  emits: ["expand"],
+  data() {
+    return { lang, util, global: global.data, client: global.client }
   },
   computed: {
     farmedBlocksList(): FarmedBlock[] {

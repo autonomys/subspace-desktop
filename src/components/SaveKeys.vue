@@ -14,18 +14,11 @@
               q-btn.full-width.full-width(:label="lang.reveal" @click="revealKey = true" flat size="lg")
           .row.justify-center.q-mt-md
             q-btn.full-width(:label="lang.copy" @click="copyPk" outline style="max-width: 200px")
-    .row.q-ma-md.q-pa-md
+    .row
       p Private keys are your password for your subspace farmer and wallet, this cannot be changed, guessed(easily), or reset if lost. It is imperitive that this is stored in a secure, safe location. Without the Private Key you will not have access to your funds. Furthermore, anyone who steals your private keys will be able to do as they please with your funds.
-  .row.q-mt-md
+  .row.q-pt-md
     q-checkbox(:label="lang.userConfirm" size="lg" v-model="userConfirm")
 </template>
-
-<style lang="sass">
-.pkdisplay
-  font-size: 20px
-  padding-top: 0px
-  margin-top: 0px
-</style>
 
 <script lang="ts">
 import { defineComponent } from "vue"
@@ -34,17 +27,24 @@ const lang = global.data.loc.text.saveKeys
 // const lang = {}
 import { QInput, Notify } from "quasar"
 
+// @vue/component
 export default defineComponent({
   name: "PageIndex",
+  emits: ["userConfirm"],
   data() {
-    let userConfirm: boolean = false
-    let generatedPk = "98da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f"
-    let revealKey = false
+    const userConfirm = false
+    const generatedPk = "98da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f"
+    const revealKey = false
     return { revealKey, userConfirm, lang, generatedPk }
   },
   computed: {
     canContinue(): boolean {
       return this.userConfirm
+    },
+  },
+  watch: {
+    userConfirm(val) {
+      this.$emit("userConfirm", val)
     },
   },
   methods: {
@@ -61,13 +61,16 @@ export default defineComponent({
         this.revealKey = previousState
         Notify.create({ message: lang.saved, icon: "content_copy" })
       })
-    },
-  },
-  emits: ["userConfirm"],
-  watch: {
-    userConfirm(val) {
-      this.$emit("userConfirm", val)
+      return 3
     },
   },
 })
 </script>
+
+
+<style lang="sass">
+.pkdisplay
+  font-size: 20px
+  padding-top: 0px
+  margin-top: 0px
+</style>

@@ -1,4 +1,6 @@
-import { ApiPromise, WsProvider } from '@polkadot/api'
+import { ApiPromise, WsProvider, } from '@polkadot/api'
+import { Vec } from '@polkadot/types/codec'
+import { PeerInfo } from '@polkadot/types/interfaces/system'
 import * as event from '@tauri-apps/api/event'
 import { reactive } from 'vue'
 import { LocalStorage } from 'quasar'
@@ -9,6 +11,8 @@ import mitt, { Emitter } from 'mitt'
 import { FarmedBlock } from './types'
 import { FarmerId, PoCPreDigest, Solution } from './customTypes/types'
 import customTypes from './customTypes/customTypes.json'
+
+export interface NetStatus {peers:Vec<PeerInfo>}
 
 export interface PeerData {
   status: 'disconnected' | 'unstable' | 'connected' | string
@@ -66,20 +70,20 @@ export interface ClientType {
   api: ApiPromise | null
   data: ClientData
   getStatus: {
-    farming: Function
-    plot: Function
-    network: Function
+    farming: ()=>void,
+    plot: ()=>void,
+    network: ()=>void
   },
   do?: { [index: string]: any }
 }
 
 function getStoredBlocks(): FarmedBlock[] {
-  let mined: FarmedBlock[] = []
+  const mined: FarmedBlock[] = []
   try {
     const blocks = LocalStorage.getItem('farmedBlocks')
     if (!blocks) return []
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    for (let [num, block] of Object.entries(blocks)) {
+    for (const [num, block] of Object.entries(blocks)) {
       mined.push(block as FarmedBlock)
     }
   } catch (error) {
@@ -88,15 +92,15 @@ function getStoredBlocks(): FarmedBlock[] {
   return mined
 }
 
-function storeBlocks(blocks: FarmedBlock[]) {
-  let farmed: { [index: string]: FarmedBlock } = {}
+function storeBlocks(blocks: FarmedBlock[]):void {
+  const farmed: { [index: string]: FarmedBlock } = {}
   for (const block of blocks) {
     farmed[block.id] = block
   }
   LocalStorage.set('farmedBlocks', farmed)
 }
 
-function clearStored() {
+function clearStored():void {
   try {
     LocalStorage.remove('farmedBlocks')
   } catch (error) {
@@ -106,46 +110,65 @@ function clearStored() {
 
 //TODO should be refactored to not rely on the .init() method to be valid
 export class Client {
-  protected wsProvider = new WsProvider
-  protected api: ApiPromise = new ApiPromise
-  protected farmed = getStoredBlocks()
-  protected clearTauriDestroy: event.UnlistenFn = () => { }
-  protected unsubscribe: event.UnlistenFn = () => { }
-  data = reactive(emptyData)
+  protected wsProvider = new WsProvider("ws://localhost:9944");
+  protected api: ApiPromise = new ApiPromise({ provider: this.wsProvider });
+  protected farmed = getStoredBlocks();
+  protected clearTauriDestroy: event.UnlistenFn = () => { };
+  protected unsubscribe: event.UnlistenFn = () => { };
+  data = reactive(emptyData);
+
   status = {
-    farming: () => { }, // TODO return some farming status info
-    plot: () => { }, // TODO return some plot status info
-    net: () => { } // TODO return some net status info
+    farming: ():void => { }, // TODO return some farming status info
+    plot: ():void => { }, // TODO return some plot status info
+    net: async ():Promise<NetStatus> => {
+      const peers = await this.api.rpc.system.peers()
+      return {peers}
+    }
   }
   do = {
     blockSubscription: {
       clearStored,
-      stopOnReload(this: any, ev: Event) {
-        ev.preventDefault()
+      stopOnReload():void {
         this.stop()
       },
-      start: async () => {
-        this.unsubscribe = await this.api.rpc.chain.subscribeNewHeads(async (lastHeader) => {
-          const signedBlock = await this.api.rpc.chain.getBlock(lastHeader.hash)
-          for (const log of signedBlock.block.header.digest.logs) {
-            if (log.isPreRuntime) {
-              const [type, data] = log.asPreRuntime
-              if (type.toString() === 'POC_') {
-                const poCPreDigest: PoCPreDigest = this.api.registry.createType('PoCPreDigest', data)
-                const solution: Solution = this.api.registry.createType('Solution', poCPreDigest.solution)
-                const farmerId: FarmerId = this.api.registry.createType('FarmerId', solution.public_key)
-                console.log('farmerId: ', farmerId.toString())
+      start: async ():Promise<void> => {
+        this.unsubscribe = await this.api.rpc.chain.subscribeNewHeads(
+          async (lastHeader) => {
+            const signedBlock = await this.api.rpc.chain.getBlock(
+              lastHeader.hash
+            );
+            for (const log of signedBlock.block.header.digest.logs) {
+              if (log.isPreRuntime) {
+                const [type, data] = log.asPreRuntime;
+                if (type.toString() === "POC_") {
+                  const poCPreDigest: PoCPreDigest =
+                    this.api.registry.createType("PoCPreDigest", data);
+                  const solution: Solution = this.api.registry.createType(
+                    "Solution",
+                    poCPreDigest.solution
+                  );
+                  const farmerId: FarmerId = this.api.registry.createType(
+                    "FarmerId",
+                    solution.public_key
+                  );
+                  console.log("farmerId: ");
+                  const block: FarmedBlock = {
+                    author: farmerId.toString(),
+                    id: lastHeader.hash.toString(),
+                    time: Date.now(),
+                    transactions: 0,
+                    blockNum: lastHeader.number.toNumber(),
+                    blockReward: 0,
+                    feeReward: 0,
+                  };
+                  this.data.farming.farmed = [block].concat(
+                    this.data.farming.farmed
+                  );
+                  storeBlocks(this.farmed);
+                }
               }
             }
-          }
-          const block: FarmedBlock = { id: lastHeader.hash.toString(), time: Date.now(), transactions: 0, blockNum: lastHeader.number.toNumber(), blockReward: 0, feeReward: 0 }
-          this.data.farming.farmed = [block].concat(this.data.farming.farmed)
-          storeBlocks(this.farmed)
-          // this.data.farming.events.emit('farmedBlock', block)
-          // const peers = await this.api.rpc.system.peers()
-          // console.log('Peers: ', peers)
-          // console.log('PeersCount: ', peers.length)
-        })
+          })
         process.on('beforeExit', this.do.blockSubscription.stopOnReload)
         window.addEventListener('unload', this.do.blockSubscription.stopOnReload)
         this.clearTauriDestroy = await tauri.event.once('tauri://destroyed', () => {
@@ -153,7 +176,7 @@ export class Client {
           storeBlocks(this.data.farming.farmed)
         })
       },
-      stop: () => {
+      stop: ():void => {
         console.log('block subscription stop triggered')
         this.unsubscribe()
         try {
@@ -164,7 +187,7 @@ export class Client {
           console.error(error)
         }
       },
-      runTest() {
+      runTest():void {
         this.start()
       }
     }
@@ -172,7 +195,7 @@ export class Client {
   constructor() {
     this.data.farming.farmed = this.farmed
   }
-  async init() {
+  async init():Promise<void> {
     this.api = await ApiPromise.create({ provider: this.wsProvider, types: customTypes })
   }
 }

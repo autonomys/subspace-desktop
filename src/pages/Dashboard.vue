@@ -30,32 +30,47 @@ import netCard from "components/netCard.vue"
 import plotCard from "components/plotCard.vue"
 import { FarmedBlock } from "src/lib/types"
 import { ClientType, ClientData, emptyData } from "src/lib/client"
-import { VoidFn } from "@polkadot/api/types"
 const lang = global.data.loc.text.dashboard
 export default defineComponent({
   components: { farmedList, netCard, plotCard },
   data() {
-    let config: util.ConfigFile = {}
-    let globalState = {
-      state: "starting",
-      message: lang.initializing,
-    }
-    let network = {
-      state: "starting",
-      message: lang.initializing,
-      peers: 0,
-    }
-    let plot = {
-      state: "starting",
-      message: lang.initializing,
-    }
-    let unsubscribe: VoidFn = () => {}
-    let clientData: ClientData = emptyData
     // TODO remove this.client after invariants are protected
-    return { lang, config, network, plot, global: global.data, client: global.client, globalState, expanded: false, util, loading: true, unsubscribe, clientData }
+    return {
+      lang,
+      config: <util.ConfigFile>{},
+      network: {
+        state: "starting",
+        message: lang.initializing,
+        peers: 0,
+      },
+      plot: {
+        state: "starting",
+        message: lang.initializing,
+      },
+      global: global.data,
+      client: global.client,
+      globalState: {
+        state: "starting",
+        message: lang.initializing,
+      },
+      expanded: false,
+      util,
+      loading: true,
+      unsubscribe: (): void => {},
+      clientData: <ClientData>emptyData,
+    }
   },
+  computed: {
+    farmedTotalEarned(): number {
+      if (!this.client) return 0
+      return this.client.data.farming.farmed.reduce((agg, val) => {
+        return val.blockReward + val.feeReward + agg
+      }, 0)
+    },
+  },
+  watch: {},
   async mounted() {
-    this.client.init() // TODO remove once invariants are protected
+    await this.client.init() // TODO remove once invariants are protected will stall forever if there is a connection issue.
     const config = await util.config.read()
     const valid = util.config.validate(config)
     this.global.status.state = "loading"
@@ -73,15 +88,11 @@ export default defineComponent({
     }
     await this.readConfig()
     this.fakeStart()
+    this.clientData = global.client.data
+    this.testClient()
+    this.loading = false
+    setInterval(this.getNetInfo, 1000)
     return
-  },
-  computed: {
-    farmedTotalEarned(): number {
-      if (!this.client) return 0
-      return this.client.data.farming.farmed.reduce((agg, val) => {
-        return val.blockReward + val.feeReward + agg
-      }, 0)
-    },
   },
   unmounted() {
     this.unsubscribe()
@@ -103,6 +114,12 @@ export default defineComponent({
     )
   },
   methods: {
+    async getNetInfo() {
+      const netData = await global.client.status.net()
+      console.log(netData)
+
+      this.network.peers = netData.peers.length
+    },
     async testClient() {
       this.client.do.blockSubscription.runTest()
       this.client.data.farming.events.on("farmedBlock", this.farmBlock)
@@ -115,26 +132,6 @@ export default defineComponent({
       this.config = await util.config.read()
     },
     async fakeStart() {
-      setTimeout(() => {
-        setTimeout(() => {
-          this.network.peers += util.random(1, 3)
-        }, util.random(500, 1000))
-        setTimeout(() => {
-          this.network.peers += util.random(1, 3)
-        }, util.random(2000, 6000))
-        setTimeout(() => {
-          this.network.peers += util.random(1, 3)
-        }, util.random(5000, 9000))
-        setTimeout(() => {
-          this.network.peers += util.random(1, 3)
-        }, util.random(6000, 10000))
-        setTimeout(() => {
-          this.network.peers += util.random(1, 3)
-        }, util.random(9000, 200000))
-        setTimeout(() => {
-          this.network.peers += util.random(1, 3)
-        }, util.random(500, 1000))
-      }, util.random(500, 2000))
       setTimeout(() => {
         this.plot.state = "verifying"
         this.plot.message = lang.verifyingPlot
@@ -169,7 +166,6 @@ export default defineComponent({
       })
     },
   },
-  watch: {},
 })
 </script>
 
