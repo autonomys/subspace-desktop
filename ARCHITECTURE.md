@@ -19,7 +19,7 @@ Inside the router directory there is `index.ts` and `routes.ts`. Logic which nee
 Main Layout is the frame that all pages are rendered inside of. This includes the top navigation bar and menu elements. If you wanted to add overlays or framing elements then you would place them here. You can also register multiple layouts in `router/routes.ts` if you want totally different layouts on different parts of the application. Read more about [layout component](https://quasar.dev/layout/layout).
 
 ### [`/pages`](src/pages)
-All Vue component pages go here. Usually the name of the .vue file should be the same as the router name listed in 'router/routes.ts`. The component template must start with the [q-page element](https://quasar.dev/layout/page).
+All Vue component pages go here. Usually the name of the .vue file should be the same as the router name listed in `router/routes.ts`. The component template must start with the [q-page element](https://quasar.dev/layout/page).
 
 ### [`/components`](src/components)
 Page components often contain other components which are registered here. Check the `Dashboard.vue` page for a good example of this.
@@ -31,7 +31,7 @@ Contains utility functions for communicating with the native OS such as reading/
 The global state object. Contains data, clases and functions that can easily be shared across all components. The `Global` class has an `init()` method which initializes the localization and autoLauncher logic.
 
 ### [`/lib/client.ts`](src/lib/client.ts)
-Wrapper logic around polkadotjs which handles communication with the Subspace client. There is wrapper function for getting information about blocks, peers and other data. This library has to be initialized async using a websocket conneection and wil hang if the connection is unable to establish. Currently we handle the initialization inside Dashboard.vue.
+Wrapper logic around polkadotjs which handles communication with the Subspace client. There is wrapper function for getting information about blocks, peers and other data. This library has to be initialized async using a websocket conneection and will hang if the connection is unable to establish. Currently we handle the initialization inside Dashboard.vue.
 
 ### [`/lib/autolaunch`](src/lib/autolaunch)
 Contains utility functions for handling the launch on boot functionality of the `AutoLauncher` class.
@@ -39,11 +39,11 @@ Contains utility functions for handling the launch on boot functionality of the 
 ## Backend (Rust + Tauri) `/src-tauri`
 The backend of the app is handled by the [Tauri Framework](https://tauri.studio/) and written in [Rust](https://www.rust-lang.org/).
 
-### [`tauri.conf.json`](/src-tauri/tauri.conf.json)
+### [`/src-tauri/tauri.conf.json`](src-tauri/tauri.conf.json)
 The Tauri framework is configured here. For details about configuration refer to the [config documentation](https://tauri.studio/en/docs/api/config).
 
-### [`/icons`](/src-tauri/icons)
+### [`src-tauri/icons`](src-tauri/icons)
 Platform icons are stored here. The icons can be automatically generated using `yarn tauri icon` as documented [here](https://tauri.studio/en/docs/usage/guides/visual/icons/).
 
-### [`/src`](/src-tauri/src)
+### [`src-tauri/src`](src-tauri/src)
 Main rust files are stored here. `main.rs` is the main entry point for the application and contains custom backend logic. The Rust Tauri API is documented [here](https://tauri.studio/en/docs/api/rust/tauri/index).
