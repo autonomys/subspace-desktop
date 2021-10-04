@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { AutoLaunchParams, ChildReturnData } from '../types'
 
 const nullAutoLaunch = {

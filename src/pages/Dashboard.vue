@@ -30,30 +30,45 @@ import netCard from "components/netCard.vue"
 import plotCard from "components/plotCard.vue"
 import { FarmedBlock } from "src/lib/types"
 import { ClientType, ClientData, emptyData } from "src/lib/client"
-import { VoidFn } from "@polkadot/api/types"
 const lang = global.data.loc.text.dashboard
 export default defineComponent({
   components: { farmedList, netCard, plotCard },
   data() {
-    let config: util.ConfigFile = {}
-    let globalState = {
-      state: "starting",
-      message: lang.initializing,
-    }
-    let network = {
-      state: "starting",
-      message: lang.initializing,
-      peers: 0,
-    }
-    let plot = {
-      state: "starting",
-      message: lang.initializing,
-    }
-    let unsubscribe: VoidFn = () => {}
-    let clientData: ClientData = emptyData
     // TODO remove this.client after invariants are protected
-    return { lang, config, network, plot, global: global.data, client: global.client, globalState, expanded: false, util, loading: true, unsubscribe, clientData }
+    return {
+      lang,
+      config: <util.ConfigFile>{},
+      network: {
+        state: "starting",
+        message: lang.initializing,
+        peers: 0,
+      },
+      plot: {
+        state: "starting",
+        message: lang.initializing,
+      },
+      global: global.data,
+      client: global.client,
+      globalState: {
+        state: "starting",
+        message: lang.initializing,
+      },
+      expanded: false,
+      util,
+      loading: true,
+      unsubscribe: (): void => {},
+      clientData: <ClientData>emptyData,
+    }
   },
+  computed: {
+    farmedTotalEarned(): number {
+      if (!this.client) return 0
+      return this.client.data.farming.farmed.reduce((agg, val) => {
+        return val.blockReward + val.feeReward + agg
+      }, 0)
+    },
+  },
+  watch: {},
   async mounted() {
     await this.client.init() // TODO remove once invariants are protected will stall forever if there is a connection issue.
     const config = await util.config.read()
@@ -78,14 +93,6 @@ export default defineComponent({
     this.loading = false
     setInterval(this.getNetInfo, 1000)
     return
-  },
-  computed: {
-    farmedTotalEarned(): number {
-      if (!this.client) return 0
-      return this.client.data.farming.farmed.reduce((agg, val) => {
-        return val.blockReward + val.feeReward + agg
-      }, 0)
-    },
   },
   unmounted() {
     this.unsubscribe()
@@ -159,7 +166,6 @@ export default defineComponent({
       })
     },
   },
-  watch: {},
 })
 </script>
 

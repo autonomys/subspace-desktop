@@ -1,4 +1,5 @@
 import { Dialog, DialogChainObject, LooseDictionary } from "quasar"
+import {Component} from 'vue'
 import * as dialog from "@tauri-apps/api/dialog"
 import * as fs from "@tauri-apps/api/fs"
 import * as path from "@tauri-apps/api/path"
@@ -7,9 +8,9 @@ const tauri = { dialog, fs, path, invoke }
 import * as native from './native'
 import * as bcrypt from 'bcryptjs'
 
-export const random = (min: number, max: number) => Math.floor(Math.random() * (max - min)) + min;
+export const random = (min: number, max: number):number => Math.floor(Math.random() * (max - min)) + min;
 
-export async function showModal(component: any, props: LooseDictionary = {}): Promise<DialogChainObject | null> {
+export async function showModal(component: Component, props: LooseDictionary = {}): Promise<DialogChainObject | null> {
   console.log("Show Modal")
   return Dialog.create({
     message: "Testing",
@@ -20,7 +21,7 @@ export async function showModal(component: any, props: LooseDictionary = {}): Pr
   })
 }
 
-export function toFixed(num: number, precision: number) {
+export function toFixed(num: number, precision: number):number {
   if (!num) return 0
   return parseFloat(num.toFixed(precision))
 }
@@ -29,7 +30,7 @@ export function plotTimeMsEstimate(gb: number): number {
   return gb * 5e4
 }
 
-export async function reset() {
+export async function reset():Promise<void> {
   try {
     const configData = await config.read()
     if (configData?.plot?.location) await tauri.fs.removeFile(configData.plot.location).catch(console.error)
@@ -59,38 +60,38 @@ export const config = {
     const config: ConfigFile = JSON.parse(result)
     return config
   },
-  async write(dir: string = "", config: ConfigFile) {
+  async write(dir: string = "", config: ConfigFile):Promise<void> {
     if (dir == "") dir = (await tauri.path.homeDir()) + ".subspace-farmer-demo"
     await native.createDir(dir).catch(console.error)
     await tauri.fs.writeFile({ path: dir + "/config.json", contents: JSON.stringify(config, null, 2) })
   },
-  async clear(dir?: string) {
+  async clear(dir?: string):Promise<void> {
     if (!dir) dir = (await tauri.path.homeDir()) + ".subspace-farmer-demo"
     await tauri.fs.removeFile(dir + "/config.json").catch(console.error)
   },
-  async update(newData: ConfigFile, dir?: string) {
-    let config = await this.read(dir).catch(console.error) || emptyConfig
+  async update(newData: ConfigFile, dir?: string):Promise<void> {
+    const config = await this.read(dir).catch(console.error) || emptyConfig
     for (const [key, value] of Object.entries(newData)) {
       Object.assign(config[key], value)
     }
     await this.write(dir, config)
   },
-  showErrorModal() {
+  showErrorModal():DialogChainObject{
     return Dialog.create({ message: "Config file is corrupted, resetting..." })
   }
 }
 
 
 
-export function formatMS(duration: number) {
+export function formatMS(duration: number):string {
   duration /= 1000
   // Hours, minutes and seconds
-  var hrs = ~~(duration / 3600)
-  var mins = ~~((duration % 3600) / 60)
-  var secs = ~~duration % 60
+  const hrs = ~~(duration / 3600)
+  const mins = ~~((duration % 3600) / 60)
+  const secs = ~~duration % 60
 
   // Output like "1:01" or "4:03:59" or "123:03:59"
-  var ret = ""
+  let ret = ""
 
   if (hrs > 0) {
     ret += "" + hrs + ":" + (mins < 10 ? "0" : "")
@@ -107,7 +108,7 @@ export const password = {
     const salt = bcrypt.genSaltSync(10)
     const hash = bcrypt.hashSync(pass, salt)
     return hash
-  }, check(pass: string, hash: string) {
+  }, check(pass: string, hash: string):boolean {
     return bcrypt.compareSync(pass, hash); // true
   }
 }

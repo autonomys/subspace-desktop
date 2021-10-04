@@ -70,20 +70,20 @@ export interface ClientType {
   api: ApiPromise | null
   data: ClientData
   getStatus: {
-    farming: Function
-    plot: Function
-    network: Function
+    farming: ()=>void,
+    plot: ()=>void,
+    network: ()=>void
   },
   do?: { [index: string]: any }
 }
 
 function getStoredBlocks(): FarmedBlock[] {
-  let mined: FarmedBlock[] = []
+  const mined: FarmedBlock[] = []
   try {
     const blocks = LocalStorage.getItem('farmedBlocks')
     if (!blocks) return []
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    for (let [num, block] of Object.entries(blocks)) {
+    for (const [num, block] of Object.entries(blocks)) {
       mined.push(block as FarmedBlock)
     }
   } catch (error) {
@@ -92,15 +92,15 @@ function getStoredBlocks(): FarmedBlock[] {
   return mined
 }
 
-function storeBlocks(blocks: FarmedBlock[]) {
-  let farmed: { [index: string]: FarmedBlock } = {}
+function storeBlocks(blocks: FarmedBlock[]):void {
+  const farmed: { [index: string]: FarmedBlock } = {}
   for (const block of blocks) {
     farmed[block.id] = block
   }
   LocalStorage.set('farmedBlocks', farmed)
 }
 
-function clearStored() {
+function clearStored():void {
   try {
     LocalStorage.remove('farmedBlocks')
   } catch (error) {
@@ -118,8 +118,8 @@ export class Client {
   data = reactive(emptyData);
 
   status = {
-    farming: () => { }, // TODO return some farming status info
-    plot: () => { }, // TODO return some plot status info
+    farming: ():void => { }, // TODO return some farming status info
+    plot: ():void => { }, // TODO return some plot status info
     net: async ():Promise<NetStatus> => {
       const peers = await this.api.rpc.system.peers()
       return {peers}
@@ -128,11 +128,10 @@ export class Client {
   do = {
     blockSubscription: {
       clearStored,
-      stopOnReload(this: any, ev: Event) {
-        ev.preventDefault()
+      stopOnReload():void {
         this.stop()
       },
-      start: async () => {
+      start: async ():Promise<void> => {
         this.unsubscribe = await this.api.rpc.chain.subscribeNewHeads(
           async (lastHeader) => {
             const signedBlock = await this.api.rpc.chain.getBlock(
@@ -177,7 +176,7 @@ export class Client {
           storeBlocks(this.data.farming.farmed)
         })
       },
-      stop: () => {
+      stop: ():void => {
         console.log('block subscription stop triggered')
         this.unsubscribe()
         try {
@@ -188,7 +187,7 @@ export class Client {
           console.error(error)
         }
       },
-      runTest() {
+      runTest():void {
         this.start()
       }
     }
@@ -196,7 +195,7 @@ export class Client {
   constructor() {
     this.data.farming.farmed = this.farmed
   }
-  async init() {
+  async init():Promise<void> {
     this.api = await ApiPromise.create({ provider: this.wsProvider, types: customTypes })
   }
 }

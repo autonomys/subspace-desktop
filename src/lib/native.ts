@@ -27,9 +27,9 @@ export interface TauriDriveStats {
 }
 export class AutoLauncher {
   protected autoLauncher: osAL = nullAL
-  appName: string = 'app'
-  appPath: string = ''
-  enabled: boolean = false
+  appName = 'app'
+  appPath = ''
+  enabled = false
   async isEnabled(): Promise<boolean> {
     const result = await this.autoLauncher.isEnabled(this.appName)
     this.enabled = result
@@ -43,7 +43,7 @@ export class AutoLauncher {
     const child = this.autoLauncher.disable(this.appName)
     return child
   }
-  async init() {
+  async init():Promise<void> {
     this.appName = process.env.DEV ? "app" : (await tauri.app.getName()).toString()
     const os = await tauri.os.type()
     this.appPath = await tauri.invoke('get_this_binary') as string
@@ -56,7 +56,7 @@ export class AutoLauncher {
   }
 }
 
-export async function execString(executable: string, args: string[] | string) {
+export async function execString(executable: string, args: string[] | string):Promise<void> {
   const command = new tauri.shell.Command(executable, args)
   command.on('close', data => {
     console.log(`command finished with code ${data.code} and signal ${data.signal}`)
@@ -69,9 +69,8 @@ export async function execString(executable: string, args: string[] | string) {
 
   console.log('pid:', child.pid)
 }
-export async function createDir(path: string) {
-  const result = await tauri.fs.createDir(path).catch(console.error)
-  return result
+export async function createDir(path: string):Promise<void> {
+  await tauri.fs.createDir(path).catch(console.error)
 }
 export async function selectDir(defaultPath: undefined | string): Promise<string | null> {
   let exists: boolean = false

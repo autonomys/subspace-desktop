@@ -39,11 +39,11 @@ import { globalState as global } from "src/lib/global"
 const lang = global.data.loc.text.dashboard
 
 export default defineComponent({
-  data() {
-    return { lang, util }
-  },
   props: {
     network: { type: Object, required: true },
+  },
+  data() {
+    return { lang, util }
   },
 })
 </script>

@@ -29,20 +29,11 @@ const lang = global.data.loc.text.importKey
 import ms from "ms"
 export default defineComponent({
   data() {
-    let keyInput: string = ""
-    return { global: global.data, lang, keyInput }
-  },
-  methods: {
-    importKey() {
-      Loading.show({ message: lang.importing, boxClass: "bg-grey-2 text-grey-9" })
-      setTimeout(() => {
-        Loading.show({ message: lang.imported, boxClass: "bg-grey-2 text-grey-9", spinnerColor: "green" })
-      }, ms("2s"))
-      setTimeout(() => {
-        this.$router.replace({ name: "setupPlot" })
-        Loading.hide()
-      }, ms("3s"))
-    },
+    return {
+      keyInput: "",
+      global: global.data,
+      lang,
+    }
   },
   computed: {
     KeyStatusMsg(): string {
@@ -56,6 +47,18 @@ export default defineComponent({
     statusMsgStyle(): string[] {
       if (this.validKey) return ["greenMsg"]
       else return ["redMsg"]
+    },
+  },
+  methods: {
+    importKey() {
+      Loading.show({ message: lang.importing, boxClass: "bg-grey-2 text-grey-9" })
+      setTimeout(() => {
+        Loading.show({ message: lang.imported, boxClass: "bg-grey-2 text-grey-9", spinnerColor: "green" })
+      }, ms("2s"))
+      setTimeout(() => {
+        this.$router.replace({ name: "setupPlot" })
+        Loading.hide()
+      }, ms("3s"))
     },
   },
 })

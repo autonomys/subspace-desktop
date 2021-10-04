@@ -30,25 +30,13 @@ import * as util from "src/lib/util"
 const lang = global.data.loc.text.setPassword
 export default defineComponent({
   data() {
-    let pw1: string = ""
-    let pw2: string = ""
-    let userConfirm: boolean = false
-    let passHash = ""
-    return { pw1, pw2, userConfirm, lang, passHash }
-  },
-  methods: {
-    async continue() {
-      this.$router.replace({ name: "setupPlot" })
-      this.$nextTick(() => {
-        setTimeout(() => {
-          const passHash = util.password.encrypt(this.pw1)
-          util.config.update({ account: { passHash } })
-        }, 3000)
-      })
-    },
-  },
-  mounted() {
-    // Dialog.create({ message: "hello" })
+    return {
+      pw1: "",
+      pw2: "",
+      userConfirm: false,
+      passHash: "",
+      lang,
+    }
   },
   computed: {
     pwStatusMsg(): string {
@@ -69,6 +57,20 @@ export default defineComponent({
     passwordsMatch(): boolean {
       const matching = this.pw1 == this.pw2
       return this.passwordValid && matching
+    },
+  },
+  mounted() {
+    // Dialog.create({ message: "hello" })
+  },
+  methods: {
+    async continue() {
+      this.$router.replace({ name: "setupPlot" })
+      this.$nextTick(() => {
+        setTimeout(() => {
+          const passHash = util.password.encrypt(this.pw1)
+          util.config.update({ account: { passHash } })
+        }, 3000)
+      })
     },
   },
 })
