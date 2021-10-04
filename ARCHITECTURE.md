@@ -24,5 +24,26 @@ All Vue component pages go here. Usually the name of the .vue file should be the
 ### [`/components`](src/components)
 Page components often contain other components which are registered here. Check the `Dashboard.vue` page for a good example of this.
 
-### [`/lib/native`](src/lib/native.ts)
+### [`/lib/native.ts`](src/lib/native.ts)
 Contains utility functions for communicating with the native OS such as reading/writing files and device metadata. Contains the `AutoLauncher` class which handles registering the app to start on boot on various platforms.
+
+### [`/lib/global.ts`](src/lib/global.ts)
+The global state object. Contains data, clases and functions that can easily be shared across all components. The `Global` class has an `init()` method which initializes the localization and autoLauncher logic.
+
+### [`/lib/client.ts`](src/lib/client.ts)
+Wrapper logic around polkadotjs which handles communication with the Subspace client. There is wrapper function for getting information about blocks, peers and other data. This library has to be initialized async using a websocket conneection and wil hang if the connection is unable to establish. Currently we handle the initialization inside Dashboard.vue.
+
+### [`/lib/autolaunch`](src/lib/autolaunch)
+Contains utility functions for handling the launch on boot functionality of the `AutoLauncher` class.
+
+## Backend (Rust + Tauri) `/src-tauri`
+The backend of the app is handled by the [Tauri Framework](https://tauri.studio/) and written in [Rust](https://www.rust-lang.org/).
+
+### [`tauri.conf.json`](/src-tauri/tauri.conf.json)
+The Tauri framework is configured here. For details about configuration refer to the [config documentation](https://tauri.studio/en/docs/api/config).
+
+### [`/icons`](/src-tauri/icons)
+Platform icons are stored here. The icons can be automatically generated using `yarn tauri icon` as documented [here](https://tauri.studio/en/docs/usage/guides/visual/icons/).
+
+### [`/src`](/src-tauri/src)
+Main rust files are stored here. `main.rs` is the main entry point for the application and contains custom backend logic. The Rust Tauri API is documented [here](https://tauri.studio/en/docs/api/rust/tauri/index).
