@@ -28,16 +28,14 @@ const linAL = {
   async enable({ appName, appPath, minimized }: AutoLaunchParams): Promise<ChildReturnData> {
     const response: ChildReturnData = { stderr: [], stdout: [] }
     const hiddenArg = minimized ? ' --minimized' : '';
-
+    // TODO setup correct PATH_TO_APP_ICON currently the icon is packed inside the executable only.
     const contents = `
 [Desktop Entry]
 Type=Application
-Version=1.0
 Name=${appName}
-Comment=${appName}startup script
+Comment=${appName} startup script
 Exec=${appPath}${hiddenArg}
-StartupNotify=false
-Terminal=false
+Icon=PATH_TO_APP_ICON
   `
     await fs.createDir(this.getDirectory()).catch(console.error)
     await fs.writeFile({ contents, path: this.getFilePath(appName) })
