@@ -8,7 +8,7 @@ export interface FarmedBlock {
   id: string
 }
 
-export interface AutoLaunchParams { appName: string, appPath: string, hidden: boolean }
+export interface AutoLaunchParams { appName: string, appPath: string, minimized: boolean }
 
 
 export interface ChildReturnData { stdout: string[], stderr: string[] }

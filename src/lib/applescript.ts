@@ -1,6 +1,6 @@
 
 import * as shell from "@tauri-apps/api/shell"
-import { ChildReturnData } from "../types";
+import { ChildReturnData } from "./types";
 
 export async function execString(command: string): Promise<ChildReturnData> {
   const args = ['-e', command]
