@@ -30,14 +30,14 @@ const linAL = {
     const hiddenArg = hidden ? ' --hidden' : '';
 
     const contents = `
-    [Desktop Entry]
-    Type=Application
-    Version=1.0
-    Name=${appName}
-    Comment=${appName}startup script
-    Exec=${appPath}${hiddenArg}
-    StartupNotify=false
-    Terminal=false
+  [Desktop Entry]
+  Type=Application
+  Version=1.0
+  Name=${appName}
+  Comment=${appName}startup script
+  Exec=${appPath}${hiddenArg}
+  StartupNotify=false
+  Terminal=false
   `
     await fs.createDir(this.getDirectory()).catch(console.error)
     await fs.writeFile({ contents, path: this.getFilePath(appName) })
@@ -85,6 +85,7 @@ const macAL = {
 
 const winAL = {
   subKey: "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+  // TODO add support for hidden on windows
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async enable({ appName, appPath, hidden }: AutoLaunchParams): Promise<ChildReturnData> {
     const returnVal = <ChildReturnData>{ stdout: [], stderr: [] }
@@ -108,11 +109,11 @@ const winAL = {
   }
 }
 
-
+// TODO make class impossible to instantiate uninitialized
 export class AutoLauncher {
   protected autoLauncher: osAL = nullAL
-  appName = 'app'
-  appPath = ''
+  protected appName = 'app'
+  protected appPath = ''
   enabled = false
   async isEnabled(): Promise<boolean> {
     const result = await this.autoLauncher.isEnabled(this.appName)
