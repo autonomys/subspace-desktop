@@ -30,14 +30,14 @@ const linAL = {
     const hiddenArg = minimized ? ' --minimized' : '';
 
     const contents = `
-  [Desktop Entry]
-  Type=Application
-  Version=1.0
-  Name=${appName}
-  Comment=${appName}startup script
-  Exec=${appPath}${hiddenArg}
-  StartupNotify=false
-  Terminal=false
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=${appName}
+Comment=${appName}startup script
+Exec=${appPath}${hiddenArg}
+StartupNotify=false
+Terminal=false
   `
     await fs.createDir(this.getDirectory()).catch(console.error)
     await fs.writeFile({ contents, path: this.getFilePath(appName) })
