@@ -10,7 +10,7 @@ type osAL = typeof macAL | typeof winAL | typeof linAL | typeof nullAL
 
 const nullAL = {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async enable({ appName, appPath, hidden }: AutoLaunchParams): Promise<ChildReturnData> {
+  async enable({ appName, appPath, minimized }: AutoLaunchParams): Promise<ChildReturnData> {
     return { stdout: [], stderr: [] }
   },
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -25,9 +25,9 @@ const nullAL = {
 
 const linAL = {
 
-  async enable({ appName, appPath, hidden }: AutoLaunchParams): Promise<ChildReturnData> {
+  async enable({ appName, appPath, minimized }: AutoLaunchParams): Promise<ChildReturnData> {
     const response: ChildReturnData = { stderr: [], stdout: [] }
-    const hiddenArg = hidden ? ' --hidden' : '';
+    const hiddenArg = minimized ? ' --minimized' : '';
 
     const contents = `
   [Desktop Entry]
@@ -64,8 +64,8 @@ const linAL = {
 }
 
 const macAL = {
-  async enable({ appName, appPath, hidden }: AutoLaunchParams): Promise<ChildReturnData> {
-    const isHiddenValue = hidden ? 'true' : 'false';
+  async enable({ appName, appPath, minimized }: AutoLaunchParams): Promise<ChildReturnData> {
+    const isHiddenValue = minimized ? 'true' : 'false';
     const properties = `{path:"${appPath}", hidden:${isHiddenValue}, name:"${appName}"}`;
     console.log('properties', properties);
     return native.execApplescriptCommand(`make login item at end with properties ${properties}`);
@@ -87,7 +87,7 @@ const winAL = {
   subKey: "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
   // TODO add support for hidden on windows
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async enable({ appName, appPath, hidden }: AutoLaunchParams): Promise<ChildReturnData> {
+  async enable({ appName, appPath, minimized }: AutoLaunchParams): Promise<ChildReturnData> {
     const returnVal = <ChildReturnData>{ stdout: [], stderr: [] }
     const result = await native.winregSet(this.subKey, appName, appPath)
     if (result.search('success') > -1) returnVal.stdout.push(result)
@@ -121,7 +121,7 @@ export class AutoLauncher {
     return result
   }
   async enable(): Promise<void | ChildReturnData> {
-    const child = await this.autoLauncher.enable({ appName: this.appName, appPath: this.appPath, hidden: false })
+    const child = await this.autoLauncher.enable({ appName: this.appName, appPath: this.appPath, minimized: false })
     return child
   }
   async disable(): Promise<void | ChildReturnData> {
