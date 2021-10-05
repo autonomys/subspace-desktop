@@ -53,7 +53,10 @@ yarn tauri --help
 ```
 
 ### Customize Quasar config
-See [Configuring quasar.conf.js](https://v2.quasar.dev/quasar-cli/quasar-conf-js).
+<https://v2.quasar.dev/quasar-cli/quasar-conf-js>
 
 ### Customize Tauri config
-https://tauri.studio/en/docs/api/config
+<https://tauri.studio/en/docs/api/config>
+
+### Contribute to development
+Review the [ARCHITECTURE.md](./ARCHITECTURE.md) document for an overview of the application design.
