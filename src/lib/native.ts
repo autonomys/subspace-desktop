@@ -7,14 +7,9 @@ import * as os from "@tauri-apps/api/os"
 import * as window from "@tauri-apps/api/window"
 import * as tProcess from "@tauri-apps/api/process"
 import { invoke } from '@tauri-apps/api/tauri'
-import macAL from "src/lib/autoLaunch/macAutoLaunch"
-import winAL from "src/lib/autoLaunch/winAutoLaunch"
-import linAL from "src/lib/autoLaunch/linuxAutoLaunch"
-import nullAL from "src/lib/autoLaunch/nullAutoLaunch"
-import * as applescript from "src/lib/osUtils/applescript"
+import { ChildReturnData } from "./types";
+import * as applescript from "./applescript"
 
-import { ChildReturnData } from "./types"
-type osAL = typeof macAL | typeof winAL | typeof linAL | typeof nullAL
 const tauri = { app, dialog, fs, path, invoke, shell, os, window, process: tProcess }
 export interface DriveStats {
   freeBytes: number
@@ -23,36 +18,6 @@ export interface DriveStats {
 export interface TauriDriveStats {
   free_bytes: number
   total_bytes: number
-}
-export class AutoLauncher {
-  protected autoLauncher: osAL = nullAL
-  appName = 'app'
-  appPath = ''
-  enabled = false
-  async isEnabled(): Promise<boolean> {
-    const result = await this.autoLauncher.isEnabled(this.appName)
-    this.enabled = result
-    return result
-  }
-  async enable(): Promise<void | ChildReturnData> {
-    const child = await this.autoLauncher.enable({ appName: this.appName, appPath: this.appPath, hidden: false })
-    return child
-  }
-  async disable(): Promise<void | ChildReturnData> {
-    const child = this.autoLauncher.disable(this.appName)
-    return child
-  }
-  async init(): Promise<void> {
-    this.appName = process.env.DEV ? "app" : (await tauri.app.getName()).toString()
-    const os = await tauri.os.type()
-    this.appPath = await tauri.invoke('get_this_binary') as string
-    console.log('get_this_binary', this.appPath);
-    console.log(this.appPath);
-    if (os == 'Darwin') this.autoLauncher = macAL
-    else if (os == 'Windows_NT') this.autoLauncher = winAL
-    else this.autoLauncher = linAL
-    this.enabled = (await this.isEnabled())
-  }
 }
 
 export async function execString(executable: string, args: string[] | string): Promise<void> {

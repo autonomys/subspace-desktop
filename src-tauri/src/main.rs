@@ -100,6 +100,8 @@ fn main() {
     windows::winreg_get,
     windows::winreg_set,
     windows::winreg_delete,
+    get_this_binary,
+    get_disk_stats
   ]);
 
   builder
