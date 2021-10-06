@@ -9,8 +9,8 @@ mod windows;
 use serde::Serialize;
 use std::path::PathBuf;
 use tauri::{
-  api, CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
-  WindowEvent,
+  api::{self},
+  CustomMenuItem, Event, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
 };
 
 #[derive(Serialize)]
@@ -45,32 +45,10 @@ fn main() {
     .add_native_item(SystemTrayMenuItem::Separator)
     .add_item(quit);
   let tray = SystemTray::new().with_menu(tray_menu);
-  let builder = tauri::Builder::default()
-    .setup(|app| {
-      let window = app.get_window("main").unwrap();
 
-      // app.listen_global("window-closed", |data| {
-      //   println!("{:?}", data.payload());
-      //   let item_handle = app.tray_handle().get_item(&"toggle_visibility");
-      // });
-
-      window.on_window_event({
-        let window = window.clone();
-        move |event| match event {
-          WindowEvent::CloseRequested => {
-            println!("Close requested");
-            window.trigger_global("window-closed", Some(String::from("hi")));
-            // let item_handle = app.tray_handle().get_item(&"toggle_visibility");
-            // window.hide().unwrap();
-            // item_handle.set_title("Show").unwrap();
-          }
-          _ => {}
-        }
-      });
-      Ok(())
-    })
+  #[allow(unused_mut)]
+  let mut app = tauri::Builder::default()
     .system_tray(tray)
-    // .on_window_event(handler)
     .on_system_tray_event(|app, event| match event {
       SystemTrayEvent::MenuItemClick { id, .. } => {
         let item_handle = app.tray_handle().get_item(&id);
@@ -93,18 +71,34 @@ fn main() {
       }
       _ => {}
     })
-    .invoke_handler(tauri::generate_handler![get_disk_stats, get_this_binary]);
-
-  #[cfg(target_os = "windows")]
-  let builder = builder.invoke_handler(tauri::generate_handler![
-    windows::winreg_get,
-    windows::winreg_set,
-    windows::winreg_delete,
-    get_this_binary,
-    get_disk_stats
-  ]);
-
-  builder
-    .run(tauri::generate_context!())
+    .invoke_handler(
+      #[cfg(not(target_os = "windows"))]
+      tauri::generate_handler![get_disk_stats, get_this_binary],
+      #[cfg(target_os = "windows")]
+      tauri::generate_handler![
+        windows::winreg_get,
+        windows::winreg_set,
+        windows::winreg_delete,
+        get_this_binary,
+        get_disk_stats
+      ],
+    )
+    .build(tauri::generate_context!())
     .expect("error while running tauri application");
+  app.run(|app_handle, e| match e {
+    Event::CloseRequested { label, api, .. } => {
+      let app_handle = app_handle.clone();
+      let window = app_handle.get_window(&label).unwrap();
+      // use the exposed close api, and prevent the event loop to close
+      api.prevent_close(); // prevent the window from closing
+      window.hide().unwrap(); // hide the window
+      let tray_handle = app_handle.tray_handle().clone();
+      let item_handle = tray_handle.get_item(&"toggle_visibility");
+      item_handle.set_title("Show").unwrap(); // update the tray menu title to reflect the hidden state of the window
+    }
+    Event::ExitRequested { api, .. } => {
+      api.prevent_exit();
+    }
+    _ => {}
+  })
 }
