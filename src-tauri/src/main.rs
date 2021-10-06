@@ -60,12 +60,14 @@ fn main() {
             let window = app.get_window("main").unwrap();
             if window.is_visible().unwrap() {
               window.hide().unwrap();
-              // app.set_activation_policy(tauri::ActivationPolicy::Accessory); // This should hide the main taskbar icon when the window is hidden, however there is a borrow error
+              //#[cfg(target_os = "macos")]
+              // app.set_activation_policy(tauri::ActivationPolicy::Accessory); // TODO This should hide the main taskbar icon when the window is hidden, however there is a borrow error
 
               item_handle.set_title("Show").unwrap();
             } else {
               window.show().unwrap();
-              // app.set_activation_policy(tauri::ActivationPolicy::Regular); // This should show the main taskbar icon when the window is visible, however there is a borrow error
+              //#[cfg(target_os = "macos")]
+              // app.set_activation_policy(tauri::ActivationPolicy::Regular); // TODO This should show the main taskbar icon when the window is visible, however there is a borrow error
               item_handle.set_title("Hide").unwrap();
             }
           }
@@ -88,7 +90,7 @@ fn main() {
     )
     .build(tauri::generate_context!())
     .expect("error while running tauri application");
-  // #[cfg(target_os = "macos")]
+  #[cfg(target_os = "macos")]
   app.set_activation_policy(tauri::ActivationPolicy::Regular);
   app.run(|app_handle, e| match e {
     Event::CloseRequested { label, api, .. } => {
@@ -97,7 +99,8 @@ fn main() {
       // use the exposed close api, and prevent the event loop to close
       api.prevent_close(); // prevent the window from closing
       window.hide().unwrap(); // hide the window
-                              // app.set_activation_policy(tauri::ActivationPolicy::Accessory); // This should hide the main taskbar icon when the window is closed, however there is a borrow error
+                              //#[cfg(target_os = "macos")]
+                              // app.set_activation_policy(tauri::ActivationPolicy::Accessory); // TODO This should hide the main taskbar icon when the window is closed, however there is a borrow error
       let tray_handle = app_handle.tray_handle().clone();
       let item_handle = tray_handle.get_item(&"toggle_visibility");
       item_handle.set_title("Show").unwrap(); // update the tray menu title to reflect the hidden state of the window
