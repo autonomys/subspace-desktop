@@ -46,8 +46,7 @@ fn main() {
     .add_item(quit);
   let tray = SystemTray::new().with_menu(tray_menu);
 
-  #[allow(unused_mut)]
-  let mut app = tauri::Builder::default()
+  let app = tauri::Builder::default()
     .system_tray(tray)
     .on_system_tray_event(|app, event| match event {
       SystemTrayEvent::MenuItemClick { id, .. } => {
@@ -97,10 +96,12 @@ fn main() {
       let app_handle = app_handle.clone();
       let window = app_handle.get_window(&label).unwrap();
       // use the exposed close api, and prevent the event loop to close
-      api.prevent_close(); // prevent the window from closing
-      window.hide().unwrap(); // hide the window
-                              //#[cfg(target_os = "macos")]
-                              // app.set_activation_policy(tauri::ActivationPolicy::Accessory); // TODO This should hide the main taskbar icon when the window is closed, however there is a borrow error
+      api.prevent_close();
+      // hide the window
+      window.hide().unwrap();
+      // TODO This should hide the main taskbar icon when the window is closed on macos, however there is a borrow error
+      // #[cfg(target_os = "macos")]
+      // app.set_activation_policy(tauri::ActivationPolicy::Accessory);
       let tray_handle = app_handle.tray_handle().clone();
       let item_handle = tray_handle.get_item(&"toggle_visibility");
       item_handle.set_title("Show").unwrap(); // update the tray menu title to reflect the hidden state of the window
