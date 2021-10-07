@@ -89,8 +89,6 @@ fn main() {
     )
     .build(tauri::generate_context!())
     .expect("error while running tauri application");
-  #[cfg(target_os = "macos")]
-  app.set_activation_policy(tauri::ActivationPolicy::Regular);
   app.run(|app_handle, e| match e {
     Event::CloseRequested { label, api, .. } => {
       let app_handle = app_handle.clone();
