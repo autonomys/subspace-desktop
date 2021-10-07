@@ -4,6 +4,7 @@
   "private": true,
   "description": "Simple desktop app for Subspace farmers.",
   "author": "",
+  "license": "Apache-2.0",
   "scripts": {
     "lint": "yarn eslint --quiet ./src/",
     "lint:all": "yarn eslint ./src/",
