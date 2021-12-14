@@ -12,6 +12,7 @@ use tauri::{
   api::{self},
   CustomMenuItem, Event, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
 };
+use subspace_farmer::{Commitments, Farming, Identity, ObjectMappings, Plot, Plotting, WsRpc};
 
 #[derive(Serialize)]
 struct DiskStats {
