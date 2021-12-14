@@ -5,9 +5,9 @@ mixin page1
     h6.q-ml-md What is Plotting, Farming, & Rewards
   //- .row.q-mb-md
   .row.q-mb-md
-    p Plotting is the process of assigning various "plots" aka tiny spots across the allocated storage of your hard drive. You can think of this as planting the seeds in a tilled field. Every plot is cryptographically independant, and verifiable, all of the plots are stored in a single file on your system.
+    p Plotting is the process of assigning various "plots" aka tiny spots across the allocated storage of your hard drive. You can think of this as planting the seeds in a tilled field. Every plot is cryptographically independent, and verifiable, all of the plots are stored in a single file on your system.
     br
-    p Farming is the act of checking with the current "challgenge" of the blockchain and seeing if any of your plots will win the challenge, you can think of this as checking to see if your various crops are ripe for the picking.
+    p Farming is the act of checking with the current "challenge" of the blockchain and seeing if any of your plots will win the challenge, you can think of this as checking to see if your various crops are ripe for the picking.
     br
     p If your "fruit is ripe" aka if you have a plot that wins the current challenge then you are rewarded with subspace credits. aka "Winning the block".
 mixin page2

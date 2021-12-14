@@ -4,13 +4,16 @@ import { PeerInfo } from '@polkadot/types/interfaces/system'
 import * as event from '@tauri-apps/api/event'
 import { reactive } from 'vue'
 import { LocalStorage } from 'quasar'
-const tauri = { event }
+
 // import { Header } from '@polkadot/types/interfaces/runtime'
 import * as process from 'process'
 import mitt, { Emitter } from 'mitt'
 import { FarmedBlock } from './types'
 import { FarmerId, PoCPreDigest, Solution } from './customTypes/types'
 import customTypes from './customTypes/customTypes.json'
+import { invoke } from '@tauri-apps/api/tauri'
+
+const tauri = { event, invoke }
 
 export interface NetStatus {peers:Vec<PeerInfo>}
 
@@ -198,4 +201,8 @@ export class Client {
   async init():Promise<void> {
     this.api = await ApiPromise.create({ provider: this.wsProvider, types: customTypes })
   }
+}
+
+export async function startFarming() {
+  await tauri.invoke('farming')
 }

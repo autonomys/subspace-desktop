@@ -48,6 +48,7 @@ export async function dirExists(dir: string): Promise<boolean> {
 }
 export async function driveStats(dir: string): Promise<DriveStats> {
   const result = (await tauri.invoke('get_disk_stats', { dir })) as TauriDriveStats
+  //const something = (await tauri.invoke('farming'))
   const stats: DriveStats = { freeBytes: result.free_bytes, totalBytes: result.total_bytes }
   return stats
 }
