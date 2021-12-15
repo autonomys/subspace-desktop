@@ -53,12 +53,18 @@ checksum = "8b26702f315f53b6071259e15dd9d64528213b44d61de1ec926eca7715d62203"
 name = "app"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
+ "dirs 4.0.0",
  "fs2",
+ "jsonrpsee",
+ "log",
  "serde",
  "serde_json",
  "subspace-farmer",
+ "subspace-solving",
  "tauri",
  "tauri-build",
+ "tokio",
  "winreg",
 ]
 
@@ -3404,8 +3410,6 @@ version = "4.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a415a013dd7c5d4221382329a5a3482566da675737494935cbbbcdec04662f9d"
 dependencies = [
- "cc",
- "libc",
  "smallvec",
 ]
 
@@ -4057,7 +4061,7 @@ dependencies = [
 [[package]]
 name = "subspace-archiving"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?branch=version-compatibility#078db9bd67dcd75023de5f40c73908165d42c70c"
+source = "git+https://github.com/subspace/subspace#3dbf3606d236f3e24ba81fb74f7f90d5fc0d1cc9"
 dependencies = [
  "merkletree",
  "parity-scale-codec",
@@ -4072,7 +4076,7 @@ dependencies = [
 [[package]]
 name = "subspace-core-primitives"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?branch=version-compatibility#078db9bd67dcd75023de5f40c73908165d42c70c"
+source = "git+https://github.com/subspace/subspace#3dbf3606d236f3e24ba81fb74f7f90d5fc0d1cc9"
 dependencies = [
  "hmac",
  "parity-scale-codec",
@@ -4085,7 +4089,7 @@ dependencies = [
 [[package]]
 name = "subspace-farmer"
 version = "0.3.0"
-source = "git+https://github.com/subspace/subspace?branch=version-compatibility#078db9bd67dcd75023de5f40c73908165d42c70c"
+source = "git+https://github.com/subspace/subspace#3dbf3606d236f3e24ba81fb74f7f90d5fc0d1cc9"
 dependencies = [
  "anyhow",
  "async-lock",
@@ -4119,7 +4123,7 @@ dependencies = [
 [[package]]
 name = "subspace-rpc-primitives"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?branch=version-compatibility#078db9bd67dcd75023de5f40c73908165d42c70c"
+source = "git+https://github.com/subspace/subspace#3dbf3606d236f3e24ba81fb74f7f90d5fc0d1cc9"
 dependencies = [
  "hex-buffer-serde",
  "serde",
@@ -4129,7 +4133,7 @@ dependencies = [
 [[package]]
 name = "subspace-solving"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?branch=version-compatibility#078db9bd67dcd75023de5f40c73908165d42c70c"
+source = "git+https://github.com/subspace/subspace#3dbf3606d236f3e24ba81fb74f7f90d5fc0d1cc9"
 dependencies = [
  "num_cpus",
  "rayon",
