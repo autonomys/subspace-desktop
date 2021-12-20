@@ -29,7 +29,7 @@ import farmedList from "components/farmedList.vue"
 import netCard from "components/netCard.vue"
 import plotCard from "components/plotCard.vue"
 import { FarmedBlock } from "src/lib/types"
-import { ClientType, ClientData, emptyData } from "src/lib/client"
+import { ClientType, ClientData, emptyData, startFarming} from "src/lib/client"
 const lang = global.data.loc.text.dashboard
 export default defineComponent({
   components: { farmedList, netCard, plotCard },
@@ -69,6 +69,9 @@ export default defineComponent({
     },
   },
   watch: {},
+  async beforeMount(){
+    await this.initFarming()
+  },
   async mounted() {
     await this.client.init() // TODO remove once invariants are protected will stall forever if there is a connection issue.
     const config = await util.config.read()
@@ -165,6 +168,9 @@ export default defineComponent({
         position: "bottom-right",
       })
     },
+    async initFarming() {
+      await startFarming()
+    }
   },
 })
 </script>

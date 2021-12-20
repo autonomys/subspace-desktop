@@ -14,10 +14,10 @@ use tauri::{
   CustomMenuItem, Event, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
 };
 use anyhow::{anyhow, Result};
-use log::info;
 use jsonrpsee::ws_server::WsServerBuilder;
+use log::info;
 use std::net::SocketAddr;
-use subspace_farmer::ws_rpc_server::{RpcServer,RpcServerImpl};
+use subspace_farmer::ws_rpc_server::{RpcServer, RpcServerImpl};
 use subspace_farmer::{
   Commitments, Farming, Identity, ObjectMappings, Plot, Plotting, RpcClient, WsRpc,
 };
@@ -32,7 +32,10 @@ struct DiskStats {
 #[tauri::command]
 async fn farming(){
   let path = get_path(None);
-  let _ = farm(path, "ws://127.0.0.1:9944", "127.0.0.1:9955".parse().unwrap()).await;
+  let node_rpc_url: String = "ws://127.0.0.1:9944".to_string();
+  let ws_server_listen_addr: SocketAddr = "127.0.0.1:9955".parse().unwrap();
+
+  let _ = farm(path, &node_rpc_url, ws_server_listen_addr).await;
 }
 
 #[tauri::command]
@@ -143,10 +146,20 @@ pub(crate) async fn farm(
   // TODO: This doesn't account for the fact that node can
   // have a completely different history to what farmer expects
   info!("Opening plot");
-  let plot = Plot::open_or_create(&base_directory).await?;
+  let plot_fut = tokio::task::spawn_blocking({
+    let base_directory = base_directory.clone();
+
+    move || Plot::open_or_create(&base_directory)
+  });
+  let plot = plot_fut.await.unwrap()?;
 
   info!("Opening commitments");
-  let commitments = Commitments::new(base_directory.join("commitments").into()).await?;
+  let commitments_fut = tokio::task::spawn_blocking({
+    let path = base_directory.join("commitments");
+
+    move || Commitments::new(path)
+  });
+  let commitments = commitments_fut.await.unwrap()?;
 
   info!("Opening object mapping");
   let object_mappings = tokio::task::spawn_blocking({
@@ -166,7 +179,7 @@ pub(crate) async fn farm(
 
   let identity = Identity::open_or_create(&base_directory)?;
 
-  let subspace_codec = SubspaceCodec::new(&identity.public_key());
+  let subspace_codec = SubspaceCodec::new(identity.public_key());
 
   // Start RPC server
   let ws_server = WsServerBuilder::default()
@@ -210,7 +223,7 @@ pub(crate) async fn farm(
   Ok(())
 }
 
-fn get_path(custom_path: Option<PathBuf>) -> PathBuf {
+pub(crate) fn get_path(custom_path: Option<PathBuf>) -> PathBuf {
   // set storage path
   let path = custom_path
     .or_else(|| std::env::var("SUBSPACE_DIR").map(PathBuf::from).ok())

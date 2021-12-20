@@ -15,7 +15,7 @@
           .row.justify-center.q-mt-md
             q-btn.full-width(:label="lang.copy" @click="copyPk" outline style="max-width: 200px")
     .row
-      p Private keys are your password for your subspace farmer and wallet, this cannot be changed, guessed(easily), or reset if lost. It is imperitive that this is stored in a secure, safe location. Without the Private Key you will not have access to your funds. Furthermore, anyone who steals your private keys will be able to do as they please with your funds.
+      p Private keys are your password for your subspace farmer and wallet, this cannot be changed, guessed(easily), or reset if lost. It is imperative that this is stored in a secure, safe location. Without the Private Key you will not have access to your funds. Furthermore, anyone who steals your private keys will be able to do as they please with your funds.
   .row.q-pt-md
     q-checkbox(:label="lang.userConfirm" size="lg" v-model="userConfirm")
 </template>

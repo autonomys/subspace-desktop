@@ -18,7 +18,7 @@ q-page.q-pl-xl.q-pr-xl.q-pt-lg
     .col
     .col-auto
       //- q-btn(@click="testModal" label="tst modal")
-      q-btn(:disable="!passwordsMatch" @click="continue" icon-right="arrow_forward" :label="lang.continue" outline size="lg")
+      q-btn(:label="lang.continue" @click="continue" :disable="!passwordsMatch" icon-right="arrow_forward" outline size="lg")
       q-tooltip.q-pa-md(v-if="!passwordsMatch")
         p.q-mb-lg {{ lang.tooltip }}
 </template>
