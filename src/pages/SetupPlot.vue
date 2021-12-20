@@ -72,7 +72,6 @@ interface StatsType {
 }
 type ChartDataType = number[]
 import { ApexOptions } from "apexcharts"
-import { startFarming } from "src/lib/client"
 const chartOptions: ApexOptions = {
   legend: { show: false },
   colors: ["#E0E0E0", "#FFFFFF", "#2081F0"],
@@ -161,7 +160,6 @@ export default defineComponent({
     this.updateDriveStats()
     this.defaultPath = (await tauri.path.homeDir()) + ".subspace-farmer-demo"
     this.plotDirectory = this.defaultPath
-    await this.initFarming()
   },
   async created() {
     this.$watch(
@@ -189,9 +187,6 @@ export default defineComponent({
       const stats = await native.driveStats(this.plotDirectory)
       console.log("Drive Stats:", stats)
       this.driveStats = stats
-    },
-    async initFarming() {
-      await startFarming()
     },
     async selectDir() {
       const result = await native.selectDir(this.plotDirectory).catch(console.error)
