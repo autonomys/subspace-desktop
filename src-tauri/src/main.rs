@@ -6,22 +6,20 @@
 #[cfg(target_os = "windows")]
 mod windows;
 
+use anyhow::{anyhow, Result};
+use jsonrpsee::ws_server::WsServerBuilder;
+use log::info;
 use serde::Serialize;
-use std::fs;
-use std::path::PathBuf;
+use std::{fs, net::SocketAddr, path::PathBuf};
+use subspace_farmer::{
+  ws_rpc_server::{RpcServer, RpcServerImpl},
+  Commitments, Farming, Identity, ObjectMappings, Plot, Plotting, RpcClient, WsRpc,
+};
+use subspace_solving::SubspaceCodec;
 use tauri::{
   api::{self},
   CustomMenuItem, Event, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
 };
-use anyhow::{anyhow, Result};
-use jsonrpsee::ws_server::WsServerBuilder;
-use log::info;
-use std::net::SocketAddr;
-use subspace_farmer::ws_rpc_server::{RpcServer, RpcServerImpl};
-use subspace_farmer::{
-  Commitments, Farming, Identity, ObjectMappings, Plot, Plotting, RpcClient, WsRpc,
-};
-use subspace_solving::SubspaceCodec;
 
 #[derive(Serialize)]
 struct DiskStats {
@@ -30,12 +28,14 @@ struct DiskStats {
 }
 
 #[tauri::command]
-async fn farming(){
+async fn farming() -> [u8; 32] {
   let path = get_path(None);
   let node_rpc_url: String = "ws://127.0.0.1:9944".to_string();
   let ws_server_listen_addr: SocketAddr = "127.0.0.1:9955".parse().unwrap();
 
-  let _ = farm(path, &node_rpc_url, ws_server_listen_addr).await;
+  // start farming, and return the public key of the farmer
+  let public_key = farm(path, &node_rpc_url, ws_server_listen_addr).await;
+  public_key.unwrap()
 }
 
 #[tauri::command]
@@ -132,7 +132,6 @@ async fn main() -> Result<()> {
     _ => {}
   });
 
-
   Ok(())
 }
 
@@ -142,7 +141,7 @@ pub(crate) async fn farm(
   base_directory: PathBuf,
   node_rpc_url: &str,
   ws_server_listen_addr: SocketAddr,
-) -> Result<(), anyhow::Error> {
+) -> Result<[u8; 32], anyhow::Error> {
   // TODO: This doesn't account for the fact that node can
   // have a completely different history to what farmer expects
   info!("Opening plot");
@@ -167,7 +166,7 @@ pub(crate) async fn farm(
 
     move || ObjectMappings::open_or_create(&base_directory)
   })
-    .await??;
+  .await??;
 
   info!("Connecting to node at {}", node_rpc_url);
   let client = WsRpc::new(node_rpc_url).await?;
@@ -198,8 +197,12 @@ pub(crate) async fn farm(
   info!("WS RPC server listening on {}", ws_server_addr);
 
   // start the farming task
-  let farming_instance =
-    Farming::start(plot.clone(), commitments.clone(), client.clone(), identity);
+  let farming_instance = Farming::start(
+    plot.clone(),
+    commitments.clone(),
+    client.clone(),
+    identity.clone(),
+  );
 
   // start the background plotting
   let plotting_instance = Plotting::start(
@@ -211,16 +214,20 @@ pub(crate) async fn farm(
     subspace_codec,
   );
 
-  tokio::select! {
-        res = plotting_instance.wait() => if let Err(error) = res {
-            return Err(anyhow!(error))
-        },
-        res = farming_instance.wait() => if let Err(error) = res {
-            return Err(anyhow!(error))
-        },
+  // wait for the farming and plotting in the background
+  tokio::spawn(async {
+    tokio::select! {
+      res = plotting_instance.wait() => if let Err(error) = res {
+        return Err(anyhow!(error))
+      },
+      res = farming_instance.wait() => if let Err(error) = res {
+        return Err(anyhow!(error))
+      },
     }
+    Ok(())
+  });
 
-  Ok(())
+  Ok(identity.public_key().to_bytes())
 }
 
 pub(crate) fn get_path(custom_path: Option<PathBuf>) -> PathBuf {
@@ -234,9 +241,8 @@ pub(crate) fn get_path(custom_path: Option<PathBuf>) -> PathBuf {
     });
 
   if !path.exists() {
-    fs::create_dir_all(&path).unwrap_or_else(|error| {
-      panic!("Failed to create data directory {:?}: {:?}", path, error)
-    });
+    fs::create_dir_all(&path)
+      .unwrap_or_else(|error| panic!("Failed to create data directory {:?}: {:?}", path, error));
   }
 
   path

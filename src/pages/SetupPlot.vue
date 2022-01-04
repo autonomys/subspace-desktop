@@ -23,7 +23,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
                 q-tooltip.q-pa-sm
                   p {{ lang.suggest }}
               .q-mt-sm {{ lang.allocated }}
-              q-input.q-field--highlighted(color="blue" dense input-class="pkdisplay" outlined suffix="GB" type="number" v-model="allocatedGB")
+              q-input.q-field--highlighted(color="blue" dense input-class="pkdisplay" outlined suffix="GB" type="number" min="1" v-model="allocatedGB")
         .col.q-pr-md
           .row.justify-center(style="transform: scale(-1, 1)")
             apexchart(:options="chartOptions" :series="chartData" type="donut" width="200px")

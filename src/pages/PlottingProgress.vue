@@ -114,7 +114,8 @@ export default defineComponent({
   async mounted() {
     await this.getPlotConfig()
     //this.startPlotting()
-    await this.initFarming()
+    const public_key = await this.initFarming()
+    console.log(`This is VUE: Received the public key: ${public_key}`)
   },
   unmounted() {
     if (interval) clearInterval(interval)
@@ -161,7 +162,8 @@ export default defineComponent({
       })
     },
     async initFarming() {
-      await startFarming()
+      const public_key = await startFarming()
+      return public_key
     },
   },
 })
