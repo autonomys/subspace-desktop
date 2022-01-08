@@ -44,9 +44,9 @@
         "entitlements": "entitlements.plist"
       },
       "windows": {
-        "certificateThumbprint": null,
+        "certificateThumbprint": "00a427587b911908f59b6c42ba2863109c599c1c",
         "digestAlgorithm": "sha256",
-        "timestampUrl": ""
+        "timestampUrl": "http://timestamp.comodoca.com"
       }
     },
     "updater": {
