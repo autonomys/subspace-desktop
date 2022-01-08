@@ -1,31 +1,88 @@
 name: "ci tests"
-on: [push, pull_request]
+on:
+  push:
+    paths-ignore:
+      - 'docs/**'
+      - 'README.md'
+      - 'ARCHITECTURE.md'
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - 'README.md'
+      - 'ARCHITECTURE.md'
 
 jobs:
   test-tauri:
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-latest, ubuntu-latest, windows-latest]
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-2019
+          - windows-2022
 
-    runs-on: ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v2
-    - name: setup node
-      uses: actions/setup-node@v1
-      with:
-        node-version: 14
-    - name: install Rust stable
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-    - name: install webkit2gtk (ubuntu only)
-      if: matrix.platform == 'ubuntu-latest'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.0-dev libappindicator3-dev
-    - name: install app dependencies and build it
-      run: yarn && yarn build
-    - uses: tauri-apps/tauri-action@v0
+      - name: git checkout
+        uses: actions/checkout@v2
+
+      - name: setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+
+      - name: install Rust nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly-2021-12-14
+          override: true
+          components: rustfmt, clippy
+
+        # Workaround to resolve link error with C:\msys64\mingw64\bin\libclang.dll
+      - name: Remove msys64
+        run: Remove-Item -LiteralPath "C:\msys64\" -Force -Recurse
+        if: runner.os == 'Windows'
+
+      - name: install webkit2gtk (ubuntu only)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.0-dev libappindicator3-dev
+
+    # Imports PFX Certificate into keystore, allows Tauri to then sign the exe without being passed the private key.
+    # This normally should not be required on CI-Tests, but due to the way that tauri has its code signing configuration for windows it is required that we sign or the build will fail.
+    - name: import windows certificate
+      if: matrix.platform == 'windows-latest'
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        WINDOWS_PFX: ${{ secrets.CERTIFICATE_WINDOWS_PFX }}
+        WINDOWS_PFX_PASSWORD: ${{ secrets.CERTIFICATE_WINDOWS_PASSWORD }}
+      run: |
+        New-Item -ItemType directory -Path certificate
+        Set-Content -Path certificate/tempCert.txt -Value $env:WINDOWS_PFX
+        certutil -decode certificate/tempCert.txt certificate/certificate.pfx
+        Remove-Item –path certificate -include tempCert.txt
+        Import-PfxCertificate -FilePath certificate/certificate.pfx -CertStoreLocation Cert:\CurrentUser\My -Password (ConvertTo-SecureString -String $env:WINDOWS_PFX_PASSWORD -Force -AsPlainText)
+
+      - name: install app dependencies and build it
+        run: yarn && yarn build
+        env:
+          MACOSX_DEPLOYMENT_TARGET: '10.13'
+
+      - name: tauri run
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MACOSX_DEPLOYMENT_TARGET: '10.13'
+
+      - name: fmt
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --manifest-path src-tauri/Cargo.toml --all -- --check
+
+      - name: clippy
+        uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --manifest-path src-tauri/Cargo.toml -- -D warnings
