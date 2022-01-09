@@ -54,7 +54,6 @@ import { defineComponent } from "vue"
 import { globalState as global } from "src/lib/global"
 const lang = global.data.loc.text.plottingProgress
 import * as util from "src/lib/util"
-import { startFarming } from "src/lib/client"
 import introModal from "components/introModal.vue"
 import TimeAgo from "javascript-time-ago"
 import en from "javascript-time-ago/locale/en"
@@ -113,9 +112,7 @@ export default defineComponent({
   },
   async mounted() {
     await this.getPlotConfig()
-    //this.startPlotting()
-    const public_key = await this.initFarming()
-    console.log(`This is VUE: Received the public key: ${public_key}`)
+    this.startPlotting()
   },
   unmounted() {
     if (interval) clearInterval(interval)
@@ -160,10 +157,6 @@ export default defineComponent({
       modal?.onDismiss(() => {
         this.viewedIntro = true
       })
-    },
-    async initFarming() {
-      const public_key = await startFarming()
-      return public_key
     },
   },
 })
