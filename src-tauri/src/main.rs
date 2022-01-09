@@ -18,6 +18,7 @@ use subspace_farmer::{
 use subspace_solving::SubspaceCodec;
 use tauri::{
   api::{self},
+  embed_plist::get_info_plist,
   CustomMenuItem, Event, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
 };
 
@@ -28,8 +29,9 @@ struct DiskStats {
 }
 
 #[tauri::command]
-async fn farming() -> [u8; 32] {
-  let path = get_path(None);
+async fn farming(path: String) -> [u8; 32] {
+  let path_buf = PathBuf::from(path);
+  let path = get_path(Some(path_buf));
   let node_rpc_url: String = "ws://127.0.0.1:9944".to_string();
   let ws_server_listen_addr: SocketAddr = "127.0.0.1:9955".parse().unwrap();
 

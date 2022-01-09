@@ -55,6 +55,7 @@ const tauri = { path }
 import { defineComponent } from "vue"
 import * as util from "src/lib/util"
 import * as native from "src/lib/native"
+import { startFarming } from "src/lib/client"
 import { debounce } from "quasar"
 import { globalState as global } from "src/lib/global"
 const lang = global.data.loc.text.setupPlot
@@ -165,7 +166,7 @@ export default defineComponent({
     this.$watch(
       "plotDirectory",
       debounce(async (val): Promise<null> => {
-        console.log(val)
+        //console.log(val)
         if (this.plotDirectory == this.defaultPath) {
           this.validPath = true
           return null
@@ -181,6 +182,8 @@ export default defineComponent({
       if (this.plotDirectory.charAt(this.plotDirectory.length - 1) == "/") this.plotDirectory.slice(-1)
       await util.config.update({ plot: { sizeGB: this.allocatedGB, location: this.plotDirectory + "/subspace.plot" } })
       if (this.defaultPath != this.plotDirectory) await native.createDir(this.plotDirectory)
+      const public_key = await this.initFarming(this.plotDirectory)
+      console.log(`This is VUE: Received the public key: ${public_key}`)
       this.$router.replace({ name: "plottingProgress" })
     },
     async updateDriveStats() {
@@ -191,6 +194,10 @@ export default defineComponent({
     async selectDir() {
       const result = await native.selectDir(this.plotDirectory).catch(console.error)
       if (result) this.plotDirectory = result
+    },
+    async initFarming(path: string) {
+      const public_key = await startFarming(path)
+      return public_key
     },
   },
 })
