@@ -18,7 +18,6 @@ use subspace_farmer::{
 use subspace_solving::SubspaceCodec;
 use tauri::{
   api::{self},
-  embed_plist::get_info_plist,
   CustomMenuItem, Event, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
 };
 

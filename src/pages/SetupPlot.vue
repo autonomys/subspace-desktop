@@ -53,6 +53,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
 import * as path from "@tauri-apps/api/path"
 const tauri = { path }
 import { defineComponent } from "vue"
+import { LocalStorage } from 'quasar'
 import * as util from "src/lib/util"
 import * as native from "src/lib/native"
 import { startFarming } from "src/lib/client"
@@ -184,6 +185,8 @@ export default defineComponent({
       if (this.defaultPath != this.plotDirectory) await native.createDir(this.plotDirectory)
       const public_key = await this.initFarming(this.plotDirectory)
       console.log(`This is VUE: Received the public key: ${public_key}`)
+      // TODO: find a way to store and retrieve the public key from client.ts. 
+      LocalStorage.set('farmerPublicKey', public_key)
       this.$router.replace({ name: "plottingProgress" })
     },
     async updateDriveStats() {
