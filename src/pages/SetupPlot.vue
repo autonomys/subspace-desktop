@@ -183,9 +183,8 @@ export default defineComponent({
       if (this.plotDirectory.charAt(this.plotDirectory.length - 1) == "/") this.plotDirectory.slice(-1)
       await util.config.update({ plot: { sizeGB: this.allocatedGB, location: this.plotDirectory + "/subspace.plot" } })
       if (this.defaultPath != this.plotDirectory) await native.createDir(this.plotDirectory)
-      const public_key = await this.initFarming(this.plotDirectory)
-      console.log(`This is VUE: Received the public key: ${public_key}`)
-      // TODO: find a way to store and retrieve the public key from client.ts. 
+      const public_key = await startFarming(this.plotDirectory)
+      // TODO: find a way to store and retrieve the public key from client.ts.
       LocalStorage.set('farmerPublicKey', public_key)
       this.$router.replace({ name: "plottingProgress" })
     },
@@ -197,10 +196,6 @@ export default defineComponent({
     async selectDir() {
       const result = await native.selectDir(this.plotDirectory).catch(console.error)
       if (result) this.plotDirectory = result
-    },
-    async initFarming(path: string) {
-      const public_key = await startFarming(path)
-      return public_key
     },
   },
 })

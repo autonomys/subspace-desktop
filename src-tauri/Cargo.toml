@@ -6,11 +6,11 @@ authors = [ "you" ]
 license = "Apache-2.0"
 repository = ""
 default-run = "app"
-edition = "2018"
+edition = "2021"
 build = "src/build.rs"
 
 [build-dependencies]
-tauri-build = { version = "1.0.0-beta.2" }
+tauri-build = { version = "1.0.0-beta.4" }
 
 [dependencies]
 anyhow = "1.0.44"

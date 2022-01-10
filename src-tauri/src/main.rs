@@ -7,12 +7,10 @@
 mod windows;
 
 use anyhow::{anyhow, Result};
-use jsonrpsee::ws_server::WsServerBuilder;
 use log::info;
 use serde::Serialize;
-use std::{fs, net::SocketAddr, path::PathBuf};
+use std::path::PathBuf;
 use subspace_farmer::{
-  ws_rpc_server::{RpcServer, RpcServerImpl},
   Commitments, Farming, Identity, ObjectMappings, Plot, Plotting, RpcClient, WsRpc,
 };
 use subspace_solving::SubspaceCodec;
@@ -30,30 +28,29 @@ struct DiskStats {
 #[tauri::command]
 async fn farming(path: String) -> [u8; 32] {
   let path_buf = PathBuf::from(path);
-  let path = get_path(Some(path_buf));
   let node_rpc_url: String = "ws://127.0.0.1:9944".to_string();
-  let ws_server_listen_addr: SocketAddr = "127.0.0.1:9955".parse().unwrap();
 
   // start farming, and return the public key of the farmer
-  let public_key = farm(path, &node_rpc_url, ws_server_listen_addr).await;
+  let public_key = farm(path_buf, &node_rpc_url).await;
   public_key.unwrap()
 }
 
 #[tauri::command]
 fn get_disk_stats(dir: String) -> DiskStats {
-  println!("{}", dir.to_string());
+  println!("{}", dir);
   let free: u64 = fs2::available_space(&dir).expect("error");
   let total: u64 = fs2::total_space(&dir).expect("error");
-  return DiskStats {
+
+  DiskStats {
     free_bytes: free,
     total_bytes: total,
-  };
+  }
 }
 
 #[tauri::command]
 fn get_this_binary() -> PathBuf {
   let bin = api::process::current_binary();
-  return bin.unwrap();
+  bin.unwrap()
 }
 
 #[tokio::main]
@@ -69,8 +66,8 @@ async fn main() -> Result<()> {
 
   let app = tauri::Builder::default()
     .system_tray(tray)
-    .on_system_tray_event(|app, event| match event {
-      SystemTrayEvent::MenuItemClick { id, .. } => {
+    .on_system_tray_event(|app, event| {
+      if let SystemTrayEvent::MenuItemClick { id, .. } = event {
         let item_handle = app.tray_handle().get_item(&id);
         match id.as_str() {
           "quit" => {
@@ -94,7 +91,6 @@ async fn main() -> Result<()> {
           _ => {}
         }
       }
-      _ => {}
     })
     .invoke_handler(
       #[cfg(not(target_os = "windows"))]
@@ -123,8 +119,8 @@ async fn main() -> Result<()> {
       // TODO This should hide the main taskbar icon when the window is closed on macos, however there is a borrow error
       // #[cfg(target_os = "macos")]
       // app.set_activation_policy(tauri::ActivationPolicy::Accessory);
-      let tray_handle = app_handle.tray_handle().clone();
-      let item_handle = tray_handle.get_item(&"toggle_visibility");
+      let tray_handle = app_handle.tray_handle();
+      let item_handle = tray_handle.get_item("toggle_visibility");
       item_handle.set_title("Show").unwrap(); // update the tray menu title to reflect the hidden state of the window
     }
     Event::ExitRequested { api, .. } => {
@@ -141,7 +137,6 @@ async fn main() -> Result<()> {
 pub(crate) async fn farm(
   base_directory: PathBuf,
   node_rpc_url: &str,
-  ws_server_listen_addr: SocketAddr,
 ) -> Result<[u8; 32], anyhow::Error> {
   // TODO: This doesn't account for the fact that node can
   // have a completely different history to what farmer expects
@@ -181,22 +176,6 @@ pub(crate) async fn farm(
 
   let subspace_codec = SubspaceCodec::new(identity.public_key());
 
-  // Start RPC server
-  let ws_server = WsServerBuilder::default()
-    .build(ws_server_listen_addr)
-    .await?;
-  let ws_server_addr = ws_server.local_addr()?;
-  let rpc_server = RpcServerImpl::new(
-    farmer_metadata.record_size,
-    farmer_metadata.recorded_history_segment_size,
-    plot.clone(),
-    object_mappings.clone(),
-    subspace_codec,
-  );
-  let _stop_handle = ws_server.start(rpc_server.into_rpc())?;
-
-  info!("WS RPC server listening on {}", ws_server_addr);
-
   // start the farming task
   let farming_instance = Farming::start(
     plot.clone(),
@@ -229,22 +208,4 @@ pub(crate) async fn farm(
   });
 
   Ok(identity.public_key().to_bytes())
-}
-
-pub(crate) fn get_path(custom_path: Option<PathBuf>) -> PathBuf {
-  // set storage path
-  let path = custom_path
-    .or_else(|| std::env::var("SUBSPACE_DIR").map(PathBuf::from).ok())
-    .unwrap_or_else(|| {
-      dirs::data_local_dir()
-        .expect("Can't find local data directory, needs to be specified explicitly")
-        .join("subspace")
-    });
-
-  if !path.exists() {
-    fs::create_dir_all(&path)
-      .unwrap_or_else(|error| panic!("Failed to create data directory {:?}: {:?}", path, error));
-  }
-
-  path
 }
