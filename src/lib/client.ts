@@ -4,7 +4,7 @@ import { PeerInfo } from '@polkadot/types/interfaces/system'
 import * as event from '@tauri-apps/api/event'
 import { reactive } from 'vue'
 import { LocalStorage } from 'quasar'
-import { AccountId32, } from '@polkadot/types/interfaces';
+import { AccountId32 } from '@polkadot/types/interfaces';
 
 // import { Header } from '@polkadot/types/interfaces/runtime'
 import * as process from 'process'
