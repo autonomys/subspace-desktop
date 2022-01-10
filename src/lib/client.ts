@@ -4,13 +4,13 @@ import { PeerInfo } from '@polkadot/types/interfaces/system'
 import * as event from '@tauri-apps/api/event'
 import { reactive } from 'vue'
 import { LocalStorage } from 'quasar'
+import { AccountId32 } from '@polkadot/types/interfaces';
 
 // import { Header } from '@polkadot/types/interfaces/runtime'
 import * as process from 'process'
 import mitt, { Emitter } from 'mitt'
 import { FarmedBlock } from './types'
-import { FarmerId, PoCPreDigest, Solution } from './customTypes/types'
-import customTypes from './customTypes/customTypes.json'
+import { SubPreDigest } from './customTypes/types'
 import { invoke } from '@tauri-apps/api/tauri'
 
 const tauri = { event, invoke }
@@ -135,41 +135,31 @@ export class Client {
         this.stop()
       },
       start: async ():Promise<void> => {
+        const farmerPublicKey: AccountId32 = this.api.registry.createType('AccountId32', LocalStorage.getItem('farmerPublicKey'));
         this.unsubscribe = await this.api.rpc.chain.subscribeNewHeads(
           async (lastHeader) => {
             const signedBlock = await this.api.rpc.chain.getBlock(
               lastHeader.hash
             );
-            for (const log of signedBlock.block.header.digest.logs) {
-              if (log.isPreRuntime) {
-                const [type, data] = log.asPreRuntime;
-                if (type.toString() === "POC_") {
-                  const poCPreDigest: PoCPreDigest =
-                    this.api.registry.createType("PoCPreDigest", data);
-                  const solution: Solution = this.api.registry.createType(
-                    "Solution",
-                    poCPreDigest.solution
-                  );
-                  const farmerId: FarmerId = this.api.registry.createType(
-                    "FarmerId",
-                    solution.public_key
-                  );
-                  console.log("farmerId: ");
-                  const block: FarmedBlock = {
-                    author: farmerId.toString(),
-                    id: lastHeader.hash.toString(),
-                    time: Date.now(),
-                    transactions: 0,
-                    blockNum: lastHeader.number.toNumber(),
-                    blockReward: 0,
-                    feeReward: 0,
-                  };
-                  this.data.farming.farmed = [block].concat(
-                    this.data.farming.farmed
-                  );
-                  storeBlocks(this.farmed);
-                }
-              }
+            const preRuntimes = signedBlock.block.header.digest.logs.filter(
+              (log) => log.isPreRuntime && log.asPreRuntime[0].toString() === 'SUB_'
+            );
+            const { solution }: SubPreDigest = this.api.registry.createType('SubPreDigest', preRuntimes[0].asPreRuntime[1]);
+
+            if (solution.public_key.toString() === farmerPublicKey?.toString()) {
+              const block: FarmedBlock = {
+                author: solution.public_key.toString(),
+                id: lastHeader.hash.toString(),
+                time: Date.now(),
+                transactions: 0,
+                blockNum: lastHeader.number.toNumber(),
+                blockReward: 0,
+                feeReward: 0,
+              };
+              this.data.farming.farmed = [block].concat(
+                this.data.farming.farmed
+              );
+              storeBlocks(this.farmed);
             }
           })
         process.on('beforeExit', this.do.blockSubscription.stopOnReload)
@@ -199,7 +189,17 @@ export class Client {
     this.data.farming.farmed = this.farmed
   }
   async init():Promise<void> {
-    this.api = await ApiPromise.create({ provider: this.wsProvider, types: customTypes })
+    this.api = await ApiPromise.create({
+      provider: this.wsProvider, types: {
+        Solution: {
+          public_key: 'AccountId32'
+        },
+        SubPreDigest: {
+          slot: 'u64',
+          solution: 'Solution'
+        }
+      }
+    })
   }
 }
 
