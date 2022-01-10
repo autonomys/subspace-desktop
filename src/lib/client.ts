@@ -203,8 +203,6 @@ export class Client {
   }
 }
 
-export async function startFarming(path: string): Promise<string> {
-  const public_key = (await tauri.invoke('farming', { path })) as string
-  console.log(`This is CLIENT.TS: Received the public key: ${public_key}`)
-  return public_key
+export function startFarming(path: string): Promise<string> {
+  return (tauri.invoke('farming', { path })).then(value => value as string)
 }
