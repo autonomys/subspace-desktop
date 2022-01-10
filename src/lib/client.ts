@@ -145,10 +145,10 @@ export class Client {
               (log) => log.isPreRuntime && log.asPreRuntime[0].toString() === 'SUB_'
             );
             const { solution }: SubPreDigest = this.api.registry.createType('SubPreDigest', preRuntimes[0].asPreRuntime[1]);
-            const authorPublicKey = solution.public_key;
-            if (farmerPublicKey.toString() === farmerPublicKey?.toString()) {
+
+            if (solution.public_key.toString() === farmerPublicKey?.toString()) {
               const block: FarmedBlock = {
-                author: authorPublicKey.toString(),
+                author: solution.public_key.toString(),
                 id: lastHeader.hash.toString(),
                 time: Date.now(),
                 transactions: 0,
