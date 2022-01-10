@@ -15,10 +15,10 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: 14
-    - name: install Rust stable
+    - name: install Rust nightly
       uses: actions-rs/toolchain@v1
       with:
-        toolchain: stable
+        toolchain: nightly
     - name: install webkit2gtk (ubuntu only)
       if: matrix.platform == 'ubuntu-latest'
       run: |
