@@ -17,7 +17,7 @@
     "build:debug": "quasar build -m pwa && tauri build -v --debug"
   },
   "dependencies": {
-    "@polkadot/api": "^5.6.1",
+    "@polkadot/api": "^7.2.1",
     "@quasar/extras": "^1.0.0",
     "@tauri-apps/api": "^1.0.0-beta.8",
     "@tsmx/human-readable": "^1.0.6",
