@@ -102,7 +102,7 @@ jobs:
       - name: Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly-2021-12-14
+          toolchain: nightly
           override: true
           components: clippy
 
