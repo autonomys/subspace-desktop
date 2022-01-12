@@ -114,5 +114,6 @@ jobs:
       - name: clippy
         uses: actions-rs/clippy-check@v1
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           command: fmt
           args: --manifest-path src-tauri/Cargo.toml -- -D warnings
