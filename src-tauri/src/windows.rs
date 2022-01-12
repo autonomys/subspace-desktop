@@ -1,5 +1,4 @@
-use winreg::enums::HKEY_CURRENT_USER;
-use winreg::RegKey;
+use winreg::{enums::HKEY_CURRENT_USER, RegKey};
 
 //TODO Refactor into special case functions instead of general utility functions
 #[tauri::command]

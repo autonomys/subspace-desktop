@@ -9,7 +9,7 @@ mod windows;
 use anyhow::{anyhow, Result};
 use log::info;
 use serde::Serialize;
-use std::{net::SocketAddr, path::PathBuf};
+use std::path::PathBuf;
 use subspace_farmer::{
   Commitments, Farming, Identity, ObjectMappings, Plot, Plotting, RpcClient, WsRpc,
 };
@@ -37,19 +37,20 @@ async fn farming(path: String) -> [u8; 32] {
 
 #[tauri::command]
 fn get_disk_stats(dir: String) -> DiskStats {
-  println!("{}", dir.to_string());
+  println!("{}", dir);
   let free: u64 = fs2::available_space(&dir).expect("error");
   let total: u64 = fs2::total_space(&dir).expect("error");
-  return DiskStats {
+
+  DiskStats {
     free_bytes: free,
     total_bytes: total,
-  };
+  }
 }
 
 #[tauri::command]
 fn get_this_binary() -> PathBuf {
   let bin = api::process::current_binary();
-  return bin.unwrap();
+  bin.unwrap()
 }
 
 #[tokio::main]
@@ -65,8 +66,8 @@ async fn main() -> Result<()> {
 
   let app = tauri::Builder::default()
     .system_tray(tray)
-    .on_system_tray_event(|app, event| match event {
-      SystemTrayEvent::MenuItemClick { id, .. } => {
+    .on_system_tray_event(|app, event| {
+      if let SystemTrayEvent::MenuItemClick { id, .. } = event {
         let item_handle = app.tray_handle().get_item(&id);
         match id.as_str() {
           "quit" => {
@@ -90,7 +91,6 @@ async fn main() -> Result<()> {
           _ => {}
         }
       }
-      _ => {}
     })
     .invoke_handler(
       #[cfg(not(target_os = "windows"))]
@@ -119,8 +119,8 @@ async fn main() -> Result<()> {
       // TODO This should hide the main taskbar icon when the window is closed on macos, however there is a borrow error
       // #[cfg(target_os = "macos")]
       // app.set_activation_policy(tauri::ActivationPolicy::Accessory);
-      let tray_handle = app_handle.tray_handle().clone();
-      let item_handle = tray_handle.get_item(&"toggle_visibility");
+      let tray_handle = app_handle.tray_handle();
+      let item_handle = tray_handle.get_item("toggle_visibility");
       item_handle.set_title("Show").unwrap(); // update the tray menu title to reflect the hidden state of the window
     }
     Event::ExitRequested { api, .. } => {
