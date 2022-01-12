@@ -17,8 +17,8 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-20.04
-          - macos-11
+          - ubuntu-latest
+          - macos-latest
           - windows-2019
           - windows-2022
 
@@ -58,8 +58,8 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-20.04
-          - macos-11
+          - ubuntu-latest
+          - macos-latest
           - windows-2019
           - windows-2022
     runs-on: ${{ matrix.os }}
