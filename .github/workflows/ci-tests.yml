@@ -35,7 +35,7 @@ jobs:
       with:
         toolchain: nightly-2021-12-14
         override: true
-        components: cargofmt, clippy
+        components: rustfmt, clippy
 
       # Workaround to resolve link error with C:\msys64\mingw64\bin\libclang.dll
     - name: Remove msys64
