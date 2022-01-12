@@ -16,7 +16,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os:
+          - ubuntu-20.04
+          - macos-11
+          - windows-2019
+          - windows-2022
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -44,7 +48,11 @@ jobs:
   clippy:
     strategy:
       matrix:
-        os: [ macos-latest, ubuntu-latest, windows-latest ]
+        os:
+          - ubuntu-20.04
+          - macos-11
+          - windows-2019
+          - windows-2022
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
