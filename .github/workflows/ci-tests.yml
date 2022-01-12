@@ -35,6 +35,7 @@ jobs:
       with:
         toolchain: nightly-2021-12-14
         override: true
+        components: cargofmt, clippy
 
       # Workaround to resolve link error with C:\msys64\mingw64\bin\libclang.dll
     - name: Remove msys64
@@ -53,77 +54,14 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  cargo-fmt:
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - ubuntu-latest
-          - macos-latest
-          - windows-2019
-          - windows-2022
+    - name: fmt
+      uses: actions-rs/cargo@v1
+      with:
+        command: fmt
+        args: --manifest-path src-tauri/Cargo.toml --all -- --check
 
-    runs-on: ${{ matrix.os }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly
-          override: true
-          components: rustfmt
-
-      - name: fmt
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --manifest-path src-tauri/Cargo.toml --all -- --check
-
-
-  cargo-clippy:
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - ubuntu-latest
-          - macos-latest
-          - windows-2019
-          - windows-2022
-
-    runs-on: ${{ matrix.os }}
-
-
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Rust toolchain
-        uses: actions-rs/toolchain@v1
-        # TODO: Below can be removed when https://github.com/actions-rs/toolchain/issues/126 is resolved
-        with:
-          # TODO: roll back to nightly on new wasmtime release, ref https://github.com/bytecodealliance/rustix/issues/142
-          toolchain: nightly-2021-12-14
-          target: wasm32-unknown-unknown
-          override: true
-          components: rustfmt, clippy
-
-      # Workaround to resolve link error with C:\msys64\mingw64\bin\libclang.dll
-      - name: Remove msys64
-        run: Remove-Item -LiteralPath "C:\msys64\" -Force -Recurse
-        if: runner.os == 'Windows'
-
-      - name: install webkit2gtk (ubuntu only)
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.0-dev libappindicator3-dev
-
-      - name: clippy
-        uses: actions-rs/clippy-check@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: --manifest-path src-tauri/Cargo.toml -- -D warnings
+    - name: clippy
+      uses: actions-rs/clippy-check@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        args: --manifest-path src-tauri/Cargo.toml -- -D warnings
