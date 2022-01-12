@@ -53,7 +53,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  clippy:
+  cargo-fmt:
     strategy:
       fail-fast: false
       matrix:
@@ -62,14 +62,19 @@ jobs:
           - macos-latest
           - windows-2019
           - windows-2022
+
     runs-on: ${{ matrix.os }}
+
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Rust toolchain
+        uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly-2021-12-14
+          toolchain: nightly
           override: true
-          components: rustfmt, clippy
+          components: rustfmt
 
       - name: fmt
         uses: actions-rs/cargo@v1
@@ -77,8 +82,37 @@ jobs:
           command: fmt
           args: --manifest-path src-tauri/Cargo.toml --all -- --check
 
-      - name: clippy
-        uses: actions-rs/cargo@v1
+
+  cargo-clippy:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-2019
+          - windows-2022
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Rust toolchain
+        uses: actions-rs/toolchain@v1
         with:
-          command: clippy
+          toolchain: nightly-2021-12-14
+          override: true
+          components: clippy
+
+      # Workaround to resolve link error with C:\msys64\mingw64\bin\libclang.dll
+      - name: Remove msys64
+        run: Remove-Item -LiteralPath "C:\msys64\" -Force -Recurse
+        if: runner.os == 'Windows'
+
+      - name: clippy
+        uses: actions-rs/clippy-check@v1
+        with:
+          command: fmt
           args: --manifest-path src-tauri/Cargo.toml -- -D warnings
