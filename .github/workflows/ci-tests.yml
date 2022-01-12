@@ -29,16 +29,24 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: 14
+
     - name: install Rust nightly
       uses: actions-rs/toolchain@v1
       with:
         toolchain: nightly-2021-12-14
         override: true
+
+      # Workaround to resolve link error with C:\msys64\mingw64\bin\libclang.dll
+    - name: Remove msys64
+      run: Remove-Item -LiteralPath "C:\msys64\" -Force -Recurse
+      if: runner.os == 'Windows'
+
     - name: install webkit2gtk (ubuntu only)
       if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
         sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.0-dev libappindicator3-dev
+
     - name: install app dependencies and build it
       run: yarn && yarn build
     - uses: tauri-apps/tauri-action@v0
@@ -61,6 +69,7 @@ jobs:
           toolchain: nightly-2021-12-14
           override: true
           components: rustfmt, clippy
+
       - name: fmt
         uses: actions-rs/cargo@v1
         with:
