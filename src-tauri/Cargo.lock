@@ -74,6 +74,7 @@ dependencies = [
  "subspace-solving",
  "tauri",
  "tauri-build",
+ "tiny-bip39",
  "tokio",
  "winreg",
 ]
