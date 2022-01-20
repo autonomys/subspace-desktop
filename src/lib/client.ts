@@ -15,7 +15,7 @@ import { invoke } from '@tauri-apps/api/tauri'
 
 const tauri = { event, invoke }
 
-export interface NetStatus {peers:Vec<PeerInfo>}
+export interface NetStatus { peers: Vec<PeerInfo> }
 
 export interface PeerData {
   status: 'disconnected' | 'unstable' | 'connected' | string
@@ -73,9 +73,9 @@ export interface ClientType {
   api: ApiPromise | null
   data: ClientData
   getStatus: {
-    farming: ()=>void,
-    plot: ()=>void,
-    network: ()=>void
+    farming: () => void,
+    plot: () => void,
+    network: () => void
   },
   do?: { [index: string]: any }
 }
@@ -95,7 +95,7 @@ function getStoredBlocks(): FarmedBlock[] {
   return mined
 }
 
-function storeBlocks(blocks: FarmedBlock[]):void {
+function storeBlocks(blocks: FarmedBlock[]): void {
   const farmed: { [index: string]: FarmedBlock } = {}
   for (const block of blocks) {
     farmed[block.id] = block
@@ -103,7 +103,7 @@ function storeBlocks(blocks: FarmedBlock[]):void {
   LocalStorage.set('farmedBlocks', farmed)
 }
 
-function clearStored():void {
+function clearStored(): void {
   try {
     LocalStorage.remove('farmedBlocks')
   } catch (error) {
@@ -121,20 +121,20 @@ export class Client {
   data = reactive(emptyData);
 
   status = {
-    farming: ():void => { }, // TODO return some farming status info
-    plot: ():void => { }, // TODO return some plot status info
-    net: async ():Promise<NetStatus> => {
+    farming: (): void => { }, // TODO return some farming status info
+    plot: (): void => { }, // TODO return some plot status info
+    net: async (): Promise<NetStatus> => {
       const peers = await this.api.rpc.system.peers()
-      return {peers}
+      return { peers }
     }
   }
   do = {
     blockSubscription: {
       clearStored,
-      stopOnReload():void {
+      stopOnReload(): void {
         this.stop()
       },
-      start: async ():Promise<void> => {
+      start: async (): Promise<void> => {
         const farmerPublicKey: AccountId32 = this.api.registry.createType('AccountId32', LocalStorage.getItem('farmerPublicKey'));
         this.unsubscribe = await this.api.rpc.chain.subscribeNewHeads(
           async (lastHeader) => {
@@ -169,7 +169,7 @@ export class Client {
           storeBlocks(this.data.farming.farmed)
         })
       },
-      stop: ():void => {
+      stop: (): void => {
         console.log('block subscription stop triggered')
         this.unsubscribe()
         try {
@@ -180,7 +180,7 @@ export class Client {
           console.error(error)
         }
       },
-      runTest():void {
+      runTest(): void {
         this.start()
       }
     }
@@ -188,7 +188,7 @@ export class Client {
   constructor() {
     this.data.farming.farmed = this.farmed
   }
-  async init():Promise<void> {
+  async init(): Promise<void> {
     this.api = await ApiPromise.create({
       provider: this.wsProvider, types: {
         Solution: {

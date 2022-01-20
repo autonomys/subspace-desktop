@@ -1,7 +1,7 @@
 <template lang="pug">
 mixin page1
   .row.q-mb-md.items-center
-    q-icon(color="blue-3" name="downloading" size="80px")
+    q-icon(color="blue-3", name="downloading", size="80px")
     h6.q-ml-md What is Plotting, Farming, & Rewards
   //- .row.q-mb-md
   .row.q-mb-md
@@ -20,7 +20,7 @@ mixin page2
 mixin page3
   .row.justify-center.q-pb-md.items-center
     .col-auto.q-mr-md
-      q-icon(color="yellow" name="lightbulb" size="100px")
+      q-icon(color="yellow", name="lightbulb", size="100px")
     .col
       .row.q-mb-md
         h6 Hints
@@ -37,10 +37,14 @@ mixin page3
       li
         p Visit us on #[a(href="https://twitter.com/NetworkSubspace") Twitter]
       li
-        p Read up about subspace on #[a(href="https://medium.com/subspace-network" target="_blank") Medium]
+        p Read up about subspace on #[a(href="https://medium.com/subspace-network", target="_blank") Medium]
 
-q-dialog(@hide="onDialogHide" persistent ref="dialog")
-  q-card.q-dialog-plugin.relative-position(bordered flat style="width: 600px; height: 500px")
+q-dialog(@hide="onDialogHide", persistent, ref="dialog")
+  q-card.q-dialog-plugin.relative-position(
+    bordered,
+    flat,
+    style="width: 600px; height: 500px"
+  )
     div
       .q-ma-md
         div(v-if="currentPage == 1")
@@ -51,15 +55,35 @@ q-dialog(@hide="onDialogHide" persistent ref="dialog")
           +page3
         .absolute-bottom.q-pa-md
           .row.justify-center.absolute-bottom
-            q-icon.q-mr-xs(:name="currentPage == page ? 'radio_button_checked' : 'radio_button_unchecked'" size="20px" style="margin-bottom: 32px" v-for="page of totalPages")
+            q-icon.q-mr-xs(
+              :name="currentPage == page ? 'radio_button_checked' : 'radio_button_unchecked'",
+              size="20px",
+              style="margin-bottom: 32px",
+              v-for="page of totalPages"
+            )
           .row.justify-end
-            q-btn(@click="currentPage++" label="next" outline size="lg" stretch v-if="currentPage != 2")
-            q-btn(:disabled="!userConfirmed" @click="currentPage++" label="next" outline size="lg" stretch v-else)
+            q-btn(
+              @click="currentPage++",
+              label="next",
+              outline,
+              size="lg",
+              stretch,
+              v-if="currentPage != 2"
+            )
+            q-btn(
+              :disabled="!userConfirmed",
+              @click="currentPage++",
+              label="next",
+              outline,
+              size="lg",
+              stretch,
+              v-else
+            )
 </template>
 
 <script>
-import { defineComponent } from "vue"
-import saveKeys from "components/SaveKeys.vue"
+import { defineComponent } from "vue";
+import saveKeys from "components/SaveKeys.vue";
 
 const component = defineComponent({
   components: { saveKeys },
@@ -77,52 +101,52 @@ const component = defineComponent({
       totalPages: 3,
       currentPage: 1,
       userConfirmed: false,
-    }
+    };
   },
   watch: {
     currentPage(val) {
-      if (val > this.totalPages) this.hide()
+      if (val > this.totalPages) this.hide();
     },
   },
   methods: {
     userConfirm(val) {
-      console.log("usrConfirm", val)
-      this.userConfirmed = val
+      console.log("usrConfirm", val);
+      this.userConfirmed = val;
     },
     // following method is REQUIRED
     // (don't change its name --> "show")
     show() {
-      this.$refs.dialog.show()
+      this.$refs.dialog.show();
     },
 
     // following method is REQUIRED
     // (don't change its name --> "hide")
     hide() {
-      this.$refs.dialog.hide()
+      this.$refs.dialog.hide();
     },
 
     onDialogHide() {
       // required to be emitted
       // when QDialog emits "hide" event
-      this.$emit("hide")
+      this.$emit("hide");
     },
 
     onOKClick() {
       // on OK, it is REQUIRED to
       // emit "ok" event (with optional payload)
       // before hiding the QDialog
-      this.$emit("ok")
+      this.$emit("ok");
       // or with payload: this.$emit('ok', { ... })
 
       // then hiding dialog
-      this.hide()
+      this.hide();
     },
 
     onCancelClick() {
       // we just need to hide the dialog
-      this.hide()
+      this.hide();
     },
   },
-})
-export default component
+});
+export default component;
 </script>
