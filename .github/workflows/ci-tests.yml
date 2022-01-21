@@ -18,7 +18,7 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-          - macos-10.15
+          - macos-latest
           - windows-2019
           - windows-2022
 

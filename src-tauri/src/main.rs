@@ -27,17 +27,14 @@ struct DiskStats {
 
 #[tauri::command]
 async fn farming(path: String) -> [u8; 32] {
-  let path_buf = PathBuf::from(path);
-  let node_rpc_url: String = "ws://127.0.0.1:9944".to_string();
-
   // start farming, and return the public key of the farmer
-  let public_key = farm(path_buf, &node_rpc_url).await;
+  let public_key = farm(path.into(), "ws://127.0.0.1:9944").await;
   public_key.unwrap()
 }
 
 #[tauri::command]
 fn get_disk_stats(dir: String) -> DiskStats {
-  println!("{}", dir);
+  info!("{}", dir);
   let free: u64 = fs2::available_space(&dir).expect("error");
   let total: u64 = fs2::total_space(&dir).expect("error");
 
@@ -198,10 +195,10 @@ pub(crate) async fn farm(
   tokio::spawn(async {
     tokio::select! {
       res = plotting_instance.wait() => if let Err(error) = res {
-        return Err(anyhow!(error))
+        return Err(anyhow!(error)) // TODO: connect this error to frontend, or log it
       },
       res = farming_instance.wait() => if let Err(error) = res {
-        return Err(anyhow!(error))
+        return Err(anyhow!(error)) // TODO: connect this error to frontend, or log it
       },
     }
     Ok(())
