@@ -23,7 +23,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
                 q-tooltip.q-pa-sm
                   p {{ lang.suggest }}
               .q-mt-sm {{ lang.allocated }}
-              q-input.q-field--highlighted(color="blue" dense input-class="pkdisplay" outlined suffix="GB" type="number" v-model="allocatedGB")
+              q-input.q-field--highlighted(color="blue" dense input-class="pkdisplay" outlined suffix="GB" type="number" min="1" v-model="allocatedGB")
         .col.q-pr-md
           .row.justify-center(style="transform: scale(-1, 1)")
             apexchart(:options="chartOptions" :series="chartData" type="donut" width="200px")
@@ -53,8 +53,10 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
 import * as path from "@tauri-apps/api/path"
 const tauri = { path }
 import { defineComponent } from "vue"
+import { LocalStorage } from 'quasar'
 import * as util from "src/lib/util"
 import * as native from "src/lib/native"
+import { startFarming } from "src/lib/client"
 import { debounce } from "quasar"
 import { globalState as global } from "src/lib/global"
 const lang = global.data.loc.text.setupPlot
@@ -165,7 +167,7 @@ export default defineComponent({
     this.$watch(
       "plotDirectory",
       debounce(async (val): Promise<null> => {
-        console.log(val)
+        //console.log(val)
         if (this.plotDirectory == this.defaultPath) {
           this.validPath = true
           return null
@@ -181,6 +183,9 @@ export default defineComponent({
       if (this.plotDirectory.charAt(this.plotDirectory.length - 1) == "/") this.plotDirectory.slice(-1)
       await util.config.update({ plot: { sizeGB: this.allocatedGB, location: this.plotDirectory + "/subspace.plot" } })
       if (this.defaultPath != this.plotDirectory) await native.createDir(this.plotDirectory)
+      const public_key = await startFarming(this.plotDirectory)
+      // TODO: find a way to store and retrieve the public key from client.ts.
+      LocalStorage.set('farmerPublicKey', public_key)
       this.$router.replace({ name: "plottingProgress" })
     },
     async updateDriveStats() {
