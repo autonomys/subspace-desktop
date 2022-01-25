@@ -53,7 +53,7 @@ jobs:
       # Imports PFX Certificate into keystore, allows Tauri to then sign the exe without being passed the private key.
       # This normally should not be required on CI-Tests, but due to the way that tauri has its code signing configuration for windows it is required that we sign or the build will fail.
       - name: import windows certificate
-        if: matrix.platform == 'windows-latest'
+        if: runner.os == 'Windows'
         env:
           WINDOWS_PFX: ${{ secrets.CERTIFICATE_WINDOWS_PFX }}
           WINDOWS_PFX_PASSWORD: ${{ secrets.CERTIFICATE_WINDOWS_PASSWORD }}

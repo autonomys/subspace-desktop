@@ -6,7 +6,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-latest, ubuntu-latest, windows-latest]
+        platform: [macos-latest, ubuntu-latest, windows-2019, windows-2022]
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -27,7 +27,7 @@ jobs:
 
     # Imports PFX Certificate into keystore, allows Tauri to then sign the exe without being passed the private key.
     - name: import windows certificate
-      if: matrix.platform == 'windows-latest'
+      if: runner.os == 'Windows'
       env:
         WINDOWS_PFX: ${{ secrets.CERTIFICATE_WINDOWS_PFX }}
         WINDOWS_PFX_PASSWORD: ${{ secrets.CERTIFICATE_WINDOWS_PASSWORD }}
