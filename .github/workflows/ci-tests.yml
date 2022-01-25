@@ -50,19 +50,19 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.0-dev libappindicator3-dev
 
-    # Imports PFX Certificate into keystore, allows Tauri to then sign the exe without being passed the private key.
-    # This normally should not be required on CI-Tests, but due to the way that tauri has its code signing configuration for windows it is required that we sign or the build will fail.
-    - name: import windows certificate
-      if: matrix.platform == 'windows-latest'
-      env:
-        WINDOWS_PFX: ${{ secrets.CERTIFICATE_WINDOWS_PFX }}
-        WINDOWS_PFX_PASSWORD: ${{ secrets.CERTIFICATE_WINDOWS_PASSWORD }}
-      run: |
-        New-Item -ItemType directory -Path certificate
-        Set-Content -Path certificate/tempCert.txt -Value $env:WINDOWS_PFX
-        certutil -decode certificate/tempCert.txt certificate/certificate.pfx
-        Remove-Item –path certificate -include tempCert.txt
-        Import-PfxCertificate -FilePath certificate/certificate.pfx -CertStoreLocation Cert:\CurrentUser\My -Password (ConvertTo-SecureString -String $env:WINDOWS_PFX_PASSWORD -Force -AsPlainText)
+      # Imports PFX Certificate into keystore, allows Tauri to then sign the exe without being passed the private key.
+      # This normally should not be required on CI-Tests, but due to the way that tauri has its code signing configuration for windows it is required that we sign or the build will fail.
+      - name: import windows certificate
+        if: matrix.platform == 'windows-latest'
+        env:
+          WINDOWS_PFX: ${{ secrets.CERTIFICATE_WINDOWS_PFX }}
+          WINDOWS_PFX_PASSWORD: ${{ secrets.CERTIFICATE_WINDOWS_PASSWORD }}
+        run: |
+          New-Item -ItemType directory -Path certificate
+          Set-Content -Path certificate/tempCert.txt -Value $env:WINDOWS_PFX
+          certutil -decode certificate/tempCert.txt certificate/certificate.pfx
+          Remove-Item –path certificate -include tempCert.txt
+          Import-PfxCertificate -FilePath certificate/certificate.pfx -CertStoreLocation Cert:\CurrentUser\My -Password (ConvertTo-SecureString -String $env:WINDOWS_PFX_PASSWORD -Force -AsPlainText)
 
       - name: install app dependencies and build it
         run: yarn && yarn build
