@@ -4,15 +4,18 @@ import { PeerInfo } from '@polkadot/types/interfaces/system'
 import * as event from '@tauri-apps/api/event'
 import { reactive } from 'vue'
 import { LocalStorage } from 'quasar'
-const tauri = { event }
+import { AccountId32 } from '@polkadot/types/interfaces';
+
 // import { Header } from '@polkadot/types/interfaces/runtime'
 import * as process from 'process'
 import mitt, { Emitter } from 'mitt'
 import { FarmedBlock } from './types'
-import { FarmerId, PoCPreDigest, Solution } from './customTypes/types'
-import customTypes from './customTypes/customTypes.json'
+import { SubPreDigest } from './customTypes/types'
+import { invoke } from '@tauri-apps/api/tauri'
 
-export interface NetStatus {peers:Vec<PeerInfo>}
+const tauri = { event, invoke }
+
+export interface NetStatus { peers: Vec<PeerInfo> }
 
 export interface PeerData {
   status: 'disconnected' | 'unstable' | 'connected' | string
@@ -70,9 +73,9 @@ export interface ClientType {
   api: ApiPromise | null
   data: ClientData
   getStatus: {
-    farming: ()=>void,
-    plot: ()=>void,
-    network: ()=>void
+    farming: () => void,
+    plot: () => void,
+    network: () => void
   },
   do?: { [index: string]: any }
 }
@@ -92,7 +95,7 @@ function getStoredBlocks(): FarmedBlock[] {
   return mined
 }
 
-function storeBlocks(blocks: FarmedBlock[]):void {
+function storeBlocks(blocks: FarmedBlock[]): void {
   const farmed: { [index: string]: FarmedBlock } = {}
   for (const block of blocks) {
     farmed[block.id] = block
@@ -100,7 +103,7 @@ function storeBlocks(blocks: FarmedBlock[]):void {
   LocalStorage.set('farmedBlocks', farmed)
 }
 
-function clearStored():void {
+function clearStored(): void {
   try {
     LocalStorage.remove('farmedBlocks')
   } catch (error) {
@@ -118,55 +121,45 @@ export class Client {
   data = reactive(emptyData);
 
   status = {
-    farming: ():void => { }, // TODO return some farming status info
-    plot: ():void => { }, // TODO return some plot status info
-    net: async ():Promise<NetStatus> => {
+    farming: (): void => { }, // TODO return some farming status info
+    plot: (): void => { }, // TODO return some plot status info
+    net: async (): Promise<NetStatus> => {
       const peers = await this.api.rpc.system.peers()
-      return {peers}
+      return { peers }
     }
   }
   do = {
     blockSubscription: {
       clearStored,
-      stopOnReload():void {
+      stopOnReload(): void {
         this.stop()
       },
-      start: async ():Promise<void> => {
+      start: async (): Promise<void> => {
+        const farmerPublicKey: AccountId32 = this.api.registry.createType('AccountId32', LocalStorage.getItem('farmerPublicKey'));
         this.unsubscribe = await this.api.rpc.chain.subscribeNewHeads(
           async (lastHeader) => {
             const signedBlock = await this.api.rpc.chain.getBlock(
               lastHeader.hash
             );
-            for (const log of signedBlock.block.header.digest.logs) {
-              if (log.isPreRuntime) {
-                const [type, data] = log.asPreRuntime;
-                if (type.toString() === "POC_") {
-                  const poCPreDigest: PoCPreDigest =
-                    this.api.registry.createType("PoCPreDigest", data);
-                  const solution: Solution = this.api.registry.createType(
-                    "Solution",
-                    poCPreDigest.solution
-                  );
-                  const farmerId: FarmerId = this.api.registry.createType(
-                    "FarmerId",
-                    solution.public_key
-                  );
-                  console.log("farmerId: ");
-                  const block: FarmedBlock = {
-                    author: farmerId.toString(),
-                    id: lastHeader.hash.toString(),
-                    time: Date.now(),
-                    transactions: 0,
-                    blockNum: lastHeader.number.toNumber(),
-                    blockReward: 0,
-                    feeReward: 0,
-                  };
-                  this.data.farming.farmed = [block].concat(
-                    this.data.farming.farmed
-                  );
-                  storeBlocks(this.farmed);
-                }
-              }
+            const preRuntimes = signedBlock.block.header.digest.logs.filter(
+              (log) => log.isPreRuntime && log.asPreRuntime[0].toString() === 'SUB_'
+            );
+            const { solution }: SubPreDigest = this.api.registry.createType('SubPreDigest', preRuntimes[0].asPreRuntime[1]);
+
+            if (solution.public_key.toString() === farmerPublicKey?.toString()) {
+              const block: FarmedBlock = {
+                author: solution.public_key.toString(),
+                id: lastHeader.hash.toString(),
+                time: Date.now(),
+                transactions: 0,
+                blockNum: lastHeader.number.toNumber(),
+                blockReward: 0,
+                feeReward: 0,
+              };
+              this.data.farming.farmed = [block].concat(
+                this.data.farming.farmed
+              );
+              storeBlocks(this.farmed);
             }
           })
         process.on('beforeExit', this.do.blockSubscription.stopOnReload)
@@ -176,7 +169,7 @@ export class Client {
           storeBlocks(this.data.farming.farmed)
         })
       },
-      stop: ():void => {
+      stop: (): void => {
         console.log('block subscription stop triggered')
         this.unsubscribe()
         try {
@@ -187,7 +180,7 @@ export class Client {
           console.error(error)
         }
       },
-      runTest():void {
+      runTest(): void {
         this.start()
       }
     }
@@ -195,7 +188,21 @@ export class Client {
   constructor() {
     this.data.farming.farmed = this.farmed
   }
-  async init():Promise<void> {
-    this.api = await ApiPromise.create({ provider: this.wsProvider, types: customTypes })
+  async init(): Promise<void> {
+    this.api = await ApiPromise.create({
+      provider: this.wsProvider, types: {
+        Solution: {
+          public_key: 'AccountId32'
+        },
+        SubPreDigest: {
+          slot: 'u64',
+          solution: 'Solution'
+        }
+      }
+    })
   }
+}
+
+export function startFarming(path: string): Promise<string> {
+  return (tauri.invoke('farming', { path })).then(value => value as string)
 }

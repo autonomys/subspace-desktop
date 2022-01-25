@@ -40,11 +40,11 @@ const lang = global.data.loc.text.dashboard
 
 export default defineComponent({
   props: {
-    network: { type: Object, required: true },
+    network: { type: Object, required: true }
   },
   data() {
     return { lang, util }
-  },
+  }
 })
 </script>
 

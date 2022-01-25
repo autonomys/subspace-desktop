@@ -14,8 +14,24 @@ q-card(bordered flat)
       q-space
       .col.col-auto
         .row.justify-center
-          q-btn(@click="$emit('expand', true)" color="grey-10" flat icon-right="list" size="md" stretch v-if="!expanded")
-          q-btn(@click="$emit('expand', false)" color="grey-10" flat icon-right="south" size="md" stretch v-else)
+          q-btn(
+            @click="$emit('expand', true)"
+            color="grey-10"
+            flat
+            icon-right="list"
+            size="md"
+            stretch
+            v-if="!expanded"
+          )
+          q-btn(
+            @click="$emit('expand', false)"
+            color="grey-10"
+            flat
+            icon-right="south"
+            size="md"
+            stretch
+            v-else
+          )
 
   q-separator
   .row.q-gutter-sm.q-pa-md
@@ -25,7 +41,11 @@ q-card(bordered flat)
     .col-2 {{ lang.transactions }}
     .col-2 {{ lang.rewards }}
   q-scroll-area(:style="blocksListStyle")
-    transition-group(appear enter-active-class="animated slideInTop " name="list")
+    transition-group(
+      appear
+      enter-active-class="animated slideInTop "
+      name="list"
+    )
       .bg-white(:key="block.time" v-for="block of farmedBlocksList")
         q-separator
         .row.q-gutter-sm.q-pa-xs.q-ml-sm
@@ -57,7 +77,7 @@ import { FarmedBlock } from "src/lib/types"
 export default defineComponent({
   props: {
     expanded: { type: Boolean, default: false },
-    farmedTotalEarned: { type: Number, default: 0 },
+    farmedTotalEarned: { type: Number, default: 0 }
   },
   emits: ["expand"],
   data() {
@@ -69,7 +89,7 @@ export default defineComponent({
     },
     blocksListStyle(): { [index: string]: string } {
       return this.expanded ? { height: "370px" } : { height: "185px" }
-    },
-  },
+    }
+  }
 })
 </script>

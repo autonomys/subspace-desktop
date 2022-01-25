@@ -7,11 +7,11 @@ export default defineComponent({
   name: "App",
   data() {
     return {
-      pageName: "",
+      pageName: ""
     }
   },
   watch: {},
   async mounted() {},
-  methods: {},
+  methods: {}
 })
 </script>

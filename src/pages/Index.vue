@@ -5,9 +5,19 @@ q-page(padding)
   .row.justify-center.q-mt-lg
     p {{ lang.subtitle }}
   .row.justify-center.q-mt-xl
-    q-btn(:label="lang.quickStart" @click="$router.push({ name: 'setPassword' })" outline size="xl")
+    q-btn(
+      :label="lang.quickStart"
+      @click="$router.push({ name: 'setPassword' })"
+      outline
+      size="xl"
+    )
   .row.justify-center.q-mt-sm
-    q-btn(:label="lang.advanced" @click="$router.push({ name: 'advanced' })" color="grey" flat)
+    q-btn(
+      :label="lang.advanced"
+      @click="$router.push({ name: 'advanced' })"
+      color="grey"
+      flat
+    )
 </template>
 
 <script lang="ts">
@@ -19,6 +29,6 @@ export default defineComponent({
   data() {
     return { lang }
   },
-  methods: {},
+  methods: {}
 })
 </script>

@@ -9,30 +9,83 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
       .row
         .col.q-mt-sm
           div {{ lang.plotsDirectory }}
-          q-input(dense input-class="pkdisplay" outlined readonly v-model="plotDirectory")
+          q-input(
+            dense
+            input-class="pkdisplay"
+            outlined
+            readonly
+            v-model="plotDirectory"
+          )
       .row.items-center.q-gutter-md
         .col.relative-position
-          q-linear-progress.rounded-borders(:value="progresspct / 100" rounded style="height: 40px" track-color="blue-2")
+          q-linear-progress.rounded-borders(
+            :value="progresspct / 100"
+            rounded
+            style="height: 40px"
+            track-color="blue-2"
+          )
             .absolute-full.flex.flex-center
               q-badge(color="white" size="lg" text-color="black")
                 template(v-slot:default)
                   .q-pa-xs(style="font-size: 18px") {{ progresspct }}%
-          q-linear-progress.absolute-right(:value="0.9" indeterminate style="height: 1px; top: 39px" track-color="transparent" v-if="plotting")
+          q-linear-progress.absolute-right(
+            :value="0.9"
+            indeterminate
+            style="height: 1px; top: 39px"
+            track-color="transparent"
+            v-if="plotting"
+          )
       .row.justify-center.q-gutter-md.q-pt-md
         .col-1
         .col-3.relative-position
-          q-icon.absolute(color="blue-1" name="downloading" size="180px" style="z-index: -100; right: 100px")
+          q-icon.absolute(
+            color="blue-1"
+            name="downloading"
+            size="180px"
+            style="z-index: -100; right: 100px"
+          )
           .q-mt-sm {{ lang.plotted }}
-          q-input.bg-white(dense input-class="pkdisplay" outlined readonly suffix="GB" v-model="plottingData.finishedGB")
+          q-input.bg-white(
+            dense
+            input-class="pkdisplay"
+            outlined
+            readonly
+            suffix="GB"
+            v-model="plottingData.finishedGB"
+          )
           .q-mt-sm {{ lang.remaining }}
-          q-input.bg-white(dense input-class="pkdisplay" outlined readonly suffix="GB" v-model="plottingData.remainingGB")
+          q-input.bg-white(
+            dense
+            input-class="pkdisplay"
+            outlined
+            readonly
+            suffix="GB"
+            v-model="plottingData.remainingGB"
+          )
         .col-2
         .col-3.relative-position
-          q-icon.absolute(color="blue-1" name="schedule" size="180px" style="z-index: -100; right: 100px")
+          q-icon.absolute(
+            color="blue-1"
+            name="schedule"
+            size="180px"
+            style="z-index: -100; right: 100px"
+          )
           .q-mt-sm {{ lang.elapsedTime }}
-          q-input.bg-white(dense input-class="pkdisplay" outlined readonly v-model="printElapsedTime")
+          q-input.bg-white(
+            dense
+            input-class="pkdisplay"
+            outlined
+            readonly
+            v-model="printElapsedTime"
+          )
           .q-mt-sm {{ lang.remainingTime }}
-          q-input.bg-white(dense input-class="pkdisplay" outlined readonly v-model="printRemainingTime")
+          q-input.bg-white(
+            dense
+            input-class="pkdisplay"
+            outlined
+            readonly
+            v-model="printRemainingTime"
+          )
 
   .row.justify-end.q-mt-lg.absolute-bottom.q-pb-lg
     .col-auto.q-ml-xl.q-pr-md
@@ -42,11 +95,42 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
     .col-auto.q-pr-md
     .col-expand
     .col-auto(v-if="viewedIntro")
-      q-btn(:label="lang.finish" @click="$router.replace({ name: 'dashboard' })" color="blue-8" icon-right="play_arrow" outline size="lg" v-if="plotFinished")
-      q-btn(:label="lang.resume" @click="startPlotting()" color="blue-8" icon-right="play_arrow" outline size="lg" v-else-if="!plotting")
-      q-btn(:label="lang.pause" @click="pausePlotting()" color="blue-8" icon-right="pause" outline size="lg" v-else)
+      q-btn(
+        :label="lang.finish"
+        @click="$router.replace({ name: 'dashboard' })"
+        color="blue-8"
+        icon-right="play_arrow"
+        outline
+        size="lg"
+        v-if="plotFinished"
+      )
+      q-btn(
+        :label="lang.resume"
+        @click="startPlotting()"
+        color="blue-8"
+        icon-right="play_arrow"
+        outline
+        size="lg"
+        v-else-if="!plotting"
+      )
+      q-btn(
+        :label="lang.pause"
+        @click="pausePlotting()"
+        color="blue-8"
+        icon-right="pause"
+        outline
+        size="lg"
+        v-else
+      )
     .col-auto(v-else)
-      q-btn(:label="lang.next" @click="viewIntro()" color="blue-8" icon-right="play_arrow" outline size="lg")
+      q-btn(
+        :label="lang.next"
+        @click="viewIntro()"
+        color="blue-8"
+        icon-right="play_arrow"
+        outline
+        size="lg"
+      )
 </template>
 
 <script lang="ts">
@@ -68,24 +152,31 @@ export default defineComponent({
       plotting: true,
       plottingData: {
         finishedGB: 0,
-        remainingGB: 0,
+        remainingGB: 0
       },
       viewedIntro: false,
       lang,
       plotFinished: false,
       plotDirectory: "/Subspace/plots",
-      allocatedGB: 0,
+      allocatedGB: 0
     }
   },
   computed: {
     progresspct(): number {
-      return parseFloat(((this.plottingData.finishedGB / this.allocatedGB) * 100).toFixed(2))
+      return parseFloat(
+        ((this.plottingData.finishedGB / this.allocatedGB) * 100).toFixed(2)
+      )
     },
     remainingTime(): number {
-      return util.toFixed(((this.plotTimeEstimate - this.elapsedTime) / this.progresspct) * 2, 2)
+      return util.toFixed(
+        ((this.plotTimeEstimate - this.elapsedTime) / this.progresspct) * 2,
+        2
+      )
     },
     printRemainingTime(): string {
-      return this.plotFinished ? util.formatMS(0) : util.formatMS(this.remainingTime)
+      return this.plotFinished
+        ? util.formatMS(0)
+        : util.formatMS(this.remainingTime)
     },
     printElapsedTime(): string {
       return util.formatMS(this.elapsedms)
@@ -98,17 +189,21 @@ export default defineComponent({
     },
     totalDiskSizeGB(): number {
       return 4000
-    },
+    }
   },
   watch: {
     "plottingData.finishedGB"(val) {
-      this.plottingData.finishedGB = parseFloat(this.plottingData.finishedGB.toFixed(2))
-      this.plottingData.remainingGB = parseFloat((this.allocatedGB - val).toFixed(2))
+      this.plottingData.finishedGB = parseFloat(
+        this.plottingData.finishedGB.toFixed(2)
+      )
+      this.plottingData.remainingGB = parseFloat(
+        (this.allocatedGB - val).toFixed(2)
+      )
       if (this.plottingData.finishedGB >= this.allocatedGB) {
         this.plotFinished = true
         this.plottingData.finishedGB = this.allocatedGB
       }
-    },
+    }
   },
   async mounted() {
     await this.getPlotConfig()
@@ -149,7 +244,8 @@ export default defineComponent({
       interval = window.setInterval(() => {
         this.plottingData.finishedGB += util.random(0, 50) / 40
         console.log(this.plottingData)
-        if (this.plottingData.finishedGB >= this.allocatedGB) this.pausePlotting()
+        if (this.plottingData.finishedGB >= this.allocatedGB)
+          this.pausePlotting()
       }, util.random(200, 1000))
     },
     async viewIntro() {
@@ -157,8 +253,8 @@ export default defineComponent({
       modal?.onDismiss(() => {
         this.viewedIntro = true
       })
-    },
-  },
+    }
+  }
 })
 </script>
 <style lang="sass">
