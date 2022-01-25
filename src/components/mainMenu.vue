@@ -5,27 +5,27 @@ q-menu(auto-close)
       .row.items-center
         .col-auto.q-mr-md
           q-toggle(
-            :disable="disableAutoLaunch",
-            @click="toggleClicked()",
+            :disable="disableAutoLaunch"
+            @click="toggleClicked()"
             v-model="autoLaunch"
           )
         .col
           p.text-grey(v-if="!autoLaunch") {{ lang.autoStart }}
           p.text-black(v-else) {{ lang.autoStart }}
-    q-item(@click="reset()", clickable)
+    q-item(@click="reset()" clickable)
       .row.items-center
         .col-auto.q-mr-md
-          q-icon(color="red", name="refresh")
+          q-icon(color="red" name="refresh")
         .col
           p.text-red {{ lang.reset }}
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import { Dialog, Notify } from "quasar";
-import * as util from "src/lib/util";
-import { globalState as global } from "src/lib/global";
-const lang = global.data.loc.text.mainMenu;
+import { defineComponent } from "vue"
+import { Dialog, Notify } from "quasar"
+import * as util from "src/lib/util"
+import { globalState as global } from "src/lib/global"
+const lang = global.data.loc.text.mainMenu
 
 export default defineComponent({
   data() {
@@ -33,41 +33,41 @@ export default defineComponent({
       lang,
       autoLaunch: false,
       launchOnBoot: global.autoLauncher,
-      disableAutoLaunch: false,
-    };
+      disableAutoLaunch: false
+    }
   },
   mounted() {
-    this.initMenu();
+    this.initMenu()
   },
   methods: {
     async toggleClicked() {
       if (this.disableAutoLaunch) {
         Notify.create({
           message: "Launch on Boot is not supported on this system.",
-          icon: "info",
-        });
-        return;
+          icon: "info"
+        })
+        return
       }
-      console.log("toggle Clicked", this.autoLaunch);
+      console.log("toggle Clicked", this.autoLaunch)
       if (this.autoLaunch)
         Notify.create({
           message: lang.willAutoLaunch,
           icon: "info",
           group: 1,
-          badgeStyle: "visibility:hidden;",
-        });
+          badgeStyle: "visibility:hidden;"
+        })
       else
         Notify.create({
           message: lang.willNotAutoLaunch,
           icon: "info",
           group: 1,
-          badgeStyle: "visibility:hidden;",
-        });
+          badgeStyle: "visibility:hidden;"
+        })
       if (this.autoLaunch) {
-        await this.launchOnBoot.disable();
-        await this.launchOnBoot.enable();
+        await this.launchOnBoot.disable()
+        await this.launchOnBoot.enable()
       } else {
-        await this.launchOnBoot.disable();
+        await this.launchOnBoot.disable()
       }
     },
     reset() {
@@ -84,24 +84,24 @@ export default defineComponent({
         `,
         html: true,
         ok: { label: "reset", icon: "refresh", flat: true, color: "red" },
-        cancel: true,
+        cancel: true
       }).onOk(async () => {
-        util.reset();
-        this.$router.replace({ name: "index" });
-      });
+        util.reset()
+        this.$router.replace({ name: "index" })
+      })
     },
     async initMenu() {
-      console.log("Init Menu", typeof this.launchOnBoot.enabled);
+      console.log("Init Menu", typeof this.launchOnBoot.enabled)
       // this.disableAutoLaunch = true
       if (this.launchOnBoot.enabled != undefined)
-        this.autoLaunch = this.launchOnBoot.enabled;
+        this.autoLaunch = this.launchOnBoot.enabled
       else {
-        this.autoLaunch = false;
-        this.disableAutoLaunch = true;
+        this.autoLaunch = false
+        this.disableAutoLaunch = true
       }
-    },
-  },
-});
+    }
+  }
+})
 </script>
 
 <style lang="scss">

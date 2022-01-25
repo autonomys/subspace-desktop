@@ -24,10 +24,10 @@ q-page.q-pl-xl.q-pr-xl.q-pt-lg
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import { globalState as global } from "src/lib/global";
-import * as util from "src/lib/util";
-const lang = global.data.loc.text.setPassword;
+import { defineComponent } from "vue"
+import { globalState as global } from "src/lib/global"
+import * as util from "src/lib/util"
+const lang = global.data.loc.text.setPassword
 export default defineComponent({
   data() {
     return {
@@ -35,43 +35,43 @@ export default defineComponent({
       pw2: "",
       userConfirm: false,
       passHash: "",
-      lang,
-    };
+      lang
+    }
   },
   computed: {
     pwStatusMsg(): string {
-      if (this.pw1.length == 0 || this.pw2.length == 0) return "";
-      else if (!this.passwordValid) return lang.pwError1;
-      else if (!this.passwordsMatch) return lang.pwError2;
-      else return lang.pwSuccess;
+      if (this.pw1.length == 0 || this.pw2.length == 0) return ""
+      else if (!this.passwordValid) return lang.pwError1
+      else if (!this.passwordsMatch) return lang.pwError2
+      else return lang.pwSuccess
     },
     statusMsgStyle(): string[] {
-      if (this.passwordsMatch) return ["greenMsg"];
-      else return ["redMsg"];
+      if (this.passwordsMatch) return ["greenMsg"]
+      else return ["redMsg"]
     },
     passwordValid(): boolean {
-      if (this.pw1.length == 0) return false;
-      const longEnough = this.pw1.length > 3;
-      return longEnough;
+      if (this.pw1.length == 0) return false
+      const longEnough = this.pw1.length > 3
+      return longEnough
     },
     passwordsMatch(): boolean {
-      const matching = this.pw1 == this.pw2;
-      return this.passwordValid && matching;
-    },
+      const matching = this.pw1 == this.pw2
+      return this.passwordValid && matching
+    }
   },
   mounted() {
     // Dialog.create({ message: "hello" })
   },
   methods: {
     async continue() {
-      this.$router.replace({ name: "setupPlot" });
+      this.$router.replace({ name: "setupPlot" })
       this.$nextTick(() => {
         setTimeout(() => {
-          const passHash = util.password.encrypt(this.pw1);
-          util.config.update({ account: { passHash } });
-        }, 3000);
-      });
-    },
-  },
-});
+          const passHash = util.password.encrypt(this.pw1)
+          util.config.update({ account: { passHash } })
+        }, 3000)
+      })
+    }
+  }
+})
 </script>

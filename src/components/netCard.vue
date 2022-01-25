@@ -1,17 +1,17 @@
 <template lang="pug">
-q-card(bordered, flat)
+q-card(bordered flat)
   .q-pa-sm
     .row.items-center
-      q-icon.q-mr-sm(color="grey", name="settings_ethernet", size="40px")
+      q-icon.q-mr-sm(color="grey" name="settings_ethernet" size="40px")
       h6.text-weight-light {{ lang.network }}
     q-separator.q-mt-xs
     .row.items-center.q-mt-sm
       .col-auto.q-mr-md(v-if="network.state == 'finished'")
-        q-icon(color="green", name="done", size="40px")
+        q-icon(color="green" name="done" size="40px")
       .col-auto.q-mr-md(v-if="network.state == 'findingPeers'")
-        q-spinner-radio(color="grey", name="done", size="40px")
+        q-spinner-radio(color="grey" name="done" size="40px")
       .col-auto.q-mr-md(v-if="network.state == 'starting'")
-        q-spinner-orbit(color="grey", name="done", size="40px")
+        q-spinner-orbit(color="grey" name="done" size="40px")
       .col
         .text-weight-light Status:
         p {{ network.message }}
@@ -19,7 +19,7 @@ q-card(bordered, flat)
       .col
         .row.items-center
           .col-auto.q-mr-md
-            q-icon(color="black", name="group", size="40px")
+            q-icon(color="black" name="group" size="40px")
           .col
             .text-weight-light Peers:
             p {{ network.peers }}
@@ -33,19 +33,19 @@ q-card(bordered, flat)
 </template>
 
 <script lang="ts" >
-import { defineComponent } from "vue";
-import * as util from "src/lib/util";
-import { globalState as global } from "src/lib/global";
-const lang = global.data.loc.text.dashboard;
+import { defineComponent } from "vue"
+import * as util from "src/lib/util"
+import { globalState as global } from "src/lib/global"
+const lang = global.data.loc.text.dashboard
 
 export default defineComponent({
   props: {
-    network: { type: Object, required: true },
+    network: { type: Object, required: true }
   },
   data() {
-    return { lang, util };
-  },
-});
+    return { lang, util }
+  }
+})
 </script>
 
 
