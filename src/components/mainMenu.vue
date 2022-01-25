@@ -4,7 +4,11 @@ q-menu(auto-close)
     q-item
       .row.items-center
         .col-auto.q-mr-md
-          q-toggle(:disable="disableAutoLaunch" @click="toggleClicked()" v-model="autoLaunch")
+          q-toggle(
+            :disable="disableAutoLaunch"
+            @click="toggleClicked()"
+            v-model="autoLaunch"
+          )
         .col
           p.text-grey(v-if="!autoLaunch") {{ lang.autoStart }}
           p.text-black(v-else) {{ lang.autoStart }}
@@ -25,7 +29,12 @@ const lang = global.data.loc.text.mainMenu
 
 export default defineComponent({
   data() {
-    return { lang, autoLaunch: false, launchOnBoot: global.autoLauncher, disableAutoLaunch: false }
+    return {
+      lang,
+      autoLaunch: false,
+      launchOnBoot: global.autoLauncher,
+      disableAutoLaunch: false
+    }
   },
   mounted() {
     this.initMenu()
@@ -33,12 +42,27 @@ export default defineComponent({
   methods: {
     async toggleClicked() {
       if (this.disableAutoLaunch) {
-        Notify.create({ message: "Launch on Boot is not supported on this system.", icon: "info" })
+        Notify.create({
+          message: "Launch on Boot is not supported on this system.",
+          icon: "info"
+        })
         return
       }
       console.log("toggle Clicked", this.autoLaunch)
-      if (this.autoLaunch) Notify.create({ message: lang.willAutoLaunch, icon: "info", group: 1, badgeStyle: "visibility:hidden;" })
-      else Notify.create({ message: lang.willNotAutoLaunch, icon: "info", group: 1, badgeStyle: "visibility:hidden;" })
+      if (this.autoLaunch)
+        Notify.create({
+          message: lang.willAutoLaunch,
+          icon: "info",
+          group: 1,
+          badgeStyle: "visibility:hidden;"
+        })
+      else
+        Notify.create({
+          message: lang.willNotAutoLaunch,
+          icon: "info",
+          group: 1,
+          badgeStyle: "visibility:hidden;"
+        })
       if (this.autoLaunch) {
         await this.launchOnBoot.disable()
         await this.launchOnBoot.enable()
@@ -60,7 +84,7 @@ export default defineComponent({
         `,
         html: true,
         ok: { label: "reset", icon: "refresh", flat: true, color: "red" },
-        cancel: true,
+        cancel: true
       }).onOk(async () => {
         util.reset()
         this.$router.replace({ name: "index" })
@@ -69,13 +93,14 @@ export default defineComponent({
     async initMenu() {
       console.log("Init Menu", typeof this.launchOnBoot.enabled)
       // this.disableAutoLaunch = true
-      if (this.launchOnBoot.enabled != undefined) this.autoLaunch = this.launchOnBoot.enabled
+      if (this.launchOnBoot.enabled != undefined)
+        this.autoLaunch = this.launchOnBoot.enabled
       else {
         this.autoLaunch = false
         this.disableAutoLaunch = true
       }
-    },
-  },
+    }
+  }
 })
 </script>
 

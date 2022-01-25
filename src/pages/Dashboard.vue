@@ -11,7 +11,11 @@ q-page.q-pl-lg.q-pr-lg.q-pt-md
         netCard(:config="config" :network="network")
     .row.q-gutter-md
       .col
-        farmedList(:expanded="expanded" :farmedTotalEarned="farmedTotalEarned" @expand="expand")
+        farmedList(
+          :expanded="expanded"
+          :farmedTotalEarned="farmedTotalEarned"
+          @expand="expand"
+        )
   div(v-else)
     .flex
       .absolute-center
@@ -41,23 +45,23 @@ export default defineComponent({
       network: {
         state: "starting",
         message: lang.initializing,
-        peers: 0,
+        peers: 0
       },
       plot: {
         state: "starting",
-        message: lang.initializing,
+        message: lang.initializing
       },
       global: global.data,
       client: global.client,
       globalState: {
         state: "starting",
-        message: lang.initializing,
+        message: lang.initializing
       },
       expanded: false,
       util,
       loading: true,
       unsubscribe: (): void => {},
-      clientData: <ClientData>emptyData,
+      clientData: <ClientData>emptyData
     }
   },
   computed: {
@@ -66,7 +70,7 @@ export default defineComponent({
       return this.client.data.farming.farmed.reduce((agg, val) => {
         return val.blockReward + val.feeReward + agg
       }, 0)
-    },
+    }
   },
   watch: {},
   async mounted() {
@@ -80,7 +84,7 @@ export default defineComponent({
         message: lang.corrupt,
         noEscDismiss: true,
         noBackdropDismiss: true,
-        noRouteDismiss: true,
+        noRouteDismiss: true
       }).onOk(async () => {
         await util.config.clear()
         this.$router.replace({ name: "index" })
@@ -161,11 +165,13 @@ export default defineComponent({
       Notify.create({
         color: "green",
         progress: true,
-        message: `${lang.farmedBlock}: ${block.blockNum} ${lang.reward} ${block.blockReward + block.feeReward} SSC`,
-        position: "bottom-right",
+        message: `${lang.farmedBlock}: ${block.blockNum} ${lang.reward} ${
+          block.blockReward + block.feeReward
+        } SSC`,
+        position: "bottom-right"
       })
-    },
-  },
+    }
+  }
 })
 </script>
 

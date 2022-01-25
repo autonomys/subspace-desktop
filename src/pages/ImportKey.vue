@@ -8,7 +8,12 @@ q-page(padding)
     .col-auto
       .row
         div {{ lang.securePassword }}
-        q-input(input-class="pwinput" outlined type="password" v-model="keyInput")
+        q-input(
+          input-class="pwinput"
+          outlined
+          type="password"
+          v-model="keyInput"
+        )
       .row.justify-center.q-mt-md(style="height: 50px")
         p(:class="statusMsgStyle" style="font-size: 20px") {{ KeyStatusMsg }}
   .row.justify-center.q-mt-sm
@@ -16,7 +21,14 @@ q-page(padding)
     .col-auto.q-mr-md
       q-btn(@click="$router.back()" color="grey" flat icon="west")
     .col-auto
-      q-btn(:disable="!validKey" :label="lang.continue" @click="importKey()" icon-right="arrow_forward" outline size="lg")
+      q-btn(
+        :disable="!validKey"
+        :label="lang.continue"
+        @click="importKey()"
+        icon-right="arrow_forward"
+        outline
+        size="lg"
+      )
       q-tooltip.q-pa-md(v-if="!validKey")
         p.q-mb-lg {{ lang.tooltip }}
 </template>
@@ -32,7 +44,7 @@ export default defineComponent({
     return {
       keyInput: "",
       global: global.data,
-      lang,
+      lang
     }
   },
   computed: {
@@ -47,20 +59,27 @@ export default defineComponent({
     statusMsgStyle(): string[] {
       if (this.validKey) return ["greenMsg"]
       else return ["redMsg"]
-    },
+    }
   },
   methods: {
     importKey() {
-      Loading.show({ message: lang.importing, boxClass: "bg-grey-2 text-grey-9" })
+      Loading.show({
+        message: lang.importing,
+        boxClass: "bg-grey-2 text-grey-9"
+      })
       setTimeout(() => {
-        Loading.show({ message: lang.imported, boxClass: "bg-grey-2 text-grey-9", spinnerColor: "green" })
+        Loading.show({
+          message: lang.imported,
+          boxClass: "bg-grey-2 text-grey-9",
+          spinnerColor: "green"
+        })
       }, ms("2s"))
       setTimeout(() => {
         this.$router.replace({ name: "setupPlot" })
         Loading.hide()
       }, ms("3s"))
-    },
-  },
+    }
+  }
 })
 </script>
 

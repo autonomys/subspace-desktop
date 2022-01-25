@@ -6,16 +6,21 @@ authors = [ "you" ]
 license = "Apache-2.0"
 repository = ""
 default-run = "app"
-edition = "2018"
+edition = "2021"
 build = "src/build.rs"
 
 [build-dependencies]
-tauri-build = { version = "1.0.0-beta.2" }
+tauri-build = { version = "1.0.0-beta.4" }
 
 [dependencies]
+anyhow = "1.0.44"
+fs2 = "0.4.3"
+log = "0.4.14"
 serde_json = "1.0"
 serde = { version = "1.0", features = [ "derive" ] }
-fs2 = "0.4.3"
+subspace-farmer = { git = "https://github.com/subspace/subspace" }
+subspace-solving = { git = "https://github.com/subspace/subspace" }
+tokio = { version = "1.11.0", features = ["macros", "rt-multi-thread"] }
 
 [target.'cfg(windows)'.dependencies]
 winreg = "0.10.1"

@@ -5,9 +5,9 @@ mixin page1
     h6.q-ml-md What is Plotting, Farming, & Rewards
   //- .row.q-mb-md
   .row.q-mb-md
-    p Plotting is the process of assigning various "plots" aka tiny spots across the allocated storage of your hard drive. You can think of this as planting the seeds in a tilled field. Every plot is cryptographically independant, and verifiable, all of the plots are stored in a single file on your system.
+    p Plotting is the process of assigning various "plots" aka tiny spots across the allocated storage of your hard drive. You can think of this as planting the seeds in a tilled field. Every plot is cryptographically independent, and verifiable, all of the plots are stored in a single file on your system.
     br
-    p Farming is the act of checking with the current "challgenge" of the blockchain and seeing if any of your plots will win the challenge, you can think of this as checking to see if your various crops are ripe for the picking.
+    p Farming is the act of checking with the current "challenge" of the blockchain and seeing if any of your plots will win the challenge, you can think of this as checking to see if your various crops are ripe for the picking.
     br
     p If your "fruit is ripe" aka if you have a plot that wins the current challenge then you are rewarded with subspace credits. aka "Winning the block".
 mixin page2
@@ -40,7 +40,11 @@ mixin page3
         p Read up about subspace on #[a(href="https://medium.com/subspace-network" target="_blank") Medium]
 
 q-dialog(@hide="onDialogHide" persistent ref="dialog")
-  q-card.q-dialog-plugin.relative-position(bordered flat style="width: 600px; height: 500px")
+  q-card.q-dialog-plugin.relative-position(
+    bordered
+    flat
+    style="width: 600px; height: 500px"
+  )
     div
       .q-ma-md
         div(v-if="currentPage == 1")
@@ -51,10 +55,30 @@ q-dialog(@hide="onDialogHide" persistent ref="dialog")
           +page3
         .absolute-bottom.q-pa-md
           .row.justify-center.absolute-bottom
-            q-icon.q-mr-xs(:name="currentPage == page ? 'radio_button_checked' : 'radio_button_unchecked'" size="20px" style="margin-bottom: 32px" v-for="page of totalPages")
+            q-icon.q-mr-xs(
+              :name="currentPage == page ? 'radio_button_checked' : 'radio_button_unchecked'"
+              size="20px"
+              style="margin-bottom: 32px"
+              v-for="page of totalPages"
+            )
           .row.justify-end
-            q-btn(@click="currentPage++" label="next" outline size="lg" stretch v-if="currentPage != 2")
-            q-btn(:disabled="!userConfirmed" @click="currentPage++" label="next" outline size="lg" stretch v-else)
+            q-btn(
+              @click="currentPage++"
+              label="next"
+              outline
+              size="lg"
+              stretch
+              v-if="currentPage != 2"
+            )
+            q-btn(
+              :disabled="!userConfirmed"
+              @click="currentPage++"
+              label="next"
+              outline
+              size="lg"
+              stretch
+              v-else
+            )
 </template>
 
 <script>
@@ -70,19 +94,19 @@ const component = defineComponent({
   emits: [
     // REQUIRED
     "ok",
-    "hide",
+    "hide"
   ],
   data() {
     return {
       totalPages: 3,
       currentPage: 1,
-      userConfirmed: false,
+      userConfirmed: false
     }
   },
   watch: {
     currentPage(val) {
       if (val > this.totalPages) this.hide()
-    },
+    }
   },
   methods: {
     userConfirm(val) {
@@ -121,8 +145,8 @@ const component = defineComponent({
     onCancelClick() {
       // we just need to hide the dialog
       this.hide()
-    },
-  },
+    }
+  }
 })
 export default component
 </script>
