@@ -4,9 +4,20 @@ q-page(padding)
     .text-h4 {{ lang.pageTitle }}
   .row.justify-center.q-mt-xl
   .row.justify-center.q-mt-xl
-    q-btn(:label="lang.importKey" @click="$router.push({ name: 'importKey' })" outline size="xl")
+    q-btn(
+      :label="lang.importKey"
+      @click="$router.push({ name: 'importKey' })"
+      outline
+      size="xl"
+    )
   .row.justify-center.q-mt-sm
-    q-btn(:label="lang.back" @click="$router.push({ name: 'index' })" color="grey" flat icon="west")
+    q-btn(
+      :label="lang.back"
+      @click="$router.push({ name: 'index' })"
+      color="grey"
+      flat
+      icon="west"
+    )
 </template>
 
 <script lang="ts">
@@ -16,6 +27,6 @@ const lang = global.data.loc.text.advanced
 export default defineComponent({
   data() {
     return { global: global.data, lang }
-  },
+  }
 })
 </script>

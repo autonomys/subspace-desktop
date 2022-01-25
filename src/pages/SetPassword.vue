@@ -35,7 +35,7 @@ export default defineComponent({
       pw2: "",
       userConfirm: false,
       passHash: "",
-      lang,
+      lang
     }
   },
   computed: {
@@ -57,7 +57,7 @@ export default defineComponent({
     passwordsMatch(): boolean {
       const matching = this.pw1 == this.pw2
       return this.passwordValid && matching
-    },
+    }
   },
   mounted() {
     // Dialog.create({ message: "hello" })
@@ -71,7 +71,7 @@ export default defineComponent({
           util.config.update({ account: { passHash } })
         }, 3000)
       })
-    },
-  },
+    }
+  }
 })
 </script>

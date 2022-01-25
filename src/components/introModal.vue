@@ -40,7 +40,11 @@ mixin page3
         p Read up about subspace on #[a(href="https://medium.com/subspace-network" target="_blank") Medium]
 
 q-dialog(@hide="onDialogHide" persistent ref="dialog")
-  q-card.q-dialog-plugin.relative-position(bordered flat style="width: 600px; height: 500px")
+  q-card.q-dialog-plugin.relative-position(
+    bordered
+    flat
+    style="width: 600px; height: 500px"
+  )
     div
       .q-ma-md
         div(v-if="currentPage == 1")
@@ -51,10 +55,30 @@ q-dialog(@hide="onDialogHide" persistent ref="dialog")
           +page3
         .absolute-bottom.q-pa-md
           .row.justify-center.absolute-bottom
-            q-icon.q-mr-xs(:name="currentPage == page ? 'radio_button_checked' : 'radio_button_unchecked'" size="20px" style="margin-bottom: 32px" v-for="page of totalPages")
+            q-icon.q-mr-xs(
+              :name="currentPage == page ? 'radio_button_checked' : 'radio_button_unchecked'"
+              size="20px"
+              style="margin-bottom: 32px"
+              v-for="page of totalPages"
+            )
           .row.justify-end
-            q-btn(@click="currentPage++" label="next" outline size="lg" stretch v-if="currentPage != 2")
-            q-btn(:disabled="!userConfirmed" @click="currentPage++" label="next" outline size="lg" stretch v-else)
+            q-btn(
+              @click="currentPage++"
+              label="next"
+              outline
+              size="lg"
+              stretch
+              v-if="currentPage != 2"
+            )
+            q-btn(
+              :disabled="!userConfirmed"
+              @click="currentPage++"
+              label="next"
+              outline
+              size="lg"
+              stretch
+              v-else
+            )
 </template>
 
 <script>
@@ -70,19 +94,19 @@ const component = defineComponent({
   emits: [
     // REQUIRED
     "ok",
-    "hide",
+    "hide"
   ],
   data() {
     return {
       totalPages: 3,
       currentPage: 1,
-      userConfirmed: false,
+      userConfirmed: false
     }
   },
   watch: {
     currentPage(val) {
       if (val > this.totalPages) this.hide()
-    },
+    }
   },
   methods: {
     userConfirm(val) {
@@ -121,8 +145,8 @@ const component = defineComponent({
     onCancelClick() {
       // we just need to hide the dialog
       this.hide()
-    },
-  },
+    }
+  }
 })
 export default component
 </script>

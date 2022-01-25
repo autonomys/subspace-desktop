@@ -9,11 +9,30 @@
         .col-8
           .row.justify-center(style="height: 70px")
             .row.justify-center.q-mb-md.full-width
-              q-input(input-class="pkdisplay" outlined readonly ref="pkDisplay" style="width: 800px; height: 80px" type="textarea" v-model="generatedPk" v-show="revealKey")
+              q-input(
+                input-class="pkdisplay"
+                outlined
+                readonly
+                ref="pkDisplay"
+                style="width: 800px; height: 80px"
+                type="textarea"
+                v-model="generatedPk"
+                v-show="revealKey"
+              )
             .row.justify-center.q-mb-lg.full-width.bg-grey-2(v-if="!revealKey")
-              q-btn.full-width.full-width(:label="lang.reveal" @click="revealKey = true" flat size="lg")
+              q-btn.full-width.full-width(
+                :label="lang.reveal"
+                @click="revealKey = true"
+                flat
+                size="lg"
+              )
           .row.justify-center.q-mt-md
-            q-btn.full-width(:label="lang.copy" @click="copyPk" outline style="max-width: 200px")
+            q-btn.full-width(
+              :label="lang.copy"
+              @click="copyPk"
+              outline
+              style="max-width: 200px"
+            )
     .row
       p Private keys are your password for your subspace farmer and wallet, this cannot be changed, guessed(easily), or reset if lost. It is imperative that this is stored in a secure, safe location. Without the Private Key you will not have access to your funds. Furthermore, anyone who steals your private keys will be able to do as they please with your funds.
   .row.q-pt-md
@@ -33,19 +52,20 @@ export default defineComponent({
   emits: ["userConfirm"],
   data() {
     const userConfirm = false
-    const generatedPk = "98da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f"
+    const generatedPk =
+      "98da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f"
     const revealKey = false
     return { revealKey, userConfirm, lang, generatedPk }
   },
   computed: {
     canContinue(): boolean {
       return this.userConfirm
-    },
+    }
   },
   watch: {
     userConfirm(val) {
       this.$emit("userConfirm", val)
-    },
+    }
   },
   methods: {
     copyPk() {
@@ -62,8 +82,8 @@ export default defineComponent({
         Notify.create({ message: lang.saved, icon: "content_copy" })
       })
       return 3
-    },
-  },
+    }
+  }
 })
 </script>
 

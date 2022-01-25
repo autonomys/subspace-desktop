@@ -32,11 +32,11 @@ const lang = global.data.loc.text.dashboard
 export default defineComponent({
   props: {
     plot: { type: Object, required: true },
-    config: { type: Object, required: true },
+    config: { type: Object, required: true }
   },
   data() {
     return { lang, util }
-  },
+  }
 })
 </script>
 
