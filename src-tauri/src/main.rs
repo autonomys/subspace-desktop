@@ -35,11 +35,7 @@ struct DiskStats {
 
 #[tauri::command]
 async fn farming(path: String) -> FarmerIdentity {
-    let path_buf = PathBuf::from(path);
-    let node_rpc_url: String = "ws://127.0.0.1:9944".to_string();
-
-    // start farming, and return the public key of the farmer
-    let farmer_identity = farm(path_buf, &node_rpc_url).await;
+    let farmer_identity = farm(path.into(), "ws://127.0.0.1:9944").await;
     farmer_identity.unwrap()
 }
 
