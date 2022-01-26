@@ -63,6 +63,11 @@ export interface ClientData {
   farming: ClientFarming
 }
 
+export interface ClientIdentity {
+  public_key: string,
+  mnemonic: string
+}
+
 export const emptyData: ClientData = {
   plot: { details: {}, plotFile: '', plotSizeBytes: 0, status: '' },
   farming: { farmed: [], status: '', events: mitt() },
@@ -203,6 +208,8 @@ export class Client {
   }
 }
 
-export function startFarming(path: string): Promise<string> {
-  return (tauri.invoke('farming', { path })).then(value => value as string)
+export async function startFarming(path: string): Promise<ClientIdentity> {
+  const result = await (tauri.invoke('farming', { path })).then(value => value as ClientIdentity)
+  const farmer_identity: ClientIdentity = { public_key: result.public_key, mnemonic: result.mnemonic }
+  return farmer_identity
 }
