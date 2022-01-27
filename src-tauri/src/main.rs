@@ -8,7 +8,7 @@ mod windows;
 
 use anyhow::{anyhow, Result};
 use bip39::{Language, Mnemonic};
-use log::{info, debug};
+use log::{debug, info};
 use serde::Serialize;
 use std::path::PathBuf;
 use subspace_farmer::{
