@@ -161,7 +161,6 @@ export default defineComponent({
     return {
       revealKey: false,
       userConfirm: false,
-      //generatedPk: "98da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f",
       plotDirectory: "/Subspace/plots",
       allocatedGB: 1,
       validPath: true,
@@ -261,10 +260,10 @@ export default defineComponent({
       })
       if (this.defaultPath != this.plotDirectory)
         await native.createDir(this.plotDirectory)
-      const farmer_identity = await startFarming(this.plotDirectory)
+      const farmerIdentity = await startFarming(this.plotDirectory)
       // TODO: find a way to store and retrieve the public key from client.ts.
-      LocalStorage.set("farmerPublicKey", farmer_identity.public_key)
-      LocalStorage.set("mnemonic", farmer_identity.mnemonic)
+      LocalStorage.set("farmerPublicKey", farmerIdentity.public_key)
+      LocalStorage.set("mnemonic", farmerIdentity.mnemonic)
       this.$router.replace({ name: "plottingProgress" })
     },
     async updateDriveStats() {

@@ -209,7 +209,5 @@ export class Client {
 }
 
 export async function startFarming(path: string): Promise<ClientIdentity> {
-  const result = await (tauri.invoke('farming', { path })).then(value => value as ClientIdentity)
-  const farmer_identity: ClientIdentity = { public_key: result.public_key, mnemonic: result.mnemonic }
-  return farmer_identity
+  return tauri.invoke('farming', { path });
 }

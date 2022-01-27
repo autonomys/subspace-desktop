@@ -8,7 +8,7 @@ mod windows;
 
 use anyhow::{anyhow, Result};
 use bip39::{Language, Mnemonic};
-use log::info;
+use log::{info, debug};
 use serde::Serialize;
 use std::path::PathBuf;
 use subspace_farmer::{
@@ -41,7 +41,7 @@ async fn farming(path: String) -> FarmerIdentity {
 
 #[tauri::command]
 fn get_disk_stats(dir: String) -> DiskStats {
-    println!("{}", dir);
+    debug!("{}", dir);
     let free: u64 = fs2::available_space(&dir).expect("error");
     let total: u64 = fs2::total_space(&dir).expect("error");
 
@@ -202,10 +202,10 @@ pub(crate) async fn farm(
     tokio::spawn(async {
         tokio::select! {
             res = plotting_instance.wait() => if let Err(error) = res {
-                return Err(anyhow!(error))
+                return Err(anyhow!(error)) // TODO: connect this error to frontend, or log it
             },
             res = farming_instance.wait() => if let Err(error) = res {
-                return Err(anyhow!(error))
+                return Err(anyhow!(error)) // TODO: connect this error to frontend, or log it
             },
         }
         Ok(())
@@ -215,7 +215,6 @@ pub(crate) async fn farm(
         public_key: identity.public_key().to_bytes(),
         mnemonic: Mnemonic::from_entropy(identity.entropy(), Language::English)
             .unwrap()
-            .phrase()
-            .parse()?,
+            .into_phrase(),
     })
 }
