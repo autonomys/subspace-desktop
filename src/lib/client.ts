@@ -64,7 +64,7 @@ export interface ClientData {
 }
 
 export interface ClientIdentity {
-  public_key: string,
+  publicKey: string,
   mnemonic: string
 }
 

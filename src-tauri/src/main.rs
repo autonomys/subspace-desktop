@@ -22,6 +22,7 @@ use tauri::{
 };
 
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 struct FarmerIdentity {
     public_key: [u8; 32],
     mnemonic: String,

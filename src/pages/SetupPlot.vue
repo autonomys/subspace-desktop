@@ -262,7 +262,7 @@ export default defineComponent({
         await native.createDir(this.plotDirectory)
       const farmerIdentity = await startFarming(this.plotDirectory)
       // TODO: find a way to store and retrieve the public key from client.ts.
-      LocalStorage.set("farmerPublicKey", farmerIdentity.public_key)
+      LocalStorage.set("farmerPublicKey", farmerIdentity.publicKey)
       LocalStorage.set("mnemonic", farmerIdentity.mnemonic)
       this.$router.replace({ name: "plottingProgress" })
     },
