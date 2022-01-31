@@ -5,8 +5,8 @@ jobs:
   publish-tauri:
     strategy:
       fail-fast: false
-      matrix:
-        platform: [macos-latest, ubuntu-latest, windows-2019, windows-2022]
+      matrix: # Windows-2022 has been temporarily removed. We are unable to build 2x windows installs at the same name due to naming convention issues. Issue made upstream here: https://github.com/tauri-apps/tauri-action/issues/215
+        platform: [macos-latest, ubuntu-latest, windows-2019]
 
     runs-on: ${{ matrix.platform }}
     steps:
