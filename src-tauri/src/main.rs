@@ -7,7 +7,8 @@
 mod windows;
 
 use anyhow::{anyhow, Result};
-use log::info;
+use bip39::{Language, Mnemonic};
+use log::{debug, info};
 use serde::Serialize;
 use std::path::PathBuf;
 use subspace_farmer::{
@@ -21,21 +22,27 @@ use tauri::{
 };
 
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct FarmerIdentity {
+    public_key: [u8; 32],
+    mnemonic: String,
+}
+
+#[derive(Serialize)]
 struct DiskStats {
     free_bytes: u64,
     total_bytes: u64,
 }
 
 #[tauri::command]
-async fn farming(path: String) -> [u8; 32] {
-    // start farming, and return the public key of the farmer
-    let public_key = farm(path.into(), "ws://127.0.0.1:9944").await;
-    public_key.unwrap()
+async fn farming(path: String) -> FarmerIdentity {
+    let farmer_identity = farm(path.into(), "ws://127.0.0.1:9944").await;
+    farmer_identity.unwrap()
 }
 
 #[tauri::command]
 fn get_disk_stats(dir: String) -> DiskStats {
-    info!("{}", dir);
+    debug!("{}", dir);
     let free: u64 = fs2::available_space(&dir).expect("error");
     let total: u64 = fs2::total_space(&dir).expect("error");
 
@@ -135,7 +142,7 @@ async fn main() -> Result<()> {
 pub(crate) async fn farm(
     base_directory: PathBuf,
     node_rpc_url: &str,
-) -> Result<[u8; 32], anyhow::Error> {
+) -> Result<FarmerIdentity, anyhow::Error> {
     // TODO: This doesn't account for the fact that node can
     // have a completely different history to what farmer expects
     info!("Opening plot");
@@ -195,15 +202,20 @@ pub(crate) async fn farm(
     // wait for the farming and plotting in the background
     tokio::spawn(async {
         tokio::select! {
-          res = plotting_instance.wait() => if let Err(error) = res {
-            return Err(anyhow!(error)) // TODO: connect this error to frontend, or log it
-          },
-          res = farming_instance.wait() => if let Err(error) = res {
-            return Err(anyhow!(error)) // TODO: connect this error to frontend, or log it
-          },
+            res = plotting_instance.wait() => if let Err(error) = res {
+                return Err(anyhow!(error)) // TODO: connect this error to frontend, or log it
+            },
+            res = farming_instance.wait() => if let Err(error) = res {
+                return Err(anyhow!(error)) // TODO: connect this error to frontend, or log it
+            },
         }
         Ok(())
     });
 
-    Ok(identity.public_key().to_bytes())
+    Ok(FarmerIdentity {
+        public_key: identity.public_key().to_bytes(),
+        mnemonic: Mnemonic::from_entropy(identity.entropy(), Language::English)
+            .unwrap()
+            .into_phrase(),
+    })
 }

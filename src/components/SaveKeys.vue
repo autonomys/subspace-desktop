@@ -7,14 +7,14 @@
     .col
       .row.justify-center
         .col-8
-          .row.justify-center(style="height: 70px")
+          .row.justify-center(style="height: 100px")
             .row.justify-center.q-mb-md.full-width
               q-input(
-                input-class="pkdisplay"
+                input-class="mnemonic"
                 outlined
                 readonly
                 ref="pkDisplay"
-                style="width: 800px; height: 80px"
+                style="width: 800px; height: 100px"
                 type="textarea"
                 v-model="generatedPk"
                 v-show="revealKey"
@@ -26,11 +26,11 @@
                 flat
                 size="lg"
               )
-          .row.justify-center.q-mt-md
-            q-btn.full-width(
+          .row.justify-center.q-mt-md(v-if="revealKey")
+            q-btn(
               :label="lang.copy"
               @click="copyPk"
-              outline
+              color="primary"
               style="max-width: 200px"
             )
     .row
@@ -44,7 +44,7 @@ import { defineComponent } from "vue"
 import { globalState as global } from "src/lib/global"
 const lang = global.data.loc.text.saveKeys
 // const lang = {}
-import { QInput, Notify } from "quasar"
+import { QInput, Notify, LocalStorage } from "quasar"
 
 // @vue/component
 export default defineComponent({
@@ -52,8 +52,7 @@ export default defineComponent({
   emits: ["userConfirm"],
   data() {
     const userConfirm = false
-    const generatedPk =
-      "98da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f"
+    const generatedPk = LocalStorage.getItem("mnemonic")
     const revealKey = false
     return { revealKey, userConfirm, lang, generatedPk }
   },
@@ -91,6 +90,13 @@ export default defineComponent({
 <style lang="sass">
 .pkdisplay
   font-size: 20px
+  padding-top: 0px
+  margin-top: 0px
+</style>
+
+<style lang="sass">
+.mnemonic
+  font-size: 14px
   padding-top: 0px
   margin-top: 0px
 </style>
