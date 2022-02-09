@@ -6,11 +6,15 @@
 #[cfg(target_os = "windows")]
 mod windows;
 
+#[macro_use]
+extern crate lazy_static;
+
 use anyhow::{anyhow, Result};
 use bip39::{Language, Mnemonic};
 use log::{debug, info};
 use serde::Serialize;
 use std::path::PathBuf;
+use std::sync::{Arc, Mutex};
 use subspace_farmer::{
     Commitments, Farming, Identity, ObjectMappings, Plot, Plotting, RpcClient, WsRpc,
 };
@@ -20,6 +24,10 @@ use tauri::{
     CustomMenuItem, Event, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu,
     SystemTrayMenuItem,
 };
+
+lazy_static! {
+    static ref PLOTTED_PIECES: Mutex<usize> = Mutex::new(0);
+}
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -32,6 +40,12 @@ struct FarmerIdentity {
 struct DiskStats {
     free_bytes: u64,
     total_bytes: u64,
+}
+
+#[tauri::command]
+fn plot_progress_tracker() -> Option<usize> {
+    let count = PLOTTED_PIECES.try_lock().ok()?;
+    Some(*count)
 }
 
 #[tauri::command]
@@ -99,7 +113,12 @@ async fn main() -> Result<()> {
         })
         .invoke_handler(
             #[cfg(not(target_os = "windows"))]
-            tauri::generate_handler![get_disk_stats, get_this_binary, farming],
+            tauri::generate_handler![
+                get_disk_stats,
+                get_this_binary,
+                farming,
+                plot_progress_tracker
+            ],
             #[cfg(target_os = "windows")]
             tauri::generate_handler![
                 windows::winreg_get,
@@ -108,6 +127,7 @@ async fn main() -> Result<()> {
                 get_this_binary,
                 get_disk_stats,
                 farming,
+                plot_progress_tracker,
             ],
         )
         .build(tauri::generate_context!())
@@ -152,6 +172,10 @@ pub(crate) async fn farm(
         move || Plot::open_or_create(&base_directory)
     });
     let plot = plot_fut.await.unwrap()?;
+    let _handler = plot.on_progress_change(Arc::new(|plotted_pieces| {
+        let mut guard = PLOTTED_PIECES.lock().unwrap();
+        *guard += plotted_pieces.plotted_piece_count;
+    }));
 
     info!("Opening commitments");
     let commitments_fut = tokio::task::spawn_blocking({
