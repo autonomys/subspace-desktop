@@ -14,6 +14,7 @@ import { SubPreDigest } from './customTypes/types'
 import { invoke } from '@tauri-apps/api/tauri'
 
 const tauri = { event, invoke }
+const SUNIT = 1000000000000000000;
 
 export interface NetStatus { peers: Vec<PeerInfo> }
 
@@ -152,14 +153,23 @@ export class Client {
             const { solution }: SubPreDigest = this.api.registry.createType('SubPreDigest', preRuntimes[0].asPreRuntime[1]);
 
             if (solution.public_key.toString() === farmerPublicKey?.toString()) {
+              let blockReward = 0;
+              if (solution.public_key.toString() === farmerPublicKey?.toString()) {
+                const allRecords: Vec<any> = await this.api.query.system.events.at(lastHeader.hash);
+                allRecords.forEach((record) => {
+                  const { section, method, data } = record.event;
+                  if (section === "rewards" && method === "BlockReward")
+                    blockReward = data[1] / SUNIT;
+                });
+              }
               const block: FarmedBlock = {
                 author: solution.public_key.toString(),
                 id: lastHeader.hash.toString(),
                 time: Date.now(),
                 transactions: 0,
                 blockNum: lastHeader.number.toNumber(),
-                blockReward: 0,
-                feeReward: 0,
+                blockReward,
+                feeReward: 0
               };
               this.data.farming.farmed = [block].concat(
                 this.data.farming.farmed
