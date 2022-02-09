@@ -6,11 +6,17 @@
 #[cfg(target_os = "windows")]
 mod windows;
 
+#[macro_use]
+extern crate lazy_static;
+
 use anyhow::{anyhow, Result};
 use bip39::{Language, Mnemonic};
+use event_listener_primitives::HandlerId;
 use log::{debug, info};
 use serde::Serialize;
 use std::path::PathBuf;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::{Arc, Mutex};
 use subspace_farmer::{
     Commitments, Farming, Identity, ObjectMappings, Plot, Plotting, RpcClient, WsRpc,
 };
@@ -20,6 +26,13 @@ use tauri::{
     CustomMenuItem, Event, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu,
     SystemTrayMenuItem,
 };
+
+const PIECE_SIZE: usize = 4096; // we store pieces as flattened arrays. Each piece has length of 4096.
+static PLOTTED_PIECES: AtomicUsize = AtomicUsize::new(0);
+
+lazy_static! {
+    static ref HANDLER: Mutex<Option<HandlerId>> = Mutex::new(None);
+}
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -32,6 +45,11 @@ struct FarmerIdentity {
 struct DiskStats {
     free_bytes: u64,
     total_bytes: u64,
+}
+
+#[tauri::command]
+fn plot_progress_tracker() -> usize {
+    PLOTTED_PIECES.load(Ordering::Relaxed)
 }
 
 #[tauri::command]
@@ -99,7 +117,12 @@ async fn main() -> Result<()> {
         })
         .invoke_handler(
             #[cfg(not(target_os = "windows"))]
-            tauri::generate_handler![get_disk_stats, get_this_binary, farming],
+            tauri::generate_handler![
+                get_disk_stats,
+                get_this_binary,
+                farming,
+                plot_progress_tracker
+            ],
             #[cfg(target_os = "windows")]
             tauri::generate_handler![
                 windows::winreg_get,
@@ -108,6 +131,7 @@ async fn main() -> Result<()> {
                 get_this_binary,
                 get_disk_stats,
                 farming,
+                plot_progress_tracker,
             ],
         )
         .build(tauri::generate_context!())
@@ -151,7 +175,22 @@ pub(crate) async fn farm(
 
         move || Plot::open_or_create(&base_directory)
     });
+
     let plot = plot_fut.await.unwrap()?;
+
+    let mut _handler_guard = HANDLER
+        .lock()
+        .unwrap()
+        .replace(plot.on_progress_change(Arc::new(|plotted_pieces| {
+            PLOTTED_PIECES.fetch_add(
+                plotted_pieces.plotted_piece_count / PIECE_SIZE,
+                Ordering::SeqCst,
+            );
+            debug!(
+                "Plotted pieces so far: {}",
+                PLOTTED_PIECES.load(Ordering::Relaxed)
+            );
+        })));
 
     info!("Opening commitments");
     let commitments_fut = tokio::task::spawn_blocking({
