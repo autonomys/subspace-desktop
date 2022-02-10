@@ -64,6 +64,7 @@ name = "app"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "event-listener-primitives",
  "fs2",
  "lazy_static",
  "log",

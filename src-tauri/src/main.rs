@@ -11,6 +11,7 @@ extern crate lazy_static;
 
 use anyhow::{anyhow, Result};
 use bip39::{Language, Mnemonic};
+use event_listener_primitives::HandlerId;
 use log::{debug, info};
 use serde::Serialize;
 use std::path::PathBuf;
@@ -27,6 +28,7 @@ use tauri::{
 
 lazy_static! {
     static ref PLOTTED_PIECES: Mutex<usize> = Mutex::new(0);
+    static ref HANDLER: Mutex<Option<HandlerId>> = Mutex::new(None);
 }
 
 #[derive(Serialize)]
@@ -171,16 +173,17 @@ pub(crate) async fn farm(
 
         move || Plot::open_or_create(&base_directory)
     });
-    println!("PRINT WORKS HERE!!!");
+
     let plot = plot_fut.await.unwrap()?;
-    let _handler = plot.on_progress_change(Arc::new(|plotted_pieces| {
-        println!(
-            "New plotted piece count is: {}",
-            plotted_pieces.plotted_piece_count
-        );
-        let mut guard = PLOTTED_PIECES.lock().unwrap();
-        *guard += plotted_pieces.plotted_piece_count;
-    }));
+
+    let mut _handler_guard = HANDLER
+        .lock()
+        .unwrap()
+        .replace(plot.on_progress_change(Arc::new(|plotted_pieces| {
+            let mut guard = PLOTTED_PIECES.lock().unwrap();
+            *guard += plotted_pieces.plotted_piece_count;
+            debug!("Plotted pieces so far: {}", *guard);
+        })));
 
     info!("Opening commitments");
     let commitments_fut = tokio::task::spawn_blocking({
