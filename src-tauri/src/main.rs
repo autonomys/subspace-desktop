@@ -30,7 +30,6 @@ use tauri::{
 static PLOTTED_PIECES: AtomicUsize = AtomicUsize::new(0);
 
 lazy_static! {
-    //static ref PLOTTED_PIECES: Mutex<usize> = Mutex::new(0);
     static ref HANDLER: Mutex<Option<HandlerId>> = Mutex::new(None);
 }
 
@@ -49,8 +48,6 @@ struct DiskStats {
 
 #[tauri::command]
 fn plot_progress_tracker() -> usize {
-    // let count = PLOTTED_PIECES.try_lock().ok()?;
-    // Some(*count)
     PLOTTED_PIECES.load(Ordering::Relaxed)
 }
 
@@ -185,13 +182,10 @@ pub(crate) async fn farm(
         .unwrap()
         .replace(plot.on_progress_change(Arc::new(|plotted_pieces| {
             PLOTTED_PIECES.fetch_add(plotted_pieces.plotted_piece_count, Ordering::SeqCst);
-            println!(
+            debug!(
                 "Plotted pieces so far: {}",
                 PLOTTED_PIECES.load(Ordering::Relaxed)
             );
-            // let mut guard = PLOTTED_PIECES.lock().unwrap();
-            // *guard += plotted_pieces.plotted_piece_count;
-            // debug!("Plotted pieces so far: {}", *guard);
         })));
 
     info!("Opening commitments");
