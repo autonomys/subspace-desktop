@@ -171,8 +171,13 @@ pub(crate) async fn farm(
 
         move || Plot::open_or_create(&base_directory)
     });
+    println!("PRINT WORKS HERE!!!");
     let plot = plot_fut.await.unwrap()?;
     let _handler = plot.on_progress_change(Arc::new(|plotted_pieces| {
+        println!(
+            "New plotted piece count is: {}",
+            plotted_pieces.plotted_piece_count
+        );
         let mut guard = PLOTTED_PIECES.lock().unwrap();
         *guard += plotted_pieces.plotted_piece_count;
     }));
