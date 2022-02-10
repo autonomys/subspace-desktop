@@ -118,7 +118,8 @@ function clearStored(): void {
 }
 
 //TODO should be refactored to not rely on the .init() method to be valid
-export class Client {
+export class Client {  
+  protected clientIsReady = false;
   protected wsProvider = new WsProvider("ws://localhost:9944");
   protected api: ApiPromise = new ApiPromise({ provider: this.wsProvider });
   protected farmed = getStoredBlocks();
@@ -154,14 +155,12 @@ export class Client {
 
             if (solution.public_key.toString() === farmerPublicKey?.toString()) {
               let blockReward = 0;
-              if (solution.public_key.toString() === farmerPublicKey?.toString()) {
-                const allRecords: Vec<any> = await this.api.query.system.events.at(lastHeader.hash);
-                allRecords.forEach((record) => {
-                  const { section, method, data } = record.event;
-                  if (section === "rewards" && method === "BlockReward")
-                    blockReward = data[1] / SUNIT;
-                });
-              }
+              const allRecords: Vec<any> = await this.api.query.system.events.at(lastHeader.hash);
+              allRecords.forEach((record) => {
+                const { section, method, data } = record.event;
+                if (section === "rewards" && method === "BlockReward")
+                  blockReward = data[1] / SUNIT;
+              });
               const block: FarmedBlock = {
                 author: solution.public_key.toString(),
                 id: lastHeader.hash.toString(),
@@ -203,7 +202,11 @@ export class Client {
   constructor() {
     this.data.farming.farmed = this.farmed
   }
+  isConnected(): boolean{
+    return this.clientIsReady
+  }
   async init(): Promise<void> {
+    this.clientIsReady = true
     this.api = await ApiPromise.create({
       provider: this.wsProvider, types: {
         Solution: {
@@ -215,6 +218,7 @@ export class Client {
         }
       }
     })
+    this.do.blockSubscription.runTest()
   }
 }
 

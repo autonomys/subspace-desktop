@@ -74,7 +74,9 @@ export default defineComponent({
   },
   watch: {},
   async mounted() {
-    await this.client.init() // TODO remove once invariants are protected will stall forever if there is a connection issue.
+    // In case we started the client from SetupPlot
+    if(!this.client.isConnected)
+      await this.client.init() // TODO remove once invariants are protected will stall forever if there is a connection issue.
     const config = await util.config.read()
     const valid = util.config.validate(config)
     this.global.status.state = "loading"
@@ -125,7 +127,6 @@ export default defineComponent({
       this.network.peers = netData.peers.length
     },
     async testClient() {
-      this.client.do.blockSubscription.runTest()
       this.client.data.farming.events.on("farmedBlock", this.farmBlock)
     },
 
