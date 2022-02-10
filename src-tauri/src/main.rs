@@ -15,6 +15,7 @@ use event_listener_primitives::HandlerId;
 use log::{debug, info};
 use serde::Serialize;
 use std::path::PathBuf;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 use subspace_farmer::{
     Commitments, Farming, Identity, ObjectMappings, Plot, Plotting, RpcClient, WsRpc,
@@ -26,8 +27,10 @@ use tauri::{
     SystemTrayMenuItem,
 };
 
+static PLOTTED_PIECES: AtomicUsize = AtomicUsize::new(0);
+
 lazy_static! {
-    static ref PLOTTED_PIECES: Mutex<usize> = Mutex::new(0);
+    //static ref PLOTTED_PIECES: Mutex<usize> = Mutex::new(0);
     static ref HANDLER: Mutex<Option<HandlerId>> = Mutex::new(None);
 }
 
@@ -45,9 +48,10 @@ struct DiskStats {
 }
 
 #[tauri::command]
-fn plot_progress_tracker() -> Option<usize> {
-    let count = PLOTTED_PIECES.try_lock().ok()?;
-    Some(*count)
+fn plot_progress_tracker() -> usize {
+    // let count = PLOTTED_PIECES.try_lock().ok()?;
+    // Some(*count)
+    PLOTTED_PIECES.load(Ordering::Relaxed)
 }
 
 #[tauri::command]
@@ -180,9 +184,14 @@ pub(crate) async fn farm(
         .lock()
         .unwrap()
         .replace(plot.on_progress_change(Arc::new(|plotted_pieces| {
-            let mut guard = PLOTTED_PIECES.lock().unwrap();
-            *guard += plotted_pieces.plotted_piece_count;
-            debug!("Plotted pieces so far: {}", *guard);
+            PLOTTED_PIECES.fetch_add(plotted_pieces.plotted_piece_count, Ordering::SeqCst);
+            println!(
+                "Plotted pieces so far: {}",
+                PLOTTED_PIECES.load(Ordering::Relaxed)
+            );
+            // let mut guard = PLOTTED_PIECES.lock().unwrap();
+            // *guard += plotted_pieces.plotted_piece_count;
+            // debug!("Plotted pieces so far: {}", *guard);
         })));
 
     info!("Opening commitments");

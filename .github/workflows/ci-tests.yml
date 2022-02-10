@@ -2,14 +2,10 @@ name: "ci tests"
 on:
   push:
     paths-ignore:
-      - 'docs/**'
-      - 'README.md'
-      - 'ARCHITECTURE.md'
+      - '*.md'
   pull_request:
     paths-ignore:
-      - 'docs/**'
-      - 'README.md'
-      - 'ARCHITECTURE.md'
+      - '*.md'
 
 jobs:
   test-tauri:
