@@ -1,49 +1,42 @@
 <template lang="pug">
 mixin page1
   .row.q-mb-md.items-center
-    q-icon(color="blue-3" name="downloading" size="80px")
+    q-icon(color="blue-3" name="downloading" size="60px")
     h6.q-ml-md What is Plotting, Farming, & Rewards
   //- .row.q-mb-md
   .row.q-mb-md
-    p Plotting is the process of assigning various "plots" aka tiny spots across the allocated storage of your hard drive. You can think of this as planting the seeds in a tilled field. Every plot is cryptographically independent, and verifiable, all of the plots are stored in a single file on your system.
+    p(style="font-size:1em") Plotting is the process of assigning various "plots" aka tiny spots across the allocated storage of your hard drive. You can think of this as planting the seeds in a tilled field. Every plot is cryptographically independent, and verifiable, all of the plots are stored in a single file on your system.
     br
-    p Farming is the act of checking with the current "challenge" of the blockchain and seeing if any of your plots will win the challenge, you can think of this as checking to see if your various crops are ripe for the picking.
+    p(style="font-size:1em") Farming is the act of checking with the current "challenge" of the blockchain and seeing if any of your plots will win the challenge, you can think of this as checking to see if your various crops are ripe for the picking.
     br
-    p If your "fruit is ripe" aka if you have a plot that wins the current challenge then you are rewarded with subspace credits. aka "Winning the block".
+    p(style="font-size:1em") If your "fruit is ripe" aka if you have a plot that wins the current challenge then you are rewarded with subspace credits. aka "Winning the block".
 mixin page2
-  .row.justify-center.q-mb-md
-    .col-auto
-    //- q-icon(color="blue-3" name="vpn_key" size="80px")
-    .col
-      .row.q-mb-md
-        saveKeys(@userConfirm="userConfirm")
-mixin page3
   .row.justify-center.q-pb-md.items-center
     .col-auto.q-mr-md
-      q-icon(color="yellow" name="lightbulb" size="100px")
+      q-icon(color="yellow" name="lightbulb" size="60px")
     .col
       .row.q-mb-md
         h6 Hints
   .row.q-mb-md
     ul
       li
-        p Did you know subspace is the first Proof of Capacity blockchain on Substrate?
+        p(style="font-size:1em") Did you know subspace is the first Proof of Capacity blockchain on Substrate?
       li
-        p Did you know that subspace stores all data On-Chain!
+        p(style="font-size:1em") Did you know that subspace stores all data On-Chain!
       li
-        p You can talk with us on #[a(href="https://discord.gg/5MAp8CD684") Discord]
+        p(style="font-size:1em") You can talk with us on #[a(href="https://discord.gg/5MAp8CD684") Discord]
       li
-        p You can talk with us on #[a(href="https://t.me/subspacelabs") Telegram]
+        p(style="font-size:1em") You can talk with us on #[a(href="https://t.me/subspacelabs") Telegram]
       li
-        p Visit us on #[a(href="https://twitter.com/NetworkSubspace") Twitter]
+        p(style="font-size:1em") Visit us on #[a(href="https://twitter.com/NetworkSubspace") Twitter]
       li
-        p Read up about subspace on #[a(href="https://medium.com/subspace-network" target="_blank") Medium]
+        p(style="font-size:1em") Read up about subspace on #[a(href="https://medium.com/subspace-network" target="_blank") Medium]
 
 q-dialog(@hide="onDialogHide" persistent ref="dialog")
   q-card.q-dialog-plugin.relative-position(
     bordered
     flat
-    style="width: 600px; height: 500px"
+    style="width: 500px; height: 400px; background-color: rgba(255, 255, 255, 0.94) !important"
   )
     div
       .q-ma-md
@@ -51,8 +44,6 @@ q-dialog(@hide="onDialogHide" persistent ref="dialog")
           +page1
         div(v-if="currentPage == 2")
           +page2
-        div(v-if="currentPage == 3")
-          +page3
         .absolute-bottom.q-pa-md
           .row.justify-center.absolute-bottom
             q-icon.q-mr-xs(
@@ -71,7 +62,6 @@ q-dialog(@hide="onDialogHide" persistent ref="dialog")
               v-if="currentPage != 2"
             )
             q-btn(
-              :disabled="!userConfirmed"
               @click="currentPage++"
               label="next"
               outline
@@ -83,10 +73,9 @@ q-dialog(@hide="onDialogHide" persistent ref="dialog")
 
 <script>
 import { defineComponent } from "vue"
-import saveKeys from "components/SaveKeys.vue"
 
 const component = defineComponent({
-  components: { saveKeys },
+  components: {  },
   props: {
     // ...your custom props
   },
@@ -98,9 +87,8 @@ const component = defineComponent({
   ],
   data() {
     return {
-      totalPages: 3,
+      totalPages: 2,
       currentPage: 1,
-      userConfirmed: false
     }
   },
   watch: {
@@ -109,10 +97,6 @@ const component = defineComponent({
     }
   },
   methods: {
-    userConfirm(val) {
-      console.log("usrConfirm", val)
-      this.userConfirmed = val
-    },
     // following method is REQUIRED
     // (don't change its name --> "show")
     show() {

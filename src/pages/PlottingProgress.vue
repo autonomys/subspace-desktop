@@ -94,7 +94,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
       div {{ lang.hintInfo }}
     .col-auto.q-pr-md
     .col-expand
-    .col-auto(v-if="viewedIntro")
+    .col-auto(v-if="viewedKeys")
       q-btn(
         :label="lang.finish"
         @click="$router.replace({ name: 'dashboard' })"
@@ -125,7 +125,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
     .col-auto(v-else)
       q-btn(
         :label="lang.next"
-        @click="viewIntro()"
+        @click="viewKeys()"
         color="blue-8"
         icon-right="play_arrow"
         outline
@@ -139,6 +139,7 @@ import { globalState as global } from "src/lib/global"
 const lang = global.data.loc.text.plottingProgress
 import * as util from "src/lib/util"
 import introModal from "components/introModal.vue"
+import userkeysModal from "components/userkeysModal.vue"
 import TimeAgo from "javascript-time-ago"
 import en from "javascript-time-ago/locale/en"
 TimeAgo.addLocale(en)
@@ -155,6 +156,7 @@ export default defineComponent({
         remainingGB: 0
       },
       viewedIntro: false,
+      viewedKeys: false,
       lang,
       plotFinished: false,
       plotDirectory: "/Subspace/plots",
@@ -233,6 +235,7 @@ export default defineComponent({
     startPlotting() {
       this.plotting = true
       this.fakeProgress()
+      this.viewIntro()
       timer = window.setInterval(() => (this.elapsedms += 100), 100)
     },
     pausePlotting() {
@@ -252,6 +255,12 @@ export default defineComponent({
       const modal = await util.showModal(introModal)
       modal?.onDismiss(() => {
         this.viewedIntro = true
+      })
+    },
+    async viewKeys() {
+      const modal = await util.showModal(userkeysModal)
+      modal?.onDismiss(() => {
+        this.viewedKeys = true
       })
     }
   }

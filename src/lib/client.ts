@@ -8,6 +8,7 @@ import * as process from 'process'
 import { ClientIdentity, emptyClientData, FarmedBlock, NetStatus } from './types'
 import { SubPreDigest } from './customTypes/types'
 import { invoke } from '@tauri-apps/api/tauri'
+import * as util from "src/lib/util"
 
 const tauri = { event, invoke }
 const SUNIT = 1000000000000000000;
@@ -52,6 +53,8 @@ export class Client {
                 const { section, method, data } = record.event;
                 if (section === "rewards" && method === "BlockReward")
                   blockReward = data[1] / SUNIT;
+                if (section === "transactionFees")
+                  console.log("transactionFees event::", section, method, data);
               });
               const block: FarmedBlock = {
                 author: solution.public_key.toString(),
@@ -94,12 +97,13 @@ export class Client {
   constructor() {
   }
 
-  public async init(clear: boolean = false, farmerPublicKey?: string | undefined , mnemonic?: string | undefined ): Promise<void> {
+  public async init(clear: boolean = false, farmerPublicKey?: string | undefined, mnemonic?: string | undefined): Promise<void> {
     if (farmerPublicKey && mnemonic) {
       LocalStorage.set("farmerPublicKey", farmerPublicKey)
       LocalStorage.set("mnemonic", mnemonic)
+      util.config.update({ account: { pubkey: farmerPublicKey } })
     }
-    
+
     if (clear)
       this.clearStoredBlocks()
     else

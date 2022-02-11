@@ -2,24 +2,25 @@
 .full-width
   .row.justify-center.q-gutter-lg
     .col-auto
-      q-icon(color="blue-3" name="vpn_key" size="80px")
+      q-icon(color="blue-3" name="vpn_key" size="65px" style="margin-left:16px")
       p.q-ml-sm {{ lang.privateKey }}
     .col
       .row.justify-center
-        .col-8
-          .row.justify-center(style="height: 100px")
+        .col-10
+          .row.justify-center(style="height: 85px")
             .row.justify-center.q-mb-md.full-width
               q-input(
                 input-class="mnemonic"
                 outlined
                 readonly
                 ref="pkDisplay"
-                style="width: 800px; height: 100px"
+                rows="5"
+                style="width: 800px; height: 85px"
                 type="textarea"
                 v-model="generatedPk"
                 v-show="revealKey"
               )
-            .row.justify-center.q-mb-lg.full-width.bg-grey-2(v-if="!revealKey")
+            .row.justify-center.q-mb-lg.full-width.bg-grey-3(v-if="!revealKey")
               q-btn.full-width.full-width(
                 :label="lang.reveal"
                 @click="revealKey = true"
@@ -34,9 +35,9 @@
               style="max-width: 200px"
             )
     .row
-      p Private keys are your password for your subspace farmer and wallet, this cannot be changed, guessed(easily), or reset if lost. It is imperative that this is stored in a secure, safe location. Without the Private Key you will not have access to your funds. Furthermore, anyone who steals your private keys will be able to do as they please with your funds.
+      p(style="font-size:16px") Private keys are your password for your subspace farmer and wallet, this cannot be changed, guessed(easily), or reset if lost. It is imperative that this is stored in a secure, safe location. Without the Private Key you will not have access to your funds. Furthermore, anyone who steals your private keys will be able to do as they please with your funds.
   .row.q-pt-md
-    q-checkbox(:label="lang.userConfirm" size="lg" v-model="userConfirm")
+    q-checkbox(style="font-size:15px" :label="lang.userConfirm" size="md" v-model="userConfirm")
 </template>
 
 <script lang="ts">
