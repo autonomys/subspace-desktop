@@ -39,6 +39,8 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
                 suffix="GB"
                 v-model="stats.utilizedGB"
               )
+                q-tooltip.q-pa-sm
+                  p {{ lang.utilizedSpace }}
               .q-mt-sm {{ lang.available }}
               q-input(
                 :error="unsafeFree"
@@ -51,18 +53,19 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
                 v-model="stats.freeGB"
               )
                 q-tooltip.q-pa-sm
-                  p {{ lang.suggest }}
+                  p {{ lang.availableSpace }}
               .q-mt-sm {{ lang.allocated }}
-              q-input.q-field--highlighted(
+              q-input(
                 color="blue"
                 dense
                 input-class="pkdisplay"
                 outlined
+                readonly
                 suffix="GB"
-                type="number"
-                min="1"
                 v-model="allocatedGB"
               )
+                q-tooltip.q-pa-sm
+                  p {{ lang.allocatedSpace }}
         .col.q-pr-md
           .row.justify-center(style="transform: scale(-1, 1)")
             apexchart(
@@ -71,20 +74,6 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
               type="donut"
               width="200px"
             )
-          .row.q-mt-md
-            .col-1
-            .col
-              q-slider(
-                :max="stats.safeAvailableGB"
-                :min="0"
-                :step="1"
-                color="blue"
-                markers
-                snap
-                style="height: 25px"
-                v-model="allocatedGB"
-              )
-            .col-1
   .row.justify-end.q-mt-sm.absolute-bottom.q-pb-md
     .col-auto.q-pr-md
       div {{ lang.hint }}
@@ -162,7 +151,7 @@ export default defineComponent({
       revealKey: false,
       userConfirm: false,
       plotDirectory: "/Subspace/plots",
-      allocatedGB: 1,
+      allocatedGB: 10,
       validPath: true,
       defaultPath: "/",
       driveStats: <native.DriveStats>{ freeBytes: 0, totalBytes: 0 },
