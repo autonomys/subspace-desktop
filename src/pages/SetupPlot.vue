@@ -263,7 +263,7 @@ export default defineComponent({
         await native.createDir(this.plotDirectory)
       const { publicKey, mnemonic } = await startFarming(this.plotDirectory)
       if(publicKey && mnemonic)
-        await this.client.init(true, publicKey, mnemonic) 
+        await this.client.init(publicKey, mnemonic) 
       this.$router.replace({ name: "plottingProgress" })
     },
     async updateDriveStats() {

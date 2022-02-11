@@ -97,19 +97,21 @@ export class Client {
   constructor() {
   }
 
-  public async init(clear: boolean = false, farmerPublicKey?: string | undefined, mnemonic?: string | undefined): Promise<void> {
-    if (farmerPublicKey && mnemonic) {
-      LocalStorage.set("farmerPublicKey", farmerPublicKey)
-      LocalStorage.set("mnemonic", mnemonic)
-      util.config.update({ account: { pubkey: farmerPublicKey } })
-    }
-
-    if (clear)
-      this.clearStoredBlocks()
-    else
-      this.loadStoredBlocks()
-
+  // If the app is started for the first time, the client will be started from PlottingProgress page.
+  // In this case, farmerPublicKey and mnemonic must be stored and clear stored farmedBlocks if exist (clearStoredBlocks).
+  // -
+  // If the app is started for the second time, the client will be started from Dashboard page.
+  // In this case, farmerPublicKey and mnemonic already exist and just need to load the stored farmedBlocks (loadStoredBlocks).
+  public async init(farmerPublicKey?: string | undefined, mnemonic?: string | undefined): Promise<void> {
     if (!this.clientStarted) {
+      if (farmerPublicKey && mnemonic) {
+        this.clearStoredBlocks()
+        LocalStorage.set("farmerPublicKey", farmerPublicKey)
+        LocalStorage.set("mnemonic", mnemonic)
+        util.config.update({ account: { pubkey: farmerPublicKey } })
+      } else {
+        this.loadStoredBlocks()
+      }
       this.api = await ApiPromise.create({
         provider: this.wsProvider, types: {
           Solution: {
@@ -122,9 +124,8 @@ export class Client {
         }
       })
       this.do.blockSubscription.startSubcriptions()
+      this.clientStarted = true;
     }
-
-    this.clientStarted = true;
   }
 
   private getStoredBlocks(): FarmedBlock[] {
