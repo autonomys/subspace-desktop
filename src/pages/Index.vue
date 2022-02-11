@@ -23,11 +23,22 @@ q-page(padding)
 <script lang="ts">
 import { defineComponent } from "vue"
 import { globalState as global } from "src/lib/global"
+import { config } from "src/lib/util"
+import { startFarming } from "src/lib/client"
 const lang = global.data.loc.text.index
 
 export default defineComponent({
   data() {
     return { lang }
+  },
+  async mounted() {
+    const configData = await config.read()
+    // If the app star and config with plot and account exists, start the farmer 
+    // Using current plot and redirect to dashboard screen .
+    if(configData?.account && configData?.plot?.location){
+      await startFarming(configData?.plot?.location.replace("/subspace.plot", ""))
+      this.$router.replace({ name: "dashboard" })
+    }
   },
   methods: {}
 })
