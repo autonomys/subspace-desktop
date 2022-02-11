@@ -23,7 +23,14 @@
               q-btn.full-width.full-width(
                 :label="lang.reveal"
                 @click="revealKey = true"
-	@@ -34,9 +35,9 @@
+                flat
+                size="lg"
+              )
+          .row.justify-center.q-mt-md(v-if="revealKey")
+            q-btn(
+              :label="lang.copy"
+              @click="copyPk"
+              color="primary"
               style="max-width: 200px"
             )
     .row
@@ -38,6 +45,7 @@ import { globalState as global } from "src/lib/global"
 const lang = global.data.loc.text.saveKeys
 // const lang = {}
 import { QInput, Notify, LocalStorage } from "quasar"
+
 // @vue/component
 export default defineComponent({
   name: "PageIndex",
@@ -77,12 +85,15 @@ export default defineComponent({
   }
 })
 </script>
+
+
 <style lang="sass">
 .pkdisplay
   font-size: 20px
   padding-top: 0px
   margin-top: 0px
 </style>
+
 <style lang="sass">
 .mnemonic
   font-size: 14px
