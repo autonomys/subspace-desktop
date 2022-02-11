@@ -37,7 +37,9 @@
     "hint": "Hint:",
     "hint2": "Increasing your plots size will improve Farmer profitability.",
     "initial": "Initial plotting time:",
-    "suggest": "We suggest you retain at least 20 GB of free available space on this drive.",
+    "availableSpace": "How much free space there are in the disk.",
+    "utilizedSpace": "How much space is currently being used.",
+    "allocatedSpace": "Space to be shared with Subspace Protocol.",
     "plotsDirectory": "Plots Directory"
   },
   "plottingProgress": {
@@ -47,11 +49,9 @@
     "plotted": "Plotted",
     "elapsedTime": "Elapsed Time",
     "remainingTime": "Remaining Time",
-    "finish": "Finish",
     "hint": "Hint:",
     "resume": "Resume Plotting",
     "hintInfo": "Join the Subspace Discord while you wait, meet the community and earn some SSC",
-    "pause": "Pause Plotting",
     "remaining": "Remaining",
     "next": "Next"
   },
