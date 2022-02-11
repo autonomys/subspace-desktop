@@ -261,14 +261,9 @@ export default defineComponent({
       })
       if (this.defaultPath != this.plotDirectory)
         await native.createDir(this.plotDirectory)
-      const farmerIdentity = await startFarming(this.plotDirectory)
-      LocalStorage.clear()
-      // TODO: find a way to store and retrieve the public key from client.ts.
-      LocalStorage.set("farmerPublicKey", farmerIdentity.publicKey)
-      LocalStorage.set("mnemonic", farmerIdentity.mnemonic)
-      // Clear farmed block local storage, as this is a new farmer.
-      LocalStorage.remove('farmedBlocks')
-      await this.client.init() 
+      const { publicKey, mnemonic } = await startFarming(this.plotDirectory)
+      if(publicKey && mnemonic)
+        await this.client.init(true, publicKey, mnemonic) 
       this.$router.replace({ name: "plottingProgress" })
     },
     async updateDriveStats() {

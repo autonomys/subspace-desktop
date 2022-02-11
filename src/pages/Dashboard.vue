@@ -32,8 +32,7 @@ import * as util from "src/lib/util"
 import farmedList from "components/farmedList.vue"
 import netCard from "components/netCard.vue"
 import plotCard from "components/plotCard.vue"
-import { FarmedBlock } from "src/lib/types"
-import { ClientType, ClientData, emptyData } from "src/lib/client"
+import { emptyClientData, ClientData, ClientType, FarmedBlock} from "src/lib/types"
 const lang = global.data.loc.text.dashboard
 export default defineComponent({
   components: { farmedList, netCard, plotCard },
@@ -61,7 +60,7 @@ export default defineComponent({
       util,
       loading: true,
       unsubscribe: (): void => {},
-      clientData: <ClientData>emptyData
+      clientData: <ClientData>emptyClientData
     }
   },
   computed: {
@@ -74,9 +73,7 @@ export default defineComponent({
   },
   watch: {},
   async mounted() {
-    // In case we started the client from SetupPlot
-    if(!this.client.isConnected)
-      await this.client.init() // TODO remove once invariants are protected will stall forever if there is a connection issue.
+    await this.client.init() 
     const config = await util.config.read()
     const valid = util.config.validate(config)
     this.global.status.state = "loading"
