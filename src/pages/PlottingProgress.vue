@@ -96,31 +96,13 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
     .col-expand
     .col-auto(v-if="viewedKeys")
       q-btn(
-        :label="lang.finish"
+        :label="lang.next"
         @click="$router.replace({ name: 'dashboard' })"
         color="blue-8"
         icon-right="play_arrow"
         outline
         size="lg"
-        v-if="plotFinished"
-      )
-      q-btn(
-        :label="lang.resume"
-        @click="startPlotting()"
-        color="blue-8"
-        icon-right="play_arrow"
-        outline
-        size="lg"
-        v-else-if="!plotting"
-      )
-      q-btn(
-        :label="lang.pause"
-        @click="pausePlotting()"
-        color="blue-8"
-        icon-right="pause"
-        outline
-        size="lg"
-        v-else
+        :disable="!plotFinished"
       )
     .col-auto(v-else)
       q-btn(
