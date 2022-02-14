@@ -128,6 +128,19 @@ export class Client {
     }
   }
 
+  public getNetworkSegmentIndex(): Promise<number> {
+    return new Promise<number>((resolve) => {
+      this.api.query.system.events((events: any[]) => {
+        events.forEach(async ({ event }) => {
+          const { section, method, data } = event;
+          if (section === "subspace" && method === "RootBlockStored") {
+            resolve(data[0].asV0.segmentIndex.toNumber())
+          }
+        });
+      });
+    })
+  }
+
   private getStoredBlocks(): FarmedBlock[] {
     const mined: FarmedBlock[] = []
     try {
@@ -167,4 +180,8 @@ export class Client {
 
 export async function startFarming(path: string): Promise<ClientIdentity> {
   return tauri.invoke('farming', { path });
+}
+
+export async function getLocalFarmerPieceCount(): Promise<number> {
+  return (await tauri.invoke('plot_progress_tracker')) as number;
 }

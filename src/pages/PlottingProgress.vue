@@ -27,7 +27,8 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
             .absolute-full.flex.flex-center
               q-badge(color="white" size="lg" text-color="black")
                 template(v-slot:default)
-                  .q-pa-xs(style="font-size: 18px") {{ progresspct }}%
+                  .q-pa-xs(style="font-size: 18px") {{ progresspct }}% 
+                  .q-pa-xs(style="font-size: 14px") {{ plottingData.status }}
           q-linear-progress.absolute-right(
             :value="0.9"
             indeterminate
@@ -123,8 +124,8 @@ import * as util from "src/lib/util"
 import introModal from "components/introModal.vue"
 import TimeAgo from "javascript-time-ago"
 import en from "javascript-time-ago/locale/en"
+import { startFarming, getLocalFarmerPieceCount } from "src/lib/client"
 TimeAgo.addLocale(en)
-let interval: number
 let timer: number
 
 export default defineComponent({
@@ -134,8 +135,10 @@ export default defineComponent({
       plotting: true,
       plottingData: {
         finishedGB: 0,
-        remainingGB: 0
+        remainingGB: 0,
+        status: "Fetching network data ..."
       },
+      client: global.client,
       viewedIntro: false,
       lang,
       plotFinished: false,
@@ -192,7 +195,6 @@ export default defineComponent({
     this.startPlotting()
   },
   unmounted() {
-    if (interval) clearInterval(interval)
     if (timer) clearInterval(timer)
   },
   methods: {
@@ -214,21 +216,28 @@ export default defineComponent({
     },
     startPlotting() {
       this.plotting = true
-      this.fakeProgress()
+      this.plottingProgress()
       timer = window.setInterval(() => (this.elapsedms += 100), 100)
     },
     pausePlotting() {
       this.plotting = false
-      clearInterval(interval)
       clearInterval(timer)
     },
-    async fakeProgress() {
-      interval = window.setInterval(() => {
-        this.plottingData.finishedGB += util.random(0, 50) / 40
-        console.log(this.plottingData)
-        if (this.plottingData.finishedGB >= this.allocatedGB)
-          this.pausePlotting()
-      }, util.random(200, 1000))
+    async plottingProgress() {
+      const networkSegmentIndex = await this.client.getNetworkSegmentIndex() 
+      const { publicKey, mnemonic } = await startFarming(this.plotDirectory.replace("/subspace.plot", ""))
+      if(publicKey && mnemonic)
+        await this.client.init(publicKey, mnemonic) 
+      let currentLocalPieceCount=0;
+      let localSegmentIndex=0;
+       do {
+        currentLocalPieceCount = await getLocalFarmerPieceCount()
+        localSegmentIndex = currentLocalPieceCount === 0 ? 0 : (currentLocalPieceCount / 4096 / 256) - 1
+        this.plottingData.finishedGB = localSegmentIndex * 10 / networkSegmentIndex
+        this.plottingData.status = "Archived segment " + localSegmentIndex + " of " + networkSegmentIndex + " ..."
+        await new Promise(resolve => setTimeout(resolve, 1500))
+      } while (localSegmentIndex < networkSegmentIndex )
+      this.pausePlotting()
     },
     async viewIntro() {
       const modal = await util.showModal(introModal)

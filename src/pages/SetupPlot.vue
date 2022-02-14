@@ -103,10 +103,8 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
 import * as path from "@tauri-apps/api/path"
 const tauri = { path }
 import { defineComponent } from "vue"
-import { LocalStorage } from "quasar"
 import * as util from "src/lib/util"
 import * as native from "src/lib/native"
-import { startFarming } from "src/lib/client"
 import { debounce } from "quasar"
 import { globalState as global } from "src/lib/global"
 const lang = global.data.loc.text.setupPlot
@@ -250,9 +248,6 @@ export default defineComponent({
       })
       if (this.defaultPath != this.plotDirectory)
         await native.createDir(this.plotDirectory)
-      const { publicKey, mnemonic } = await startFarming(this.plotDirectory)
-      if(publicKey && mnemonic)
-        await this.client.init(publicKey, mnemonic) 
       this.$router.replace({ name: "plottingProgress" })
     },
     async updateDriveStats() {
