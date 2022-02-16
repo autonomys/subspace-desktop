@@ -156,7 +156,8 @@ export default defineComponent({
       defaultPath: "/",
       driveStats: <native.DriveStats>{ freeBytes: 0, totalBytes: 0 },
       lang,
-      chartOptions
+      chartOptions,
+      client: global.client,
     }
   },
   computed: {
@@ -249,10 +250,9 @@ export default defineComponent({
       })
       if (this.defaultPath != this.plotDirectory)
         await native.createDir(this.plotDirectory)
-      const farmerIdentity = await startFarming(this.plotDirectory)
-      // TODO: find a way to store and retrieve the public key from client.ts.
-      LocalStorage.set("farmerPublicKey", farmerIdentity.publicKey)
-      LocalStorage.set("mnemonic", farmerIdentity.mnemonic)
+      const { publicKey, mnemonic } = await startFarming(this.plotDirectory)
+      if(publicKey && mnemonic)
+        await this.client.init(publicKey, mnemonic) 
       this.$router.replace({ name: "plottingProgress" })
     },
     async updateDriveStats() {

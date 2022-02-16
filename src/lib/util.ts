@@ -1,4 +1,4 @@
-import { Dialog, DialogChainObject, LooseDictionary } from "quasar"
+import { Dialog, DialogChainObject, LocalStorage, LooseDictionary } from "quasar"
 import { Component } from 'vue'
 import * as dialog from "@tauri-apps/api/dialog"
 import * as fs from "@tauri-apps/api/fs"
@@ -34,6 +34,7 @@ export async function reset(): Promise<void> {
   try {
     const configData = await config.read()
     if (configData?.plot?.location) await tauri.fs.removeFile(configData.plot.location).catch(console.error)
+    LocalStorage.clear()
   } catch (error) {
     console.error(error)
   }
