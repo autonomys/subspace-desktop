@@ -63,6 +63,7 @@ export default defineComponent({
   },
   watch: {
     userConfirm(val) {
+      LocalStorage.set("mnemonic", null)
       this.$emit("userConfirm", val)
     }
   },
