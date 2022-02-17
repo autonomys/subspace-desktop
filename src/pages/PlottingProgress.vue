@@ -27,7 +27,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
             .absolute-full.flex.flex-center
               q-badge(color="white" size="lg" text-color="black")
                 template(v-slot:default)
-                  .q-pa-xs(style="font-size: 18px") {{ progresspct }}% 
+                  .q-pa-xs(style="font-size: 18px") {{ progresspct }}%
                   .q-pa-xs(style="font-size: 14px") {{ plottingData.status }}
           q-linear-progress.absolute-right(
             :value="0.9"
@@ -124,7 +124,7 @@ import * as util from "src/lib/util"
 import introModal from "components/introModal.vue"
 import TimeAgo from "javascript-time-ago"
 import en from "javascript-time-ago/locale/en"
-import { startFarming, getLocalFarmerPieceCount } from "src/lib/client"
+import { startFarming, getLocalFarmerSegmentIndex } from "src/lib/client"
 import { LocalStorage } from "quasar"
 TimeAgo.addLocale(en)
 let timer: number
@@ -218,34 +218,60 @@ export default defineComponent({
     startPlotting() {
       this.plotting = true
       this.plottingProgress()
-      timer = window.setInterval(() => (this.elapsedms += 100), 100)
     },
     pausePlotting() {
       this.plotting = false
       clearInterval(timer)
     },
     async plottingProgress() {
-      const networkSegmentIndex = await this.client.getNetworkSegmentIndex() 
+      // If the local node is Syncing. Must wait until done.
+      let blockNumberData = await Promise.all([
+        this.client.getLocalLastBlockNumber(),
+        this.client.getNetworkLastBlockNumber(),
+      ])
+      do {
+        blockNumberData = await Promise.all([
+          this.client.getLocalLastBlockNumber(),
+          this.client.getNetworkLastBlockNumber(),
+        ])
+        this.plottingData.status = "Syncing node  " + blockNumberData[0].toLocaleString() + " of " + blockNumberData[1].toLocaleString() +" Blocks"
+        await new Promise((resolve) => setTimeout(resolve, 1500))
+      } while (blockNumberData[0] < blockNumberData[1])
+      
+      this.plottingData.status = lang.startingFarmer
+      // After local node is fully Synced, the farmer will be able to actualy plot and farm. 
       const { publicKey, mnemonic } = await startFarming(this.plotDirectory.replace("/subspace.plot", ""))
-      if (publicKey && mnemonic){
+ 
+      // When farmer start, temporal mnemonic storage, when user accept on modal that mnemonic was backed up. We remove it from local storage
+      // Check SaveKeys.vue.
+      if (publicKey && mnemonic) {
+        // TODO: Fully remove LocalStorage. Find a secure way to pass mnemonic to SaveKeys modal.
         LocalStorage.set("mnemonic", mnemonic)
-        await this.client.init(publicKey) 
+        await this.client.init(publicKey)
       }
-      if (networkSegmentIndex === 0){
-        this.plottingData.finishedGB = 10 
+      this.plottingData.status = lang.fetchingPlot;      
+      // Query from last block until find last RootBlockStored, then return last segmentIndex on the public network.
+      let networkSegmentIndex = await this.client.getNetworkSegmentIndex()
+      let localSegmentIndex = 0;
+      // TODO: Fix this timer, not updating correctly
+      timer = window.setInterval(() => (this.elapsedms += 100), 100)
+     
+      // If the network is new and have no blocks. The plot and farm will take no time. This check is usefull for local development.
+      if (networkSegmentIndex === 0) {
+        this.plottingData.finishedGB = 10
         this.plottingData.status = lang.initSegments
       } else {
-        let currentLocalPieceCount = 0
-        let localSegmentIndex = 0
+        // Otherwise, if network have blocks, validate and show plotting progress and archived segments.
         do {
-          currentLocalPieceCount = await getLocalFarmerPieceCount()
-          localSegmentIndex = currentLocalPieceCount === 0 ? 0 : (currentLocalPieceCount / 4096 / 256) - 1
-          this.plottingData.finishedGB = localSegmentIndex * 10 / networkSegmentIndex
-          this.plottingData.status = "Archived segment " + localSegmentIndex + " of " + networkSegmentIndex + " ..."
-          await new Promise(resolve => setTimeout(resolve, 1500))
-        } while (localSegmentIndex <= networkSegmentIndex )
+          // At this point the farmer is already running and also plotting.
+          // Block subs are ON and we are validating and storing farmed blocks.
+          localSegmentIndex = await getLocalFarmerSegmentIndex()
+          this.plottingData.finishedGB = (localSegmentIndex * 10) / networkSegmentIndex
+          this.plottingData.status = "Archived " + localSegmentIndex + " of " + networkSegmentIndex + " Segments"
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+          // But we wait to get fully plotted. Afgter this the user can click next and go to dashboard.
+        } while (localSegmentIndex < networkSegmentIndex)
       }
-
       this.pausePlotting()
     },
     async viewIntro() {

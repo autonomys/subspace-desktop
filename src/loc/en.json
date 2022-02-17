@@ -43,6 +43,7 @@
     "plotsDirectory": "Plots Directory"
   },
   "plottingProgress": {
+    "startingFarmer": "Starting the farmer ...",
     "initSegments": "Archived segment 1 of 1...",
     "fetchingPlot": "Fetching network data ...",
     "pageTitle": "Initial Plotting",
