@@ -27,7 +27,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
             .absolute-full.flex.flex-center
               q-badge(color="white" size="lg" text-color="black")
                 template(v-slot:default)
-                  .q-pa-xs(style="font-size: 18px") {{ progresspct }}% 
+                  .q-pa-xs(style="font-size: 18px") {{ progresspct }}%
                   .q-pa-xs(style="font-size: 14px") {{ plottingData.status }}
           q-linear-progress.absolute-right(
             :value="0.9"
@@ -224,15 +224,15 @@ export default defineComponent({
       clearInterval(timer)
     },
     async plottingProgress() {
-      const networkSegmentIndex = await this.client.getNetworkSegmentIndex() 
+      const networkSegmentIndex = await this.client.getNetworkSegmentIndex()
       const { publicKey, mnemonic } = await startFarming(this.plotDirectory.replace("/subspace.plot", ""))
       if(publicKey && mnemonic)
-        await this.client.init(publicKey, mnemonic) 
+        await this.client.init(publicKey, mnemonic)
       let currentLocalPieceCount=0;
       let localSegmentIndex=0;
        do {
         currentLocalPieceCount = await getLocalFarmerPieceCount()
-        localSegmentIndex = currentLocalPieceCount === 0 ? 0 : (currentLocalPieceCount / 4096 / 256) - 1
+        localSegmentIndex = currentLocalPieceCount === 0 ? 0 : (currentLocalPieceCount / 256) - 1
         this.plottingData.finishedGB = localSegmentIndex * 10 / networkSegmentIndex
         this.plottingData.status = "Archived segment " + localSegmentIndex + " of " + networkSegmentIndex + " ..."
         await new Promise(resolve => setTimeout(resolve, 1500))
