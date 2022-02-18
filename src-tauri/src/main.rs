@@ -8,13 +8,11 @@ mod windows;
 
 use anyhow::{anyhow, Result};
 use bip39::{Language, Mnemonic};
-use event_listener_primitives::HandlerId;
-use lazy_static::lazy_static;
 use log::{debug, info};
 use serde::Serialize;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use subspace_core_primitives::PIECE_SIZE;
 use subspace_farmer::{
     Commitments, Farming, Identity, ObjectMappings, Plot, Plotting, RpcClient, WsRpc,
@@ -27,10 +25,6 @@ use tauri::{
 };
 
 static PLOTTED_PIECES: AtomicUsize = AtomicUsize::new(0);
-
-lazy_static! {
-    static ref HANDLER: Mutex<Option<HandlerId>> = Mutex::new(None);
-}
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -176,19 +170,17 @@ pub(crate) async fn farm(
 
     let plot = plot_fut.await.unwrap()?;
 
-    HANDLER
-        .lock()
-        .unwrap()
-        .replace(plot.on_progress_change(Arc::new(|plotted_pieces| {
-            PLOTTED_PIECES.fetch_add(
-                plotted_pieces.plotted_piece_count / PIECE_SIZE,
-                Ordering::SeqCst,
-            );
-            debug!(
-                "Plotted pieces so far: {}",
-                PLOTTED_PIECES.load(Ordering::Relaxed)
-            );
-        })));
+    plot.on_progress_change(Arc::new(|plotted_pieces| {
+        PLOTTED_PIECES.fetch_add(
+            plotted_pieces.plotted_piece_count / PIECE_SIZE,
+            Ordering::SeqCst,
+        );
+        debug!(
+            "Plotted pieces so far: {}",
+            PLOTTED_PIECES.load(Ordering::Relaxed)
+        );
+    }))
+    .detach();
 
     info!("Opening commitments");
     let commitments_fut = tokio::task::spawn_blocking({
