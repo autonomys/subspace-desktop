@@ -105,6 +105,7 @@ dependencies = [
  "log",
  "serde",
  "serde_json",
+ "subspace-core-primitives",
  "subspace-farmer",
  "subspace-solving",
  "tauri",

@@ -20,6 +20,7 @@ lazy_static = "1.4.0"
 log = "0.4.14"
 serde_json = "1.0"
 serde = { version = "1.0", features = [ "derive" ] }
+subspace-core-primitives = { git = "https://github.com/subspace/subspace" }
 subspace-farmer = { git = "https://github.com/subspace/subspace" }
 subspace-solving = { git = "https://github.com/subspace/subspace" }
 tiny-bip39 = "0.8.2"

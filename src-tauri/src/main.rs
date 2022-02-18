@@ -6,17 +6,16 @@
 #[cfg(target_os = "windows")]
 mod windows;
 
-#[macro_use]
-extern crate lazy_static;
-
 use anyhow::{anyhow, Result};
 use bip39::{Language, Mnemonic};
 use event_listener_primitives::HandlerId;
+use lazy_static::lazy_static;
 use log::{debug, info};
 use serde::Serialize;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
+use subspace_core_primitives::PIECE_SIZE;
 use subspace_farmer::{
     Commitments, Farming, Identity, ObjectMappings, Plot, Plotting, RpcClient, WsRpc,
 };
@@ -27,7 +26,6 @@ use tauri::{
     SystemTrayMenuItem,
 };
 
-const PIECE_SIZE: usize = 4096; // we store pieces as flattened arrays. Each piece has length of 4096.
 static PLOTTED_PIECES: AtomicUsize = AtomicUsize::new(0);
 
 lazy_static! {
@@ -178,7 +176,7 @@ pub(crate) async fn farm(
 
     let plot = plot_fut.await.unwrap()?;
 
-    let mut _handler_guard = HANDLER
+    HANDLER
         .lock()
         .unwrap()
         .replace(plot.on_progress_change(Arc::new(|plotted_pieces| {
