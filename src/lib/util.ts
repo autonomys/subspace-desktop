@@ -113,3 +113,13 @@ export const password = {
     return bcrypt.compareSync(pass, hash); // true
   }
 }
+
+export const apiTypes = {
+  Solution: {
+    public_key: 'AccountId32'
+  },
+  SubPreDigest: {
+    slot: 'u64',
+    solution: 'Solution'
+  }
+}

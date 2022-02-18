@@ -11,10 +11,15 @@ import { invoke } from '@tauri-apps/api/tauri'
 import * as util from "src/lib/util"
 
 const tauri = { event, invoke }
-const SUNIT = 1000000000000000000;
+const SUNIT = 1000000000000000000
+
+// TODO: This const must be loaded from a .env or similar. 
+const NETWORK_RPC = "wss://farm-rpc.subspace.network"
+const LOCAL_RPC = "ws://localhost:9944"
+
 export class Client {
-  protected wsProvider = new WsProvider("ws://localhost:9944");
-  protected api: ApiPromise = new ApiPromise({ provider: this.wsProvider });
+  protected publicApi: ApiPromise = new ApiPromise({ provider: new WsProvider(NETWORK_RPC), types: util.apiTypes });
+  protected localApi: ApiPromise = new ApiPromise({ provider: new WsProvider(LOCAL_RPC), types: util.apiTypes });
   protected farmed: FarmedBlock[] = [];
   protected clearTauriDestroy: event.UnlistenFn = () => { };
   protected unsubscribe: event.UnlistenFn = () => { };
@@ -25,7 +30,7 @@ export class Client {
     farming: (): void => { }, // TODO return some farming status info
     plot: (): void => { }, // TODO return some plot status info
     net: async (): Promise<NetStatus> => {
-      const peers = await this.api.rpc.system.peers()
+      const peers = await this.localApi.rpc.system.peers()
       return { peers }
     }
   }
@@ -35,20 +40,20 @@ export class Client {
         this.stop()
       },
       start: async (): Promise<void> => {
-        const farmerPublicKey: AccountId32 = this.api.registry.createType('AccountId32', LocalStorage.getItem('farmerPublicKey'));
-        this.unsubscribe = await this.api.rpc.chain.subscribeNewHeads(
+        const farmerPublicKey: AccountId32 = this.localApi.registry.createType('AccountId32', LocalStorage.getItem('farmerPublicKey'));
+        this.unsubscribe = await this.localApi.rpc.chain.subscribeNewHeads(
           async (lastHeader) => {
-            const signedBlock = await this.api.rpc.chain.getBlock(
+            const signedBlock = await this.localApi.rpc.chain.getBlock(
               lastHeader.hash
             );
             const preRuntimes = signedBlock.block.header.digest.logs.filter(
               (log) => log.isPreRuntime && log.asPreRuntime[0].toString() === 'SUB_'
             );
-            const { solution }: SubPreDigest = this.api.registry.createType('SubPreDigest', preRuntimes[0].asPreRuntime[1]);
+            const { solution }: SubPreDigest = this.localApi.registry.createType('SubPreDigest', preRuntimes[0].asPreRuntime[1]);
 
             if (solution.public_key.toString() === farmerPublicKey?.toString()) {
               let blockReward = 0;
-              const allRecords: Vec<any> = await this.api.query.system.events.at(lastHeader.hash);
+              const allRecords: Vec<any> = await this.localApi.query.system.events.at(lastHeader.hash);
               allRecords.forEach((record) => {
                 const { section, method, data } = record.event;
                 if (section === "rewards" && method === "BlockReward")
@@ -102,29 +107,44 @@ export class Client {
   // -
   // If the app is started for the second time, the client will be started from Dashboard page.
   // In this case, farmerPublicKey and mnemonic already exist and just need to load the stored farmedBlocks (loadStoredBlocks).
-  public async init(farmerPublicKey?: string | undefined, mnemonic?: string | undefined): Promise<void> {
+  public async init(farmerPublicKey?: string): Promise<void> {
     if (!this.clientStarted) {
-      if (farmerPublicKey && mnemonic) {
+      if (farmerPublicKey) {
         this.clearStoredBlocks()
         LocalStorage.set("farmerPublicKey", farmerPublicKey)
-        LocalStorage.set("mnemonic", mnemonic)
         util.config.update({ account: { pubkey: farmerPublicKey } })
       } else {
         this.loadStoredBlocks()
       }
-      this.api = await ApiPromise.create({
-        provider: this.wsProvider, types: {
-          Solution: {
-            public_key: 'AccountId32'
-          },
-          SubPreDigest: {
-            slot: 'u64',
-            solution: 'Solution'
-          }
-        }
-      })
       this.do.blockSubscription.startSubcriptions()
       this.clientStarted = true;
+    }
+  }
+
+  public async getNetworkLastBlockNumber(): Promise<number> {
+    const signedBlock = await this.publicApi.rpc.chain.getBlock();
+    return signedBlock.block.header.number.toNumber()
+  }
+
+  public async getLocalLastBlockNumber(): Promise<number> {
+    const signedBlock = await this.localApi.rpc.chain.getBlock();
+    return signedBlock.block.header.number.toNumber()
+  }
+  
+  public async getNetworkSegmentIndex(hash?: any): Promise<number> {
+    let signedBlock;
+    if (hash) signedBlock = await this.publicApi.rpc.chain.getBlock(hash);
+    else signedBlock = await this.publicApi.rpc.chain.getBlock();
+    if (signedBlock.block.header.number.toNumber() === 0) return 0;
+
+    else {
+      const allRecords: Vec<any> = await this.publicApi.query.system.events.at(signedBlock.block.header.parentHash);
+      for (const record of allRecords) {
+        const { section, method, data } = record.event;
+        if (section === "subspace" && method === "RootBlockStored")
+          return data[0].asV0.segmentIndex.toNumber()
+      }
+      return await this.getNetworkSegmentIndex(signedBlock.block.header.parentHash)
     }
   }
 
@@ -166,5 +186,10 @@ export class Client {
 }
 
 export async function startFarming(path: string): Promise<ClientIdentity> {
-  return tauri.invoke('farming', { path });
+  return await tauri.invoke('farming', { path });
+}
+
+export async function getLocalFarmerSegmentIndex(): Promise<number> {
+  const plot_progress_tracker = (await tauri.invoke('plot_progress_tracker') as number) / 256
+  return plot_progress_tracker;
 }

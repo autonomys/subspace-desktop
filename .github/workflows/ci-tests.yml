@@ -2,14 +2,10 @@ name: "ci tests"
 on:
   push:
     paths-ignore:
-      - 'docs/**'
-      - 'README.md'
-      - 'ARCHITECTURE.md'
+      - "**.md"
   pull_request:
     paths-ignore:
-      - 'docs/**'
-      - 'README.md'
-      - 'ARCHITECTURE.md'
+      - "**.md"
 
 jobs:
   test-tauri:
@@ -35,7 +31,7 @@ jobs:
       - name: install Rust nightly
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly-2021-12-14
+          toolchain: nightly
           override: true
           components: rustfmt, clippy
 
@@ -67,13 +63,13 @@ jobs:
       - name: install app dependencies and build it
         run: yarn && yarn build
         env:
-          MACOSX_DEPLOYMENT_TARGET: '10.13'
+          MACOSX_DEPLOYMENT_TARGET: "10.13"
 
       - name: tauri run
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MACOSX_DEPLOYMENT_TARGET: '10.13'
+          MACOSX_DEPLOYMENT_TARGET: "10.13"
 
       - name: fmt
         uses: actions-rs/cargo@v1
