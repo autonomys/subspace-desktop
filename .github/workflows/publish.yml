@@ -10,47 +10,47 @@ jobs:
 
     runs-on: ${{ matrix.platform }}
     steps:
-    - uses: actions/checkout@v2
-    - name: setup node
-      uses: actions/setup-node@v1
-      with:
-        node-version: 14
-    - name: install Rust stable
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-    - name: install webkit2gtk (ubuntu only)
-      if: matrix.platform == 'ubuntu-latest'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.0-dev libappindicator3-dev0
+      - uses: actions/checkout@v2
+      - name: setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      - name: install Rust stable
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - name: install webkit2gtk (ubuntu only)
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.0-dev libappindicator3-dev0
 
-    # Imports PFX Certificate into keystore, allows Tauri to then sign the exe without being passed the private key.
-    - name: import windows certificate
-      if: runner.os == 'Windows'
-      env:
-        WINDOWS_PFX: ${{ secrets.CERTIFICATE_WINDOWS_PFX }}
-        WINDOWS_PFX_PASSWORD: ${{ secrets.CERTIFICATE_WINDOWS_PASSWORD }}
-      run: |
-        New-Item -ItemType directory -Path certificate
-        Set-Content -Path certificate/tempCert.txt -Value $env:WINDOWS_PFX
-        certutil -decode certificate/tempCert.txt certificate/certificate.pfx
-        Remove-Item –path certificate -include tempCert.txt
-        Import-PfxCertificate -FilePath certificate/certificate.pfx -CertStoreLocation Cert:\CurrentUser\My -Password (ConvertTo-SecureString -String $env:WINDOWS_PFX_PASSWORD -Force -AsPlainText)
-    - name: install app dependencies and build it
-      run: yarn && yarn build
-    - uses: tauri-apps/tauri-action@v0
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        ENABLE_CODE_SIGNING: ${{ secrets.MACOS_CERTIFICATE }}
-        APPLE_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
-        APPLE_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
-        APPLE_SIGNING_IDENTITY: ${{ secrets.MACOS_IDENTITY_ID }}
-        APPLE_ID: ${{ secrets.APPLE_ID }}
-        APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-      with:
-        tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
-        releaseName: "App v__VERSION__"
-        body: "See the assets to download this version and install."
-        draft: true
-        prerelease: false
+      # Imports PFX Certificate into keystore, allows Tauri to then sign the exe without being passed the private key.
+      - name: import windows certificate
+        if: runner.os == 'Windows'
+        env:
+          WINDOWS_PFX: ${{ secrets.CERTIFICATE_WINDOWS_PFX }}
+          WINDOWS_PFX_PASSWORD: ${{ secrets.CERTIFICATE_WINDOWS_PASSWORD }}
+        run: |
+          New-Item -ItemType directory -Path certificate
+          Set-Content -Path certificate/tempCert.txt -Value $env:WINDOWS_PFX
+          certutil -decode certificate/tempCert.txt certificate/certificate.pfx
+          Remove-Item –path certificate -include tempCert.txt
+          Import-PfxCertificate -FilePath certificate/certificate.pfx -CertStoreLocation Cert:\CurrentUser\My -Password (ConvertTo-SecureString -String $env:WINDOWS_PFX_PASSWORD -Force -AsPlainText)
+      - name: install app dependencies and build it
+        run: yarn && yarn build
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ENABLE_CODE_SIGNING: ${{ secrets.MACOS_CERTIFICATE }}
+          APPLE_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.MACOS_IDENTITY_ID }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+        with:
+          tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
+          releaseName: "App v__VERSION__"
+          body: "See the assets to download this version and install."
+          draft: true
+          prerelease: true
