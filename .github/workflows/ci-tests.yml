@@ -61,7 +61,7 @@ jobs:
           Import-PfxCertificate -FilePath certificate/certificate.pfx -CertStoreLocation Cert:\CurrentUser\My -Password (ConvertTo-SecureString -String $env:WINDOWS_PFX_PASSWORD -Force -AsPlainText)
 
       - name: install app dependencies and build it
-        run: npm install && npm build
+        run: yarn install && yarn build
 
       - name: tauri run
         uses: tauri-apps/tauri-action@v0
