@@ -19,7 +19,7 @@ jobs:
       - name: setup node
         uses: actions/setup-node@v1
         with:
-          node-version: 14
+          node-version: 16
 
       - name: install Rust nightly
         uses: actions-rs/toolchain@v1
