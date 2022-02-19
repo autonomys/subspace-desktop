@@ -64,7 +64,7 @@ jobs:
           Import-PfxCertificate -FilePath certificate/certificate.pfx -CertStoreLocation Cert:\CurrentUser\My -Password (ConvertTo-SecureString -String $env:WINDOWS_PFX_PASSWORD -Force -AsPlainText)
 
       - name: install app dependencies and build it
-        run: yarn && yarn build
+        run: npm install && npm build
         env:
           MACOSX_DEPLOYMENT_TARGET: "10.13"
 
