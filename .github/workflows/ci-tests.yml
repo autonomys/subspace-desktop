@@ -62,7 +62,6 @@ jobs:
 
       - name: install app dependencies and build it
         run: npm install && npm build
-        env:
 
       - name: tauri run
         uses: tauri-apps/tauri-action@v0
