@@ -10,7 +10,6 @@ jobs:
           - ubuntu-latest
           - macos-latest
           - windows-2019
-          - windows-2022 # test again to see if it will fail, comment out this again if necessary
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -25,7 +24,7 @@ jobs:
       - name: install Rust nightly
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly-2021-12-14
+          toolchain: nightly
           override: true
           components: rustfmt, clippy
 
@@ -41,7 +40,6 @@ jobs:
           sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.0-dev libappindicator3-dev0
 
       # Imports PFX Certificate into keystore, allows Tauri to then sign the exe without being passed the private key.
-      # This normally should not be required on CI-Tests, but due to the way that tauri has its code signing configuration for windows it is required that we sign or the build will fail.
       - name: import windows certificate
         if: runner.os == 'Windows'
         env:
@@ -57,12 +55,10 @@ jobs:
       - name: install app dependencies and build it
         run: yarn && yarn build
         env:
-          MACOSX_DEPLOYMENT_TARGET: "10.13"
 
       - name: tauri run
         uses: tauri-apps/tauri-action@v0
         env:
-          MACOSX_DEPLOYMENT_TARGET: "10.13"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ENABLE_CODE_SIGNING: ${{ secrets.MACOS_CERTIFICATE }}
           APPLE_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
@@ -76,5 +72,3 @@ jobs:
           body: "See the assets to download this version and install."
           draft: true
           prerelease: false
-
-    # rust fmt and clippy actions are not included, since we should only release a version that is passed the tests

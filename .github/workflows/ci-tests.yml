@@ -2,12 +2,9 @@ name: "ci tests"
 on:
   push:
     paths-ignore:
-      # ignore yaml files, since they need to be merged to main in order to take effect
-      - "**.yml"
       - "**.md"
   pull_request:
     paths-ignore:
-      - "**.yml"
       - "**.md"
 
 jobs:
@@ -66,13 +63,11 @@ jobs:
       - name: install app dependencies and build it
         run: npm install && npm build
         env:
-          MACOSX_DEPLOYMENT_TARGET: "10.13"
 
       - name: tauri run
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MACOSX_DEPLOYMENT_TARGET: "10.13"
 
       - name: fmt
         uses: actions-rs/cargo@v1
