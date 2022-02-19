@@ -2,9 +2,12 @@ name: "ci tests"
 on:
   push:
     paths-ignore:
+      # ignore yaml files, since they need to be merged to main in order to take effect
+      - "**.yml"
       - "**.md"
   pull_request:
     paths-ignore:
+      - "**.yml"
       - "**.md"
 
 jobs:
