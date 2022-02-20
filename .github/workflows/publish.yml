@@ -6,19 +6,33 @@ jobs:
     strategy:
       fail-fast: false
       matrix: # Windows-2022 has been temporarily removed. We are unable to build 2x windows installs at the same name due to naming convention issues. Issue made upstream here: https://github.com/tauri-apps/tauri-action/issues/215
-        platform: [macos-latest, ubuntu-latest, windows-2019]
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-2019
 
     runs-on: ${{ matrix.platform }}
     steps:
-      - uses: actions/checkout@v2
+      - name: git checkout
+        uses: actions/checkout@v2
+
       - name: setup node
         uses: actions/setup-node@v1
         with:
-          node-version: 14
-      - name: install Rust stable
+          node-version: 16
+
+      - name: install Rust nightly
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          toolchain: nightly
+          override: true
+          components: rustfmt, clippy
+
+        # Workaround to resolve link error with C:\msys64\mingw64\bin\libclang.dll
+      - name: Remove msys64
+        run: Remove-Item -LiteralPath "C:\msys64\" -Force -Recurse
+        if: runner.os == 'Windows'
+
       - name: install webkit2gtk (ubuntu only)
         if: matrix.platform == 'ubuntu-latest'
         run: |
@@ -37,9 +51,13 @@ jobs:
           certutil -decode certificate/tempCert.txt certificate/certificate.pfx
           Remove-Item –path certificate -include tempCert.txt
           Import-PfxCertificate -FilePath certificate/certificate.pfx -CertStoreLocation Cert:\CurrentUser\My -Password (ConvertTo-SecureString -String $env:WINDOWS_PFX_PASSWORD -Force -AsPlainText)
+
       - name: install app dependencies and build it
         run: yarn && yarn build
-      - uses: tauri-apps/tauri-action@v0
+        env:
+
+      - name: tauri run
+        uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ENABLE_CODE_SIGNING: ${{ secrets.MACOS_CERTIFICATE }}
@@ -53,4 +71,4 @@ jobs:
           releaseName: "App v__VERSION__"
           body: "See the assets to download this version and install."
           draft: true
-          prerelease: true
+          prerelease: false
