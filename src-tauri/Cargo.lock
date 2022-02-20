@@ -5396,7 +5396,7 @@ dependencies = [
 [[package]]
 name = "subspace-archiving"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace#37ca628691e27c86c3dc78627c99c61b81dbb737"
+source = "git+https://github.com/subspace/subspace?rev=c76d6744a17933fe82811ad809856d665869cdaa#c76d6744a17933fe82811ad809856d665869cdaa"
 dependencies = [
  "merkletree",
  "parity-scale-codec",
@@ -5411,7 +5411,7 @@ dependencies = [
 [[package]]
 name = "subspace-core-primitives"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace#37ca628691e27c86c3dc78627c99c61b81dbb737"
+source = "git+https://github.com/subspace/subspace?rev=c76d6744a17933fe82811ad809856d665869cdaa#c76d6744a17933fe82811ad809856d665869cdaa"
 dependencies = [
  "hmac 0.12.0",
  "parity-scale-codec",
@@ -5424,7 +5424,7 @@ dependencies = [
 [[package]]
 name = "subspace-farmer"
 version = "0.3.0"
-source = "git+https://github.com/subspace/subspace#37ca628691e27c86c3dc78627c99c61b81dbb737"
+source = "git+https://github.com/subspace/subspace?rev=c76d6744a17933fe82811ad809856d665869cdaa#c76d6744a17933fe82811ad809856d665869cdaa"
 dependencies = [
  "anyhow",
  "arc-swap",
@@ -5463,7 +5463,7 @@ dependencies = [
 [[package]]
 name = "subspace-networking"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace#37ca628691e27c86c3dc78627c99c61b81dbb737"
+source = "git+https://github.com/subspace/subspace?rev=c76d6744a17933fe82811ad809856d665869cdaa#c76d6744a17933fe82811ad809856d665869cdaa"
 dependencies = [
  "bytes",
  "event-listener-primitives",
@@ -5481,7 +5481,7 @@ dependencies = [
 [[package]]
 name = "subspace-rpc-primitives"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace#37ca628691e27c86c3dc78627c99c61b81dbb737"
+source = "git+https://github.com/subspace/subspace?rev=c76d6744a17933fe82811ad809856d665869cdaa#c76d6744a17933fe82811ad809856d665869cdaa"
 dependencies = [
  "hex-buffer-serde",
  "serde",
@@ -5491,7 +5491,7 @@ dependencies = [
 [[package]]
 name = "subspace-solving"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace#37ca628691e27c86c3dc78627c99c61b81dbb737"
+source = "git+https://github.com/subspace/subspace?rev=c76d6744a17933fe82811ad809856d665869cdaa#c76d6744a17933fe82811ad809856d665869cdaa"
 dependencies = [
  "log",
  "num_cpus",
