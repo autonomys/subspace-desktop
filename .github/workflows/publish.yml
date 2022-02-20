@@ -26,7 +26,6 @@ jobs:
         with:
           toolchain: nightly
           override: true
-          components: rustfmt, clippy
 
         # Workaround to resolve link error with C:\msys64\mingw64\bin\libclang.dll
       - name: Remove msys64
@@ -54,7 +53,6 @@ jobs:
 
       - name: install app dependencies and build it
         run: yarn && yarn build
-        env:
 
       - name: tauri run
         uses: tauri-apps/tauri-action@v0
