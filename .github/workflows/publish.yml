@@ -11,7 +11,7 @@ jobs:
           - macos-latest
           - windows-2019
 
-    runs-on: ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
     steps:
       - name: git checkout
         uses: actions/checkout@v2
@@ -33,10 +33,10 @@ jobs:
         if: runner.os == 'Windows'
 
       - name: install webkit2gtk (ubuntu only)
-        if: matrix.platform == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.0-dev libappindicator3-dev0
+          sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.0-dev libappindicator3-dev
 
       # Imports PFX Certificate into keystore, allows Tauri to then sign the exe without being passed the private key.
       - name: import windows certificate
@@ -52,7 +52,8 @@ jobs:
           Import-PfxCertificate -FilePath certificate/certificate.pfx -CertStoreLocation Cert:\CurrentUser\My -Password (ConvertTo-SecureString -String $env:WINDOWS_PFX_PASSWORD -Force -AsPlainText)
 
       - name: install app dependencies and build it
-        run: yarn && yarn build
+        # sometimes it fails downloading packages, so set a timeout https://github.com/yarnpkg/yarn/issues/4890
+        run: yarn install --network-timeout 1000000 && yarn build
 
       - name: tauri run
         uses: tauri-apps/tauri-action@v0
