@@ -15,7 +15,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
             outlined
             readonly
             v-model="plotDirectory"
-          )
+          ) 
       .row.items-center.q-gutter-md
         .col.relative-position
           q-linear-progress.rounded-borders(
@@ -142,7 +142,7 @@ export default defineComponent({
       viewedIntro: false,
       lang,
       plotFinished: false,
-      plotDirectory: "/Subspace/plots",
+      plotDirectory: "",
       allocatedGB: 0
     }
   },
@@ -223,6 +223,7 @@ export default defineComponent({
       clearInterval(timer)
     },
     async plottingProgress() {
+      this.client.validateApiStatus()
       // If the local node is Syncing. Must wait until done.
       let blockNumberData = await Promise.all([
         this.client.getLocalLastBlockNumber(),
@@ -239,7 +240,7 @@ export default defineComponent({
       
       this.plottingData.status = lang.startingFarmer
       // After local node is fully Synced, the farmer will be able to actualy plot and farm. 
-      const { publicKey, mnemonic } = await startFarming(this.plotDirectory.replace("/subspace.plot", ""))
+      const { publicKey, mnemonic } = await startFarming(this.plotDirectory)
  
       if (publicKey && mnemonic) {
         await this.client.init(publicKey, mnemonic)

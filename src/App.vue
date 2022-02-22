@@ -10,8 +10,5 @@ export default defineComponent({
       pageName: ""
     }
   },
-  watch: {},
-  async mounted() {},
-  methods: {}
 })
 </script>

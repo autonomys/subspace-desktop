@@ -243,7 +243,7 @@ export default defineComponent({
       await util.config.update({
         plot: {
           sizeGB: this.allocatedGB,
-          location: this.plotDirectory + "/subspace.plot"
+          location: this.plotDirectory 
         }
       })
       if (this.defaultPath != this.plotDirectory)

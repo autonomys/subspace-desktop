@@ -32,21 +32,26 @@ export function plotTimeMsEstimate(gb: number): number {
 
 export async function reset(): Promise<void> {
   try {
-    const configData = await config.read()
-    if (configData?.plot?.location) await tauri.fs.removeFile(configData.plot.location).catch(console.error)
-    LocalStorage.clear()
+    const { plot } = await config.read()
+    if (plot?.location) {
+      // TODO: Stop farmer call.
+      // Remove plot
+      await tauri.fs.removeDir(plot.location,{recursive:true}).catch(console.error)
+    }
   } catch (error) {
     console.error(error)
   }
-
-  config.clear()
+  // Remove config, clearing farmerPublicKey
+  await config.clear()
+  // Remove farmedBlocks History.
+  LocalStorage.clear()
 }
 
 export interface ConfigFile {
   [index: string]: any
-  plot?: { sizeGB?: number, location?: string }, account?: { pubkey?: string, passHash?: string }
+  plot?: { sizeGB?: number, location?: string }, account?: { farmerPublicKey?: string, passHash?: string }
 }
-const emptyConfig: ConfigFile = { plot: { sizeGB: 0, location: "" }, account: { pubkey: "", passHash: "" } }
+const emptyConfig: ConfigFile = { plot: { sizeGB: 0, location: "" }, account: { farmerPublicKey: "", passHash: "" } }
 export const config = {
   validate(config: ConfigFile): boolean {
     const acctValid = config.account ? true : false

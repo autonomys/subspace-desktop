@@ -32,14 +32,18 @@ export default defineComponent({
     return { lang }
   },
   async mounted() {
-    const configData = await config.read()
-    // TODO: validate this redirection.
-    // Show plotting update status on PlottingProgress or Dashboard.
-    if(configData?.account && configData?.plot?.location){
-      await startFarming(configData?.plot?.location.replace("/subspace.plot", ""))
-      this.$router.replace({ name: "dashboard" })
+    try {
+      const { account, plot } = await config.read()
+      if (account?.farmerPublicKey && plot?.location) {
+        console.log(`NOT First Time RUN: Found Existing :: plot ${plot.location} :: farmerPublicKey ${account.farmerPublicKey}`)
+        // TODO: Show a node status for syncing new Blocks.
+        // TODO: Show a plot status for archived segments.  
+        await startFarming(plot.location)
+        this.$router.replace({ name: "dashboard" })
+      }
+    } catch (e) {
+      console.error("No existing plot and account. First Time RUN.", e)
     }
   },
-  methods: {}
 })
 </script>

@@ -41,42 +41,46 @@ export class Client {
         this.stop()
       },
       start: async (): Promise<void> => {
-        const farmerPublicKey: AccountId32 = this.localApi.registry.createType('AccountId32', LocalStorage.getItem('farmerPublicKey'));
-        this.unsubscribe = await this.localApi.rpc.chain.subscribeNewHeads(
-          async (lastHeader) => {
-            const signedBlock = await this.localApi.rpc.chain.getBlock(
-              lastHeader.hash
-            );
-            const preRuntimes = signedBlock.block.header.digest.logs.filter(
-              (log) => log.isPreRuntime && log.asPreRuntime[0].toString() === 'SUB_'
-            );
-            const { solution }: SubPreDigest = this.localApi.registry.createType('SubPreDigest', preRuntimes[0].asPreRuntime[1]);
-
-            if (solution.public_key.toString() === farmerPublicKey?.toString()) {
-              let blockReward = 0;
-              const allRecords: Vec<any> = await this.localApi.query.system.events.at(lastHeader.hash);
-              allRecords.forEach((record) => {
-                const { section, method, data } = record.event;
-                if (section === "rewards" && method === "BlockReward")
-                  blockReward = data[1] / SUNIT;
-                if (section === "transactionFees")
-                  console.log("transactionFees event::", section, method, data);
-              });
-              const block: FarmedBlock = {
-                author: solution.public_key.toString(),
-                id: lastHeader.hash.toString(),
-                time: Date.now(),
-                transactions: 0,
-                blockNum: lastHeader.number.toNumber(),
-                blockReward,
-                feeReward: 0
-              };
-              this.data.farming.farmed = [block].concat(
-                this.data.farming.farmed
+        const { account } = await util.config.read()
+        if(account?.farmerPublicKey){
+          const farmerPublicKey: AccountId32 = this.localApi.registry.createType('AccountId32', account.farmerPublicKey);
+          this.unsubscribe = await this.localApi.rpc.chain.subscribeNewHeads(
+            async (lastHeader) => {
+              const signedBlock = await this.localApi.rpc.chain.getBlock(
+                lastHeader.hash
               );
-              this.storeBlocks(this.data.farming.farmed)
-            }
-          })
+              const preRuntimes = signedBlock.block.header.digest.logs.filter(
+                (log) => log.isPreRuntime && log.asPreRuntime[0].toString() === 'SUB_'
+              );
+              const { solution }: SubPreDigest = this.localApi.registry.createType('SubPreDigest', preRuntimes[0].asPreRuntime[1]);
+              console.log("New Block:", lastHeader.number.toNumber(), "Farmed by me:", solution.public_key.eq(farmerPublicKey)?"YES":"NO")
+              if (solution.public_key.eq(farmerPublicKey)) {
+                let blockReward = 0;
+                const allRecords: Vec<any> = await this.localApi.query.system.events.at(lastHeader.hash);
+                allRecords.forEach((record) => {
+                  const { section, method, data } = record.event;
+                  if (section === "rewards" && method === "BlockReward")
+                    blockReward = data[1] / SUNIT;
+                  if (section === "transactionFees")
+                    console.log("transactionFees event::", section, method, data);
+                });
+                const block: FarmedBlock = {
+                  author: solution.public_key.toString(),
+                  id: lastHeader.hash.toString(),
+                  time: Date.now(),
+                  transactions: 0,
+                  blockNum: lastHeader.number.toNumber(),
+                  blockReward,
+                  feeReward: 0
+                };
+                this.data.farming.farmed = [block].concat(
+                  this.data.farming.farmed
+                );
+                this.storeBlocks(this.data.farming.farmed)
+                // this.data.farming.events.emit("farmedBlock", block)
+              }
+            })
+        }
         process.on('beforeExit', this.do.blockSubscription.stopOnReload)
         window.addEventListener('unload', this.do.blockSubscription.stopOnReload)
         this.clearTauriDestroy = await tauri.event.once('tauri://destroyed', () => {
@@ -87,6 +91,9 @@ export class Client {
       stop: (): void => {
         console.log('block subscription stop triggered')
         this.unsubscribe()
+        this.clientStarted = false
+        this.localApi.disconnect()
+        this.publicApi.disconnect()
         try {
           this.clearTauriDestroy()
           this.storeBlocks(this.data.farming.farmed)
@@ -95,9 +102,6 @@ export class Client {
           console.error(error)
         }
       },
-      startSubcriptions(): void {
-        this.start()
-      }
     }
   }
   constructor() {
@@ -107,15 +111,15 @@ export class Client {
   // If the app is started for the second time, the client will be started from Dashboard page.
   public async init(farmerPublicKey?: string, mnemonic?: string): Promise<void> {
     if (!this.clientStarted) {
-      if (mnemonic) this.mnemonic = mnemonic;
-      if (farmerPublicKey) {
+      if (farmerPublicKey && mnemonic) {
+        const publicKey: AccountId32 = this.localApi.registry.createType('AccountId32', farmerPublicKey);
+        await util.config.update({ account: { farmerPublicKey: publicKey.toString() } })
         this.clearStoredBlocks()
-        LocalStorage.set("farmerPublicKey", farmerPublicKey)
-        util.config.update({ account: { pubkey: farmerPublicKey } })
+        this.mnemonic = mnemonic
       } else {
         this.loadStoredBlocks()
       }
-      this.do.blockSubscription.startSubcriptions()
+      this.do.blockSubscription.start()
       this.clientStarted = true;
     }
   }
@@ -141,7 +145,7 @@ export class Client {
   public async getNetworkSegmentIndex(hash?: Hash): Promise<number> {
     let signedBlock;
     if (hash) signedBlock = await this.publicApi.rpc.chain.getBlock(hash);
-    else signedBlock = await this.publicApi.rpc.chain.getBlock();
+    else signedBlock = await this.publicApi.rpc.chain.getBlock();       
     if (signedBlock.block.header.number.toNumber() === 0) return 0;
 
     else {
@@ -189,6 +193,14 @@ export class Client {
   private loadStoredBlocks(): void {
     this.farmed = this.getStoredBlocks();
     this.data.farming.farmed = this.farmed
+  }
+
+  public validateApiStatus(): void {
+    if(!this.publicApi.isConnected) 
+      this.publicApi = new ApiPromise({ provider: new WsProvider(NETWORK_RPC), types: util.apiTypes });
+    if(!this.localApi.isConnected) 
+      this.localApi = new ApiPromise({ provider: new WsProvider(LOCAL_RPC), types: util.apiTypes });
+    return
   }
 }
 
