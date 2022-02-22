@@ -16,7 +16,7 @@
                 ref="pkDisplay"
                 style="width: 800px; height: 100px"
                 type="textarea"
-                v-model="generatedPk"
+                v-model="mnemonic"
                 v-show="revealKey"
               )
             .row.justify-center.q-mb-lg.full-width.bg-grey-2(v-if="!revealKey")
@@ -52,12 +52,12 @@ export default defineComponent({
   emits: ["userConfirm"],
   data() {
     const userConfirm = false
-    const generatedPk = global.client.getGeneratedPk()
+    const mnemonic = global.client.getMnemonic()
     const revealKey = false
-    return { revealKey, userConfirm, lang, generatedPk }
+    return { revealKey, userConfirm, lang, mnemonic }
   },
   unmounted() {
-    global.client.clearGeneratedPk()
+    global.client.clearMnemonic()
   },
   computed: {
     canContinue(): boolean {

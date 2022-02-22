@@ -25,7 +25,7 @@ export class Client {
   protected unsubscribe: event.UnlistenFn = () => { };
   data = reactive(emptyClientData);
   protected clientStarted = false;
-  protected generatedPk = "";
+  protected mnemonic = "";
 
   status = {
     farming: (): void => { }, // TODO return some farming status info
@@ -105,9 +105,9 @@ export class Client {
 
   // If the app is started for the first time, the client will be started from PlottingProgress page.
   // If the app is started for the second time, the client will be started from Dashboard page.
-  public async init(farmerPublicKey?: string, generatedPk?: string): Promise<void> {
+  public async init(farmerPublicKey?: string, mnemonic?: string): Promise<void> {
     if (!this.clientStarted) {
-      if (generatedPk) this.generatedPk = generatedPk;
+      if (mnemonic) this.mnemonic = mnemonic;
       if (farmerPublicKey) {
         this.clearStoredBlocks()
         LocalStorage.set("farmerPublicKey", farmerPublicKey)
@@ -120,12 +120,12 @@ export class Client {
     }
   }
 
-  public clearGeneratedPk() {
-    this.generatedPk = "";
+  public clearMnemonic() {
+    this.mnemonic = "";
   }
 
-  public getGeneratedPk(): string{
-    return this.generatedPk 
+  public getMnemonic(): string{
+    return this.mnemonic 
   }
 
   public async getNetworkLastBlockNumber(): Promise<number> {
