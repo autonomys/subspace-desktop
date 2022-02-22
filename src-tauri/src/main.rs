@@ -9,6 +9,7 @@ mod windows;
 use anyhow::{anyhow, Result};
 use bip39::{Language, Mnemonic};
 use log::{debug, info};
+use sc_cli::SubstrateCli;
 use serde::Serialize;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -17,6 +18,7 @@ use subspace_core_primitives::PIECE_SIZE;
 use subspace_farmer::{
     Commitments, Farming, Identity, ObjectMappings, Plot, Plotting, RpcClient, WsRpc,
 };
+use subspace_node::cli::Cli;
 use subspace_solving::SubspaceCodec;
 use tauri::{
     api::{self},
@@ -247,4 +249,11 @@ pub(crate) async fn farm(
             .unwrap()
             .into_phrase(),
     })
+}
+
+fn create_config(name: String) -> Cli {
+    let args = vec![name];
+    let cli = Cli::from_iter(args);
+
+    cli
 }
