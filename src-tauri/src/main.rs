@@ -9,7 +9,10 @@ mod windows;
 use anyhow::{anyhow, Result};
 use bip39::{Language, Mnemonic};
 use log::{debug, info};
+use sc_cli::{ChainSpec, SubstrateCli};
+use sc_executor::NativeExecutionDispatch;
 use serde::Serialize;
+use sp_core::crypto::Ss58AddressFormat;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
@@ -17,6 +20,7 @@ use subspace_core_primitives::PIECE_SIZE;
 use subspace_farmer::{
     Commitments, Farming, Identity, ObjectMappings, Plot, Plotting, RpcClient, WsRpc,
 };
+use subspace_node::{cli::Cli, Error};
 use subspace_solving::SubspaceCodec;
 use tauri::{
     api::{self},
@@ -48,6 +52,11 @@ fn plot_progress_tracker() -> usize {
 async fn farming(path: String) -> FarmerIdentity {
     let farmer_identity = farm(path.into(), "ws://127.0.0.1:9944").await;
     farmer_identity.unwrap()
+}
+
+#[tauri::command]
+async fn start_node(path: String) {
+    init_node(path.into()).await.unwrap();
 }
 
 #[tauri::command]
@@ -113,7 +122,8 @@ async fn main() -> Result<()> {
                 get_disk_stats,
                 get_this_binary,
                 farming,
-                plot_progress_tracker
+                plot_progress_tracker,
+                start_node
             ],
             #[cfg(target_os = "windows")]
             tauri::generate_handler![
@@ -124,6 +134,7 @@ async fn main() -> Result<()> {
                 get_disk_stats,
                 farming,
                 plot_progress_tracker,
+                start_node
             ],
         )
         .build(tauri::generate_context!())
@@ -153,14 +164,25 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
+pub(crate) async fn init_node(base_directory: PathBuf) -> Result<(), anyhow::Error> {
+    let identity = Identity::open_or_create(&base_directory)?;
+    let mut name = hex::encode(identity.public_key().to_bytes().as_slice());
+    name.truncate(32);
+
+    // start the node, and take the public key as the name parameter
+    std::thread::spawn(move || run_node(name.as_str()));
+
+    Ok(())
+}
+
 /// Start farming by using plot in specified path and connecting to WebSocket server at specified
 /// address.
 pub(crate) async fn farm(
     base_directory: PathBuf,
     node_rpc_url: &str,
 ) -> Result<FarmerIdentity, anyhow::Error> {
-    // TODO: This doesn't account for the fact that node can
-    // have a completely different history to what farmer expects
+    let identity = Identity::open_or_create(&base_directory)?;
+
     info!("Opening plot");
     let plot_fut = tokio::task::spawn_blocking({
         let base_directory = base_directory.clone();
@@ -206,8 +228,6 @@ pub(crate) async fn farm(
         .await
         .map_err(|error| anyhow::Error::msg(error.to_string()))?;
 
-    let identity = Identity::open_or_create(&base_directory)?;
-
     let subspace_codec = SubspaceCodec::new(identity.public_key());
 
     // start the farming task
@@ -247,4 +267,79 @@ pub(crate) async fn farm(
             .unwrap()
             .into_phrase(),
     })
+}
+
+fn run_node(id: &str) -> Result<(), Error> {
+    let args = vec![
+        "--",
+        "--chain", "testnet",
+        "--wasm-execution", "compiled",
+        "--execution", "wasm",
+        "--bootnodes", "/dns/farm-rpc.subspace.network/tcp/30333/p2p/12D3KooWPjMZuSYj35ehced2MTJFf95upwpHKgKUrFRfHwohzJXr",
+        "--rpc-cors", "all",
+        "--rpc-methods", "unsafe",
+        "--ws-external",
+        "--validator",
+        "--telemetry-url", "wss://telemetry.polkadot.io/submit/ 1",
+        "--name", id
+    ];
+    println!("Current Dir: {:?}", std::env::current_dir().unwrap());
+    let cli = Cli::from_iter(args);
+    cli.load_spec("./chain-spec-raw.json")?;
+
+    println!("opened the spec!");
+
+    let runner = cli.create_runner(&cli.run.base)?;
+
+    set_default_ss58_version(&runner.config().chain_spec);
+
+    println!("ss58 version set successfully");
+    runner.run_node_until_exit(|config| async move {
+        subspace_service::new_full::<subspace_runtime::RuntimeApi, ExecutorDispatch>(config, true)
+            .await
+            .map(|full| full.task_manager)
+    })?;
+
+    println!("runner started successfully");
+
+    Ok(())
+}
+
+struct ExecutorDispatch;
+
+impl NativeExecutionDispatch for ExecutorDispatch {
+    /// Only enable the benchmarking host functions when we actually want to benchmark.
+    #[cfg(feature = "runtime-benchmarks")]
+    type ExtendHostFunctions = frame_benchmarking::benchmarking::HostFunctions;
+    /// Otherwise we only use the default Substrate host functions.
+    #[cfg(not(feature = "runtime-benchmarks"))]
+    type ExtendHostFunctions = ();
+
+    fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
+        subspace_runtime::api::dispatch(method, data)
+    }
+
+    fn native_version() -> sc_executor::NativeVersion {
+        subspace_runtime::native_version()
+    }
+}
+
+fn set_default_ss58_version<C: AsRef<dyn ChainSpec>>(chain_spec: C) {
+    let maybe_ss58_address_format = chain_spec
+        .as_ref()
+        .properties()
+        .get("ss58Format")
+        .map(|v| {
+            v.as_u64()
+                .expect("ss58Format must always be an unsigned number; qed")
+        })
+        .map(|v| {
+            v.try_into()
+                .expect("ss58Format must always be within u16 range; qed")
+        })
+        .map(Ss58AddressFormat::custom);
+
+    if let Some(ss58_address_format) = maybe_ss58_address_format {
+        sp_core::crypto::set_default_ss58_version(ss58_address_format);
+    }
 }
