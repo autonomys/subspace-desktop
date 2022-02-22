@@ -242,12 +242,8 @@ export default defineComponent({
       // After local node is fully Synced, the farmer will be able to actualy plot and farm. 
       const { publicKey, mnemonic } = await startFarming(this.plotDirectory.replace("/subspace.plot", ""))
  
-      // When farmer start, temporal mnemonic storage, when user accept on modal that mnemonic was backed up. We remove it from local storage
-      // Check SaveKeys.vue.
       if (publicKey && mnemonic) {
-        // TODO: Fully remove LocalStorage. Find a secure way to pass mnemonic to SaveKeys modal.
-        LocalStorage.set("mnemonic", mnemonic)
-        await this.client.init(publicKey)
+        await this.client.init(publicKey, mnemonic)
       }
       this.plottingData.status = lang.fetchingPlot;      
       // Query from last block until find last RootBlockStored, then return last segmentIndex on the public network.

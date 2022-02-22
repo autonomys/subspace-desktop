@@ -44,7 +44,7 @@ import { defineComponent } from "vue"
 import { globalState as global } from "src/lib/global"
 const lang = global.data.loc.text.saveKeys
 // const lang = {}
-import { QInput, Notify, LocalStorage } from "quasar"
+import { QInput, Notify } from "quasar"
 
 // @vue/component
 export default defineComponent({
@@ -52,9 +52,12 @@ export default defineComponent({
   emits: ["userConfirm"],
   data() {
     const userConfirm = false
-    const generatedPk = LocalStorage.getItem("mnemonic")
+    const generatedPk = global.client.getGeneratedPk()
     const revealKey = false
     return { revealKey, userConfirm, lang, generatedPk }
+  },
+  unmounted() {
+    global.client.clearGeneratedPk()
   },
   computed: {
     canContinue(): boolean {
@@ -63,7 +66,6 @@ export default defineComponent({
   },
   watch: {
     userConfirm(val) {
-      LocalStorage.set("mnemonic", null)
       this.$emit("userConfirm", val)
     }
   },

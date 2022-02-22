@@ -14,7 +14,7 @@ const tauri = { event, invoke }
 const SUNIT = 1000000000000000000
 
 // TODO: This const must be loaded from a .env or similar. 
-const NETWORK_RPC = "wss://farm-rpc.subspace.network"
+const NETWORK_RPC = "ws://localhost:9944"
 const LOCAL_RPC = "ws://localhost:9944"
 
 export class Client {
@@ -25,6 +25,7 @@ export class Client {
   protected unsubscribe: event.UnlistenFn = () => { };
   data = reactive(emptyClientData);
   protected clientStarted = false;
+  protected generatedPk = "";
 
   status = {
     farming: (): void => { }, // TODO return some farming status info
@@ -103,12 +104,10 @@ export class Client {
   }
 
   // If the app is started for the first time, the client will be started from PlottingProgress page.
-  // In this case, farmerPublicKey and mnemonic must be stored and clear stored farmedBlocks if exist (clearStoredBlocks).
-  // -
   // If the app is started for the second time, the client will be started from Dashboard page.
-  // In this case, farmerPublicKey and mnemonic already exist and just need to load the stored farmedBlocks (loadStoredBlocks).
-  public async init(farmerPublicKey?: string): Promise<void> {
+  public async init(farmerPublicKey?: string, generatedPk?: string): Promise<void> {
     if (!this.clientStarted) {
+      if (generatedPk) this.generatedPk = generatedPk;
       if (farmerPublicKey) {
         this.clearStoredBlocks()
         LocalStorage.set("farmerPublicKey", farmerPublicKey)
@@ -119,6 +118,14 @@ export class Client {
       this.do.blockSubscription.startSubcriptions()
       this.clientStarted = true;
     }
+  }
+
+  public clearGeneratedPk() {
+    this.generatedPk = "";
+  }
+
+  public getGeneratedPk(): string{
+    return this.generatedPk 
   }
 
   public async getNetworkLastBlockNumber(): Promise<number> {
