@@ -9,8 +9,10 @@ mod windows;
 use anyhow::{anyhow, Result};
 use bip39::{Language, Mnemonic};
 use log::{debug, info};
-use sc_cli::SubstrateCli;
+use sc_cli::{ChainSpec, SubstrateCli};
+use sc_executor::NativeExecutionDispatch;
 use serde::Serialize;
+use sp_core::crypto::Ss58AddressFormat;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
@@ -18,7 +20,7 @@ use subspace_core_primitives::PIECE_SIZE;
 use subspace_farmer::{
     Commitments, Farming, Identity, ObjectMappings, Plot, Plotting, RpcClient, WsRpc,
 };
-use subspace_node::cli::Cli;
+use subspace_node::{cli::Cli, Error};
 use subspace_solving::SubspaceCodec;
 use tauri::{
     api::{self},
@@ -163,6 +165,7 @@ pub(crate) async fn farm(
 ) -> Result<FarmerIdentity, anyhow::Error> {
     // TODO: This doesn't account for the fact that node can
     // have a completely different history to what farmer expects
+    create_config("OZZY");
     info!("Opening plot");
     let plot_fut = tokio::task::spawn_blocking({
         let base_directory = base_directory.clone();
@@ -251,9 +254,71 @@ pub(crate) async fn farm(
     })
 }
 
-fn create_config(name: String) -> Cli {
-    let args = vec![name];
+fn create_config(id: &str) -> Result<(), Error> {
+    let args = vec![
+        "--",
+        "--chain", "testnet",
+        "--wasm-execution", "compiled",
+        "--execution", "wasm",
+        "--bootnodes", "/dns/farm-rpc.subspace.network/tcp/30333/p2p/12D3KooWPjMZuSYj35ehced2MTJFf95upwpHKgKUrFRfHwohzJXr",
+        "--rpc-cors", "all",
+        "--rpc-methods", "unsafe",
+        "--ws-external",
+        "--validator",
+        "--telemetry-url", "wss://telemetry.polkadot.io/submit/ 1",
+        "--name", id
+    ];
+
     let cli = Cli::from_iter(args);
 
-    cli
+    // println!("{:?}", cli);
+
+    let runner = cli.create_runner(&cli.run.base)?;
+    set_default_ss58_version(&runner.config().chain_spec);
+    runner.run_node_until_exit(|config| async move {
+        subspace_service::new_full::<subspace_runtime::RuntimeApi, ExecutorDispatch>(config, true)
+            .await
+            .map(|full| full.task_manager)
+    })?;
+
+    Ok(())
+}
+
+struct ExecutorDispatch;
+
+impl NativeExecutionDispatch for ExecutorDispatch {
+    /// Only enable the benchmarking host functions when we actually want to benchmark.
+    #[cfg(feature = "runtime-benchmarks")]
+    type ExtendHostFunctions = frame_benchmarking::benchmarking::HostFunctions;
+    /// Otherwise we only use the default Substrate host functions.
+    #[cfg(not(feature = "runtime-benchmarks"))]
+    type ExtendHostFunctions = ();
+
+    fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
+        subspace_runtime::api::dispatch(method, data)
+    }
+
+    fn native_version() -> sc_executor::NativeVersion {
+        subspace_runtime::native_version()
+    }
+}
+
+fn set_default_ss58_version<C: AsRef<dyn ChainSpec>>(chain_spec: C) {
+    let maybe_ss58_address_format = chain_spec
+        .as_ref()
+        .properties()
+        .get("ss58Format")
+        .map(|v| {
+            v.as_u64()
+                .expect("ss58Format must always be an unsigned number; qed")
+        })
+        .map(|v| {
+            v.try_into()
+                .expect("ss58Format must always be within u16 range; qed")
+        })
+        .map(Ss58AddressFormat::custom);
+
+    if let Some(ss58_address_format) = maybe_ss58_address_format {
+        sp_core::crypto::set_default_ss58_version(ss58_address_format);
+    }
 }
