@@ -14,7 +14,7 @@ const tauri = { event, invoke }
 const SUNIT = 1000000000000000000
 
 // TODO: This const must be loaded from a .env or similar. 
-const NETWORK_RPC = "ws://localhost:9944"
+const NETWORK_RPC = "wss://farm-rpc.subspace.network"
 const LOCAL_RPC = "ws://localhost:9944"
 
 export class Client {
