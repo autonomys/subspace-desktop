@@ -119,8 +119,6 @@ export default defineComponent({
   methods: {
     async getNetInfo() {
       const netData = await global.client.status.net()
-      console.log(netData)
-
       this.network.peers = netData.peers.length
     },
     async testClient() {
