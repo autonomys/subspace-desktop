@@ -1,9 +1,9 @@
 import { ApiPromise, WsProvider, } from '@polkadot/api'
-import { Vec } from '@polkadot/types/codec'
+import type { Vec } from '@polkadot/types/codec'
+import type { AccountId32, Hash } from '@polkadot/types/interfaces';
 import * as event from '@tauri-apps/api/event'
 import { reactive } from 'vue'
 import { LocalStorage } from 'quasar'
-import { AccountId32 } from '@polkadot/types/interfaces';
 import * as process from 'process'
 import { ClientIdentity, emptyClientData, FarmedBlock, NetStatus } from './types'
 import { SubPreDigest } from './customTypes/types'
@@ -138,7 +138,7 @@ export class Client {
     return signedBlock.block.header.number.toNumber()
   }
   
-  public async getNetworkSegmentIndex(hash?: any): Promise<number> {
+  public async getNetworkSegmentIndex(hash?: Hash): Promise<number> {
     let signedBlock;
     if (hash) signedBlock = await this.publicApi.rpc.chain.getBlock(hash);
     else signedBlock = await this.publicApi.rpc.chain.getBlock();

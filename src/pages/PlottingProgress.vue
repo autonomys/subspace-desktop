@@ -125,7 +125,6 @@ import introModal from "components/introModal.vue"
 import TimeAgo from "javascript-time-ago"
 import en from "javascript-time-ago/locale/en"
 import { startFarming, getLocalFarmerSegmentIndex } from "src/lib/client"
-import { LocalStorage } from "quasar"
 TimeAgo.addLocale(en)
 let timer: number
 
@@ -247,7 +246,7 @@ export default defineComponent({
       }
       this.plottingData.status = lang.fetchingPlot;      
       // Query from last block until find last RootBlockStored, then return last segmentIndex on the public network.
-      let networkSegmentIndex = await this.client.getNetworkSegmentIndex()
+      const networkSegmentIndex = await this.client.getNetworkSegmentIndex()
       let localSegmentIndex = 0;
       // TODO: Fix this timer, not updating correctly
       timer = window.setInterval(() => (this.elapsedms += 100), 100)

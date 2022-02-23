@@ -56,9 +56,6 @@ export default defineComponent({
     const revealKey = false
     return { revealKey, userConfirm, lang, mnemonic }
   },
-  unmounted() {
-    global.client.clearMnemonic()
-  },
   computed: {
     canContinue(): boolean {
       return this.userConfirm
@@ -68,6 +65,9 @@ export default defineComponent({
     userConfirm(val) {
       this.$emit("userConfirm", val)
     }
+  },
+  unmounted() {
+    global.client.clearMnemonic()
   },
   methods: {
     copyPk() {
