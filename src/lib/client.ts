@@ -120,11 +120,11 @@ export class Client {
     }
   }
 
-  public clearMnemonic() {
+  public clearMnemonic(): void {
     this.mnemonic = "";
   }
 
-  public getMnemonic(): string{
+  public getMnemonic(): string {
     return this.mnemonic 
   }
 
