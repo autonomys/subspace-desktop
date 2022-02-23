@@ -1,9 +1,9 @@
 import { ApiPromise, WsProvider, } from '@polkadot/api'
-import { Vec } from '@polkadot/types/codec'
+import type { Vec } from '@polkadot/types/codec'
+import type { AccountId32, Hash } from '@polkadot/types/interfaces';
 import * as event from '@tauri-apps/api/event'
 import { reactive } from 'vue'
 import { LocalStorage } from 'quasar'
-import { AccountId32 } from '@polkadot/types/interfaces';
 import * as process from 'process'
 import { ClientIdentity, emptyClientData, FarmedBlock, NetStatus } from './types'
 import { SubPreDigest } from './customTypes/types'
@@ -25,6 +25,7 @@ export class Client {
   protected unsubscribe: event.UnlistenFn = () => { };
   data = reactive(emptyClientData);
   protected clientStarted = false;
+  protected mnemonic = "";
 
   status = {
     farming: (): void => { }, // TODO return some farming status info
@@ -103,12 +104,10 @@ export class Client {
   }
 
   // If the app is started for the first time, the client will be started from PlottingProgress page.
-  // In this case, farmerPublicKey and mnemonic must be stored and clear stored farmedBlocks if exist (clearStoredBlocks).
-  // -
   // If the app is started for the second time, the client will be started from Dashboard page.
-  // In this case, farmerPublicKey and mnemonic already exist and just need to load the stored farmedBlocks (loadStoredBlocks).
-  public async init(farmerPublicKey?: string): Promise<void> {
+  public async init(farmerPublicKey?: string, mnemonic?: string): Promise<void> {
     if (!this.clientStarted) {
+      if (mnemonic) this.mnemonic = mnemonic;
       if (farmerPublicKey) {
         this.clearStoredBlocks()
         LocalStorage.set("farmerPublicKey", farmerPublicKey)
@@ -121,6 +120,14 @@ export class Client {
     }
   }
 
+  public clearMnemonic(): void {
+    this.mnemonic = "";
+  }
+
+  public getMnemonic(): string {
+    return this.mnemonic 
+  }
+
   public async getNetworkLastBlockNumber(): Promise<number> {
     const signedBlock = await this.publicApi.rpc.chain.getBlock();
     return signedBlock.block.header.number.toNumber()
@@ -131,7 +138,7 @@ export class Client {
     return signedBlock.block.header.number.toNumber()
   }
   
-  public async getNetworkSegmentIndex(hash?: any): Promise<number> {
+  public async getNetworkSegmentIndex(hash?: Hash): Promise<number> {
     let signedBlock;
     if (hash) signedBlock = await this.publicApi.rpc.chain.getBlock(hash);
     else signedBlock = await this.publicApi.rpc.chain.getBlock();

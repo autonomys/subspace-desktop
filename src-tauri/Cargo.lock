@@ -358,7 +358,7 @@ version = "0.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b94ba84325db59637ffc528bbe8c7f86c02c57cff5c0e2b9b00f9a851f42f309"
 dependencies = [
- "digest 0.10.1",
+ "digest 0.10.3",
 ]
 
 [[package]]
@@ -393,7 +393,7 @@ dependencies = [
  "cc",
  "cfg-if 1.0.0",
  "constant_time_eq",
- "digest 0.10.1",
+ "digest 0.10.3",
  "rayon",
 ]
 
@@ -931,11 +931,12 @@ checksum = "7a81dae078cea95a014a339291cec439d2f232ebe854a9d672b796c6afafa9b7"
 
 [[package]]
 name = "crypto-common"
-version = "0.1.1"
+version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "683d6b536309245c849479fba3da410962a43ed8e51c26b729208ec0ac2798d0"
+checksum = "57952ca27b5e3606ff4dd79b0020231aaf9d6aa76dc05fd30137538c50bd3ce8"
 dependencies = [
  "generic-array 0.14.5",
+ "typenum",
 ]
 
 [[package]]
@@ -1144,13 +1145,12 @@ dependencies = [
 
 [[package]]
 name = "digest"
-version = "0.10.1"
+version = "0.10.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b697d66081d42af4fba142d56918a3cb21dc8eb63372c6b85d14f44fb9c5979b"
+checksum = "f2fb860ca6fafa5552fb6d0e816a69c8e49f0908bf524e30a90d97c85892d506"
 dependencies = [
  "block-buffer 0.10.0",
  "crypto-common",
- "generic-array 0.14.5",
  "subtle",
 ]
 
@@ -2074,7 +2074,7 @@ version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ddca131f3e7f2ce2df364b57949a9d47915cfbd35e46cfee355ccebbf794d6a2"
 dependencies = [
- "digest 0.10.1",
+ "digest 0.10.3",
 ]
 
 [[package]]
@@ -2623,7 +2623,7 @@ checksum = "c7d73b3f436185384286bd8098d17ec07c9a7d2388a6599f824d8502b529702a"
 [[package]]
 name = "libp2p"
 version = "0.43.0"
-source = "git+https://github.com/libp2p/rust-libp2p#65cc8994a6230b43e74b53b42b5c5c8655320d5e"
+source = "git+https://github.com/libp2p/rust-libp2p#2ff9acee227bc8787fb41d657de5f174250e2588"
 dependencies = [
  "atomic",
  "bytes",
@@ -2655,7 +2655,7 @@ dependencies = [
 [[package]]
 name = "libp2p-core"
 version = "0.32.0"
-source = "git+https://github.com/libp2p/rust-libp2p#65cc8994a6230b43e74b53b42b5c5c8655320d5e"
+source = "git+https://github.com/libp2p/rust-libp2p#2ff9acee227bc8787fb41d657de5f174250e2588"
 dependencies = [
  "asn1_der",
  "bs58",
@@ -2688,7 +2688,7 @@ dependencies = [
 [[package]]
 name = "libp2p-dns"
 version = "0.32.0"
-source = "git+https://github.com/libp2p/rust-libp2p#65cc8994a6230b43e74b53b42b5c5c8655320d5e"
+source = "git+https://github.com/libp2p/rust-libp2p#2ff9acee227bc8787fb41d657de5f174250e2588"
 dependencies = [
  "futures",
  "libp2p-core",
@@ -2700,7 +2700,7 @@ dependencies = [
 [[package]]
 name = "libp2p-gossipsub"
 version = "0.36.0"
-source = "git+https://github.com/libp2p/rust-libp2p#65cc8994a6230b43e74b53b42b5c5c8655320d5e"
+source = "git+https://github.com/libp2p/rust-libp2p#2ff9acee227bc8787fb41d657de5f174250e2588"
 dependencies = [
  "asynchronous-codec",
  "base64",
@@ -2727,7 +2727,7 @@ dependencies = [
 [[package]]
 name = "libp2p-identify"
 version = "0.34.0"
-source = "git+https://github.com/libp2p/rust-libp2p#65cc8994a6230b43e74b53b42b5c5c8655320d5e"
+source = "git+https://github.com/libp2p/rust-libp2p#2ff9acee227bc8787fb41d657de5f174250e2588"
 dependencies = [
  "futures",
  "futures-timer",
@@ -2743,7 +2743,7 @@ dependencies = [
 [[package]]
 name = "libp2p-kad"
 version = "0.35.0"
-source = "git+https://github.com/libp2p/rust-libp2p#65cc8994a6230b43e74b53b42b5c5c8655320d5e"
+source = "git+https://github.com/libp2p/rust-libp2p#2ff9acee227bc8787fb41d657de5f174250e2588"
 dependencies = [
  "arrayvec 0.5.2",
  "asynchronous-codec",
@@ -2770,7 +2770,7 @@ dependencies = [
 [[package]]
 name = "libp2p-metrics"
 version = "0.4.0"
-source = "git+https://github.com/libp2p/rust-libp2p#65cc8994a6230b43e74b53b42b5c5c8655320d5e"
+source = "git+https://github.com/libp2p/rust-libp2p#2ff9acee227bc8787fb41d657de5f174250e2588"
 dependencies = [
  "libp2p-core",
  "libp2p-gossipsub",
@@ -2784,7 +2784,7 @@ dependencies = [
 [[package]]
 name = "libp2p-noise"
 version = "0.35.0"
-source = "git+https://github.com/libp2p/rust-libp2p#65cc8994a6230b43e74b53b42b5c5c8655320d5e"
+source = "git+https://github.com/libp2p/rust-libp2p#2ff9acee227bc8787fb41d657de5f174250e2588"
 dependencies = [
  "bytes",
  "curve25519-dalek 3.2.0",
@@ -2805,7 +2805,7 @@ dependencies = [
 [[package]]
 name = "libp2p-ping"
 version = "0.34.0"
-source = "git+https://github.com/libp2p/rust-libp2p#65cc8994a6230b43e74b53b42b5c5c8655320d5e"
+source = "git+https://github.com/libp2p/rust-libp2p#2ff9acee227bc8787fb41d657de5f174250e2588"
 dependencies = [
  "futures",
  "futures-timer",
@@ -2820,7 +2820,7 @@ dependencies = [
 [[package]]
 name = "libp2p-swarm"
 version = "0.34.0"
-source = "git+https://github.com/libp2p/rust-libp2p#65cc8994a6230b43e74b53b42b5c5c8655320d5e"
+source = "git+https://github.com/libp2p/rust-libp2p#2ff9acee227bc8787fb41d657de5f174250e2588"
 dependencies = [
  "either",
  "fnv",
@@ -2839,7 +2839,7 @@ dependencies = [
 [[package]]
 name = "libp2p-swarm-derive"
 version = "0.26.1"
-source = "git+https://github.com/libp2p/rust-libp2p#65cc8994a6230b43e74b53b42b5c5c8655320d5e"
+source = "git+https://github.com/libp2p/rust-libp2p#2ff9acee227bc8787fb41d657de5f174250e2588"
 dependencies = [
  "quote",
  "syn",
@@ -2848,7 +2848,7 @@ dependencies = [
 [[package]]
 name = "libp2p-tcp"
 version = "0.32.0"
-source = "git+https://github.com/libp2p/rust-libp2p#65cc8994a6230b43e74b53b42b5c5c8655320d5e"
+source = "git+https://github.com/libp2p/rust-libp2p#2ff9acee227bc8787fb41d657de5f174250e2588"
 dependencies = [
  "futures",
  "futures-timer",
@@ -2864,7 +2864,7 @@ dependencies = [
 [[package]]
 name = "libp2p-websocket"
 version = "0.34.0"
-source = "git+https://github.com/libp2p/rust-libp2p#65cc8994a6230b43e74b53b42b5c5c8655320d5e"
+source = "git+https://github.com/libp2p/rust-libp2p#2ff9acee227bc8787fb41d657de5f174250e2588"
 dependencies = [
  "either",
  "futures",
@@ -2881,7 +2881,7 @@ dependencies = [
 [[package]]
 name = "libp2p-yamux"
 version = "0.36.0"
-source = "git+https://github.com/libp2p/rust-libp2p#65cc8994a6230b43e74b53b42b5c5c8655320d5e"
+source = "git+https://github.com/libp2p/rust-libp2p#2ff9acee227bc8787fb41d657de5f174250e2588"
 dependencies = [
  "futures",
  "libp2p-core",
@@ -3229,7 +3229,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7392bffd88bc0c4f8297e36a777ab9f80b7127409c4a1acb8fee99c9f27addcd"
 dependencies = [
  "core2",
- "digest 0.10.1",
+ "digest 0.10.3",
  "multihash-derive",
  "sha2 0.10.1",
  "unsigned-varint",
@@ -3258,7 +3258,7 @@ checksum = "e5ce46fe64a9d73be07dcbe690a38ce1b293be448fd8ce1e6c1b8062c9f72c6a"
 [[package]]
 name = "multistream-select"
 version = "0.11.0"
-source = "git+https://github.com/libp2p/rust-libp2p#65cc8994a6230b43e74b53b42b5c5c8655320d5e"
+source = "git+https://github.com/libp2p/rust-libp2p#2ff9acee227bc8787fb41d657de5f174250e2588"
 dependencies = [
  "bytes",
  "futures",
@@ -4947,7 +4947,7 @@ checksum = "99c3bd8169c58782adad9290a9af5939994036b76187f7b4f0e6de91dbbfc0ec"
 dependencies = [
  "cfg-if 1.0.0",
  "cpufeatures",
- "digest 0.10.1",
+ "digest 0.10.3",
  "sha2-asm",
 ]
 
@@ -4958,6 +4958,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bf27176fb5d15398e3a479c652c20459d9dac830dedd1fa55b42a77dbcdbfcea"
 dependencies = [
  "cc",
+]
+
+[[package]]
+name = "sha3"
+version = "0.10.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "881bf8156c87b6301fc5ca6b27f11eeb2761224c7081e69b409d5a1951a70c86"
+dependencies = [
+ "digest 0.10.3",
+ "keccak",
 ]
 
 [[package]]
@@ -5092,8 +5102,8 @@ dependencies = [
 
 [[package]]
 name = "sp-core"
-version = "4.1.0-dev"
-source = "git+https://github.com/paritytech/substrate?rev=2c4549689dbb86c23725dac2f82af35faa07c9f6#2c4549689dbb86c23725dac2f82af35faa07c9f6"
+version = "5.0.0"
+source = "git+https://github.com/paritytech/substrate?rev=e6def65920d30029e42d498cb07cec5dd433b927#e6def65920d30029e42d498cb07cec5dd433b927"
 dependencies = [
  "base58",
  "bitflags",
@@ -5121,7 +5131,6 @@ dependencies = [
  "schnorrkel",
  "secrecy",
  "serde",
- "sha2 0.10.1",
  "sp-core-hashing",
  "sp-debug-derive",
  "sp-externalities",
@@ -5132,8 +5141,6 @@ dependencies = [
  "substrate-bip39",
  "thiserror",
  "tiny-bip39",
- "tiny-keccak",
- "twox-hash",
  "wasmi",
  "zeroize",
 ]
@@ -5141,20 +5148,21 @@ dependencies = [
 [[package]]
 name = "sp-core-hashing"
 version = "4.0.0"
-source = "git+https://github.com/paritytech/substrate?rev=2c4549689dbb86c23725dac2f82af35faa07c9f6#2c4549689dbb86c23725dac2f82af35faa07c9f6"
+source = "git+https://github.com/paritytech/substrate?rev=e6def65920d30029e42d498cb07cec5dd433b927#e6def65920d30029e42d498cb07cec5dd433b927"
 dependencies = [
- "blake2-rfc",
+ "blake2",
  "byteorder 1.4.3",
+ "digest 0.10.3",
  "sha2 0.10.1",
+ "sha3",
  "sp-std",
- "tiny-keccak",
  "twox-hash",
 ]
 
 [[package]]
 name = "sp-debug-derive"
 version = "4.0.0"
-source = "git+https://github.com/paritytech/substrate?rev=2c4549689dbb86c23725dac2f82af35faa07c9f6#2c4549689dbb86c23725dac2f82af35faa07c9f6"
+source = "git+https://github.com/paritytech/substrate?rev=e6def65920d30029e42d498cb07cec5dd433b927#e6def65920d30029e42d498cb07cec5dd433b927"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -5163,8 +5171,8 @@ dependencies = [
 
 [[package]]
 name = "sp-externalities"
-version = "0.10.0"
-source = "git+https://github.com/paritytech/substrate?rev=2c4549689dbb86c23725dac2f82af35faa07c9f6#2c4549689dbb86c23725dac2f82af35faa07c9f6"
+version = "0.11.0"
+source = "git+https://github.com/paritytech/substrate?rev=e6def65920d30029e42d498cb07cec5dd433b927#e6def65920d30029e42d498cb07cec5dd433b927"
 dependencies = [
  "environmental",
  "parity-scale-codec",
@@ -5174,8 +5182,8 @@ dependencies = [
 
 [[package]]
 name = "sp-runtime-interface"
-version = "4.1.0-dev"
-source = "git+https://github.com/paritytech/substrate?rev=2c4549689dbb86c23725dac2f82af35faa07c9f6#2c4549689dbb86c23725dac2f82af35faa07c9f6"
+version = "5.0.0"
+source = "git+https://github.com/paritytech/substrate?rev=e6def65920d30029e42d498cb07cec5dd433b927#e6def65920d30029e42d498cb07cec5dd433b927"
 dependencies = [
  "impl-trait-for-tuples",
  "parity-scale-codec",
@@ -5192,7 +5200,7 @@ dependencies = [
 [[package]]
 name = "sp-runtime-interface-proc-macro"
 version = "4.0.0"
-source = "git+https://github.com/paritytech/substrate?rev=2c4549689dbb86c23725dac2f82af35faa07c9f6#2c4549689dbb86c23725dac2f82af35faa07c9f6"
+source = "git+https://github.com/paritytech/substrate?rev=e6def65920d30029e42d498cb07cec5dd433b927#e6def65920d30029e42d498cb07cec5dd433b927"
 dependencies = [
  "Inflector",
  "proc-macro-crate 1.1.0",
@@ -5204,12 +5212,12 @@ dependencies = [
 [[package]]
 name = "sp-std"
 version = "4.0.0"
-source = "git+https://github.com/paritytech/substrate?rev=2c4549689dbb86c23725dac2f82af35faa07c9f6#2c4549689dbb86c23725dac2f82af35faa07c9f6"
+source = "git+https://github.com/paritytech/substrate?rev=e6def65920d30029e42d498cb07cec5dd433b927#e6def65920d30029e42d498cb07cec5dd433b927"
 
 [[package]]
 name = "sp-storage"
-version = "4.0.0"
-source = "git+https://github.com/paritytech/substrate?rev=2c4549689dbb86c23725dac2f82af35faa07c9f6#2c4549689dbb86c23725dac2f82af35faa07c9f6"
+version = "5.0.0"
+source = "git+https://github.com/paritytech/substrate?rev=e6def65920d30029e42d498cb07cec5dd433b927#e6def65920d30029e42d498cb07cec5dd433b927"
 dependencies = [
  "impl-serde",
  "parity-scale-codec",
@@ -5222,7 +5230,7 @@ dependencies = [
 [[package]]
 name = "sp-tracing"
 version = "4.0.0"
-source = "git+https://github.com/paritytech/substrate?rev=2c4549689dbb86c23725dac2f82af35faa07c9f6#2c4549689dbb86c23725dac2f82af35faa07c9f6"
+source = "git+https://github.com/paritytech/substrate?rev=e6def65920d30029e42d498cb07cec5dd433b927#e6def65920d30029e42d498cb07cec5dd433b927"
 dependencies = [
  "parity-scale-codec",
  "sp-std",
@@ -5233,8 +5241,8 @@ dependencies = [
 
 [[package]]
 name = "sp-wasm-interface"
-version = "4.1.0-dev"
-source = "git+https://github.com/paritytech/substrate?rev=2c4549689dbb86c23725dac2f82af35faa07c9f6#2c4549689dbb86c23725dac2f82af35faa07c9f6"
+version = "5.0.0"
+source = "git+https://github.com/paritytech/substrate?rev=e6def65920d30029e42d498cb07cec5dd433b927#e6def65920d30029e42d498cb07cec5dd433b927"
 dependencies = [
  "impl-trait-for-tuples",
  "log",
@@ -5388,7 +5396,7 @@ dependencies = [
 [[package]]
 name = "subspace-archiving"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace#af8fdf08225fa4cbe09afda4d45f94ed86be9363"
+source = "git+https://github.com/subspace/subspace?rev=c76d6744a17933fe82811ad809856d665869cdaa#c76d6744a17933fe82811ad809856d665869cdaa"
 dependencies = [
  "merkletree",
  "parity-scale-codec",
@@ -5403,7 +5411,7 @@ dependencies = [
 [[package]]
 name = "subspace-core-primitives"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace#af8fdf08225fa4cbe09afda4d45f94ed86be9363"
+source = "git+https://github.com/subspace/subspace?rev=c76d6744a17933fe82811ad809856d665869cdaa#c76d6744a17933fe82811ad809856d665869cdaa"
 dependencies = [
  "hmac 0.12.0",
  "parity-scale-codec",
@@ -5416,7 +5424,7 @@ dependencies = [
 [[package]]
 name = "subspace-farmer"
 version = "0.3.0"
-source = "git+https://github.com/subspace/subspace#af8fdf08225fa4cbe09afda4d45f94ed86be9363"
+source = "git+https://github.com/subspace/subspace?rev=c76d6744a17933fe82811ad809856d665869cdaa#c76d6744a17933fe82811ad809856d665869cdaa"
 dependencies = [
  "anyhow",
  "arc-swap",
@@ -5455,7 +5463,7 @@ dependencies = [
 [[package]]
 name = "subspace-networking"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace#af8fdf08225fa4cbe09afda4d45f94ed86be9363"
+source = "git+https://github.com/subspace/subspace?rev=c76d6744a17933fe82811ad809856d665869cdaa#c76d6744a17933fe82811ad809856d665869cdaa"
 dependencies = [
  "bytes",
  "event-listener-primitives",
@@ -5473,7 +5481,7 @@ dependencies = [
 [[package]]
 name = "subspace-rpc-primitives"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace#af8fdf08225fa4cbe09afda4d45f94ed86be9363"
+source = "git+https://github.com/subspace/subspace?rev=c76d6744a17933fe82811ad809856d665869cdaa#c76d6744a17933fe82811ad809856d665869cdaa"
 dependencies = [
  "hex-buffer-serde",
  "serde",
@@ -5483,7 +5491,7 @@ dependencies = [
 [[package]]
 name = "subspace-solving"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace#af8fdf08225fa4cbe09afda4d45f94ed86be9363"
+source = "git+https://github.com/subspace/subspace?rev=c76d6744a17933fe82811ad809856d665869cdaa#c76d6744a17933fe82811ad809856d665869cdaa"
 dependencies = [
  "log",
  "num_cpus",
@@ -5912,15 +5920,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tiny-keccak"
-version = "2.0.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2c9d3793400a45f954c52e73d068316d76b6f4e36977e3fcebb13a2721e80237"
-dependencies = [
- "crunchy",
-]
-
-[[package]]
 name = "tinyvec"
 version = "1.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5946,6 +5945,7 @@ dependencies = [
  "memchr",
  "mio",
  "num_cpus",
+ "parking_lot 0.11.2",
  "pin-project-lite 0.2.8",
  "tokio-macros",
  "winapi 0.3.9",
@@ -6153,7 +6153,8 @@ version = "1.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4ee73e6e4924fe940354b8d4d98cad5231175d615cd855b758adc658c0aac6a0"
 dependencies = [
- "cfg-if 0.1.10",
+ "cfg-if 1.0.0",
+ "digest 0.10.3",
  "rand 0.8.4",
  "static_assertions",
 ]
