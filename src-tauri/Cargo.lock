@@ -110,6 +110,7 @@ dependencies = [
  "anyhow",
  "event-listener-primitives",
  "fs2",
+ "hex",
  "lazy_static",
  "log",
  "sc-cli",

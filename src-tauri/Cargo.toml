@@ -16,6 +16,7 @@ tauri-build = { version = "1.0.0-beta.4" }
 anyhow = "1.0.44"
 event-listener-primitives = "2.0.1"
 fs2 = "0.4.3"
+hex = "0.4.3"
 lazy_static = "1.4.0"
 log = "0.4.14"
 sc-cli = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "e6def65920d30029e42d498cb07cec5dd433b927", features = ["wasmtime"] }
