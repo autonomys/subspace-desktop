@@ -16,7 +16,7 @@
                 ref="pkDisplay"
                 style="width: 800px; height: 100px"
                 type="textarea"
-                v-model="generatedPk"
+                v-model="mnemonic"
                 v-show="revealKey"
               )
             .row.justify-center.q-mb-lg.full-width.bg-grey-2(v-if="!revealKey")
@@ -44,7 +44,7 @@ import { defineComponent } from "vue"
 import { globalState as global } from "src/lib/global"
 const lang = global.data.loc.text.saveKeys
 // const lang = {}
-import { QInput, Notify, LocalStorage } from "quasar"
+import { QInput, Notify } from "quasar"
 
 // @vue/component
 export default defineComponent({
@@ -52,9 +52,9 @@ export default defineComponent({
   emits: ["userConfirm"],
   data() {
     const userConfirm = false
-    const generatedPk = LocalStorage.getItem("mnemonic")
+    const mnemonic = global.client.getMnemonic()
     const revealKey = false
-    return { revealKey, userConfirm, lang, generatedPk }
+    return { revealKey, userConfirm, lang, mnemonic }
   },
   computed: {
     canContinue(): boolean {
@@ -63,9 +63,11 @@ export default defineComponent({
   },
   watch: {
     userConfirm(val) {
-      LocalStorage.set("mnemonic", null)
       this.$emit("userConfirm", val)
     }
+  },
+  unmounted() {
+    global.client.clearMnemonic()
   },
   methods: {
     copyPk() {
