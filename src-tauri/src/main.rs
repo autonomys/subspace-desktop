@@ -163,9 +163,14 @@ pub(crate) async fn farm(
     base_directory: PathBuf,
     node_rpc_url: &str,
 ) -> Result<FarmerIdentity, anyhow::Error> {
-    // TODO: This doesn't account for the fact that node can
-    // have a completely different history to what farmer expects
-    create_config("OZZY");
+    let identity = Identity::open_or_create(&base_directory)?;
+    let name = std::str::from_utf8(identity.public_key().to_bytes().as_slice())
+        .unwrap()
+        .to_owned();
+
+    // start the node, and take the public key as the name
+    std::thread::spawn(move || run_node(name.as_str()));
+
     info!("Opening plot");
     let plot_fut = tokio::task::spawn_blocking({
         let base_directory = base_directory.clone();
@@ -211,8 +216,6 @@ pub(crate) async fn farm(
         .await
         .map_err(|error| anyhow::Error::msg(error.to_string()))?;
 
-    let identity = Identity::open_or_create(&base_directory)?;
-
     let subspace_codec = SubspaceCodec::new(identity.public_key());
 
     // start the farming task
@@ -254,7 +257,7 @@ pub(crate) async fn farm(
     })
 }
 
-fn create_config(id: &str) -> Result<(), Error> {
+fn run_node(id: &str) -> Result<(), Error> {
     let args = vec![
         "--",
         "--chain", "testnet",
