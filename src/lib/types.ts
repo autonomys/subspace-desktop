@@ -1,4 +1,3 @@
-import { ApiPromise } from '@polkadot/api'
 import { Vec } from '@polkadot/types/codec'
 import { PeerInfo } from '@polkadot/types/interfaces/system'
 import mitt, { Emitter } from 'mitt'
@@ -75,15 +74,4 @@ export const emptyClientData: ClientData = {
   plot: { details: {}, plotFile: '', plotSizeBytes: 0, status: '' },
   farming: { farmed: [], status: '', events: mitt() },
   network: { details: {}, peers: [], status: '' }
-}
-
-export interface ClientType {
-  api: ApiPromise | null
-  data: ClientData
-  getStatus: {
-    farming: () => void,
-    plot: () => void,
-    network: () => void
-  },
-  do?: { [index: string]: any }
 }
