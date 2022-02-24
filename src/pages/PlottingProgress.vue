@@ -250,7 +250,7 @@ export default defineComponent({
       }
       this.plottingData.status = lang.fetchingPlot;      
       // Query from last block until find last RootBlockStored, then return last segmentIndex on the public network.
-      const networkSegmentIndex = await this.client.getNetworkSegmentIndex()
+      let networkSegmentIndex = this.client.data.plot.lastSegmentIndex > 0 ? this.client.data.plot.lastSegmentIndex : await this.client.getNetworkSegmentIndex();
       let localSegmentIndex = 1;
       // TODO: Fix this timer, not updating correctly
       timer = window.setInterval(() => (this.elapsedms += 100), 100)
@@ -268,6 +268,7 @@ export default defineComponent({
           localSegmentIndex = await getLocalFarmerSegmentIndex()
           this.plottingData.finishedGB = (localSegmentIndex * 10) / networkSegmentIndex
           this.plottingData.status = "Archived " + localSegmentIndex + " of " + networkSegmentIndex + " Segments"
+          networkSegmentIndex = this.client.data.plot.lastSegmentIndex 
           await new Promise((resolve) => setTimeout(resolve, 2000))
           // But we wait to get fully plotted. Afgter this the user can click next and go to dashboard.
         } while (localSegmentIndex < networkSegmentIndex)

@@ -6,7 +6,7 @@ q-page.q-pl-lg.q-pr-lg.q-pt-md
   div(v-if="!loading")
     .row.q-gutter-md.q-pb-md(v-if="!expanded")
       .col
-        plotCard(:config="config" :plot="plot")
+        plotCard(:plot="plot")
       .col
         netCard(:config="config" :network="network")
     .row.q-gutter-md
@@ -49,7 +49,8 @@ export default defineComponent({
       },
       plot: {
         state: "starting",
-        message: lang.initializing
+        message: lang.initializing,
+        plotSizeGB: 0
       },
       global: global.data,
       client: global.client,
@@ -73,7 +74,12 @@ export default defineComponent({
       }, 0)
     }
   },
-  watch: {},
+  watch: {
+      "clientData.plot.lastSegmentIndex"(val) {
+        const totalSize = val * 256 * util.PIECE_SIZE
+        this.plot.plotSizeGB = Math.round(totalSize * 100 / util.GB ) / 100
+    }
+  },
   async mounted() {
     await this.client.validateApiStatus()
     await this.client.init() 
@@ -99,7 +105,7 @@ export default defineComponent({
     this.client.data.farming.events.on("newBlock", this.newBlock)
     this.client.data.farming.events.on("farmedBlock", this.farmBlock)
     this.global.status.state = "live"
-    this.global.status.message = lang.syncedMsg
+    this.global.status.message = lang.syncedMsg  
     this.checkNodeAndNetwork()
     this.checkFarmerAndPlot()
     return
@@ -125,12 +131,17 @@ export default defineComponent({
     async checkFarmerAndPlot() {
       this.plot.state = "verifying"
       this.plot.message = lang.verifyingPlot
-      const networkSegmentIndex = await this.client.getNetworkSegmentIndex()
+      let networkSegmentIndex = this.client.data.plot.lastSegmentIndex > 0 ? this.client.data.plot.lastSegmentIndex : await this.client.getNetworkSegmentIndex();
       let localSegmentIndex = 1;
       this.plot.state = "downloading"
+
+      const totalSize = this.clientData.plot.lastSegmentIndex * 256 * util.PIECE_SIZE
+      this.plot.plotSizeGB = Math.round(totalSize * 100 / util.GB ) / 100
+
       do {
         localSegmentIndex = await getLocalFarmerSegmentIndex()
         this.plot.message = "Archived " + localSegmentIndex + " of " + networkSegmentIndex + " Segments"
+        networkSegmentIndex = this.client.data.plot.lastSegmentIndex 
         await new Promise((resolve) => setTimeout(resolve, 2000))
       } while (localSegmentIndex < networkSegmentIndex)
       this.plot.message = lang.syncedMsg

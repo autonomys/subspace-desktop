@@ -80,6 +80,18 @@ export class Client {
                 this.data.farming.events.emit("farmedBlock", block)
               }
               this.data.farming.events.emit("newBlock", lastHeader.number.toNumber())
+
+              const checkNewSegment: Vec<any> = await this.localApi.query.system.events.at(lastHeader.hash);
+              checkNewSegment.forEach(async(record) => {
+                const { section, method, data } = record.event;
+                // Update last segment incoming and new size in GB. Can be improved.
+                if (section === "subspace" && method === "RootBlockStored") {
+                  const segmentIndex = data[0].asV0.segmentIndex.toNumber()
+                  this.data.plot.lastSegmentIndex = segmentIndex <= 1 ? 1 : segmentIndex
+                  const totalSize = segmentIndex * 256 * util.PIECE_SIZE
+                  this.data.plot.plotSizeGB = Math.round(totalSize * 100 / util.GB ) / 100
+                }
+              });
             })
         }
         process.on('beforeExit', this.do.blockSubscription.stopOnReload)

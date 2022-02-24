@@ -220,6 +220,11 @@ export default defineComponent({
     this.updateDriveStats()
     this.defaultPath = (await tauri.path.homeDir()) + ".subspace-farmer-demo"
     this.plotDirectory = this.defaultPath
+    await this.client.validateApiStatus()
+    // 
+    this.client.data.plot.lastSegmentIndex = await this.client.getNetworkSegmentIndex()
+    const totalSize = this.client.data.plot.lastSegmentIndex * 256 * util.PIECE_SIZE
+    this.allocatedGB = Math.round(totalSize * 100 / util.GB ) / 100
   },
   async created() {
     this.$watch(
