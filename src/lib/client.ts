@@ -77,7 +77,7 @@ export class Client {
                   this.data.farming.farmed
                 );
                 this.storeBlocks(this.data.farming.farmed)
-                // this.data.farming.events.emit("farmedBlock", block)
+                this.data.farming.events.emit("farmedBlock", block)
               }
               this.data.farming.events.emit("newBlock", lastHeader.number.toNumber())
             })
@@ -147,14 +147,16 @@ export class Client {
     let signedBlock;
     if (hash) signedBlock = await this.publicApi.rpc.chain.getBlock(hash);
     else signedBlock = await this.publicApi.rpc.chain.getBlock();       
-    if (signedBlock.block.header.number.toNumber() === 0) return 0;
+    if (signedBlock.block.header.number.toNumber() === 0) return 1;
 
     else {
       const allRecords: Vec<any> = await this.publicApi.query.system.events.at(signedBlock.block.header.parentHash);
       for (const record of allRecords) {
         const { section, method, data } = record.event;
-        if (section === "subspace" && method === "RootBlockStored")
-          return data[0].asV0.segmentIndex.toNumber()
+        if (section === "subspace" && method === "RootBlockStored"){
+          const segmentIndex = data[0].asV0.segmentIndex.toNumber()
+          return segmentIndex <= 1 ? 1 : segmentIndex
+        }
       }
       return await this.getNetworkSegmentIndex(signedBlock.block.header.parentHash)
     }
@@ -196,12 +198,12 @@ export class Client {
     this.data.farming.farmed = this.farmed
   }
 
-  public validateApiStatus(): void {
+  public async validateApiStatus(): Promise<void> {
     if(!this.publicApi.isConnected) 
       this.publicApi = new ApiPromise({ provider: new WsProvider(NETWORK_RPC), types: util.apiTypes });
     if(!this.localApi.isConnected) 
       this.localApi = new ApiPromise({ provider: new WsProvider(LOCAL_RPC), types: util.apiTypes });
-    return
+    await Promise.all([this.localApi.isReady, this.publicApi.isReady])
   }
 }
 
@@ -211,5 +213,5 @@ export async function startFarming(path: string): Promise<ClientIdentity> {
 
 export async function getLocalFarmerSegmentIndex(): Promise<number> {
   const plot_progress_tracker = (await tauri.invoke('plot_progress_tracker') as number) / 256 
-  return plot_progress_tracker - 1;
+  return plot_progress_tracker <= 1 ? 1 : plot_progress_tracker - 1;
 }

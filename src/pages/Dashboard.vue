@@ -75,7 +75,7 @@ export default defineComponent({
   },
   watch: {},
   async mounted() {
-    this.client.validateApiStatus()
+    await this.client.validateApiStatus()
     await this.client.init() 
     const config = await util.config.read()
     const valid = util.config.validate(config)
@@ -97,7 +97,7 @@ export default defineComponent({
     this.loading = false
     this.peerInterval = window.setInterval(this.getNetInfo, 10000)
     this.client.data.farming.events.on("newBlock", this.newBlock)
-    // this.client.data.farming.events.on("farmedBlock", this.farmBlock)
+    this.client.data.farming.events.on("farmedBlock", this.farmBlock)
     this.global.status.state = "live"
     this.global.status.message = lang.syncedMsg
     this.checkNodeAndNetwork()
@@ -108,8 +108,8 @@ export default defineComponent({
     this.unsubscribe()
     clearInterval(this.peerInterval)
     this.client.do.blockSubscription.stop()
-     this.client.data.farming.events.off("newBlock", this.newBlock)
-    // this.client.data.farming.events.off("farmedBlock", this.farmBlock)
+    this.client.data.farming.events.off("newBlock", this.newBlock)
+    this.client.data.farming.events.off("farmedBlock", this.farmBlock)
   },
   methods: {
     async getNetInfo() {
@@ -126,7 +126,8 @@ export default defineComponent({
       this.plot.state = "verifying"
       this.plot.message = lang.verifyingPlot
       const networkSegmentIndex = await this.client.getNetworkSegmentIndex()
-      let localSegmentIndex = 0;
+      let localSegmentIndex = 1;
+      this.plot.state = "downloading"
       do {
         localSegmentIndex = await getLocalFarmerSegmentIndex()
         this.plot.message = "Archived " + localSegmentIndex + " of " + networkSegmentIndex + " Segments"
