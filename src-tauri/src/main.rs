@@ -164,13 +164,14 @@ pub(crate) async fn farm(
     node_rpc_url: &str,
 ) -> Result<FarmerIdentity, anyhow::Error> {
     let identity = Identity::open_or_create(&base_directory)?;
-    let name = hex::encode(identity.public_key().to_bytes().as_slice()).to_owned();
+    let mut name = hex::encode(identity.public_key().to_bytes().as_slice()).to_owned();
+    name.truncate(32);
 
     // start the node, and take the public key as the name
     std::thread::spawn(move || run_node(name.as_str()));
 
-    tokio::time::sleep(tokio::time::Duration::from_secs(15)).await;
-    println!("15 seconds have elapsed");
+    tokio::time::sleep(tokio::time::Duration::from_secs(30)).await; // TODO: remove this somehow.
+
     info!("Opening plot");
     let plot_fut = tokio::task::spawn_blocking({
         let base_directory = base_directory.clone();
@@ -274,16 +275,21 @@ fn run_node(id: &str) -> Result<(), Error> {
     println!("Current Dir: {:?}", std::env::current_dir().unwrap());
     let cli = Cli::from_iter(args);
     cli.load_spec("./chain-spec-raw.json")?;
-    // println!("{:?}", cli);
+
     println!("opened the spec!");
 
     let runner = cli.create_runner(&cli.run.base)?;
+
     set_default_ss58_version(&runner.config().chain_spec);
+
+    println!("ss58 version set successfully");
     runner.run_node_until_exit(|config| async move {
         subspace_service::new_full::<subspace_runtime::RuntimeApi, ExecutorDispatch>(config, true)
             .await
             .map(|full| full.task_manager)
     })?;
+
+    println!("runner started successfully");
 
     Ok(())
 }
