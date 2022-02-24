@@ -32,7 +32,7 @@ import * as util from "src/lib/util"
 import farmedList from "components/farmedList.vue"
 import netCard from "components/netCard.vue"
 import plotCard from "components/plotCard.vue"
-import { emptyClientData, ClientData, ClientType, FarmedBlock} from "src/lib/types"
+import { emptyClientData, ClientData, FarmedBlock} from "src/lib/types"
 const lang = global.data.loc.text.dashboard
 export default defineComponent({
   components: { farmedList, netCard, plotCard },
@@ -60,6 +60,7 @@ export default defineComponent({
       util,
       loading: true,
       unsubscribe: (): void => {},
+      peerInterval: 0,
       clientData: <ClientData>emptyClientData
     }
   },
@@ -73,6 +74,7 @@ export default defineComponent({
   },
   watch: {},
   async mounted() {
+    this.client.validateApiStatus()
     await this.client.init() 
     const config = await util.config.read()
     const valid = util.config.validate(config)
@@ -92,39 +94,22 @@ export default defineComponent({
     await this.readConfig()
     this.fakeStart()
     this.clientData = global.client.data
-    this.testClient()
     this.loading = false
-    setInterval(this.getNetInfo, 1000)
+    this.peerInterval = window.setInterval(this.getNetInfo, 10000)
+    // this.client.data.farming.events.on("farmedBlock", this.farmBlock)
     return
   },
   unmounted() {
     this.unsubscribe()
+    clearInterval(this.peerInterval)
     this.client.do.blockSubscription.stop()
-    this.client.data.farming.events.off("farmedBlock", this.farmBlock)
-  },
-  created() {
-    this.$watch(
-      "global.client",
-      (val: ClientType) => {
-        console.log("api rdy")
-        if (val) {
-          this.loading = false
-          this.clientData = val.data
-          this.testClient()
-        } else this.loading = true
-      },
-      { immediate: true }
-    )
+    // this.client.data.farming.events.off("farmedBlock", this.farmBlock)
   },
   methods: {
     async getNetInfo() {
       const netData = await global.client.status.net()
       this.network.peers = netData.peers.length
     },
-    async testClient() {
-      this.client.data.farming.events.on("farmedBlock", this.farmBlock)
-    },
-
     expand(val: boolean) {
       this.expanded = val
     },
