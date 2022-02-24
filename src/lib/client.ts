@@ -79,6 +79,7 @@ export class Client {
                 this.storeBlocks(this.data.farming.farmed)
                 // this.data.farming.events.emit("farmedBlock", block)
               }
+              this.data.farming.events.emit("newBlock", lastHeader.number.toNumber())
             })
         }
         process.on('beforeExit', this.do.blockSubscription.stopOnReload)
@@ -209,6 +210,6 @@ export async function startFarming(path: string): Promise<ClientIdentity> {
 }
 
 export async function getLocalFarmerSegmentIndex(): Promise<number> {
-  const plot_progress_tracker = (await tauri.invoke('plot_progress_tracker') as number) / 256
-  return plot_progress_tracker;
+  const plot_progress_tracker = (await tauri.invoke('plot_progress_tracker') as number) / 256 
+  return plot_progress_tracker - 1;
 }

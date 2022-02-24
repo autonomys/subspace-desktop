@@ -8,9 +8,7 @@ q-card(bordered flat)
     .row.items-center.q-mt-sm
       .col-auto.q-mr-md(v-if="network.state == 'finished'")
         q-icon(color="green" name="done" size="40px")
-      .col-auto.q-mr-md(v-if="network.state == 'findingPeers'")
-        q-spinner-radio(color="grey" name="done" size="40px")
-      .col-auto.q-mr-md(v-if="network.state == 'starting'")
+      .col-auto.q-mr-md(v-if="network.state == 'verifying'")
         q-spinner-orbit(color="grey" name="done" size="40px")
       .col
         .text-weight-light Status:
