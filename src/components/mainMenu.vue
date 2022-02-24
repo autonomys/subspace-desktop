@@ -12,7 +12,8 @@ q-menu(auto-close)
         .col
           p.text-grey(v-if="!autoLaunch") {{ lang.autoStart }}
           p.text-black(v-else) {{ lang.autoStart }}
-    q-item(@click="reset()" clickable)
+    // TODO: Enable after stop farmer fix.
+    q-item(:disable="true" @click="reset()")
       .row.items-center
         .col-auto.q-mr-md
           q-icon(color="red" name="refresh")
