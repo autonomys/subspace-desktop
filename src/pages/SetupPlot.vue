@@ -54,7 +54,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
               )
                 q-tooltip.q-pa-sm
                   p {{ lang.availableSpace }}
-              .q-mt-sm {{ lang.allocated }}
+              .q-mt-sm {{ lang.allocated }} 
               q-input(
                 color="blue"
                 dense
@@ -63,9 +63,20 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
                 readonly
                 suffix="GB"
                 v-model="allocatedGB"
-              )
+              )(v-if="allocatedGB>0") 
                 q-tooltip.q-pa-sm
                   p {{ lang.allocatedSpace }}
+              q-input(
+                color="blue"
+                dense
+                input-class="pkdisplay"
+                outlined
+                readonly
+                prefix="Estimating plot size ..."
+              )(v-if="allocatedGB===0") 
+                q-tooltip.q-pa-sm
+                  p {{ lang.allocatedSpace }}
+          
         .col.q-pr-md
           .row.justify-center(style="transform: scale(-1, 1)")
             apexchart(
@@ -79,9 +90,6 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
       div {{ lang.hint }}
     .col.q-pr-md
       div {{ lang.hint2 }}
-    .col-auto.q-pr-md
-      div {{ lang.initial }}
-      div(style="font-size: 20px") {{ printEstimatedTime }}
     .col-expand
     .col-auto
       q-btn(
@@ -104,44 +112,11 @@ import * as path from "@tauri-apps/api/path"
 const tauri = { path }
 import { defineComponent } from "vue"
 import * as util from "src/lib/util"
+import { chartOptions, ChartDataType, StatsType } from "src/lib/types"
 import * as native from "src/lib/native"
 import { debounce } from "quasar"
 import { globalState as global } from "src/lib/global"
 const lang = global.data.loc.text.setupPlot
-
-import TimeAgo from "javascript-time-ago"
-import en from "javascript-time-ago/locale/en"
-TimeAgo.addDefaultLocale(en)
-const timeAgo = new TimeAgo("en-US")
-
-interface StatsType {
-  totalDiskSizeGB: number
-  safeAvailableGB: number
-  utilizedGB: number
-  freeGB: number
-}
-type ChartDataType = number[]
-import { ApexOptions } from "apexcharts"
-const chartOptions: ApexOptions = {
-  legend: { show: false },
-  colors: ["#E0E0E0", "#FFFFFF", "#2081F0"],
-  plotOptions: {
-    pie: {
-      startAngle: 0,
-      endAngle: 360,
-      expandOnClick: false,
-      donut: { size: "40px" }
-    }
-  },
-  dataLabels: { enabled: false },
-  labels: [],
-  states: {
-    active: { filter: { type: "none" } },
-    hover: { filter: { type: "none" } }
-  },
-  markers: { hover: { size: 0 } },
-  tooltip: { enabled: false }
-}
 
 export default defineComponent({
   data() {
@@ -149,21 +124,18 @@ export default defineComponent({
       revealKey: false,
       userConfirm: false,
       plotDirectory: "/Subspace/plots",
-      allocatedGB: 10,
+      allocatedGB: 0,
       validPath: true,
       defaultPath: "/",
       driveStats: <native.DriveStats>{ freeBytes: 0, totalBytes: 0 },
       lang,
       chartOptions,
-      client: global.client,
+      client: global.client
     }
   },
   computed: {
     chartData(): ChartDataType {
       return [this.stats.utilizedGB, this.stats.freeGB, this.allocatedGB]
-    },
-    printEstimatedTime(): string {
-      return timeAgo.format(Date.now() + this.plotTimeHr).split("in")[1]
     },
     plotTimeHr(): number {
       return util.plotTimeMsEstimate(this.allocatedGB)
@@ -221,10 +193,9 @@ export default defineComponent({
     this.defaultPath = (await tauri.path.homeDir()) + ".subspace-farmer-demo"
     this.plotDirectory = this.defaultPath
     await this.client.validateApiStatus()
-    // 
     this.client.data.plot.lastSegmentIndex = await this.client.getNetworkSegmentIndex()
     const totalSize = this.client.data.plot.lastSegmentIndex * 256 * util.PIECE_SIZE
-    this.allocatedGB = Math.round(totalSize * 100 / util.GB ) / 100
+    this.allocatedGB = Math.round((totalSize * 100) / util.GB) / 100
   },
   async created() {
     this.$watch(
@@ -248,7 +219,7 @@ export default defineComponent({
       await util.config.update({
         plot: {
           sizeGB: this.allocatedGB,
-          location: this.plotDirectory 
+          location: this.plotDirectory
         }
       })
       if (this.defaultPath != this.plotDirectory)

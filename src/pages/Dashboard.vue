@@ -131,17 +131,16 @@ export default defineComponent({
     async checkFarmerAndPlot() {
       this.plot.state = "verifying"
       this.plot.message = lang.verifyingPlot
-      let networkSegmentIndex = this.client.data.plot.lastSegmentIndex > 0 ? this.client.data.plot.lastSegmentIndex : await this.client.getNetworkSegmentIndex();
+      const networkSegmentIndex = this.client.data.plot.lastSegmentIndex > 0 ? this.client.data.plot.lastSegmentIndex : await this.client.getNetworkSegmentIndex();
       let localSegmentIndex = 1;
       this.plot.state = "downloading"
 
-      const totalSize = this.clientData.plot.lastSegmentIndex * 256 * util.PIECE_SIZE
+      const totalSize = networkSegmentIndex * 256 * util.PIECE_SIZE
       this.plot.plotSizeGB = Math.round(totalSize * 100 / util.GB ) / 100
 
       do {
         localSegmentIndex = await getLocalFarmerSegmentIndex()
         this.plot.message = "Archived " + localSegmentIndex + " of " + networkSegmentIndex + " Segments"
-        networkSegmentIndex = this.client.data.plot.lastSegmentIndex 
         await new Promise((resolve) => setTimeout(resolve, 2000))
       } while (localSegmentIndex < networkSegmentIndex)
       this.plot.message = lang.syncedMsg
@@ -167,7 +166,7 @@ export default defineComponent({
     },
     newBlock(blockNumber: number) {
       if(this.network.state==="finished")
-        this.network.message = "Network last " + lang.blockNum + " " + blockNumber
+        this.network.message = "Synced at " + lang.blockNum + " " + blockNumber.toLocaleString()
     },
     farmBlock(block: FarmedBlock) {
       Notify.create({

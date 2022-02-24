@@ -1,6 +1,7 @@
 import { Vec } from '@polkadot/types/codec'
 import { PeerInfo } from '@polkadot/types/interfaces/system'
 import mitt, { Emitter } from 'mitt'
+import { ApexOptions } from "apexcharts"
 
 export interface FarmedBlock {
   author: string
@@ -75,4 +76,34 @@ export const emptyClientData: ClientData = {
   plot: { details: {}, plotFile: '', plotSizeGB: 0, status: '', lastSegmentIndex: 0 },
   farming: { farmed: [], status: '', events: mitt() },
   network: { details: {}, peers: [], status: '' }
+}
+
+export const chartOptions: ApexOptions = {
+  legend: { show: false },
+  colors: ["#E0E0E0", "#FFFFFF", "#2081F0"],
+  plotOptions: {
+    pie: {
+      startAngle: 0,
+      endAngle: 360,
+      expandOnClick: false,
+      donut: { size: "40px" }
+    }
+  },
+  dataLabels: { enabled: false },
+  labels: [],
+  states: {
+    active: { filter: { type: "none" } },
+    hover: { filter: { type: "none" } }
+  },
+  markers: { hover: { size: 0 } },
+  tooltip: { enabled: false }
+}
+
+export type ChartDataType = number[]
+
+export interface StatsType {
+  totalDiskSizeGB: number
+  safeAvailableGB: number
+  utilizedGB: number
+  freeGB: number
 }
