@@ -8,10 +8,10 @@ q-card(bordered flat)
     .row.items-center.q-mt-sm
       .col-auto.q-mr-md(v-if="plot.state == 'finished'")
         q-icon(color="green" name="done" size="40px")
+      .col-auto.q-mr-md(v-if="plot.state == 'downloading'")
+        q-spinner-box(color="green" size="40px")
       .col-auto.q-mr-md(v-if="plot.state == 'verifying'")
         q-spinner-box(color="grey" size="40px")
-      .col-auto.q-mr-md(v-if="plot.state == 'starting'")
-        q-spinner-orbit(color="grey" size="40px")
       .col
         .text-weight-light {{ lang.status }}
         p {{ plot.message }}

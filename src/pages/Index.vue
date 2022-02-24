@@ -36,13 +36,11 @@ export default defineComponent({
       const { account, plot } = await config.read()
       if (account?.farmerPublicKey && plot?.location) {
         console.log(`NOT First Time RUN: Found Existing :: plot ${plot.location} :: farmerPublicKey ${account.farmerPublicKey}`)
-        // TODO: Show a node status for syncing new Blocks.
-        // TODO: Show a plot status for archived segments.  
         await startFarming(plot.location)
         this.$router.replace({ name: "dashboard" })
       }
     } catch (e) {
-      console.error("No existing plot and account. First Time RUN.", e)
+      console.log("No existing plot and account. First Time RUN.", e)
     }
   },
 })

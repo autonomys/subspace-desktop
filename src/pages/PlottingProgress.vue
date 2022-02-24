@@ -185,9 +185,12 @@ export default defineComponent({
         (this.allocatedGB - val).toFixed(2)
       )
       if (this.plottingData.finishedGB >= this.allocatedGB) {
-        this.plotFinished = true
         this.plottingData.finishedGB = this.allocatedGB
       }
+      // Avoid user to get stuck in plotting progress page. After node is fully synced plot is started, 
+      // allow to move dashboard. Only if viewedIntro === true
+      if(this.plottingData.finishedGB > 0)
+        this.plotFinished = true
     }
   },
   async mounted() {
@@ -223,7 +226,7 @@ export default defineComponent({
       clearInterval(timer)
     },
     async plottingProgress() {
-      this.client.validateApiStatus()
+      await this.client.validateApiStatus()
       // If the local node is Syncing. Must wait until done.
       let blockNumberData = await Promise.all([
         this.client.getLocalLastBlockNumber(),
@@ -248,12 +251,13 @@ export default defineComponent({
       this.plottingData.status = lang.fetchingPlot;      
       // Query from last block until find last RootBlockStored, then return last segmentIndex on the public network.
       const networkSegmentIndex = await this.client.getNetworkSegmentIndex()
-      let localSegmentIndex = 0;
+      let localSegmentIndex = 1;
       // TODO: Fix this timer, not updating correctly
       timer = window.setInterval(() => (this.elapsedms += 100), 100)
+      this.plotting = false
      
       // If the network is new and have no blocks. The plot and farm will take no time. This check is usefull for local development.
-      if (networkSegmentIndex === 0) {
+      if (networkSegmentIndex === 1) {
         this.plottingData.finishedGB = 10
         this.plottingData.status = lang.initSegments
       } else {

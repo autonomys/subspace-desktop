@@ -7,6 +7,7 @@ import { invoke } from '@tauri-apps/api/tauri'
 const tauri = { dialog, fs, path, invoke }
 import * as native from './native'
 import * as bcrypt from 'bcryptjs'
+import { relaunch } from "@tauri-apps/api/process";
 
 export const random = (min: number, max: number): number => Math.floor(Math.random() * (max - min)) + min;
 
@@ -37,14 +38,16 @@ export async function reset(): Promise<void> {
       // TODO: Stop farmer call.
       // Remove plot
       await tauri.fs.removeDir(plot.location,{recursive:true}).catch(console.error)
+      // Remove config, clearing farmerPublicKey
+      await config.clear()
+      // Remove farmedBlocks History.
+      LocalStorage.clear()
+      // TODO: remove relaunch after stopFarmer fix, temp solution to kill farmer.
+      relaunch()
     }
   } catch (error) {
     console.error(error)
   }
-  // Remove config, clearing farmerPublicKey
-  await config.clear()
-  // Remove farmedBlocks History.
-  LocalStorage.clear()
 }
 
 export interface ConfigFile {
