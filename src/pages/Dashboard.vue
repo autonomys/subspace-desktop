@@ -6,7 +6,7 @@ q-page.q-pl-lg.q-pr-lg.q-pt-md
   div(v-if="!loading")
     .row.q-gutter-md.q-pb-md(v-if="!expanded")
       .col
-        plotCard(:config="config" :plot="plot")
+        plotCard(:plot="plot")
       .col
         netCard(:config="config" :network="network")
     .row.q-gutter-md
@@ -32,8 +32,8 @@ import * as util from "src/lib/util"
 import farmedList from "components/farmedList.vue"
 import netCard from "components/netCard.vue"
 import plotCard from "components/plotCard.vue"
-import { emptyClientData, ClientData, FarmedBlock} from "src/lib/types"
-import {  getLocalFarmerSegmentIndex } from "src/lib/client"
+import { emptyClientData, ClientData, FarmedBlock } from "src/lib/types"
+import { getLocalFarmerSegmentIndex } from "src/lib/client"
 const lang = global.data.loc.text.dashboard
 export default defineComponent({
   components: { farmedList, netCard, plotCard },
@@ -49,7 +49,8 @@ export default defineComponent({
       },
       plot: {
         state: "starting",
-        message: lang.initializing
+        message: lang.initializing,
+        plotSizeGB: 0
       },
       global: global.data,
       client: global.client,
@@ -73,11 +74,17 @@ export default defineComponent({
       }, 0)
     }
   },
-  watch: {},
+  watch: {
+    "clientData.plot.lastSegmentIndex"(val) {
+      const totalSize = val * 256 * util.PIECE_SIZE
+      this.plot.plotSizeGB = Math.round((totalSize * 100) / util.GB) / 100
+    }
+  },
   async mounted() {
     await this.client.validateApiStatus()
-    await this.client.init() 
+    await this.client.init()
     const config = await util.config.read()
+    console.log("DASHBOARD CONFIG", config)
     const valid = util.config.validate(config)
     this.global.status.state = "loading"
     this.global.status.message = "loading..."
@@ -125,12 +132,24 @@ export default defineComponent({
     async checkFarmerAndPlot() {
       this.plot.state = "verifying"
       this.plot.message = lang.verifyingPlot
-      const networkSegmentIndex = await this.client.getNetworkSegmentIndex()
-      let localSegmentIndex = 1;
+      const networkSegmentIndex =
+        this.client.data.plot.lastSegmentIndex > 0
+          ? this.client.data.plot.lastSegmentIndex
+          : await this.client.getNetworkSegmentIndex()
+      let localSegmentIndex = 1
       this.plot.state = "downloading"
+
+      const totalSize = networkSegmentIndex * 256 * util.PIECE_SIZE
+      this.plot.plotSizeGB = Math.round((totalSize * 100) / util.GB) / 100
+
       do {
         localSegmentIndex = await getLocalFarmerSegmentIndex()
-        this.plot.message = "Archived " + localSegmentIndex + " of " + networkSegmentIndex + " Segments"
+        this.plot.message =
+          "Archived " +
+          localSegmentIndex +
+          " of " +
+          networkSegmentIndex +
+          " Segments"
         await new Promise((resolve) => setTimeout(resolve, 2000))
       } while (localSegmentIndex < networkSegmentIndex)
       this.plot.message = lang.syncedMsg
@@ -141,22 +160,28 @@ export default defineComponent({
       this.network.message = lang.verifyingNet
       let blockNumberData = await Promise.all([
         this.client.getLocalLastBlockNumber(),
-        this.client.getNetworkLastBlockNumber(),
+        this.client.getNetworkLastBlockNumber()
       ])
       do {
         blockNumberData = await Promise.all([
           this.client.getLocalLastBlockNumber(),
-          this.client.getNetworkLastBlockNumber(),
+          this.client.getNetworkLastBlockNumber()
         ])
-        this.network.message = "Syncing node  " + blockNumberData[0].toLocaleString() + " of " + blockNumberData[1].toLocaleString() +" Blocks"
+        this.network.message =
+          "Syncing node  " +
+          blockNumberData[0].toLocaleString() +
+          " of " +
+          blockNumberData[1].toLocaleString() +
+          " Blocks"
         await new Promise((resolve) => setTimeout(resolve, 1500))
       } while (blockNumberData[0] < blockNumberData[1])
       this.network.message = lang.synced
       this.network.state = "finished"
     },
     newBlock(blockNumber: number) {
-      if(this.network.state==="finished")
-        this.network.message = "Network last " + lang.blockNum + " " + blockNumber
+      if (this.network.state === "finished")
+        this.network.message =
+          "Synced at " + lang.blockNum + " " + blockNumber.toLocaleString()
     },
     farmBlock(block: FarmedBlock) {
       Notify.create({

@@ -33,7 +33,10 @@ export default defineComponent({
   },
   async mounted() {
     try {
+      // Disable reload, forward and back options from context menu. 
+      document.addEventListener('contextmenu', event => event.preventDefault());
       const { account, plot } = await config.read()
+      console.log("INDEX CONFIG", { account, plot })
       if (account?.farmerPublicKey && plot?.location) {
         console.log(`NOT First Time RUN: Found Existing :: plot ${plot.location} :: farmerPublicKey ${account.farmerPublicKey}`)
         await startFarming(plot.location)

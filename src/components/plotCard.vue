@@ -20,7 +20,7 @@ q-card(bordered flat)
         q-icon(color="black" name="storage" size="40px")
       .col
         .text-weight-light {{ lang.allocated }}
-        p {{ util.toFixed(config?.plot?.sizeGB, 2) }} GB
+        p {{ util.toFixed(plot.plotSizeGB, 2) }} GB
 </template>
 
 <script lang="ts" >
@@ -32,7 +32,6 @@ const lang = global.data.loc.text.dashboard
 export default defineComponent({
   props: {
     plot: { type: Object, required: true },
-    config: { type: Object, required: true }
   },
   data() {
     return { lang, util }

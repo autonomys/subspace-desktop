@@ -131,3 +131,6 @@ export const apiTypes = {
     solution: 'Solution'
   }
 }
+
+export const PIECE_SIZE = 4096;
+export const GB = 1024 * 1024 * 1024;

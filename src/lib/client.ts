@@ -8,14 +8,14 @@ import * as process from 'process'
 import { ClientIdentity, emptyClientData, FarmedBlock, NetStatus } from './types'
 import { SubPreDigest } from './customTypes/types'
 import { invoke } from '@tauri-apps/api/tauri'
-import * as util from "src/lib/util"
+import * as util from 'src/lib/util'
 
 const tauri = { event, invoke }
 const SUNIT = 1000000000000000000
 
 // TODO: This const must be loaded from a .env or similar. 
-const NETWORK_RPC = "wss://farm-rpc.subspace.network"
-const LOCAL_RPC = "ws://localhost:9944"
+const NETWORK_RPC = 'wss://farm-rpc.subspace.network'
+const LOCAL_RPC = 'ws://localhost:9944'
 
 export class Client {
   protected publicApi: ApiPromise = new ApiPromise({ provider: new WsProvider(NETWORK_RPC), types: util.apiTypes });
@@ -25,7 +25,7 @@ export class Client {
   protected unsubscribe: event.UnlistenFn = () => { };
   data = reactive(emptyClientData);
   protected clientStarted = false;
-  protected mnemonic = "";
+  protected mnemonic = '';
 
   status = {
     farming: (): void => { }, // TODO return some farming status info
@@ -53,16 +53,16 @@ export class Client {
                 (log) => log.isPreRuntime && log.asPreRuntime[0].toString() === 'SUB_'
               );
               const { solution }: SubPreDigest = this.localApi.registry.createType('SubPreDigest', preRuntimes[0].asPreRuntime[1]);
-              console.log("New Block:", lastHeader.number.toNumber(), "Farmed by me:", solution.public_key.eq(farmerPublicKey)?"YES":"NO")
+              console.log('New Block:', lastHeader.number.toNumber(), 'Farmed by me:', solution.public_key.eq(farmerPublicKey)?'YES':'NO')
               if (solution.public_key.eq(farmerPublicKey)) {
                 let blockReward = 0;
                 const allRecords: Vec<any> = await this.localApi.query.system.events.at(lastHeader.hash);
                 allRecords.forEach((record) => {
                   const { section, method, data } = record.event;
-                  if (section === "rewards" && method === "BlockReward")
+                  if (section === 'rewards' && method === 'BlockReward')
                     blockReward = data[1] / SUNIT;
-                  if (section === "transactionFees")
-                    console.log("transactionFees event::", section, method, data);
+                  if (section === 'transactionFees')
+                    console.log('transactionFees event::', section, method, data);
                 });
                 const block: FarmedBlock = {
                   author: solution.public_key.toString(),
@@ -77,9 +77,9 @@ export class Client {
                   this.data.farming.farmed
                 );
                 this.storeBlocks(this.data.farming.farmed)
-                this.data.farming.events.emit("farmedBlock", block)
+                this.data.farming.events.emit('farmedBlock', block)
               }
-              this.data.farming.events.emit("newBlock", lastHeader.number.toNumber())
+              this.data.farming.events.emit('newBlock', lastHeader.number.toNumber())
             })
         }
         process.on('beforeExit', this.do.blockSubscription.stopOnReload)
@@ -126,7 +126,7 @@ export class Client {
   }
 
   public clearMnemonic(): void {
-    this.mnemonic = "";
+    this.mnemonic = '';
   }
 
   public getMnemonic(): string {
@@ -146,14 +146,14 @@ export class Client {
   public async getNetworkSegmentIndex(hash?: Hash): Promise<number> {
     let signedBlock;
     if (hash) signedBlock = await this.publicApi.rpc.chain.getBlock(hash);
-    else signedBlock = await this.publicApi.rpc.chain.getBlock();       
+    else signedBlock = await this.publicApi.rpc.chain.getBlock();
     if (signedBlock.block.header.number.toNumber() === 0) return 1;
 
     else {
       const allRecords: Vec<any> = await this.publicApi.query.system.events.at(signedBlock.block.header.parentHash);
       for (const record of allRecords) {
         const { section, method, data } = record.event;
-        if (section === "subspace" && method === "RootBlockStored"){
+        if (section === 'subspace' && method === 'RootBlockStored'){
           const segmentIndex = data[0].asV0.segmentIndex.toNumber()
           return segmentIndex <= 1 ? 1 : segmentIndex
         }

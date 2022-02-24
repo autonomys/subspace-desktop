@@ -15,7 +15,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
             outlined
             readonly
             v-model="plotDirectory"
-          ) 
+          )
       .row.items-center.q-gutter-md
         .col.relative-position
           q-linear-progress.rounded-borders(
@@ -103,7 +103,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
         icon-right="play_arrow"
         outline
         size="lg"
-        :disable="!plotFinished"
+        :disable="!farmStarted"
       )
     .col-auto(v-else)
       q-btn(
@@ -142,6 +142,8 @@ export default defineComponent({
       viewedIntro: false,
       lang,
       plotFinished: false,
+      farmStarted: false,
+      localSegment: 0,
       plotDirectory: "",
       allocatedGB: 0
     }
@@ -154,7 +156,8 @@ export default defineComponent({
     },
     remainingTime(): number {
       return util.toFixed(
-        ((this.plotTimeEstimate - this.elapsedTime) / this.progresspct) * 2,
+        (this.elapsedms * this.client.data.plot.lastSegmentIndex) /
+          this.localSegment,
         2
       )
     },
@@ -187,10 +190,9 @@ export default defineComponent({
       if (this.plottingData.finishedGB >= this.allocatedGB) {
         this.plottingData.finishedGB = this.allocatedGB
       }
-      // Avoid user to get stuck in plotting progress page. After node is fully synced plot is started, 
+      // Avoid user to get stuck in plotting progress page. After node is fully synced plot is started,
       // allow to move dashboard. Only if viewedIntro === true
-      if(this.plottingData.finishedGB > 0)
-        this.plotFinished = true
+      if (this.plottingData.finishedGB > 0) this.farmStarted = true
     }
   },
   async mounted() {
@@ -203,8 +205,7 @@ export default defineComponent({
   methods: {
     async getPlotConfig() {
       const config = await util.config.read()
-      console.log(config)
-
+      console.log("PLOTTING PROGRESS CONFIG", config)
       if (!config.plot || !config.plot.sizeGB || !config.plot.location) {
         const modal = util.config.showErrorModal()
         modal.onOk(async () => {
@@ -213,7 +214,6 @@ export default defineComponent({
         })
         return
       }
-      console.log(config)
       this.allocatedGB = config.plot.sizeGB
       this.plotDirectory = config.plot.location
     },
@@ -237,25 +237,24 @@ export default defineComponent({
           this.client.getLocalLastBlockNumber(),
           this.client.getNetworkLastBlockNumber(),
         ])
-        this.plottingData.status = "Syncing node  " + blockNumberData[0].toLocaleString() + " of " + blockNumberData[1].toLocaleString() +" Blocks"
+        this.plottingData.status = `Syncing node ${blockNumberData[0].toLocaleString()} of ${blockNumberData[1].toLocaleString()} Blocks`
         await new Promise((resolve) => setTimeout(resolve, 1500))
       } while (blockNumberData[0] < blockNumberData[1])
-      
+
       this.plottingData.status = lang.startingFarmer
-      // After local node is fully Synced, the farmer will be able to actualy plot and farm. 
+      // After local node is fully Synced, the farmer will be able to actualy plot and farm.
       const { publicKey, mnemonic } = await startFarming(this.plotDirectory)
- 
+
       if (publicKey && mnemonic) {
         await this.client.init(publicKey, mnemonic)
       }
-      this.plottingData.status = lang.fetchingPlot;      
+      this.plottingData.status = lang.fetchingPlot
       // Query from last block until find last RootBlockStored, then return last segmentIndex on the public network.
-      const networkSegmentIndex = await this.client.getNetworkSegmentIndex()
-      let localSegmentIndex = 1;
-      // TODO: Fix this timer, not updating correctly
-      timer = window.setInterval(() => (this.elapsedms += 100), 100)
+      let networkSegmentIndex = this.client.data.plot.lastSegmentIndex > 0 ? this.client.data.plot.lastSegmentIndex : await this.client.getNetworkSegmentIndex()
+      let localSegmentIndex = 1
+      timer = window.setInterval(() => (this.elapsedms += 1000), 1000)
       this.plotting = false
-     
+
       // If the network is new and have no blocks. The plot and farm will take no time. This check is usefull for local development.
       if (networkSegmentIndex === 1) {
         this.plottingData.finishedGB = 10
@@ -266,8 +265,10 @@ export default defineComponent({
           // At this point the farmer is already running and also plotting.
           // Block subs are ON and we are validating and storing farmed blocks.
           localSegmentIndex = await getLocalFarmerSegmentIndex()
+          this.localSegment = localSegmentIndex
           this.plottingData.finishedGB = (localSegmentIndex * 10) / networkSegmentIndex
-          this.plottingData.status = "Archived " + localSegmentIndex + " of " + networkSegmentIndex + " Segments"
+          this.plottingData.status = `Archived ${localSegmentIndex} of ${networkSegmentIndex} Segments`
+          networkSegmentIndex = this.client.data.plot.lastSegmentIndex
           await new Promise((resolve) => setTimeout(resolve, 2000))
           // But we wait to get fully plotted. Afgter this the user can click next and go to dashboard.
         } while (localSegmentIndex < networkSegmentIndex)
