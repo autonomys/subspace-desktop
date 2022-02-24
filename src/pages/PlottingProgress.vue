@@ -125,7 +125,6 @@ import introModal from "components/introModal.vue"
 import TimeAgo from "javascript-time-ago"
 import en from "javascript-time-ago/locale/en"
 import { startFarming, getLocalFarmerSegmentIndex } from "src/lib/client"
-import { LocalStorage } from "quasar"
 TimeAgo.addLocale(en)
 let timer: number
 
@@ -242,16 +241,12 @@ export default defineComponent({
       // After local node is fully Synced, the farmer will be able to actualy plot and farm. 
       const { publicKey, mnemonic } = await startFarming(this.plotDirectory.replace("/subspace.plot", ""))
  
-      // When farmer start, temporal mnemonic storage, when user accept on modal that mnemonic was backed up. We remove it from local storage
-      // Check SaveKeys.vue.
       if (publicKey && mnemonic) {
-        // TODO: Fully remove LocalStorage. Find a secure way to pass mnemonic to SaveKeys modal.
-        LocalStorage.set("mnemonic", mnemonic)
-        await this.client.init(publicKey)
+        await this.client.init(publicKey, mnemonic)
       }
       this.plottingData.status = lang.fetchingPlot;      
       // Query from last block until find last RootBlockStored, then return last segmentIndex on the public network.
-      let networkSegmentIndex = await this.client.getNetworkSegmentIndex()
+      const networkSegmentIndex = await this.client.getNetworkSegmentIndex()
       let localSegmentIndex = 0;
       // TODO: Fix this timer, not updating correctly
       timer = window.setInterval(() => (this.elapsedms += 100), 100)
