@@ -40,7 +40,9 @@
     "availableSpace": "How much free space there are in the disk.",
     "utilizedSpace": "How much space is currently being used.",
     "allocatedSpace": "Space to be shared with Subspace Protocol.",
+    "estimatingSpace": "Estimating plot size from network ...",
     "plotsDirectory": "Plots Directory"
+    
   },
   "plottingProgress": {
     "startingFarmer": "Starting the farmer ...",
