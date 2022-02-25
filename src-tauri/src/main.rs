@@ -166,7 +166,7 @@ async fn main() -> Result<()> {
 
 pub(crate) async fn init_node(base_directory: PathBuf) -> Result<(), anyhow::Error> {
     let identity = Identity::open_or_create(&base_directory)?;
-    let mut name = hex::encode(identity.public_key().to_bytes().as_slice()).to_owned();
+    let mut name = hex::encode(identity.public_key().to_bytes().as_slice());
     name.truncate(32);
 
     // start the node, and take the public key as the name parameter
