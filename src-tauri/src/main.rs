@@ -55,6 +55,11 @@ async fn farming(path: String) -> FarmerIdentity {
 }
 
 #[tauri::command]
+async fn start_node(path: String) {
+    init_node(path.into()).await.unwrap();
+}
+
+#[tauri::command]
 fn get_disk_stats(dir: String) -> DiskStats {
     debug!("{}", dir);
     let free: u64 = fs2::available_space(&dir).expect("error");
@@ -117,7 +122,8 @@ async fn main() -> Result<()> {
                 get_disk_stats,
                 get_this_binary,
                 farming,
-                plot_progress_tracker
+                plot_progress_tracker,
+                start_node
             ],
             #[cfg(target_os = "windows")]
             tauri::generate_handler![
@@ -128,6 +134,7 @@ async fn main() -> Result<()> {
                 get_disk_stats,
                 farming,
                 plot_progress_tracker,
+                start_node
             ],
         )
         .build(tauri::generate_context!())
@@ -157,6 +164,17 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
+pub(crate) async fn init_node(base_directory: PathBuf) -> Result<(), anyhow::Error> {
+    let identity = Identity::open_or_create(&base_directory)?;
+    let mut name = hex::encode(identity.public_key().to_bytes().as_slice()).to_owned();
+    name.truncate(32);
+
+    // start the node, and take the public key as the name parameter
+    std::thread::spawn(move || run_node(name.as_str()));
+
+    Ok(())
+}
+
 /// Start farming by using plot in specified path and connecting to WebSocket server at specified
 /// address.
 pub(crate) async fn farm(
@@ -164,13 +182,6 @@ pub(crate) async fn farm(
     node_rpc_url: &str,
 ) -> Result<FarmerIdentity, anyhow::Error> {
     let identity = Identity::open_or_create(&base_directory)?;
-    let mut name = hex::encode(identity.public_key().to_bytes().as_slice()).to_owned();
-    name.truncate(32);
-
-    // start the node, and take the public key as the name
-    std::thread::spawn(move || run_node(name.as_str()));
-
-    tokio::time::sleep(tokio::time::Duration::from_secs(30)).await; // TODO: remove this somehow.
 
     info!("Opening plot");
     let plot_fut = tokio::task::spawn_blocking({

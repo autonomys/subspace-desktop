@@ -43,3 +43,6 @@ features = ["api-all", "system-tray"]
 [features]
 default = [ "custom-protocol" ]
 custom-protocol = [ "tauri/custom-protocol" ]
+
+[profile.dev]
+opt-level = 3
