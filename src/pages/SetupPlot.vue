@@ -187,6 +187,8 @@ export default defineComponent({
     }
   },
   async mounted() {
+    const config = await util.config.read()
+    console.log("SETUP PLOT CONFIG", config)
     const homeDir = await tauri.path.homeDir()
     this.plotDirectory = homeDir
     this.updateDriveStats()

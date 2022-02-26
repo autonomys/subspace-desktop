@@ -205,8 +205,7 @@ export default defineComponent({
   methods: {
     async getPlotConfig() {
       const config = await util.config.read()
-      console.log(config)
-
+      console.log("PLOTTING PROGRESS CONFIG", config)
       if (!config.plot || !config.plot.sizeGB || !config.plot.location) {
         const modal = util.config.showErrorModal()
         modal.onOk(async () => {
@@ -215,7 +214,6 @@ export default defineComponent({
         })
         return
       }
-      console.log(config)
       this.allocatedGB = config.plot.sizeGB
       this.plotDirectory = config.plot.location
     },

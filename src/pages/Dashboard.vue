@@ -84,6 +84,7 @@ export default defineComponent({
     await this.client.validateApiStatus()
     await this.client.init()
     const config = await util.config.read()
+    console.log("DASHBOARD CONFIG", config)
     const valid = util.config.validate(config)
     this.global.status.state = "loading"
     this.global.status.message = "loading..."
