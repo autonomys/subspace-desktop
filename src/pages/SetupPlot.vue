@@ -63,7 +63,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
                 readonly
                 suffix="GB"
                 v-model="allocatedGB"
-              )(v-if="allocatedGB>0") 
+                v-if="allocatedGB>0") 
                 q-tooltip.q-pa-sm
                   p {{ lang.allocatedSpace }}
               q-input(
@@ -73,7 +73,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
                 outlined
                 readonly
                 prefix="Estimating plot size ..."
-              )(v-if="allocatedGB===0") 
+                v-if="allocatedGB===0") 
                 q-tooltip.q-pa-sm
                   p {{ lang.estimatingSpace }}
           
