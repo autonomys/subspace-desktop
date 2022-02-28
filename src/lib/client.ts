@@ -218,6 +218,6 @@ export async function getLocalFarmerSegmentIndex(): Promise<number> {
   return plot_progress_tracker <= 1 ? 1 : plot_progress_tracker - 1;
 }
 
-export async function startNode(path: string): Promise<any> {
+export async function startNode(path: string): Promise<void> {
   return await tauri.invoke("start_node", { path })
 }

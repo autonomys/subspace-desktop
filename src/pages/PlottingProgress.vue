@@ -105,6 +105,8 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
         size="lg"
         :disable="!farmStarted"
       )
+      q-tooltip.q-pa-md(v-if="!canContinue")
+        p.q-mb-lg {{ lang.waitNodeSync }}
     .col-auto(v-else)
       q-btn(
         :label="lang.next"
@@ -114,6 +116,9 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
         outline
         size="lg"
       )
+      q-tooltip.q-pa-md(v-if="canContinue")
+        p.q-mb-lg {{ lang.canStartFarm }}
+
 </template>
 
 <script lang="ts">
@@ -143,7 +148,8 @@ export default defineComponent({
       lang,
       plotFinished: false,
       farmStarted: false,
-      localSegment: 0,
+      lastLocalSegmentIndex: 0,
+      lastNetSegmentIndex:0,
       plotDirectory: "",
       allocatedGB: 0
     }
@@ -156,8 +162,8 @@ export default defineComponent({
     },
     remainingTime(): number {
       return util.toFixed(
-        (this.elapsedms * this.client.data.plot.lastSegmentIndex) /
-          this.localSegment,
+        (this.elapsedms * this.lastNetSegmentIndex) /
+          this.lastLocalSegmentIndex,
         2
       )
     },
@@ -249,38 +255,33 @@ export default defineComponent({
         await new Promise((resolve) => setTimeout(resolve, 1500))
       } while (blockNumberData[0] < blockNumberData[1])
 
-      this.plottingData.status = lang.startingFarmer
       // After local node is fully Synced, the farmer will be able to actualy plot and farm.
+      this.plottingData.status = lang.startingFarmer
       const { publicKey, mnemonic } = await startFarming(this.plotDirectory)
 
       if (publicKey && mnemonic) {
         await this.client.init(publicKey, mnemonic)
       }
       this.plottingData.status = lang.fetchingPlot
-      // Query from last block until find last RootBlockStored, then return last segmentIndex on the public network.
-      let networkSegmentIndex = this.client.data.plot.lastSegmentIndex > 0 ? this.client.data.plot.lastSegmentIndex : await this.client.getNetworkSegmentIndex()
-      let localSegmentIndex = 1
       timer = window.setInterval(() => (this.elapsedms += 1000), 1000)
+
+      const { utilCache } = await util.config.read()
+      let lastNetSegmentIndex =  utilCache?.lastNetSegmentIndex || await this.client.getNetworkSegmentIndex()
+      let lastLocalSegmentIndex = await getLocalFarmerSegmentIndex()
+
+      this.lastLocalSegmentIndex = lastLocalSegmentIndex
+      this.lastNetSegmentIndex = lastNetSegmentIndex
+
       this.plotting = false
 
-      // If the network is new and have no blocks. The plot and farm will take no time. This check is usefull for local development.
-      if (networkSegmentIndex === 1) {
-        this.plottingData.finishedGB = 10
-        this.plottingData.status = lang.initSegments
-      } else {
-        // Otherwise, if network have blocks, validate and show plotting progress and archived segments.
-        do {
-          // At this point the farmer is already running and also plotting.
-          // Block subs are ON and we are validating and storing farmed blocks.
-          localSegmentIndex = await getLocalFarmerSegmentIndex()
-          this.localSegment = localSegmentIndex
-          this.plottingData.finishedGB = (localSegmentIndex * 10) / networkSegmentIndex
-          this.plottingData.status = `Archived ${localSegmentIndex} of ${networkSegmentIndex} Segments`
-          networkSegmentIndex = this.client.data.plot.lastSegmentIndex
-          await new Promise((resolve) => setTimeout(resolve, 2000))
-          // But we wait to get fully plotted. Afgter this the user can click next and go to dashboard.
-        } while (localSegmentIndex < networkSegmentIndex)
-      }
+      do {
+        lastLocalSegmentIndex = await getLocalFarmerSegmentIndex()
+        this.lastLocalSegmentIndex = lastLocalSegmentIndex
+        this.plottingData.finishedGB = (lastLocalSegmentIndex * 10) / lastNetSegmentIndex
+        this.plottingData.status = `Archived ${lastLocalSegmentIndex} of ${lastNetSegmentIndex} Segments`
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+      } while (lastLocalSegmentIndex < lastNetSegmentIndex)
+
       this.pausePlotting()
     },
     async viewIntro() {

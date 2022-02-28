@@ -195,9 +195,15 @@ export default defineComponent({
     this.plotDirectory = this.defaultPath
     try {
       await this.client.validateApiStatus(true, false)
-      this.client.data.plot.lastSegmentIndex = await this.client.getNetworkSegmentIndex()
-      const totalSize = this.client.data.plot.lastSegmentIndex * 256 * util.PIECE_SIZE
+      const lastNetSegmentIndex = await this.client.getNetworkSegmentIndex()
+      const totalSize = lastNetSegmentIndex * 256 * util.PIECE_SIZE
       this.allocatedGB = Math.round((totalSize * 100) / util.GB) / 100
+      await util.config.update({
+        utilCache: {
+          lastNetSegmentIndex,
+          allocatedGB: this.allocatedGB
+        }
+      })    
     } catch (e) {
       console.log("SETUP PLOT getNetworkSegmentIndex | ERROR", e)
     }
@@ -231,10 +237,7 @@ export default defineComponent({
       if (this.defaultPath != this.plotDirectory)
         await native.createDir(this.plotDirectory)
 
-      console.log("startNode", this.plotDirectory)
-      const nodeResult = await startNode(this.plotDirectory)
-      console.log("startNode Exit", nodeResult)
-      
+      await startNode(this.plotDirectory)      
       this.$router.replace({ name: "plottingProgress" })
     },
     async updateDriveStats() {
