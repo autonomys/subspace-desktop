@@ -7,6 +7,7 @@ import { invoke } from '@tauri-apps/api/tauri'
 const tauri = { dialog, fs, path, invoke }
 import * as native from './native'
 import * as bcrypt from 'bcryptjs'
+import { relaunch } from "@tauri-apps/api/process";
 
 export const random = (min: number, max: number): number => Math.floor(Math.random() * (max - min)) + min;
 
@@ -32,21 +33,28 @@ export function plotTimeMsEstimate(gb: number): number {
 
 export async function reset(): Promise<void> {
   try {
-    const configData = await config.read()
-    if (configData?.plot?.location) await tauri.fs.removeFile(configData.plot.location).catch(console.error)
-    LocalStorage.clear()
+    const { plot } = await config.read()
+    if (plot?.location) {
+      // TODO: Stop farmer call.
+      // Remove plot
+      await tauri.fs.removeDir(plot.location,{recursive:true}).catch(console.error)
+      // Remove config, clearing farmerPublicKey
+      await config.clear()
+      // Remove farmedBlocks History.
+      LocalStorage.clear()
+      // TODO: remove relaunch after stopFarmer fix, temp solution to kill farmer.
+      relaunch()
+    }
   } catch (error) {
     console.error(error)
   }
-
-  config.clear()
 }
 
 export interface ConfigFile {
   [index: string]: any
-  plot?: { sizeGB?: number, location?: string }, account?: { pubkey?: string, passHash?: string }
+  plot?: { sizeGB?: number, location?: string }, account?: { farmerPublicKey?: string, passHash?: string }
 }
-const emptyConfig: ConfigFile = { plot: { sizeGB: 0, location: "" }, account: { pubkey: "", passHash: "" } }
+const emptyConfig: ConfigFile = { plot: { sizeGB: 0, location: "" }, account: { farmerPublicKey: "", passHash: "" } }
 export const config = {
   validate(config: ConfigFile): boolean {
     const acctValid = config.account ? true : false
@@ -123,3 +131,6 @@ export const apiTypes = {
     solution: 'Solution'
   }
 }
+
+export const PIECE_SIZE = 4096;
+export const GB = 1024 * 1024 * 1024;

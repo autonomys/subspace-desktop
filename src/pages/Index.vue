@@ -32,14 +32,19 @@ export default defineComponent({
     return { lang }
   },
   async mounted() {
-    const configData = await config.read()
-    // TODO: validate this redirection.
-    // Show plotting update status on PlottingProgress or Dashboard.
-    if(configData?.account && configData?.plot?.location){
-      await startFarming(configData?.plot?.location.replace("/subspace.plot", ""))
-      this.$router.replace({ name: "dashboard" })
+    try {
+      // Disable reload, forward and back options from context menu. 
+      document.addEventListener('contextmenu', event => event.preventDefault());
+      const { account, plot } = await config.read()
+      console.log("INDEX CONFIG", { account, plot })
+      if (account?.farmerPublicKey && plot?.location) {
+        console.log(`NOT First Time RUN: Found Existing :: plot ${plot.location} :: farmerPublicKey ${account.farmerPublicKey}`)
+        await startFarming(plot.location)
+        this.$router.replace({ name: "dashboard" })
+      }
+    } catch (e) {
+      console.log("No existing plot and account. First Time RUN.", e)
     }
   },
-  methods: {}
 })
 </script>

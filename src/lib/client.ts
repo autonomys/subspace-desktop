@@ -8,14 +8,14 @@ import * as process from 'process'
 import { ClientIdentity, emptyClientData, FarmedBlock, NetStatus } from './types'
 import { SubPreDigest } from './customTypes/types'
 import { invoke } from '@tauri-apps/api/tauri'
-import * as util from "src/lib/util"
+import * as util from 'src/lib/util'
 
 const tauri = { event, invoke }
 const SUNIT = 1000000000000000000
 
 // TODO: This const must be loaded from a .env or similar. 
-const NETWORK_RPC = "wss://farm-rpc.subspace.network"
-const LOCAL_RPC = "ws://localhost:9944"
+const NETWORK_RPC = 'wss://farm-rpc.subspace.network'
+const LOCAL_RPC = 'ws://localhost:9944'
 
 export class Client {
   protected publicApi: ApiPromise = new ApiPromise({ provider: new WsProvider(NETWORK_RPC), types: util.apiTypes });
@@ -25,7 +25,7 @@ export class Client {
   protected unsubscribe: event.UnlistenFn = () => { };
   data = reactive(emptyClientData);
   protected clientStarted = false;
-  protected mnemonic = "";
+  protected mnemonic = '';
 
   status = {
     farming: (): void => { }, // TODO return some farming status info
@@ -41,42 +41,47 @@ export class Client {
         this.stop()
       },
       start: async (): Promise<void> => {
-        const farmerPublicKey: AccountId32 = this.localApi.registry.createType('AccountId32', LocalStorage.getItem('farmerPublicKey'));
-        this.unsubscribe = await this.localApi.rpc.chain.subscribeNewHeads(
-          async (lastHeader) => {
-            const signedBlock = await this.localApi.rpc.chain.getBlock(
-              lastHeader.hash
-            );
-            const preRuntimes = signedBlock.block.header.digest.logs.filter(
-              (log) => log.isPreRuntime && log.asPreRuntime[0].toString() === 'SUB_'
-            );
-            const { solution }: SubPreDigest = this.localApi.registry.createType('SubPreDigest', preRuntimes[0].asPreRuntime[1]);
-
-            if (solution.public_key.toString() === farmerPublicKey?.toString()) {
-              let blockReward = 0;
-              const allRecords: Vec<any> = await this.localApi.query.system.events.at(lastHeader.hash);
-              allRecords.forEach((record) => {
-                const { section, method, data } = record.event;
-                if (section === "rewards" && method === "BlockReward")
-                  blockReward = data[1] / SUNIT;
-                if (section === "transactionFees")
-                  console.log("transactionFees event::", section, method, data);
-              });
-              const block: FarmedBlock = {
-                author: solution.public_key.toString(),
-                id: lastHeader.hash.toString(),
-                time: Date.now(),
-                transactions: 0,
-                blockNum: lastHeader.number.toNumber(),
-                blockReward,
-                feeReward: 0
-              };
-              this.data.farming.farmed = [block].concat(
-                this.data.farming.farmed
+        const { account } = await util.config.read()
+        if(account?.farmerPublicKey){
+          const farmerPublicKey: AccountId32 = this.localApi.registry.createType('AccountId32', account.farmerPublicKey);
+          this.unsubscribe = await this.localApi.rpc.chain.subscribeNewHeads(
+            async (lastHeader) => {
+              const signedBlock = await this.localApi.rpc.chain.getBlock(
+                lastHeader.hash
               );
-              this.storeBlocks(this.data.farming.farmed)
-            }
-          })
+              const preRuntimes = signedBlock.block.header.digest.logs.filter(
+                (log) => log.isPreRuntime && log.asPreRuntime[0].toString() === 'SUB_'
+              );
+              const { solution }: SubPreDigest = this.localApi.registry.createType('SubPreDigest', preRuntimes[0].asPreRuntime[1]);
+              console.log('New Block:', lastHeader.number.toNumber(), 'Farmed by me:', solution.public_key.eq(farmerPublicKey)?'YES':'NO')
+              if (solution.public_key.eq(farmerPublicKey)) {
+                let blockReward = 0;
+                const allRecords: Vec<any> = await this.localApi.query.system.events.at(lastHeader.hash);
+                allRecords.forEach((record) => {
+                  const { section, method, data } = record.event;
+                  if (section === 'rewards' && method === 'BlockReward')
+                    blockReward = data[1] / SUNIT;
+                  if (section === 'transactionFees')
+                    console.log('transactionFees event::', section, method, data);
+                });
+                const block: FarmedBlock = {
+                  author: solution.public_key.toString(),
+                  id: lastHeader.hash.toString(),
+                  time: Date.now(),
+                  transactions: 0,
+                  blockNum: lastHeader.number.toNumber(),
+                  blockReward,
+                  feeReward: 0
+                };
+                this.data.farming.farmed = [block].concat(
+                  this.data.farming.farmed
+                );
+                this.storeBlocks(this.data.farming.farmed)
+                this.data.farming.events.emit('farmedBlock', block)
+              }
+              this.data.farming.events.emit('newBlock', lastHeader.number.toNumber())
+            })
+        }
         process.on('beforeExit', this.do.blockSubscription.stopOnReload)
         window.addEventListener('unload', this.do.blockSubscription.stopOnReload)
         this.clearTauriDestroy = await tauri.event.once('tauri://destroyed', () => {
@@ -87,6 +92,9 @@ export class Client {
       stop: (): void => {
         console.log('block subscription stop triggered')
         this.unsubscribe()
+        this.clientStarted = false
+        this.localApi.disconnect()
+        this.publicApi.disconnect()
         try {
           this.clearTauriDestroy()
           this.storeBlocks(this.data.farming.farmed)
@@ -95,9 +103,6 @@ export class Client {
           console.error(error)
         }
       },
-      startSubcriptions(): void {
-        this.start()
-      }
     }
   }
   constructor() {
@@ -107,21 +112,21 @@ export class Client {
   // If the app is started for the second time, the client will be started from Dashboard page.
   public async init(farmerPublicKey?: string, mnemonic?: string): Promise<void> {
     if (!this.clientStarted) {
-      if (mnemonic) this.mnemonic = mnemonic;
-      if (farmerPublicKey) {
+      if (farmerPublicKey && mnemonic) {
+        const publicKey: AccountId32 = this.localApi.registry.createType('AccountId32', farmerPublicKey);
+        await util.config.update({ account: { farmerPublicKey: publicKey.toString() } })
         this.clearStoredBlocks()
-        LocalStorage.set("farmerPublicKey", farmerPublicKey)
-        util.config.update({ account: { pubkey: farmerPublicKey } })
+        this.mnemonic = mnemonic
       } else {
         this.loadStoredBlocks()
       }
-      this.do.blockSubscription.startSubcriptions()
+      this.do.blockSubscription.start()
       this.clientStarted = true;
     }
   }
 
   public clearMnemonic(): void {
-    this.mnemonic = "";
+    this.mnemonic = '';
   }
 
   public getMnemonic(): string {
@@ -142,14 +147,16 @@ export class Client {
     let signedBlock;
     if (hash) signedBlock = await this.publicApi.rpc.chain.getBlock(hash);
     else signedBlock = await this.publicApi.rpc.chain.getBlock();
-    if (signedBlock.block.header.number.toNumber() === 0) return 0;
+    if (signedBlock.block.header.number.toNumber() === 0) return 1;
 
     else {
       const allRecords: Vec<any> = await this.publicApi.query.system.events.at(signedBlock.block.header.parentHash);
       for (const record of allRecords) {
         const { section, method, data } = record.event;
-        if (section === "subspace" && method === "RootBlockStored")
-          return data[0].asV0.segmentIndex.toNumber()
+        if (section === 'subspace' && method === 'RootBlockStored'){
+          const segmentIndex = data[0].asV0.segmentIndex.toNumber()
+          return segmentIndex <= 1 ? 1 : segmentIndex
+        }
       }
       return await this.getNetworkSegmentIndex(signedBlock.block.header.parentHash)
     }
@@ -190,6 +197,14 @@ export class Client {
     this.farmed = this.getStoredBlocks();
     this.data.farming.farmed = this.farmed
   }
+
+  public async validateApiStatus(): Promise<void> {
+    if(!this.publicApi.isConnected) 
+      this.publicApi = new ApiPromise({ provider: new WsProvider(NETWORK_RPC), types: util.apiTypes });
+    if(!this.localApi.isConnected) 
+      this.localApi = new ApiPromise({ provider: new WsProvider(LOCAL_RPC), types: util.apiTypes });
+    await Promise.all([this.localApi.isReady, this.publicApi.isReady])
+  }
 }
 
 export async function startFarming(path: string): Promise<ClientIdentity> {
@@ -197,6 +212,6 @@ export async function startFarming(path: string): Promise<ClientIdentity> {
 }
 
 export async function getLocalFarmerSegmentIndex(): Promise<number> {
-  const plot_progress_tracker = (await tauri.invoke('plot_progress_tracker') as number) / 256
-  return plot_progress_tracker;
+  const plot_progress_tracker = (await tauri.invoke('plot_progress_tracker') as number) / 256 
+  return plot_progress_tracker <= 1 ? 1 : plot_progress_tracker - 1;
 }

@@ -40,7 +40,9 @@
     "availableSpace": "How much free space there are in the disk.",
     "utilizedSpace": "How much space is currently being used.",
     "allocatedSpace": "Space to be shared with Subspace Protocol.",
+    "estimatingSpace": "Requesting the plot size from the network.",
     "plotsDirectory": "Plots Directory"
+    
   },
   "plottingProgress": {
     "startingFarmer": "Starting the farmer ...",
@@ -67,11 +69,11 @@
     "initializing": "initializing...",
     "corrupt": "Config file is corrupted, resetting farmer...",
     "verifyingPlot": "Verifying plot data...",
+    "verifyingNet": "Verifying network data...",
     "plotActive": "Plot active",
-    "syncedMsg": "synced and farming",
+    "syncedMsg": "Synced and farming",
     "searchPeers": "Searching for peers...",
     "synced": "Synced and connected",
-    "farming": "synced and farming",
     "farmedBlock": "Farmed Block",
     "reward": "Reward",
     "farmedBlocks": "Farmed Blocks",

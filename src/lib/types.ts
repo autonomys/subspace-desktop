@@ -1,7 +1,7 @@
-import { ApiPromise } from '@polkadot/api'
 import { Vec } from '@polkadot/types/codec'
 import { PeerInfo } from '@polkadot/types/interfaces/system'
 import mitt, { Emitter } from 'mitt'
+import { ApexOptions } from "apexcharts"
 
 export interface FarmedBlock {
   author: string
@@ -39,8 +39,9 @@ export interface ClientNetwork {
 
 export interface ClientPlot {
   status: 'active' | 'verifying' | 'corrupted' | 'syncing' | string
-  plotSizeBytes: number // size of the plot file in Bytes
+  plotSizeGB: number // size of the plot file in GigaBytes
   plotFile: string // drive directory where the plot file is located
+  lastSegmentIndex: number
   details: {
     // additional information could be placed here
   }
@@ -72,18 +73,37 @@ export interface ClientIdentity {
 }
 
 export const emptyClientData: ClientData = {
-  plot: { details: {}, plotFile: '', plotSizeBytes: 0, status: '' },
+  plot: { details: {}, plotFile: '', plotSizeGB: 0, status: '', lastSegmentIndex: 0 },
   farming: { farmed: [], status: '', events: mitt() },
   network: { details: {}, peers: [], status: '' }
 }
 
-export interface ClientType {
-  api: ApiPromise | null
-  data: ClientData
-  getStatus: {
-    farming: () => void,
-    plot: () => void,
-    network: () => void
+export const chartOptions: ApexOptions = {
+  legend: { show: false },
+  colors: ["#E0E0E0", "#FFFFFF", "#2081F0"],
+  plotOptions: {
+    pie: {
+      startAngle: 0,
+      endAngle: 360,
+      expandOnClick: false,
+      donut: { size: "40px" }
+    }
   },
-  do?: { [index: string]: any }
+  dataLabels: { enabled: false },
+  labels: [],
+  states: {
+    active: { filter: { type: "none" } },
+    hover: { filter: { type: "none" } }
+  },
+  markers: { hover: { size: 0 } },
+  tooltip: { enabled: false }
+}
+
+export type ChartDataType = number[]
+
+export interface StatsType {
+  totalDiskSizeGB: number
+  safeAvailableGB: number
+  utilizedGB: number
+  freeGB: number
 }
