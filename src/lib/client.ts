@@ -198,11 +198,14 @@ export class Client {
   }
 
   public async validateApiStatus(pub:boolean, loc:boolean): Promise<void> {
-    if(pub && !this.publicApi.isConnected) 
+    if(pub && !this.publicApi.isConnected) {
       this.publicApi = new ApiPromise({ provider: new WsProvider(NETWORK_RPC), types: util.apiTypes });
-    if(loc && !this.localApi.isConnected) 
+      await this.publicApi.isReady
+    }
+    if(loc && !this.localApi.isConnected) {
       this.localApi = new ApiPromise({ provider: new WsProvider(LOCAL_RPC), types: util.apiTypes });
-    await Promise.all([this.localApi.isReady, this.publicApi.isReady])
+      await this.localApi.isReady
+    }
   }
 }
 

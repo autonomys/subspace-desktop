@@ -206,9 +206,7 @@ export default defineComponent({
     async getPlotConfig() {
       try {
         const config = await util.config.read()
-        const validConfig = util.config.validate(config)
         if (
-          !validConfig ||
           !config.plot ||
           !config.plot.sizeGB ||
           !config.plot.location

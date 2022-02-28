@@ -159,7 +159,7 @@ export default defineComponent({
       }
     },
     canContinue(): boolean {
-      return this.allocatedGB >= 1 && this.validPath
+      return this.allocatedGB > 0 && this.validPath
     },
     unsafeFree(): boolean {
       return this.stats.freeGB < 20
