@@ -15,7 +15,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
             outlined
             readonly
             v-model="plotDirectory"
-          ) 
+          )
       .row.items-center.q-gutter-md
         .col.relative-position
           q-linear-progress.rounded-borders(
@@ -190,7 +190,7 @@ export default defineComponent({
       this.plottingData.remainingGB = parseFloat(
         (this.plottingData.allocatedGB - val).toFixed(2)
       )
-      if (this.plottingData.finishedGB >= this.plottingData.allocatedGB) 
+      if (this.plottingData.finishedGB >= this.plottingData.allocatedGB)
         this.plottingData.finishedGB = this.plottingData.allocatedGB
     }
   },
@@ -252,11 +252,9 @@ export default defineComponent({
 
       // After local node is fully Synced, the farmer will be able to actualy plot and farm.
       this.plottingData.status = lang.startingFarmer
-      const { publicKey, mnemonic } = await startFarming(this.plotDirectory)
 
-      if (publicKey && mnemonic) {
-        await this.client.init(publicKey, mnemonic)
-      }
+      await startFarming(this.plotDirectory)
+
       this.plottingData.status = lang.fetchingPlot
       timer = window.setInterval(() => (this.elapsedms += 1000), 1000)
 

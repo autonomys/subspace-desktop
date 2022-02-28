@@ -129,7 +129,7 @@ export class Client {
   }
 
   public getMnemonic(): string {
-    return this.mnemonic 
+    return this.mnemonic
   }
 
   public async getNetworkLastBlockNumber(): Promise<number> {
@@ -141,11 +141,11 @@ export class Client {
     const signedBlock = await this.localApi.rpc.chain.getBlock();
     return signedBlock.block.header.number.toNumber()
   }
-  
+
   public async getNetworkSegmentIndex(hash?: Hash): Promise<number> {
     let signedBlock;
     if (hash) signedBlock = await this.publicApi.rpc.chain.getBlock(hash);
-    else signedBlock = await this.publicApi.rpc.chain.getBlock();       
+    else signedBlock = await this.publicApi.rpc.chain.getBlock();
     if (signedBlock.block.header.number.toNumber() === 0) return 1;
 
     else {
@@ -209,15 +209,15 @@ export class Client {
   }
 }
 
-export async function startFarming(path: string): Promise<ClientIdentity> {
+export async function startFarming(path: string): Promise<void> {
   return await tauri.invoke('farming', { path });
 }
 
 export async function getLocalFarmerSegmentIndex(): Promise<number> {
-  const plot_progress_tracker = (await tauri.invoke('plot_progress_tracker') as number) / 256 
+  const plot_progress_tracker = (await tauri.invoke('plot_progress_tracker') as number) / 256
   return plot_progress_tracker <= 1 ? 1 : plot_progress_tracker - 1;
 }
 
-export async function startNode(path: string): Promise<void> {
+export async function startNode(path: string): Promise<ClientIdentity> {
   return await tauri.invoke("start_node", { path })
 }

@@ -8,9 +8,10 @@ mod windows;
 
 #[macro_use]
 extern crate dotenv_codegen;
-use dotenv::dotenv;
+
 use anyhow::{anyhow, Result};
 use bip39::{Language, Mnemonic};
+use dotenv::dotenv;
 use log::{debug, info};
 use sc_cli::{ChainSpec, SubstrateCli};
 use sc_executor::NativeExecutionDispatch;
@@ -52,14 +53,13 @@ fn plot_progress_tracker() -> usize {
 }
 
 #[tauri::command]
-async fn farming(path: String) -> FarmerIdentity {
-    let farmer_identity = farm(path.into(), "ws://127.0.0.1:9944").await;
-    farmer_identity.unwrap()
+async fn farming(path: String) {
+    farm(path.into(), "ws://127.0.0.1:9944").await.unwrap();
 }
 
 #[tauri::command]
-async fn start_node(path: String) {
-    init_node(path.into()).await.unwrap();
+async fn start_node(path: String) -> FarmerIdentity {
+    init_node(path.into()).await.unwrap()
 }
 
 #[tauri::command]
@@ -167,9 +167,10 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-pub(crate) async fn init_node(base_directory: PathBuf) -> Result<(), anyhow::Error> {
+pub(crate) async fn init_node(base_directory: PathBuf) -> Result<FarmerIdentity, anyhow::Error> {
     let identity = Identity::open_or_create(&base_directory)?;
-    let mut name = hex::encode(identity.public_key().to_bytes().as_slice());
+    let public_key = identity.public_key().to_bytes();
+    let mut name = hex::encode(public_key.as_slice());
     name.truncate(32);
     // TODO: Could be a better way to pass this value to run_node.
     let base_path: String = base_directory.as_path().display().to_string();
@@ -177,15 +178,17 @@ pub(crate) async fn init_node(base_directory: PathBuf) -> Result<(), anyhow::Err
     // also send base-path to avoid using default node database directory.
     std::thread::spawn(move || run_node(name.as_str(), &base_path));
 
-    Ok(())
+    Ok(FarmerIdentity {
+        public_key: public_key,
+        mnemonic: Mnemonic::from_entropy(identity.entropy(), Language::English)
+            .unwrap()
+            .into_phrase(),
+    })
 }
 
 /// Start farming by using plot in specified path and connecting to WebSocket server at specified
 /// address.
-pub(crate) async fn farm(
-    base_directory: PathBuf,
-    node_rpc_url: &str,
-) -> Result<FarmerIdentity, anyhow::Error> {
+pub(crate) async fn farm(base_directory: PathBuf, node_rpc_url: &str) -> Result<()> {
     let identity = Identity::open_or_create(&base_directory)?;
 
     info!("Opening plot");
@@ -266,32 +269,35 @@ pub(crate) async fn farm(
         Ok(())
     });
 
-    Ok(FarmerIdentity {
-        public_key: identity.public_key().to_bytes(),
-        mnemonic: Mnemonic::from_entropy(identity.entropy(), Language::English)
-            .unwrap()
-            .into_phrase(),
-    })
+    Ok(())
 }
 
-fn run_node(id: &str, base_path:&String) -> Result<(), Error> {
+fn run_node(id: &str, base_path: &String) -> Result<(), Error> {
     dotenv().ok();
     let args = vec![
         "--",
-        "--chain", dotenv!("CHAIN_SPEC_FILE"),
-        "--wasm-execution", "compiled",
-        "--execution", "wasm",
-        "--bootnodes", dotenv!("BOOTNODE"),
-        "--rpc-cors", "all",
-        "--rpc-methods", "unsafe",
+        "--chain",
+        dotenv!("CHAIN_SPEC_FILE"),
+        "--wasm-execution",
+        "compiled",
+        "--execution",
+        "wasm",
+        "--bootnodes",
+        dotenv!("BOOTNODE"),
+        "--rpc-cors",
+        "all",
+        "--rpc-methods",
+        "unsafe",
         "--ws-external",
         "--validator",
-        "--telemetry-url", "wss://telemetry.polkadot.io/submit/ 1",
-        "--name", id,
-        "--base-path", base_path
+        "--telemetry-url",
+        "wss://telemetry.polkadot.io/submit/ 1",
+        "--name",
+        id,
+        "--base-path",
+        base_path,
     ];
     let cli = Cli::from_iter(args);
-
 
     let runner = cli.create_runner(&cli.run.base)?;
 

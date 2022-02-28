@@ -54,7 +54,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
               )
                 q-tooltip.q-pa-sm
                   p {{ lang.availableSpace }}
-              .q-mt-sm {{ lang.allocated }} 
+              .q-mt-sm {{ lang.allocated }}
                 q-spinner-orbit(color="black" size="12px" v-if="allocatedGB===0")
               q-input(
                 color="blue"
@@ -64,7 +64,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
                 readonly
                 suffix="GB"
                 v-model="allocatedGB"
-                v-if="allocatedGB>0") 
+                v-if="allocatedGB>0")
                 q-tooltip.q-pa-sm
                   p {{ lang.allocatedSpace }}
               q-input(
@@ -74,10 +74,10 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
                 outlined
                 readonly
                 prefix="Estimating plot size ..."
-                v-if="allocatedGB===0") 
+                v-if="allocatedGB===0")
                 q-tooltip.q-pa-sm
                   p {{ lang.estimatingSpace }}
-          
+
         .col.q-pr-md
           .row.justify-center(style="transform: scale(-1, 1)")
             apexchart(
@@ -204,7 +204,7 @@ export default defineComponent({
           lastNetSegmentIndex,
           allocatedGB: this.allocatedGB
         }
-      })    
+      })
     } catch (e) {
       console.log("SETUP PLOT getNetworkSegmentIndex | ERROR", e)
     }
@@ -232,13 +232,18 @@ export default defineComponent({
         plot: {
           sizeGB: this.allocatedGB,
           location: this.plotDirectory,
-          nodeLocation: this.plotDirectory 
+          nodeLocation: this.plotDirectory
         }
       })
       if (this.defaultPath != this.plotDirectory)
         await native.createDir(this.plotDirectory)
 
-      await startNode(this.plotDirectory)      
+      const { publicKey, mnemonic } = await startNode(this.plotDirectory)
+
+      if (publicKey && mnemonic) {
+        await this.client.init(publicKey, mnemonic)
+      }
+
       this.$router.replace({ name: "plottingProgress" })
     },
     async updateDriveStats() {
