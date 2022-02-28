@@ -179,7 +179,7 @@ pub(crate) async fn init_node(base_directory: PathBuf) -> Result<FarmerIdentity,
     std::thread::spawn(move || run_node(name.as_str(), &base_path));
 
     Ok(FarmerIdentity {
-        public_key: public_key,
+        public_key,
         mnemonic: Mnemonic::from_entropy(identity.entropy(), Language::English)
             .unwrap()
             .into_phrase(),
