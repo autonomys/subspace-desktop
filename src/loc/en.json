@@ -42,7 +42,6 @@
     "allocatedSpace": "Space to be shared with Subspace Protocol.",
     "estimatingSpace": "Requesting the plot size from the network.",
     "plotsDirectory": "Plots Directory"
-    
   },
   "plottingProgress": {
     "startingFarmer": "Starting the farmer ...",
@@ -51,8 +50,7 @@
     "infoDialog": "This is a one-time process to prepare this device as a Subspace farmer.",
     "plotsDirectory": "Plots Directory",
     "plotted": "Plotted",
-    "waitNodeSync": "Farmer will start after node is fully synced, please wait and don't close the app.",
-    "canStartFarm": "The plotting progresss will run on background, you can now continue and start farming.",
+    "waitPlotting": "Dashboard will be available after initial plotting is finished, please wait and don't close the app.",
     "elapsedTime": "Elapsed Time",
     "remainingTime": "Remaining Time",
     "hint": "Hint:",

@@ -105,8 +105,8 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
         size="lg"
         :disable="!farmStarted"
       )
-      q-tooltip.q-pa-md(v-if="farmStarted")
-        p.q-mb-lg {{ lang.canStartFarm }}
+      q-tooltip.q-pa-md(v-if="!farmStarted")
+        p.q-mb-lg {{ lang.waitPlotting }}
     .col-auto(v-else)
       q-btn(
         :label="lang.next"
@@ -115,10 +115,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
         icon-right="play_arrow"
         outline
         size="lg"
-        :disable="!farmStarted"
       )
-      q-tooltip.q-pa-md(v-if="!farmStarted")
-        p.q-mb-lg {{ lang.waitNodeSync }}
 </template>
 
 <script lang="ts">
