@@ -75,14 +75,14 @@ export default defineComponent({
     }
   },
   watch: {
-    "clientData.plot.lastSegmentIndex"(val) {
+    "clientData.plot.lastNetSegmentIndex"(val) {
       const totalSize = val * 256 * util.PIECE_SIZE
       this.plot.plotSizeGB = Math.round((totalSize * 100) / util.GB) / 100
     }
   },
   async mounted() {
-    await this.client.validateApiStatus(true, true)
     await this.client.init()
+    await this.client.validateApiStatus(true, true)
     const config = await util.config.read()
     console.log("DASHBOARD CONFIG", config)
     const valid = util.config.validate(config)
@@ -132,10 +132,7 @@ export default defineComponent({
     async checkFarmerAndPlot() {
       this.plot.state = "verifying"
       this.plot.message = lang.verifyingPlot
-      const networkSegmentIndex =
-        this.client.data.plot.lastSegmentIndex > 0
-          ? this.client.data.plot.lastSegmentIndex
-          : await this.client.getNetworkSegmentIndex()
+      const networkSegmentIndex = await this.client.getNetworkSegmentIndex()
       let localSegmentIndex = 1
       this.plot.state = "downloading"
 

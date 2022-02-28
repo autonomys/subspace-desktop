@@ -41,7 +41,6 @@ export interface ClientPlot {
   status: 'active' | 'verifying' | 'corrupted' | 'syncing' | string
   plotSizeGB: number // size of the plot file in GigaBytes
   plotFile: string // drive directory where the plot file is located
-  lastSegmentIndex: number
   details: {
     // additional information could be placed here
   }
@@ -73,7 +72,7 @@ export interface ClientIdentity {
 }
 
 export const emptyClientData: ClientData = {
-  plot: { details: {}, plotFile: '', plotSizeGB: 0, status: '', lastSegmentIndex: 0 },
+  plot: { details: {}, plotFile: '', plotSizeGB: 0, status: ''},
   farming: { farmed: [], status: '', events: mitt() },
   network: { details: {}, peers: [], status: '' }
 }

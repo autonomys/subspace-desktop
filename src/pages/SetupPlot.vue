@@ -55,6 +55,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
                 q-tooltip.q-pa-sm
                   p {{ lang.availableSpace }}
               .q-mt-sm {{ lang.allocated }} 
+                q-spinner-orbit(color="black" size="12px" v-if="allocatedGB===0")
               q-input(
                 color="blue"
                 dense
@@ -195,9 +196,15 @@ export default defineComponent({
     this.plotDirectory = this.defaultPath
     try {
       await this.client.validateApiStatus(true, false)
-      this.client.data.plot.lastSegmentIndex = await this.client.getNetworkSegmentIndex()
-      const totalSize = this.client.data.plot.lastSegmentIndex * 256 * util.PIECE_SIZE
+      const lastNetSegmentIndex = await this.client.getNetworkSegmentIndex()
+      const totalSize = lastNetSegmentIndex * 256 * util.PIECE_SIZE
       this.allocatedGB = Math.round((totalSize * 100) / util.GB) / 100
+      await util.config.update({
+        utilCache: {
+          lastNetSegmentIndex,
+          allocatedGB: this.allocatedGB
+        }
+      })    
     } catch (e) {
       console.log("SETUP PLOT getNetworkSegmentIndex | ERROR", e)
     }
@@ -231,10 +238,7 @@ export default defineComponent({
       if (this.defaultPath != this.plotDirectory)
         await native.createDir(this.plotDirectory)
 
-      console.log("startNode", this.plotDirectory)
-      const nodeResult = await startNode(this.plotDirectory)
-      console.log("startNode Exit", nodeResult)
-      
+      await startNode(this.plotDirectory)      
       this.$router.replace({ name: "plottingProgress" })
     },
     async updateDriveStats() {

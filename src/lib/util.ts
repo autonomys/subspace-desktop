@@ -52,11 +52,13 @@ export async function reset(): Promise<void> {
 export interface ConfigFile {
   [index: string]: any
   plot?: { sizeGB: number; location: string; nodeLocation: string }
-  account?: { farmerPublicKey?: string; passHash: string }
+  account?: { farmerPublicKey?: string; passHash: string },
+  utilCache?: { lastNetSegmentIndex: number; allocatedGB: number }
 }
 const emptyConfig: ConfigFile = {
   plot: { sizeGB: 0, location: "", nodeLocation: "" },
-  account: { farmerPublicKey: "", passHash: "" }
+  account: { farmerPublicKey: "", passHash: "" },
+  utilCache: { lastNetSegmentIndex: 0, allocatedGB: 0 }
 }
 export const config = {
   validate(config: ConfigFile): boolean {
