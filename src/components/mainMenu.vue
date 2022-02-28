@@ -86,8 +86,9 @@ export default defineComponent({
         ok: { label: "reset", icon: "refresh", flat: true, color: "red" },
         cancel: true
       }).onOk(async () => {
-        util.reset()
-        this.$router.replace({ name: "index" })
+        await util.reset()
+        // TODO: remove comment after stopFarmer fix
+        // this.$router.replace({ name: "index" })
       })
     },
     async initMenu() {

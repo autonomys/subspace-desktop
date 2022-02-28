@@ -110,7 +110,6 @@ const component = defineComponent({
   },
   methods: {
     userConfirm(val) {
-      console.log("usrConfirm", val)
       this.userConfirmed = val
     },
     // following method is REQUIRED
