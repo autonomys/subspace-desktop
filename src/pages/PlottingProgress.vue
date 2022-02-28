@@ -27,7 +27,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
             .absolute-full.flex.flex-center
               q-badge(color="white" size="lg" text-color="black")
                 template(v-slot:default)
-                  .q-pa-xs(style="font-size: 18px") {{ progresspct }}%
+                  .q-pa-xs(style="font-size: 18px" v-if="progresspct > 0") {{ progresspct }}%
                   .q-pa-xs(style="font-size: 14px") {{ plottingData.status }}
           q-linear-progress.absolute-right(
             :value="0.9"
@@ -115,11 +115,10 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
         icon-right="play_arrow"
         outline
         size="lg"
+        :disable="!farmStarted"
       )
       q-tooltip.q-pa-md(v-if="!farmStarted")
         p.q-mb-lg {{ lang.waitNodeSync }}
-
-
 </template>
 
 <script lang="ts">
@@ -138,10 +137,12 @@ export default defineComponent({
   data() {
     return {
       elapsedms: 0,
+      remainingms: 0,
       plotting: true,
       plottingData: {
         finishedGB: 0,
         remainingGB: 0,
+        allocatedGB: 0,
         status: lang.fetchingPlot
       },
       client: global.client,
@@ -150,40 +151,35 @@ export default defineComponent({
       plotFinished: false,
       farmStarted: false,
       lastLocalSegmentIndex: 0,
-      lastNetSegmentIndex:0,
-      plotDirectory: "",
-      allocatedGB: 0
+      lastNetSegmentIndex: 0,
+      plotDirectory: ""
     }
   },
   computed: {
     progresspct(): number {
-      return parseFloat(
-        ((this.plottingData.finishedGB / this.allocatedGB) * 100).toFixed(2)
+      const progress = parseFloat(
+        ((this.lastLocalSegmentIndex * 100) / this.lastNetSegmentIndex).toFixed(
+          2
+        )
       )
+      return isNaN(progress) ? 0 : progress <= 100 ? progress : 100
     },
     remainingTime(): number {
-      return util.toFixed(
-        (this.elapsedms * this.lastNetSegmentIndex) /
-          this.lastLocalSegmentIndex,
+      const remainingTotalMs = ((this.elapsedms * this.lastNetSegmentIndex) / this.lastLocalSegmentIndex) - this.elapsedms
+      const remainingTotal = util.toFixed(
+        remainingTotalMs > this.remainingms ? this.remainingms : remainingTotalMs,
         2
       )
+      this.remainingms = remainingTotalMs;
+      return remainingTotal
     },
     printRemainingTime(): string {
-      return this.plotFinished
+      return this.plotFinished || this.elapsedms === 0
         ? util.formatMS(0)
         : util.formatMS(this.remainingTime)
     },
     printElapsedTime(): string {
       return util.formatMS(this.elapsedms)
-    },
-    elapsedTime(): number {
-      return this.elapsedms
-    },
-    plotTimeEstimate(): number {
-      return util.plotTimeMsEstimate(this.allocatedGB)
-    },
-    totalDiskSizeGB(): number {
-      return 4000
     }
   },
   watch: {
@@ -192,14 +188,10 @@ export default defineComponent({
         this.plottingData.finishedGB.toFixed(2)
       )
       this.plottingData.remainingGB = parseFloat(
-        (this.allocatedGB - val).toFixed(2)
+        (this.plottingData.allocatedGB - val).toFixed(2)
       )
-      if (this.plottingData.finishedGB >= this.allocatedGB) {
-        this.plottingData.finishedGB = this.allocatedGB
-      }
-      // Avoid user to get stuck in plotting progress page. After node is fully synced plot is started,
-      // allow to move dashboard. Only if viewedIntro === true
-      if (this.plottingData.finishedGB > 0) this.farmStarted = true
+      if (this.plottingData.finishedGB >= this.plottingData.allocatedGB) 
+        this.plottingData.finishedGB = this.plottingData.allocatedGB
     }
   },
   async mounted() {
@@ -213,11 +205,7 @@ export default defineComponent({
     async getPlotConfig() {
       try {
         const config = await util.config.read()
-        if (
-          !config.plot ||
-          !config.plot.sizeGB ||
-          !config.plot.location
-        ) {
+        if (!config.plot || !config.plot.sizeGB || !config.plot.location) {
           const modal = util.config.showErrorModal()
           modal.onOk(async () => {
             await util.config.clear()
@@ -225,7 +213,8 @@ export default defineComponent({
           })
           return
         }
-        this.allocatedGB = config.plot.sizeGB
+        this.plottingData.remainingGB = config.plot.sizeGB
+        this.plottingData.allocatedGB = config.plot.sizeGB
         this.plotDirectory = config.plot.location
       } catch (e) {
         console.log("PLOT PROGRESS CONFIG | ERROR", e)
@@ -238,6 +227,7 @@ export default defineComponent({
     },
     pausePlotting() {
       this.plotting = false
+      this.plotFinished = true
       clearInterval(timer)
     },
     async plottingProgress() {
@@ -245,16 +235,20 @@ export default defineComponent({
       // If the local node is Syncing. Must wait until done.
       let blockNumberData = await Promise.all([
         this.client.getLocalLastBlockNumber(),
-        this.client.getNetworkLastBlockNumber(),
+        this.client.getNetworkLastBlockNumber()
       ])
       do {
         blockNumberData = await Promise.all([
           this.client.getLocalLastBlockNumber(),
-          this.client.getNetworkLastBlockNumber(),
+          this.client.getNetworkLastBlockNumber()
         ])
         this.plottingData.status = `Syncing node ${blockNumberData[0].toLocaleString()} of ${blockNumberData[1].toLocaleString()} Blocks`
         await new Promise((resolve) => setTimeout(resolve, 1500))
       } while (blockNumberData[0] < blockNumberData[1])
+
+      // Avoid user to get stuck in plotting progress page. After node is fully synced plot is started,
+      // allow to move dashboard. Only if viewedIntro === true
+      this.farmStarted = true
 
       // After local node is fully Synced, the farmer will be able to actualy plot and farm.
       this.plottingData.status = lang.startingFarmer
@@ -267,21 +261,27 @@ export default defineComponent({
       timer = window.setInterval(() => (this.elapsedms += 1000), 1000)
 
       const { utilCache } = await util.config.read()
-      let lastNetSegmentIndex =  utilCache?.lastNetSegmentIndex || await this.client.getNetworkSegmentIndex()
-      let lastLocalSegmentIndex = await getLocalFarmerSegmentIndex()
+      this.lastNetSegmentIndex =
+        utilCache?.lastNetSegmentIndex ||
+        (await this.client.getNetworkSegmentIndex())
+      this.lastLocalSegmentIndex = await getLocalFarmerSegmentIndex()
 
-      this.lastLocalSegmentIndex = lastLocalSegmentIndex
-      this.lastNetSegmentIndex = lastNetSegmentIndex
+      const totalSize = this.lastNetSegmentIndex * 256 * util.PIECE_SIZE
+      this.plottingData.allocatedGB =
+        Math.round((totalSize * 100) / util.GB) / 100
 
       this.plotting = false
-
       do {
-        lastLocalSegmentIndex = await getLocalFarmerSegmentIndex()
-        this.lastLocalSegmentIndex = lastLocalSegmentIndex
-        this.plottingData.finishedGB = (lastLocalSegmentIndex * 10) / lastNetSegmentIndex
-        this.plottingData.status = `Archived ${lastLocalSegmentIndex} of ${lastNetSegmentIndex} Segments`
+        this.lastLocalSegmentIndex = await getLocalFarmerSegmentIndex()
+        this.plottingData.finishedGB =
+          (this.lastLocalSegmentIndex * this.plottingData.allocatedGB) /
+          this.lastNetSegmentIndex
+        if (this.lastLocalSegmentIndex >= this.lastNetSegmentIndex)
+          this.plottingData.status = `Archived ${this.lastLocalSegmentIndex} Segments`
+        else
+          this.plottingData.status = `Archived ${this.lastLocalSegmentIndex} of ${this.lastNetSegmentIndex} Segments`
         await new Promise((resolve) => setTimeout(resolve, 2000))
-      } while (lastLocalSegmentIndex < lastNetSegmentIndex)
+      } while (this.lastLocalSegmentIndex < this.lastNetSegmentIndex)
 
       this.pausePlotting()
     },

@@ -33,7 +33,7 @@
     "invalidDir": "Invalid Directory",
     "available": "Available",
     "utilized": "Utilized",
-    "allocated": "Allocated:",
+    "allocated": "Allocated",
     "hint": "Hint:",
     "hint2": "Increasing your plots size will improve Farmer profitability.",
     "initial": "Initial plotting time:",

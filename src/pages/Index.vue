@@ -26,7 +26,6 @@ import { globalState as global } from "src/lib/global"
 import * as util from "src/lib/util"
 import { startFarming, startNode } from "src/lib/client"
 const lang = global.data.loc.text.index
-const DEV_MODE = process.env.DEV_MODE || "DEV"
 
 export default defineComponent({
   data() {
@@ -34,7 +33,7 @@ export default defineComponent({
   },
   async mounted() {
     try {
-      if (DEV_MODE !== "DEV")
+      if (util.DEV_MODE !== "DEV")
         document.addEventListener('contextmenu', event => event.preventDefault())
 
       const config = await util.config.read()
