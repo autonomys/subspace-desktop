@@ -105,8 +105,8 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
         size="lg"
         :disable="!farmStarted"
       )
-      q-tooltip.q-pa-md(v-if="!canContinue")
-        p.q-mb-lg {{ lang.waitNodeSync }}
+      q-tooltip.q-pa-md(v-if="farmStarted")
+        p.q-mb-lg {{ lang.canStartFarm }}
     .col-auto(v-else)
       q-btn(
         :label="lang.next"
@@ -116,8 +116,9 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
         outline
         size="lg"
       )
-      q-tooltip.q-pa-md(v-if="canContinue")
-        p.q-mb-lg {{ lang.canStartFarm }}
+      q-tooltip.q-pa-md(v-if="!farmStarted")
+        p.q-mb-lg {{ lang.waitNodeSync }}
+
 
 </template>
 
