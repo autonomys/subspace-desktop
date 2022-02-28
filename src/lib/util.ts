@@ -34,17 +34,16 @@ export function plotTimeMsEstimate(gb: number): number {
 export async function reset(): Promise<void> {
   try {
     const { plot } = await config.read()
-    if (plot?.location) {
       // TODO: Stop farmer call.
       // Remove plot
+    if (plot?.location) 
       await tauri.fs.removeDir(plot.location,{recursive:true}).catch(console.error)
-      // Remove config, clearing farmerPublicKey
-      await config.clear()
-      // Remove farmedBlocks History.
-      LocalStorage.clear()
-      // TODO: remove relaunch after stopFarmer fix, temp solution to kill farmer.
-      relaunch()
-    }
+    // Remove config, clearing farmerPublicKey
+    await config.clear()
+    // Remove farmedBlocks History.
+    LocalStorage.clear()
+    // TODO: remove relaunch after stopFarmer fix, temp solution to kill farmer.
+    relaunch()
   } catch (error) {
     console.error(error)
   }
@@ -52,16 +51,30 @@ export async function reset(): Promise<void> {
 
 export interface ConfigFile {
   [index: string]: any
-  plot?: { sizeGB?: number, location?: string }, account?: { farmerPublicKey?: string, passHash?: string }
+  plot?: { sizeGB: number; location: string; nodeLocation: string }
+  account?: { farmerPublicKey?: string; passHash: string }
 }
-const emptyConfig: ConfigFile = { plot: { sizeGB: 0, location: "" }, account: { farmerPublicKey: "", passHash: "" } }
+const emptyConfig: ConfigFile = {
+  plot: { sizeGB: 0, location: "", nodeLocation: "" },
+  account: { farmerPublicKey: "", passHash: "" }
+}
 export const config = {
   validate(config: ConfigFile): boolean {
     const acctValid = config.account ? true : false
     const plotValid = config.plot ? true : false
-    // console.log('acctValid', acctValid);
-    // console.log('plotValid', acctValid);
-    return (acctValid && plotValid)
+    if (acctValid && plotValid) {
+      if (config.plot && config.account && config.account.farmerPublicKey) {
+        if (
+          config.plot.location.length > 0 &&
+          config.plot.nodeLocation.length > 0 &&
+          config.account.passHash.length > 0 &&
+          config.account.farmerPublicKey?.length > 0
+        ) {
+          return true
+        }
+      }
+    }
+    return false
   },
   async read(dir?: string): Promise<ConfigFile> {
     if (!dir) dir = (await tauri.path.homeDir()) + ".subspace-farmer-demo"

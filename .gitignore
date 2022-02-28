@@ -32,3 +32,9 @@ yarn-error.log*
 *.ntvs*
 *.njsproj
 *.sln
+
+# dotenv file - used in rust and js
+.env
+
+# do not commit development or testing chain spec files
+/src-tauri/chain-spec-raw-*.json

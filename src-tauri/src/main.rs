@@ -6,6 +6,9 @@
 #[cfg(target_os = "windows")]
 mod windows;
 
+#[macro_use]
+extern crate dotenv_codegen;
+use dotenv::dotenv;
 use anyhow::{anyhow, Result};
 use bip39::{Language, Mnemonic};
 use log::{debug, info};
@@ -168,9 +171,11 @@ pub(crate) async fn init_node(base_directory: PathBuf) -> Result<(), anyhow::Err
     let identity = Identity::open_or_create(&base_directory)?;
     let mut name = hex::encode(identity.public_key().to_bytes().as_slice());
     name.truncate(32);
-
+    // TODO: Could be a better way to pass this value to run_node.
+    let base_path: String = base_directory.as_path().display().to_string();
     // start the node, and take the public key as the name parameter
-    std::thread::spawn(move || run_node(name.as_str()));
+    // also send base-path to avoid using default node database directory.
+    std::thread::spawn(move || run_node(name.as_str(), &base_path));
 
     Ok(())
 }
@@ -269,25 +274,24 @@ pub(crate) async fn farm(
     })
 }
 
-fn run_node(id: &str) -> Result<(), Error> {
+fn run_node(id: &str, base_path:&String) -> Result<(), Error> {
+    dotenv().ok();
     let args = vec![
         "--",
-        "--chain", "testnet",
+        "--chain", dotenv!("CHAIN_SPEC_FILE"),
         "--wasm-execution", "compiled",
         "--execution", "wasm",
-        "--bootnodes", "/dns/farm-rpc.subspace.network/tcp/30333/p2p/12D3KooWPjMZuSYj35ehced2MTJFf95upwpHKgKUrFRfHwohzJXr",
+        "--bootnodes", dotenv!("BOOTNODE"),
         "--rpc-cors", "all",
         "--rpc-methods", "unsafe",
         "--ws-external",
         "--validator",
         "--telemetry-url", "wss://telemetry.polkadot.io/submit/ 1",
-        "--name", id
+        "--name", id,
+        "--base-path", base_path
     ];
-    println!("Current Dir: {:?}", std::env::current_dir().unwrap());
     let cli = Cli::from_iter(args);
-    cli.load_spec("./chain-spec-raw.json")?;
 
-    println!("opened the spec!");
 
     let runner = cli.create_runner(&cli.run.base)?;
 
