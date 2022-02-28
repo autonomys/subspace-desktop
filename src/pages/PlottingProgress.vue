@@ -170,7 +170,7 @@ export default defineComponent({
         remainingTotalMs > this.remainingms ? this.remainingms : remainingTotalMs,
         2
       )
-      this.remainingms = remainingTotalMs;
+      this.changes(remainingTotalMs);
       return remainingTotal
     },
     printRemainingTime(): string {
@@ -192,7 +192,8 @@ export default defineComponent({
       )
       if (this.plottingData.finishedGB >= this.plottingData.allocatedGB)
         this.plottingData.finishedGB = this.plottingData.allocatedGB
-    }
+    },
+
   },
   async mounted() {
     await this.getPlotConfig()
@@ -202,6 +203,9 @@ export default defineComponent({
     if (timer) clearInterval(timer)
   },
   methods: {
+    changes(remainingTotalMs: number) {
+      this.remainingms = remainingTotalMs;
+    },
     async getPlotConfig() {
       try {
         const config = await util.config.read()
