@@ -48,7 +48,7 @@ import { QInput, Notify } from "quasar"
 
 // @vue/component
 export default defineComponent({
-  name: "PageIndex",
+  name: "SaveKeys",
   emits: ["userConfirm"],
   data() {
     const userConfirm = false
@@ -88,14 +88,6 @@ export default defineComponent({
   }
 })
 </script>
-
-
-<style lang="sass">
-.pkdisplay
-  font-size: 20px
-  padding-top: 0px
-  margin-top: 0px
-</style>
 
 <style lang="sass">
 .mnemonic

@@ -24,38 +24,61 @@ q-page(padding)
 import { defineComponent } from "vue"
 import { globalState as global } from "src/lib/global"
 import * as util from "src/lib/util"
-import { startFarming, startNode } from "src/lib/client"
 const lang = global.data.loc.text.index
-const DEV_MODE = process.env.DEV_MODE || "DEV"
 
 export default defineComponent({
   data() {
-    return { lang }
+    return { lang, client: global.client }
   },
   async mounted() {
     try {
-      if (DEV_MODE !== "DEV")
-        document.addEventListener('contextmenu', event => event.preventDefault())
-
-      const config = await util.config.read()
+      this.checkDev()
+      const appDir = await util.getAppDir()
+      const config = await util.config.read(appDir)
       const validConfig = util.config.validate(config)
+      const { plot, account } = config
 
-      console.log("INDEX CONFIG", config)
-
-      if (validConfig && config.plot && config.account) {
-        console.log(`NOT First RUN: plot ${config.plot} :: account ${config.account} :: validConfig ${validConfig}`)
-
-        await startNode(config.plot.nodeLocation)
-        console.log("WAIT FOR NODE - 15 secs")
-        await new Promise((resolve) => setTimeout(resolve, 15000))
-        console.log("WAIT FOR NODE - ok")
-
-        await startFarming(config.plot.location)
-        this.$router.replace({ name: "dashboard" })
+      if (validConfig && plot && account) {
+        console.log("INDEX - NOT First Time RUN.")
+        this.dashboard()
+      } else {
+        await this.clear()
       }
     } catch (e) {
-      console.log("No existing plot and account. First Time RUN.", e)
+      await this.clear()
     }
   },
+  methods: {
+    checkDev() {
+      if (util.DEV_MODE !== "DEV")
+        document.addEventListener("contextmenu", (event) =>
+          event.preventDefault()
+        )
+    },
+    dashboard() {
+      this.$router.replace({ name: "dashboard" })
+    },
+    async clear() {
+      console.log("INDEX - First Time RUN.")
+      await util.config.clear()
+      await util.config.writeEmpty()
+      this.loadNetworkData()
+    },
+    async loadNetworkData() {
+      await this.client.connectPublicApi()
+      const lastNetSegmentIndex = await this.client.getNetworkSegmentIndex()
+      const totalSize = lastNetSegmentIndex * 256 * util.PIECE_SIZE
+      const allocatedGB = Math.round((totalSize * 100) / util.GB) / 100
+
+      const config = await util.config.read()
+      await util.config.update({
+        ...config,
+        utilCache: {
+          lastNetSegmentIndex,
+          allocatedGB: allocatedGB === 0 ? 0.1 : allocatedGB
+        }
+      })
+    }
+  }
 })
 </script>

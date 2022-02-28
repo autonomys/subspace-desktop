@@ -11,7 +11,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
           div {{ lang.plotsDirectory }}
           q-input(
             dense
-            input-class="pkdisplay"
+            input-class="plottingInput"
             outlined
             readonly
             v-model="plotDirectory"
@@ -27,14 +27,14 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
             .absolute-full.flex.flex-center
               q-badge(color="white" size="lg" text-color="black")
                 template(v-slot:default)
-                  .q-pa-xs(style="font-size: 18px") {{ progresspct }}%
+                  .q-pa-xs(style="font-size: 18px" v-if="progresspct > 0") {{ progresspct }}%
                   .q-pa-xs(style="font-size: 14px") {{ plottingData.status }}
           q-linear-progress.absolute-right(
             :value="0.9"
             indeterminate
             style="height: 1px; top: 39px"
             track-color="transparent"
-            v-if="plotting"
+            v-if="!plotFinished"
           )
       .row.justify-center.q-gutter-md.q-pt-md
         .col-1
@@ -48,7 +48,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
           .q-mt-sm {{ lang.plotted }}
           q-input.bg-white(
             dense
-            input-class="pkdisplay"
+            input-class="plottingInput"
             outlined
             readonly
             suffix="GB"
@@ -57,7 +57,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
           .q-mt-sm {{ lang.remaining }}
           q-input.bg-white(
             dense
-            input-class="pkdisplay"
+            input-class="plottingInput"
             outlined
             readonly
             suffix="GB"
@@ -74,7 +74,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
           .q-mt-sm {{ lang.elapsedTime }}
           q-input.bg-white(
             dense
-            input-class="pkdisplay"
+            input-class="plottingInput"
             outlined
             readonly
             v-model="printElapsedTime"
@@ -82,7 +82,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
           .q-mt-sm {{ lang.remainingTime }}
           q-input.bg-white(
             dense
-            input-class="pkdisplay"
+            input-class="plottingInput"
             outlined
             readonly
             v-model="printRemainingTime"
@@ -105,8 +105,8 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
         size="lg"
         :disable="!farmStarted"
       )
-      q-tooltip.q-pa-md(v-if="!canContinue")
-        p.q-mb-lg {{ lang.waitNodeSync }}
+      q-tooltip.q-pa-md(v-if="!farmStarted")
+        p.q-mb-lg {{ lang.waitPlotting }}
     .col-auto(v-else)
       q-btn(
         :label="lang.next"
@@ -116,73 +116,59 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
         outline
         size="lg"
       )
-      q-tooltip.q-pa-md(v-if="canContinue")
-        p.q-mb-lg {{ lang.canStartFarm }}
-
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue"
 import { globalState as global } from "src/lib/global"
-const lang = global.data.loc.text.plottingProgress
 import * as util from "src/lib/util"
 import introModal from "components/introModal.vue"
-import TimeAgo from "javascript-time-ago"
-import en from "javascript-time-ago/locale/en"
-import { startFarming, getLocalFarmerSegmentIndex } from "src/lib/client"
-TimeAgo.addLocale(en)
-let timer: number
+
+const lang = global.data.loc.text.plottingProgress
+let farmerTimer: number
 
 export default defineComponent({
   data() {
     return {
+      lang,
       elapsedms: 0,
-      plotting: true,
+      remainingms: 0,
       plottingData: {
         finishedGB: 0,
         remainingGB: 0,
+        allocatedGB: 0,
         status: lang.fetchingPlot
       },
       client: global.client,
       viewedIntro: false,
-      lang,
       plotFinished: false,
       farmStarted: false,
-      lastLocalSegmentIndex: 0,
-      lastNetSegmentIndex:0,
-      plotDirectory: "",
-      allocatedGB: 0
+      localSegIndex: 0,
+      netSegIndex: 0,
+      plotDirectory: ""
     }
   },
   computed: {
     progresspct(): number {
-      return parseFloat(
-        ((this.plottingData.finishedGB / this.allocatedGB) * 100).toFixed(2)
+      const progress = parseFloat(
+        ((this.localSegIndex * 100) / this.netSegIndex).toFixed(2)
       )
+      return isNaN(progress) ? 0 : progress <= 100 ? progress : 100
     },
     remainingTime(): number {
-      return util.toFixed(
-        (this.elapsedms * this.lastNetSegmentIndex) /
-          this.lastLocalSegmentIndex,
-        2
-      )
+      const ms =
+        (this.elapsedms * this.netSegIndex) / this.localSegIndex -
+        this.elapsedms
+      this.changes(ms)
+      return util.toFixed(ms > this.remainingms ? this.remainingms : ms, 2)
     },
     printRemainingTime(): string {
-      return this.plotFinished
+      return this.plotFinished || this.elapsedms === 0
         ? util.formatMS(0)
         : util.formatMS(this.remainingTime)
     },
     printElapsedTime(): string {
       return util.formatMS(this.elapsedms)
-    },
-    elapsedTime(): number {
-      return this.elapsedms
-    },
-    plotTimeEstimate(): number {
-      return util.plotTimeMsEstimate(this.allocatedGB)
-    },
-    totalDiskSizeGB(): number {
-      return 4000
     }
   },
   watch: {
@@ -191,96 +177,97 @@ export default defineComponent({
         this.plottingData.finishedGB.toFixed(2)
       )
       this.plottingData.remainingGB = parseFloat(
-        (this.allocatedGB - val).toFixed(2)
+        (this.plottingData.allocatedGB - val).toFixed(2)
       )
-      if (this.plottingData.finishedGB >= this.allocatedGB) {
-        this.plottingData.finishedGB = this.allocatedGB
-      }
-      // Avoid user to get stuck in plotting progress page. After node is fully synced plot is started,
-      // allow to move dashboard. Only if viewedIntro === true
-      if (this.plottingData.finishedGB > 0) this.farmStarted = true
+      if (this.plottingData.finishedGB >= this.plottingData.allocatedGB)
+        this.plottingData.finishedGB = this.plottingData.allocatedGB
+    },
+    localSegIndex(localIndex) {
+      if (localIndex >= this.netSegIndex)
+        this.plottingData.status = `Archived ${localIndex} Segments`
+      else
+        this.plottingData.status = `Archived ${localIndex} of ${this.netSegIndex} Segments`
+
+      this.plottingData.finishedGB =
+        (localIndex * this.plottingData.allocatedGB) / this.netSegIndex
     }
   },
   async mounted() {
     await this.getPlotConfig()
+    await this.waitNode()
     this.startPlotting()
   },
   unmounted() {
-    if (timer) clearInterval(timer)
+    if (farmerTimer) clearInterval(farmerTimer)
   },
   methods: {
+    changes(rMs: number) {
+      this.remainingms = rMs
+    },
     async getPlotConfig() {
       try {
-        const config = await util.config.read()
-        if (
-          !config.plot ||
-          !config.plot.sizeGB ||
-          !config.plot.location
-        ) {
-          const modal = util.config.showErrorModal()
-          modal.onOk(async () => {
-            await util.config.clear()
-            this.$router.replace({ name: "index" })
-          })
-          return
-        }
-        this.allocatedGB = config.plot.sizeGB
+        this.client.setFirstLoad()
+        const appDir = await util.getAppDir()
+        const config = await util.config.read(appDir)
+        this.plottingData.remainingGB = config.utilCache.allocatedGB
+        this.plottingData.allocatedGB = config.utilCache.allocatedGB
         this.plotDirectory = config.plot.location
       } catch (e) {
-        console.log("PLOT PROGRESS CONFIG | ERROR", e)
-        return
+        console.error("PLOT PROGRESS getPlotConfig | ERROR", e)
       }
     },
-    startPlotting() {
-      this.plotting = true
-      this.plottingProgress()
+    async waitNode() {
+      const { publicKey } = await this.client.waitNodeStartApiConnect(
+        this.plotDirectory
+      )
+      const config = await util.config.read(this.plotDirectory)
+
+      if (publicKey && config) {
+        await util.config.update(
+          {
+            ...config,
+            plot: {
+              location: this.plotDirectory,
+              nodeLocation: this.plotDirectory
+            },
+            account: {
+              farmerPublicKey: publicKey.toString(),
+              passHash: config.account.passHash
+            }
+          },
+          this.plotDirectory
+        )
+      }
     },
     pausePlotting() {
-      this.plotting = false
-      clearInterval(timer)
+      this.plotFinished = true
+      clearInterval(farmerTimer)
     },
-    async plottingProgress() {
-      await this.client.validateApiStatus(true, true)
-      // If the local node is Syncing. Must wait until done.
-      let blockNumberData = await Promise.all([
-        this.client.getLocalLastBlockNumber(),
-        this.client.getNetworkLastBlockNumber(),
-      ])
+    async startPlotting() {
+      let blockNumberData = await this.client.getBlocksData()
       do {
-        blockNumberData = await Promise.all([
-          this.client.getLocalLastBlockNumber(),
-          this.client.getNetworkLastBlockNumber(),
-        ])
         this.plottingData.status = `Syncing node ${blockNumberData[0].toLocaleString()} of ${blockNumberData[1].toLocaleString()} Blocks`
-        await new Promise((resolve) => setTimeout(resolve, 1500))
+        await new Promise((resolve) => setTimeout(resolve, 3000))
+        blockNumberData = await this.client.getBlocksData()
       } while (blockNumberData[0] < blockNumberData[1])
 
-      // After local node is fully Synced, the farmer will be able to actualy plot and farm.
+      await this.client.startBlockSubscription()
+
       this.plottingData.status = lang.startingFarmer
-      const { publicKey, mnemonic } = await startFarming(this.plotDirectory)
-
-      if (publicKey && mnemonic) {
-        await this.client.init(publicKey, mnemonic)
-      }
+      farmerTimer = window.setInterval(() => (this.elapsedms += 1000), 1000)
+      await this.client.startFarming(this.plotDirectory)
+      this.farmStarted = true
       this.plottingData.status = lang.fetchingPlot
-      timer = window.setInterval(() => (this.elapsedms += 1000), 1000)
 
-      const { utilCache } = await util.config.read()
-      let lastNetSegmentIndex =  utilCache?.lastNetSegmentIndex || await this.client.getNetworkSegmentIndex()
-      let lastLocalSegmentIndex = await getLocalFarmerSegmentIndex()
+      const { utilCache } = await util.config.read(this.plotDirectory)
+      this.netSegIndex = utilCache.lastNetSegmentIndex
+      this.plottingData.allocatedGB = utilCache.allocatedGB
 
-      this.lastLocalSegmentIndex = lastLocalSegmentIndex
-      this.lastNetSegmentIndex = lastNetSegmentIndex
-
-      this.plotting = false
-
+      this.localSegIndex = await this.client.getLocalFarmerSegmentIndex()
       do {
-        lastLocalSegmentIndex = await getLocalFarmerSegmentIndex()
-        this.lastLocalSegmentIndex = lastLocalSegmentIndex
-        this.plottingData.finishedGB = (lastLocalSegmentIndex * 10) / lastNetSegmentIndex
-        this.plottingData.status = `Archived ${lastLocalSegmentIndex} of ${lastNetSegmentIndex} Segments`
         await new Promise((resolve) => setTimeout(resolve, 2000))
-      } while (lastLocalSegmentIndex < lastNetSegmentIndex)
+        this.localSegIndex = await this.client.getLocalFarmerSegmentIndex()
+      } while (this.localSegIndex < this.netSegIndex)
 
       this.pausePlotting()
     },
@@ -293,8 +280,9 @@ export default defineComponent({
   }
 })
 </script>
+
 <style lang="sass">
-.pkdisplay
+.plottingInput
   font-size: 20px
   padding-top: 5px
   margin-top: 0px
