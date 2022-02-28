@@ -81,7 +81,7 @@ export default defineComponent({
     }
   },
   async mounted() {
-    await this.client.validateApiStatus()
+    await this.client.validateApiStatus(true, true)
     await this.client.init()
     const config = await util.config.read()
     console.log("DASHBOARD CONFIG", config)

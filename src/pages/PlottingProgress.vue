@@ -204,18 +204,28 @@ export default defineComponent({
   },
   methods: {
     async getPlotConfig() {
-      const config = await util.config.read()
-      console.log("PLOTTING PROGRESS CONFIG", config)
-      if (!config.plot || !config.plot.sizeGB || !config.plot.location) {
-        const modal = util.config.showErrorModal()
-        modal.onOk(async () => {
-          await util.config.clear()
-          this.$router.replace({ name: "index" })
-        })
+      try {
+        const config = await util.config.read()
+        const validConfig = util.config.validate(config)
+        if (
+          !validConfig ||
+          !config.plot ||
+          !config.plot.sizeGB ||
+          !config.plot.location
+        ) {
+          const modal = util.config.showErrorModal()
+          modal.onOk(async () => {
+            await util.config.clear()
+            this.$router.replace({ name: "index" })
+          })
+          return
+        }
+        this.allocatedGB = config.plot.sizeGB
+        this.plotDirectory = config.plot.location
+      } catch (e) {
+        console.log("PLOT PROGRESS CONFIG | ERROR", e)
         return
       }
-      this.allocatedGB = config.plot.sizeGB
-      this.plotDirectory = config.plot.location
     },
     startPlotting() {
       this.plotting = true
@@ -226,7 +236,7 @@ export default defineComponent({
       clearInterval(timer)
     },
     async plottingProgress() {
-      await this.client.validateApiStatus()
+      await this.client.validateApiStatus(true, true)
       // If the local node is Syncing. Must wait until done.
       let blockNumberData = await Promise.all([
         this.client.getLocalLastBlockNumber(),

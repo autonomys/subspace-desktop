@@ -116,6 +116,7 @@ import { chartOptions, ChartDataType, StatsType } from "src/lib/types"
 import * as native from "src/lib/native"
 import { debounce } from "quasar"
 import { globalState as global } from "src/lib/global"
+import { startNode } from "src/lib/client"
 const lang = global.data.loc.text.setupPlot
 
 export default defineComponent({
@@ -123,7 +124,7 @@ export default defineComponent({
     return {
       revealKey: false,
       userConfirm: false,
-      plotDirectory: "/Subspace/plots",
+      plotDirectory: "/",
       allocatedGB: 0,
       validPath: true,
       defaultPath: "/",
@@ -187,17 +188,19 @@ export default defineComponent({
     }
   },
   async mounted() {
-    const config = await util.config.read()
-    console.log("SETUP PLOT CONFIG", config)
     const homeDir = await tauri.path.homeDir()
     this.plotDirectory = homeDir
-    this.updateDriveStats()
+    await this.updateDriveStats()
     this.defaultPath = (await tauri.path.homeDir()) + ".subspace-farmer-demo"
     this.plotDirectory = this.defaultPath
-    await this.client.validateApiStatus()
-    this.client.data.plot.lastSegmentIndex = await this.client.getNetworkSegmentIndex()
-    const totalSize = this.client.data.plot.lastSegmentIndex * 256 * util.PIECE_SIZE
-    this.allocatedGB = Math.round((totalSize * 100) / util.GB) / 100
+    try {
+      await this.client.validateApiStatus(true, false)
+      this.client.data.plot.lastSegmentIndex = await this.client.getNetworkSegmentIndex()
+      const totalSize = this.client.data.plot.lastSegmentIndex * 256 * util.PIECE_SIZE
+      this.allocatedGB = Math.round((totalSize * 100) / util.GB) / 100
+    } catch (e) {
+      console.log("SETUP PLOT getNetworkSegmentIndex | ERROR", e)
+    }
   },
   async created() {
     this.$watch(
@@ -221,11 +224,17 @@ export default defineComponent({
       await util.config.update({
         plot: {
           sizeGB: this.allocatedGB,
-          location: this.plotDirectory
+          location: this.plotDirectory,
+          nodeLocation: this.plotDirectory 
         }
       })
       if (this.defaultPath != this.plotDirectory)
         await native.createDir(this.plotDirectory)
+
+      console.log("startNode", this.plotDirectory)
+      const nodeResult = await startNode(this.plotDirectory)
+      console.log("startNode Exit", nodeResult)
+      
       this.$router.replace({ name: "plottingProgress" })
     },
     async updateDriveStats() {

@@ -13,13 +13,12 @@ import * as util from 'src/lib/util'
 const tauri = { event, invoke }
 const SUNIT = 1000000000000000000
 
-// TODO: This const must be loaded from a .env or similar. 
-const NETWORK_RPC = 'wss://farm-rpc.subspace.network'
-const LOCAL_RPC = 'ws://localhost:9944'
+const NETWORK_RPC = process.env.PUBLIC_API_WS || 'ws://localhost:9944'
+const LOCAL_RPC = process.env.LOCAL_API_WS || 'ws://localhost:9944'
 
 export class Client {
   protected publicApi: ApiPromise = new ApiPromise({ provider: new WsProvider(NETWORK_RPC), types: util.apiTypes });
-  protected localApi: ApiPromise = new ApiPromise({ provider: new WsProvider(LOCAL_RPC), types: util.apiTypes });
+  protected localApi: ApiPromise = new ApiPromise({ provider: new WsProvider(LOCAL_RPC, false), types: util.apiTypes,  });
   protected farmed: FarmedBlock[] = [];
   protected clearTauriDestroy: event.UnlistenFn = () => { };
   protected unsubscribe: event.UnlistenFn = () => { };
@@ -111,17 +110,17 @@ export class Client {
   // If the app is started for the first time, the client will be started from PlottingProgress page.
   // If the app is started for the second time, the client will be started from Dashboard page.
   public async init(farmerPublicKey?: string, mnemonic?: string): Promise<void> {
-    if (!this.clientStarted) {
-      if (farmerPublicKey && mnemonic) {
-        const publicKey: AccountId32 = this.localApi.registry.createType('AccountId32', farmerPublicKey);
-        await util.config.update({ account: { farmerPublicKey: publicKey.toString() } })
-        this.clearStoredBlocks()
-        this.mnemonic = mnemonic
-      } else {
-        this.loadStoredBlocks()
-      }
-      this.do.blockSubscription.start()
-      this.clientStarted = true;
+      if (!this.clientStarted) {
+        const { account } = await util.config.read()
+        if (farmerPublicKey && mnemonic && account) {
+          await util.config.update({ account: { farmerPublicKey, passHash: account.passHash } })
+          this.clearStoredBlocks()
+          this.mnemonic = mnemonic
+        } else {
+          this.loadStoredBlocks()
+        }
+        this.do.blockSubscription.start()
+        this.clientStarted = true;
     }
   }
 
@@ -198,10 +197,10 @@ export class Client {
     this.data.farming.farmed = this.farmed
   }
 
-  public async validateApiStatus(): Promise<void> {
-    if(!this.publicApi.isConnected) 
+  public async validateApiStatus(pub:boolean, loc:boolean): Promise<void> {
+    if(pub && !this.publicApi.isConnected) 
       this.publicApi = new ApiPromise({ provider: new WsProvider(NETWORK_RPC), types: util.apiTypes });
-    if(!this.localApi.isConnected) 
+    if(loc && !this.localApi.isConnected) 
       this.localApi = new ApiPromise({ provider: new WsProvider(LOCAL_RPC), types: util.apiTypes });
     await Promise.all([this.localApi.isReady, this.publicApi.isReady])
   }
@@ -214,4 +213,8 @@ export async function startFarming(path: string): Promise<ClientIdentity> {
 export async function getLocalFarmerSegmentIndex(): Promise<number> {
   const plot_progress_tracker = (await tauri.invoke('plot_progress_tracker') as number) / 256 
   return plot_progress_tracker <= 1 ? 1 : plot_progress_tracker - 1;
+}
+
+export async function startNode(path: string): Promise<any> {
+  return await tauri.invoke("start_node", { path })
 }

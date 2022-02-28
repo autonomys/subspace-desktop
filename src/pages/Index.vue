@@ -23,9 +23,10 @@ q-page(padding)
 <script lang="ts">
 import { defineComponent } from "vue"
 import { globalState as global } from "src/lib/global"
-import { config } from "src/lib/util"
-import { startFarming } from "src/lib/client"
+import * as util from "src/lib/util"
+import { startFarming, startNode } from "src/lib/client"
 const lang = global.data.loc.text.index
+const DEV_MODE = process.env.DEV_MODE || "DEV"
 
 export default defineComponent({
   data() {
@@ -33,13 +34,23 @@ export default defineComponent({
   },
   async mounted() {
     try {
-      // Disable reload, forward and back options from context menu. 
-      document.addEventListener('contextmenu', event => event.preventDefault());
-      const { account, plot } = await config.read()
-      console.log("INDEX CONFIG", { account, plot })
-      if (account?.farmerPublicKey && plot?.location) {
-        console.log(`NOT First Time RUN: Found Existing :: plot ${plot.location} :: farmerPublicKey ${account.farmerPublicKey}`)
-        await startFarming(plot.location)
+      if (DEV_MODE !== "DEV")
+        document.addEventListener('contextmenu', event => event.preventDefault())
+
+      const config = await util.config.read()
+      const validConfig = util.config.validate(config)
+
+      console.log("INDEX CONFIG", config)
+
+      if (validConfig && config.plot && config.account) {
+        console.log(`NOT First RUN: plot ${config.plot} :: account ${config.account} :: validConfig ${validConfig}`)
+
+        await startNode(config.plot.nodeLocation)
+        console.log("WAIT FOR NODE - 15 secs")
+        await new Promise((resolve) => setTimeout(resolve, 15000))
+        console.log("WAIT FOR NODE - ok")
+
+        await startFarming(config.plot.location)
         this.$router.replace({ name: "dashboard" })
       }
     } catch (e) {
