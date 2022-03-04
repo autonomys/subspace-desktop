@@ -12,7 +12,7 @@ use sc_service::{
 use sc_tracing::logging::LoggerBuilder;
 use sp_core::crypto::Ss58AddressFormat;
 use std::env;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::Once;
 use subspace_service::{FullClient, NewFull};
@@ -24,7 +24,7 @@ static INITIALIZE_SUBSTRATE: Once = Once::new();
 const NODE_NAME_MAX_LENGTH: usize = 64;
 
 /// Default sub directory to store network config.
-const DEFAULT_NETWORK_CONFIG_PATH: &'static str = "network";
+const DEFAULT_NETWORK_CONFIG_PATH: &str = "network";
 
 /// The recommended open file descriptor limit to be configured for the process.
 const RECOMMENDED_OPEN_FILE_DESCRIPTOR_LIMIT: u64 = 10_000;
@@ -174,7 +174,7 @@ fn create_configuration<CS: ChainSpec + 'static>(
 }
 
 /// Get the database configuration object for the parameters provided
-fn database_config(base_path: &PathBuf, cache_size: usize, role: &Role) -> DatabaseSource {
+fn database_config(base_path: &Path, cache_size: usize, role: &Role) -> DatabaseSource {
     let role_dir = match role {
         Role::Light => "light",
         Role::Full | Role::Authority => "full",

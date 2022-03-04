@@ -8,7 +8,7 @@ mod windows;
 
 mod node;
 
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use bip39::{Language, Mnemonic};
 use log::{debug, error, info};
 use serde::Serialize;
@@ -170,7 +170,7 @@ async fn init_node(base_directory: PathBuf) -> Result<FarmerIdentity> {
         sc_service::GenericChainSpec::<subspace_runtime::GenesisConfig>::from_json_bytes(
             include_bytes!("../chain-spec.json").as_ref(),
         )
-        .map_err(|error| anyhow::Error::msg(error))?;
+        .map_err(anyhow::Error::msg)?;
 
     let mut full_client =
         Handle::current().block_on(node::create_full_client(chain_spec, base_directory))?;
@@ -266,13 +266,12 @@ async fn farm(base_directory: PathBuf, node_rpc_url: &str) -> Result<()> {
     tokio::spawn(async {
         tokio::select! {
             res = plotting_instance.wait() => if let Err(error) = res {
-                return Err(anyhow!(error)) // TODO: connect this error to frontend, or log it
+                error!("Plotting created the error: {error}");
             },
             res = farming_instance.wait() => if let Err(error) = res {
-                return Err(anyhow!(error)) // TODO: connect this error to frontend, or log it
+                error!("Farming created the error: {error}");
             },
         }
-        Ok(())
     });
 
     Ok(())

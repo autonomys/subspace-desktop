@@ -13,8 +13,8 @@ substrate-build-script-utils = { version = "3.0.0", git = "https://github.com/pa
 tauri-build = { version = "1.0.0-beta.4" }
 
 [dependencies]
-dotenv = "0.15.0"
 anyhow = "1.0.44"
+dotenv = "0.15.0"
 event-listener-primitives = "2.0.1"
 fdlimit = "0.2.1"
 fs2 = "0.4.3"
