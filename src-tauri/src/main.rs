@@ -172,21 +172,18 @@ async fn init_node(base_directory: PathBuf) -> Result<FarmerIdentity> {
         )
         .map_err(anyhow::Error::msg)?;
 
-    let handle = Handle::current();
+    let full_client_fut = tokio::task::spawn_blocking(move || {
+        Handle::current().block_on(node::create_full_client(chain_spec, base_directory))
+    });
+    let mut full_client = full_client_fut.await??;
 
-    std::thread::spawn(move || {
-        let mut full_client = handle
-            .block_on(node::create_full_client(chain_spec, base_directory))
-            .unwrap();
-
-        // TODO: Make this interruptable if needed
-        handle.spawn(async move {
-            if let Err(error) = full_client.task_manager.future().await {
-                error!("Task manager exited with error: {error}");
-            } else {
-                error!("Task manager exited without error");
-            }
-        });
+    // TODO: Make this interruptable if needed
+    tokio::spawn(async move {
+        if let Err(error) = full_client.task_manager.future().await {
+            error!("Task manager exited with error: {error}");
+        } else {
+            error!("Task manager exited without error");
+        }
     });
 
     Ok(FarmerIdentity {
