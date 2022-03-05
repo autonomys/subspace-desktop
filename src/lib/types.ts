@@ -51,7 +51,6 @@ export interface ClientPlot {
   status: "active" | "verifying" | "corrupted" | "syncing" | string
   plotSizeGB: number // size of the plot file in GigaBytes
   plotFile: string // drive directory where the plot file is located
-  lastSegmentIndex: number
   details: {
     // additional information could be placed here
   }
@@ -124,34 +123,4 @@ interface Solution extends Struct {
 export interface SubPreDigest extends Struct {
   readonly slot: u64
   readonly solution: Solution
-}
-
-export const chartOptions: ApexOptions = {
-  legend: { show: false },
-  colors: ["#E0E0E0", "#FFFFFF", "#2081F0"],
-  plotOptions: {
-    pie: {
-      startAngle: 0,
-      endAngle: 360,
-      expandOnClick: false,
-      donut: { size: "40px" }
-    }
-  },
-  dataLabels: { enabled: false },
-  labels: [],
-  states: {
-    active: { filter: { type: "none" } },
-    hover: { filter: { type: "none" } }
-  },
-  markers: { hover: { size: 0 } },
-  tooltip: { enabled: false }
-}
-
-export type ChartDataType = number[]
-
-export interface StatsType {
-  totalDiskSizeGB: number
-  safeAvailableGB: number
-  utilizedGB: number
-  freeGB: number
 }

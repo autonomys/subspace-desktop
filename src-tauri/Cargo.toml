@@ -6,27 +6,31 @@ authors = ["Subspace Labs <https://subspace.network>"]
 license = "Apache-2.0"
 repository = "https://github.com/subspace/subspace-desktop"
 edition = "2021"
-build = "src/build.rs"
 
 [build-dependencies]
+substrate-build-script-utils = { version = "3.0.0", git = "https://github.com/paritytech/substrate", rev = "e6def65920d30029e42d498cb07cec5dd433b927" }
 tauri-build = { version = "1.0.0-beta.4" }
 
 [dependencies]
-dotenv = "0.15.0"
-dotenv_codegen = "0.15.0"
 anyhow = "1.0.44"
+dotenv = "0.15.0"
 event-listener-primitives = "2.0.1"
+fdlimit = "0.2.1"
 fs2 = "0.4.3"
 hex = "0.4.3"
 log = "0.4.14"
-sc-cli = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "e6def65920d30029e42d498cb07cec5dd433b927", features = ["wasmtime"] }
+names = { version = "0.12.0", default-features = false }
+sc-chain-spec = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate", rev = "e6def65920d30029e42d498cb07cec5dd433b927" }
 sc-executor = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "e6def65920d30029e42d498cb07cec5dd433b927", features = ["wasmtime"] }
+sc-network = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "e6def65920d30029e42d498cb07cec5dd433b927" }
+sc-service = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "e6def65920d30029e42d498cb07cec5dd433b927" }
+sc-tracing = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate", rev = "e6def65920d30029e42d498cb07cec5dd433b927" }
 serde_json = "1.0"
 serde = { version = "1.0", features = [ "derive" ] }
 sp-core = { version = "5.0.0", git = "https://github.com/paritytech/substrate", rev = "e6def65920d30029e42d498cb07cec5dd433b927" }
+sp-panic-handler = { version = "4.0.0", git = "https://github.com/paritytech/substrate", rev = "e6def65920d30029e42d498cb07cec5dd433b927" }
 subspace-core-primitives = { git = "https://github.com/subspace/subspace", rev = "c76d6744a17933fe82811ad809856d665869cdaa" }
 subspace-farmer = { git = "https://github.com/subspace/subspace", rev = "c76d6744a17933fe82811ad809856d665869cdaa" }
-subspace-node = { git = "https://github.com/subspace/subspace", rev = "c76d6744a17933fe82811ad809856d665869cdaa" }
 subspace-runtime = { git = "https://github.com/subspace/subspace", rev = "c76d6744a17933fe82811ad809856d665869cdaa" }
 subspace-service = { git = "https://github.com/subspace/subspace", rev = "c76d6744a17933fe82811ad809856d665869cdaa" }
 subspace-solving = { git = "https://github.com/subspace/subspace", rev = "c76d6744a17933fe82811ad809856d665869cdaa" }
