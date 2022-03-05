@@ -35,7 +35,7 @@
     "utilized": "Utilized",
     "allocated": "Allocated",
     "hint": "Hint:",
-    "hint2": "Increasing your plots size will improve Farmer profitability.",
+    "hint2": "Increasing your plots size will improve Farmer profitability (plot size will be configurable in the upcoming releases).",
     "initial": "Initial plotting time:",
     "availableSpace": "How much free space there are in the disk.",
     "utilizedSpace": "How much space is currently being used.",

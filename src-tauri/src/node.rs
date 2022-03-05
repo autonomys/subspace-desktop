@@ -10,8 +10,8 @@ use sc_service::config::{
     OffchainWorkerConfig,
 };
 use sc_service::{
-    BasePath, Configuration, DatabaseSource, KeepBlocks, Role, RpcMethods, TracingReceiver,
-    TransactionStorageMode,
+    BasePath, Configuration, DatabaseSource, KeepBlocks, PruningMode, Role, RpcMethods,
+    TracingReceiver, TransactionStorageMode,
 };
 use sc_tracing::logging::LoggerBuilder;
 use sp_core::crypto::Ss58AddressFormat;
@@ -155,7 +155,7 @@ fn create_configuration<CS: ChainSpec + 'static>(
         state_cache_size: 67_108_864,
         state_cache_child_ratio: None,
         // TODO: Change to constrained eventually (need DSN for this)
-        state_pruning: Default::default(),
+        state_pruning: PruningMode::ArchiveAll,
         keep_blocks: KeepBlocks::All,
         transaction_storage: TransactionStorageMode::BlockBody,
         wasm_method: WasmExecutionMethod::Compiled,
