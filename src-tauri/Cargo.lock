@@ -117,6 +117,7 @@ dependencies = [
  "names",
  "sc-chain-spec",
  "sc-executor",
+ "sc-network",
  "sc-service",
  "sc-tracing",
  "serde",

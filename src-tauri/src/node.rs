@@ -4,7 +4,11 @@ use names::{Generator, Name};
 use sc_chain_spec::ChainSpec;
 use sc_executor::NativeExecutionDispatch;
 use sc_executor::WasmExecutionMethod;
-use sc_service::config::{KeystoreConfig, NetworkConfiguration, OffchainWorkerConfig};
+use sc_network::config::{NodeKeyConfig, Secret};
+use sc_service::config::{
+    ExecutionStrategies, ExecutionStrategy, KeystoreConfig, NetworkConfiguration,
+    OffchainWorkerConfig,
+};
 use sc_service::{
     BasePath, Configuration, DatabaseSource, KeepBlocks, Role, RpcMethods, TracingReceiver,
     TransactionStorageMode,
@@ -25,6 +29,10 @@ const NODE_NAME_MAX_LENGTH: usize = 64;
 
 /// Default sub directory to store network config.
 const DEFAULT_NETWORK_CONFIG_PATH: &str = "network";
+
+/// The file name of the node's Ed25519 secret key inside the chain-specific
+/// network config directory.
+const NODE_KEY_ED25519_FILE: &str = "secret_ed25519";
 
 /// The recommended open file descriptor limit to be configured for the process.
 const RECOMMENDED_OPEN_FILE_DESCRIPTOR_LIMIT: u64 = 10_000;
@@ -116,12 +124,20 @@ fn create_configuration<CS: ChainSpec + 'static>(
     let net_config_dir = config_dir.join(DEFAULT_NETWORK_CONFIG_PATH);
     let client_id = format!("{}/v{}", impl_name, impl_version);
     let database_cache_size = 1024;
-    let network = NetworkConfiguration::new(
+    let mut network = NetworkConfiguration::new(
         generate_node_name(),
         client_id,
-        Default::default(),
+        NodeKeyConfig::Ed25519(Secret::File(net_config_dir.join(NODE_KEY_ED25519_FILE))),
         Some(net_config_dir),
     );
+    network.listen_addresses = vec![
+        "/ip6/::/tcp/30333".parse().expect("Multiaddr is correct"),
+        "/ip4/0.0.0.0/tcp/30333"
+            .parse()
+            .expect("Multiaddr is correct"),
+    ];
+    // Full + Light clients
+    network.default_peers_set.in_peers = 25 + 100;
     let role = Role::Authority;
     let (keystore_remote, keystore) = (None, KeystoreConfig::InMemory);
     let telemetry_endpoints = chain_spec.telemetry_endpoints().clone();
@@ -138,18 +154,25 @@ fn create_configuration<CS: ChainSpec + 'static>(
         database: database_config(&config_dir, database_cache_size, &role),
         state_cache_size: 67_108_864,
         state_cache_child_ratio: None,
+        // TODO: Change to constrained eventually (need DSN for this)
         state_pruning: Default::default(),
         keep_blocks: KeepBlocks::All,
         transaction_storage: TransactionStorageMode::BlockBody,
         wasm_method: WasmExecutionMethod::Compiled,
         wasm_runtime_overrides: None,
-        execution_strategies: Default::default(),
+        execution_strategies: ExecutionStrategies {
+            syncing: ExecutionStrategy::AlwaysWasm,
+            importing: ExecutionStrategy::AlwaysWasm,
+            block_construction: ExecutionStrategy::AlwaysWasm,
+            offchain_worker: ExecutionStrategy::AlwaysWasm,
+            other: ExecutionStrategy::AlwaysWasm,
+        },
         rpc_http: None,
-        rpc_ws: Some("127.0.0.1:9945".parse().expect("IP and port are valid")),
+        rpc_ws: Some("127.0.0.1:9944".parse().expect("IP and port are valid")),
         rpc_ipc: None,
-        rpc_methods: RpcMethods::Auto,
+        rpc_methods: RpcMethods::Unsafe,
         rpc_ws_max_connections: None,
-        rpc_cors: Some(vec!["all".to_string()]),
+        rpc_cors: None,
         rpc_max_payload: None,
         ws_max_out_buffer_capacity: None,
         prometheus_config: None,
