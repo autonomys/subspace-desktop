@@ -50,7 +50,7 @@ export default defineComponent({
   },
   methods: {
     checkDev() {
-      if (util.DEV_MODE !== "DEV")
+      if (util.CONTEXT_MENU === "OFF")
         document.addEventListener("contextmenu", (event) =>
           event.preventDefault()
         )

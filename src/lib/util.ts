@@ -184,4 +184,4 @@ export const apiTypes = {
 
 export const PIECE_SIZE = 4096
 export const GB = 1024 * 1024 * 1024
-export const DEV_MODE = process.env.DEV_MODE || "DEV"
+export const CONTEXT_MENU = process.env.CONTEXT_MENU || "OFF"

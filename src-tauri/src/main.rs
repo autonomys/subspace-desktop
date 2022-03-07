@@ -17,7 +17,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use subspace_core_primitives::PIECE_SIZE;
 use subspace_farmer::{
-    Commitments, Farming, Identity, ObjectMappings, Plot, Plotting, RpcClient, WsRpc,
+    Commitments, FarmerData, Farming, Identity, ObjectMappings, Plot, Plotting, RpcClient, WsRpc,
 };
 use subspace_solving::SubspaceCodec;
 use tauri::{
@@ -245,6 +245,13 @@ async fn farm(base_directory: PathBuf, node_rpc_url: &str) -> Result<()> {
         .map_err(|error| anyhow::Error::msg(error.to_string()))?;
 
     let subspace_codec = SubspaceCodec::new(identity.public_key());
+    let reward_address = identity
+        .public_key()
+        .as_ref()
+        .to_vec()
+        .try_into()
+        .map(From::<[u8; 32]>::from)
+        .unwrap();
 
     // start the farming task
     let farming_instance = Farming::start(
@@ -252,16 +259,16 @@ async fn farm(base_directory: PathBuf, node_rpc_url: &str) -> Result<()> {
         commitments.clone(),
         client.clone(),
         identity.clone(),
+        reward_address,
     );
+    let farmer_data = FarmerData::new(plot.clone(), commitments, object_mappings, farmer_metadata);
 
     // start the background plotting
     let plotting_instance = Plotting::start(
-        plot,
-        commitments,
-        object_mappings,
+        farmer_data,
         client,
-        farmer_metadata,
         subspace_codec,
+        std::time::Duration::from_secs(5),
     );
 
     // wait for the farming and plotting in the background

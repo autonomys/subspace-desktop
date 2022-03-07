@@ -55,6 +55,12 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
                 q-tooltip.q-pa-sm
                   p {{ lang.availableSpace }}
               .q-mt-sm {{ lang.allocated }}
+                q-spinner-orbit(
+                  style="margin-left: 6px"
+                  color="black"
+                  size="12px"
+                  v-if="allocatedGB === 0"
+                )
               q-input(
                 color="blue"
                 dense

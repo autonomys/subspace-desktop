@@ -136,6 +136,8 @@ fn create_configuration<CS: ChainSpec + 'static>(
             .parse()
             .expect("Multiaddr is correct"),
     ];
+    network.boot_nodes = chain_spec.boot_nodes().to_vec();
+
     // Full + Light clients
     network.default_peers_set.in_peers = 25 + 100;
     let role = Role::Authority;
