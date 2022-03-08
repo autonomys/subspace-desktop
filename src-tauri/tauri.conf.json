@@ -1,8 +1,4 @@
 {
-  "package": {
-    "productName": "Subspace Desktop",
-    "version": "0.1.0"
-  },
   "build": {
     "distDir": "../dist/pwa",
     "devPath": "http://localhost:8080",

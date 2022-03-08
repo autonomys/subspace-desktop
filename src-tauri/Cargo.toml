@@ -1,11 +1,10 @@
 [package]
-name = "app"
+name = "subspace-desktop"
 version = "0.1.0"
-description = "A Tauri App"
-authors = [ "you" ]
+description = "Subspace desktop"
+authors = ["Subspace Labs <https://subspace.network>"]
 license = "Apache-2.0"
-repository = ""
-default-run = "app"
+repository = "https://github.com/subspace/subspace-desktop"
 edition = "2021"
 build = "src/build.rs"
 
