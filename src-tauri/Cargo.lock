@@ -95,27 +95,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "94a45b455c14666b85fc40a019e8ab9eb75e3a124e05494f5397122bc9eb06e0"
 
 [[package]]
-name = "app"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "event-listener-primitives",
- "fs2",
- "lazy_static",
- "log",
- "serde",
- "serde_json",
- "subspace-core-primitives",
- "subspace-farmer",
- "subspace-solving",
- "tauri",
- "tauri-build",
- "tiny-bip39",
- "tokio",
- "winreg 0.10.1",
-]
-
-[[package]]
 name = "arc-swap"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5419,6 +5398,27 @@ dependencies = [
  "serde",
  "serde_arrays",
  "sha2 0.10.1",
+]
+
+[[package]]
+name = "subspace-desktop"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "event-listener-primitives",
+ "fs2",
+ "lazy_static",
+ "log",
+ "serde",
+ "serde_json",
+ "subspace-core-primitives",
+ "subspace-farmer",
+ "subspace-solving",
+ "tauri",
+ "tauri-build",
+ "tiny-bip39",
+ "tokio",
+ "winreg 0.10.1",
 ]
 
 [[package]]
