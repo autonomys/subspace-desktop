@@ -2,6 +2,7 @@
   "extends": "@quasar/app/tsconfig-preset",
   "experimentalDecorators": true,
   "compilerOptions": {
+    "target": "ESNext",
     "strict": true,
     "baseUrl": ".",
     "noImplicitAny": true,

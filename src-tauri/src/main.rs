@@ -6,16 +6,18 @@
 #[cfg(target_os = "windows")]
 mod windows;
 
-use anyhow::{anyhow, Result};
+mod node;
+
+use anyhow::Result;
 use bip39::{Language, Mnemonic};
-use log::{debug, info};
+use log::{debug, error, info};
 use serde::Serialize;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use subspace_core_primitives::PIECE_SIZE;
 use subspace_farmer::{
-    Commitments, Farming, Identity, ObjectMappings, Plot, Plotting, RpcClient, WsRpc,
+    Commitments, FarmerData, Farming, Identity, ObjectMappings, Plot, Plotting, RpcClient, WsRpc,
 };
 use subspace_solving::SubspaceCodec;
 use tauri::{
@@ -23,6 +25,7 @@ use tauri::{
     CustomMenuItem, Event, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu,
     SystemTrayMenuItem,
 };
+use tokio::runtime::Handle;
 
 static PLOTTED_PIECES: AtomicUsize = AtomicUsize::new(0);
 
@@ -45,9 +48,13 @@ fn plot_progress_tracker() -> usize {
 }
 
 #[tauri::command]
-async fn farming(path: String) -> FarmerIdentity {
-    let farmer_identity = farm(path.into(), "ws://127.0.0.1:9944").await;
-    farmer_identity.unwrap()
+async fn farming(path: String) {
+    farm(path.into(), "ws://127.0.0.1:9944").await.unwrap();
+}
+
+#[tauri::command]
+async fn start_node(path: String) -> FarmerIdentity {
+    init_node(path.into()).await.unwrap()
 }
 
 #[tauri::command]
@@ -113,7 +120,8 @@ async fn main() -> Result<()> {
                 get_disk_stats,
                 get_this_binary,
                 farming,
-                plot_progress_tracker
+                plot_progress_tracker,
+                start_node
             ],
             #[cfg(target_os = "windows")]
             tauri::generate_handler![
@@ -124,6 +132,7 @@ async fn main() -> Result<()> {
                 get_disk_stats,
                 farming,
                 plot_progress_tracker,
+                start_node
             ],
         )
         .build(tauri::generate_context!())
@@ -153,14 +162,43 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
+async fn init_node(base_directory: PathBuf) -> Result<FarmerIdentity> {
+    let identity = Identity::open_or_create(&base_directory)?;
+    let public_key = identity.public_key().to_bytes();
+
+    let chain_spec =
+        sc_service::GenericChainSpec::<subspace_runtime::GenesisConfig>::from_json_bytes(
+            include_bytes!("../chain-spec.json").as_ref(),
+        )
+        .map_err(anyhow::Error::msg)?;
+
+    let full_client_fut = tokio::task::spawn_blocking(move || {
+        Handle::current().block_on(node::create_full_client(chain_spec, base_directory))
+    });
+    let mut full_client = full_client_fut.await??;
+
+    // TODO: Make this interruptable if needed
+    tokio::spawn(async move {
+        if let Err(error) = full_client.task_manager.future().await {
+            error!("Task manager exited with error: {error}");
+        } else {
+            error!("Task manager exited without error");
+        }
+    });
+
+    Ok(FarmerIdentity {
+        public_key,
+        mnemonic: Mnemonic::from_entropy(identity.entropy(), Language::English)
+            .unwrap()
+            .into_phrase(),
+    })
+}
+
 /// Start farming by using plot in specified path and connecting to WebSocket server at specified
 /// address.
-pub(crate) async fn farm(
-    base_directory: PathBuf,
-    node_rpc_url: &str,
-) -> Result<FarmerIdentity, anyhow::Error> {
-    // TODO: This doesn't account for the fact that node can
-    // have a completely different history to what farmer expects
+async fn farm(base_directory: PathBuf, node_rpc_url: &str) -> Result<()> {
+    let identity = Identity::open_or_create(&base_directory)?;
+
     info!("Opening plot");
     let plot_fut = tokio::task::spawn_blocking({
         let base_directory = base_directory.clone();
@@ -206,9 +244,14 @@ pub(crate) async fn farm(
         .await
         .map_err(|error| anyhow::Error::msg(error.to_string()))?;
 
-    let identity = Identity::open_or_create(&base_directory)?;
-
     let subspace_codec = SubspaceCodec::new(identity.public_key());
+    let reward_address = identity
+        .public_key()
+        .as_ref()
+        .to_vec()
+        .try_into()
+        .map(From::<[u8; 32]>::from)
+        .unwrap();
 
     // start the farming task
     let farming_instance = Farming::start(
@@ -216,35 +259,29 @@ pub(crate) async fn farm(
         commitments.clone(),
         client.clone(),
         identity.clone(),
+        reward_address,
     );
+    let farmer_data = FarmerData::new(plot.clone(), commitments, object_mappings, farmer_metadata);
 
     // start the background plotting
     let plotting_instance = Plotting::start(
-        plot,
-        commitments,
-        object_mappings,
+        farmer_data,
         client,
-        farmer_metadata,
         subspace_codec,
+        std::time::Duration::from_secs(5),
     );
 
     // wait for the farming and plotting in the background
     tokio::spawn(async {
         tokio::select! {
             res = plotting_instance.wait() => if let Err(error) = res {
-                return Err(anyhow!(error)) // TODO: connect this error to frontend, or log it
+                error!("Plotting created the error: {error}");
             },
             res = farming_instance.wait() => if let Err(error) = res {
-                return Err(anyhow!(error)) // TODO: connect this error to frontend, or log it
+                error!("Farming created the error: {error}");
             },
         }
-        Ok(())
     });
 
-    Ok(FarmerIdentity {
-        public_key: identity.public_key().to_bytes(),
-        mnemonic: Mnemonic::from_entropy(identity.entropy(), Language::English)
-            .unwrap()
-            .into_phrase(),
-    })
+    Ok(())
 }

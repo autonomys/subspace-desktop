@@ -23,28 +23,62 @@ q-page(padding)
 <script lang="ts">
 import { defineComponent } from "vue"
 import { globalState as global } from "src/lib/global"
-import { config } from "src/lib/util"
-import { startFarming } from "src/lib/client"
+import * as util from "src/lib/util"
 const lang = global.data.loc.text.index
 
 export default defineComponent({
   data() {
-    return { lang }
+    return { lang, client: global.client }
   },
   async mounted() {
     try {
-      // Disable reload, forward and back options from context menu. 
-      document.addEventListener('contextmenu', event => event.preventDefault());
-      const { account, plot } = await config.read()
-      console.log("INDEX CONFIG", { account, plot })
-      if (account?.farmerPublicKey && plot?.location) {
-        console.log(`NOT First Time RUN: Found Existing :: plot ${plot.location} :: farmerPublicKey ${account.farmerPublicKey}`)
-        await startFarming(plot.location)
-        this.$router.replace({ name: "dashboard" })
+      this.checkDev()
+      const appDir = await util.getAppDir()
+      const config = await util.config.read(appDir)
+      const validConfig = util.config.validate(config)
+      const { plot, account } = config
+
+      if (validConfig && plot && account) {
+        console.log("INDEX - NOT First Time RUN.")
+        this.dashboard()
+      } else {
+        await this.clear()
       }
     } catch (e) {
-      console.log("No existing plot and account. First Time RUN.", e)
+      await this.clear()
     }
   },
+  methods: {
+    checkDev() {
+      if (util.CONTEXT_MENU === "OFF")
+        document.addEventListener("contextmenu", (event) =>
+          event.preventDefault()
+        )
+    },
+    dashboard() {
+      this.$router.replace({ name: "dashboard" })
+    },
+    async clear() {
+      console.log("INDEX - First Time RUN.")
+      await util.config.clear()
+      await util.config.writeEmpty()
+      this.loadNetworkData()
+    },
+    async loadNetworkData() {
+      await this.client.connectPublicApi()
+      const lastNetSegmentIndex = await this.client.getNetworkSegmentIndex()
+      const totalSize = lastNetSegmentIndex * 256 * util.PIECE_SIZE
+      const allocatedGB = Math.round((totalSize * 100) / util.GB) / 100
+
+      const config = await util.config.read()
+      await util.config.update({
+        ...config,
+        utilCache: {
+          lastNetSegmentIndex,
+          allocatedGB: allocatedGB === 0 ? 0.1 : allocatedGB
+        }
+      })
+    }
+  }
 })
 </script>

@@ -14,7 +14,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
             :error-message="lang.invalidDir"
             color="blue"
             dense
-            input-class="pkdisplay"
+            input-class="setupPlotInput"
             outlined
             v-model="plotDirectory"
           )
@@ -33,7 +33,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
               .q-mt-sm {{ lang.utilized }}
               q-input.bg-grey-3(
                 dense
-                input-class="pkdisplay"
+                input-class="setupPlotInput"
                 outlined
                 readonly
                 suffix="GB"
@@ -46,7 +46,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
                 :error="unsafeFree"
                 dense
                 hide-bottom-space
-                input-class="pkdisplay"
+                input-class="setupPlotInput"
                 outlined
                 readonly
                 suffix="GB"
@@ -55,36 +55,49 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
                 q-tooltip.q-pa-sm
                   p {{ lang.availableSpace }}
               .q-mt-sm {{ lang.allocated }}
+                q-spinner-orbit(
+                  style="margin-left: 6px"
+                  color="black"
+                  size="12px"
+                  v-if="allocatedGB === 0"
+                )
               q-input(
                 color="blue"
                 dense
-                input-class="pkdisplay"
+                input-class="setupPlotInput"
                 outlined
                 readonly
                 suffix="GB"
                 v-model="allocatedGB"
-                v-if="allocatedGB>0") 
+                v-if="allocatedGB > 0"
+              )
                 q-tooltip.q-pa-sm
                   p {{ lang.allocatedSpace }}
               q-input(
                 color="blue"
                 dense
-                input-class="pkdisplay"
+                input-class="setupPlotInput"
                 outlined
                 readonly
                 prefix="Estimating plot size ..."
-                v-if="allocatedGB===0") 
+                v-if="allocatedGB === 0"
+              )
                 q-tooltip.q-pa-sm
                   p {{ lang.estimatingSpace }}
-          
+
         .col.q-pr-md
-          .row.justify-center(style="transform: scale(-1, 1)")
+          .row.justify-center(
+            style="transform: scale(-1, 1)"
+            v-if="allocatedGB > 0"
+          )
             apexchart(
               :options="chartOptions"
               :series="chartData"
               type="donut"
               width="200px"
             )
+          .row.justify-center(v-else)
+            q-spinner-pie(color="grey" size="120px" thickness="1")
   .row.justify-end.q-mt-sm.absolute-bottom.q-pb-md
     .col-auto.q-pr-md
       div {{ lang.hint }}
@@ -105,17 +118,17 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
         p.q-mb-lg {{ lang.tooltip }}
 </template>
 
-
-
 <script lang="ts">
 import * as path from "@tauri-apps/api/path"
-const tauri = { path }
 import { defineComponent } from "vue"
 import * as util from "src/lib/util"
 import { chartOptions, ChartDataType, StatsType } from "src/lib/types"
 import * as native from "src/lib/native"
 import { debounce } from "quasar"
 import { globalState as global } from "src/lib/global"
+import { LocalStorage } from "quasar"
+
+const tauri = { path }
 const lang = global.data.loc.text.setupPlot
 
 export default defineComponent({
@@ -123,7 +136,7 @@ export default defineComponent({
     return {
       revealKey: false,
       userConfirm: false,
-      plotDirectory: "/Subspace/plots",
+      plotDirectory: "/",
       allocatedGB: 0,
       validPath: true,
       defaultPath: "/",
@@ -135,10 +148,11 @@ export default defineComponent({
   },
   computed: {
     chartData(): ChartDataType {
-      return [this.stats.utilizedGB, this.stats.freeGB, this.allocatedGB]
-    },
-    plotTimeHr(): number {
-      return util.plotTimeMsEstimate(this.allocatedGB)
+      return [
+        this.stats.utilizedGB,
+        this.stats.freeGB,
+        this.allocatedGB < 5 ? 5 : this.allocatedGB
+      ]
     },
     stats(): StatsType {
       const totalDiskSizeGB = util.toFixed(this.driveStats.totalBytes / 1e9, 2)
@@ -158,7 +172,7 @@ export default defineComponent({
       }
     },
     canContinue(): boolean {
-      return this.allocatedGB >= 1 && this.validPath
+      return this.allocatedGB > 0 && this.validPath
     },
     unsafeFree(): boolean {
       return this.stats.freeGB < 20
@@ -191,19 +205,24 @@ export default defineComponent({
     console.log("SETUP PLOT CONFIG", config)
     const homeDir = await tauri.path.homeDir()
     this.plotDirectory = homeDir
-    this.updateDriveStats()
-    this.defaultPath = (await tauri.path.homeDir()) + ".subspace-farmer-demo"
+    await this.updateDriveStats()
+    this.defaultPath = (await tauri.path.homeDir()) + util.dirName
     this.plotDirectory = this.defaultPath
-    await this.client.validateApiStatus()
-    this.client.data.plot.lastSegmentIndex = await this.client.getNetworkSegmentIndex()
-    const totalSize = this.client.data.plot.lastSegmentIndex * 256 * util.PIECE_SIZE
-    this.allocatedGB = Math.round((totalSize * 100) / util.GB) / 100
+
+    try {
+      do {
+        const config = await util.config.read()
+        this.allocatedGB = config.utilCache?.allocatedGB || 0
+        await new Promise((resolve) => setTimeout(resolve, 500))
+      } while (this.allocatedGB <= 0)
+    } catch (error) {
+      console.log("mounted error", error)
+    }
   },
   async created() {
     this.$watch(
       "plotDirectory",
       debounce(async (val): Promise<null> => {
-        //console.log(val)
         if (this.plotDirectory == this.defaultPath) {
           this.validPath = true
           return null
@@ -218,14 +237,25 @@ export default defineComponent({
     async startPlotting() {
       if (this.plotDirectory.charAt(this.plotDirectory.length - 1) == "/")
         this.plotDirectory.slice(-1)
-      await util.config.update({
-        plot: {
-          sizeGB: this.allocatedGB,
-          location: this.plotDirectory
-        }
-      })
+
+      // If user a directory different than default, config.json file must be move from default directory to selected directory.
       if (this.defaultPath != this.plotDirectory)
-        await native.createDir(this.plotDirectory)
+        await util.config.moveToSelectedDir(
+          this.defaultPath,
+          this.plotDirectory
+        )
+      const config = await util.config.read(this.plotDirectory)
+      await util.config.update(
+        {
+          ...config,
+          plot: {
+            location: this.plotDirectory,
+            nodeLocation: this.plotDirectory
+          }
+        },
+        this.plotDirectory
+      )
+      LocalStorage.set("appDir", this.plotDirectory)
       this.$router.replace({ name: "plottingProgress" })
     },
     async updateDriveStats() {
@@ -244,7 +274,7 @@ export default defineComponent({
 </script>
 
 <style lang="sass">
-.pkdisplay
+.setupPlotInput
   font-size: 20px
   padding-top: 5px
   margin-top: 0px

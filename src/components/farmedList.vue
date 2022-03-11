@@ -35,9 +35,8 @@ q-card(bordered flat)
 
   q-separator
   .row.q-gutter-sm.q-pa-md
-    .col-2 {{ lang.farmedBy }}
+    .col-3 {{ lang.farmedBy }}
     .col-1 {{ lang.blockNum }}
-    .col-1 {{ "Tx #" }}
     .col-4 {{ lang.time }}
     .col-2 {{ lang.rewards }}
   q-scroll-area(:style="blocksListStyle")
@@ -49,26 +48,25 @@ q-card(bordered flat)
       .bg-white(:key="block.time" v-for="block of farmedBlocksList")
         q-separator
         .row.q-gutter-sm.q-pa-xs.q-ml-sm
-          .col-2.ellipsis
-            p {{ block.author.substring(0, 6)+'...'+block.author.substring(block.author.length-6, block.author.length-1) }}
+          .col-3.ellipsis
+            p {{ block.author.substring(0, 9) + '...' + block.author.substring(block.author.length - 9, block.author.length - 1) }}
           .col-1
             p {{ block.blockNum }}
-          .col-1
-            p {{ block.transactions }}
           .col-4
             p {{ new Date(block.time).toLocaleString() }}
           .col-2
             p {{ block.blockReward }} SSC
           .col-auto
             q-btn(color="grey" flat icon="info" size="sm")
-
 </template>
+
 <script lang="ts">
 import { defineComponent } from "vue"
 import * as util from "src/lib/util"
 import { globalState as global } from "src/lib/global"
-const lang = global.data.loc.text.dashboard
 import { FarmedBlock } from "src/lib/types"
+
+const lang = global.data.loc.text.dashboard
 
 export default defineComponent({
   props: {

@@ -1,6 +1,5 @@
 <template lang="pug">
 q-page.q-pl-lg.q-pr-lg.q-pt-md
-  //- div {{ clientData }}
   .row.justify-center
   .row.q-pb-sm.justify-center
   div(v-if="!loading")
@@ -8,7 +7,7 @@ q-page.q-pl-lg.q-pr-lg.q-pt-md
       .col
         plotCard(:plot="plot")
       .col
-        netCard(:config="config" :network="network")
+        netCard(:network="network")
     .row.q-gutter-md
       .col
         farmedList(
@@ -26,22 +25,21 @@ q-page.q-pl-lg.q-pr-lg.q-pt-md
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import { Dialog, Notify } from "quasar"
+import { Notify } from "quasar"
 import { globalState as global } from "src/lib/global"
 import * as util from "src/lib/util"
 import farmedList from "components/farmedList.vue"
 import netCard from "components/netCard.vue"
 import plotCard from "components/plotCard.vue"
 import { emptyClientData, ClientData, FarmedBlock } from "src/lib/types"
-import { getLocalFarmerSegmentIndex } from "src/lib/client"
 const lang = global.data.loc.text.dashboard
+
 export default defineComponent({
   components: { farmedList, netCard, plotCard },
   data() {
     // TODO remove this.client after invariants are protected
     return {
       lang,
-      config: <util.ConfigFile>{},
       network: {
         state: "starting",
         message: lang.initializing,
@@ -74,32 +72,21 @@ export default defineComponent({
       }, 0)
     }
   },
-  watch: {
-    "clientData.plot.lastSegmentIndex"(val) {
-      const totalSize = val * 256 * util.PIECE_SIZE
-      this.plot.plotSizeGB = Math.round((totalSize * 100) / util.GB) / 100
-    }
-  },
   async mounted() {
-    await this.client.validateApiStatus()
-    await this.client.init()
-    const config = await util.config.read()
-    console.log("DASHBOARD CONFIG", config)
-    const valid = util.config.validate(config)
+    const appDir = await util.getAppDir()
+    const config = await util.config.read(appDir)
+    this.plot.plotSizeGB = config.utilCache.allocatedGB
+
+    if (this.client.isFirstLoad() === false) {
+      await this.client.connectPublicApi()
+      await this.client.waitNodeStartApiConnect(config.plot.nodeLocation)
+      await this.client.startFarming(config.plot.location)
+      await this.client.startBlockSubscription()
+    }
+
     this.global.status.state = "loading"
     this.global.status.message = "loading..."
-    if (!valid) {
-      return Dialog.create({
-        message: lang.corrupt,
-        noEscDismiss: true,
-        noBackdropDismiss: true,
-        noRouteDismiss: true
-      }).onOk(async () => {
-        await util.config.clear()
-        this.$router.replace({ name: "index" })
-      })
-    }
-    await this.readConfig()
+
     this.clientData = global.client.data
     this.loading = false
     this.peerInterval = window.setInterval(this.getNetInfo, 10000)
@@ -109,7 +96,6 @@ export default defineComponent({
     this.global.status.message = lang.syncedMsg
     this.checkNodeAndNetwork()
     this.checkFarmerAndPlot()
-    return
   },
   unmounted() {
     this.unsubscribe()
@@ -126,55 +112,29 @@ export default defineComponent({
     expand(val: boolean) {
       this.expanded = val
     },
-    async readConfig() {
-      this.config = await util.config.read()
-    },
     async checkFarmerAndPlot() {
       this.plot.state = "verifying"
       this.plot.message = lang.verifyingPlot
-      const networkSegmentIndex =
-        this.client.data.plot.lastSegmentIndex > 0
-          ? this.client.data.plot.lastSegmentIndex
-          : await this.client.getNetworkSegmentIndex()
-      let localSegmentIndex = 1
-      this.plot.state = "downloading"
 
-      const totalSize = networkSegmentIndex * 256 * util.PIECE_SIZE
-      this.plot.plotSizeGB = Math.round((totalSize * 100) / util.GB) / 100
+      const lastNetSegmentIndex = await this.client.getNetworkSegmentIndex()
+      const totalSize = lastNetSegmentIndex * 256 * util.PIECE_SIZE
+      const allocatedGB = Math.round((totalSize * 100) / util.GB) / 100
+      this.plot.plotSizeGB = allocatedGB
 
-      do {
-        localSegmentIndex = await getLocalFarmerSegmentIndex()
-        this.plot.message =
-          "Archived " +
-          localSegmentIndex +
-          " of " +
-          networkSegmentIndex +
-          " Segments"
-        await new Promise((resolve) => setTimeout(resolve, 2000))
-      } while (localSegmentIndex < networkSegmentIndex)
       this.plot.message = lang.syncedMsg
       this.plot.state = "finished"
     },
     async checkNodeAndNetwork() {
       this.network.state = "verifying"
       this.network.message = lang.verifyingNet
-      let blockNumberData = await Promise.all([
-        this.client.getLocalLastBlockNumber(),
-        this.client.getNetworkLastBlockNumber()
-      ])
+
+      let blockNumberData = await this.client.getBlocksData()
       do {
-        blockNumberData = await Promise.all([
-          this.client.getLocalLastBlockNumber(),
-          this.client.getNetworkLastBlockNumber()
-        ])
-        this.network.message =
-          "Syncing node  " +
-          blockNumberData[0].toLocaleString() +
-          " of " +
-          blockNumberData[1].toLocaleString() +
-          " Blocks"
-        await new Promise((resolve) => setTimeout(resolve, 1500))
+        this.network.message = `Syncing node ${blockNumberData[0].toLocaleString()} of ${blockNumberData[1].toLocaleString()} Blocks`
+        await new Promise((resolve) => setTimeout(resolve, 3000))
+        blockNumberData = await this.client.getBlocksData()
       } while (blockNumberData[0] < blockNumberData[1])
+
       this.network.message = lang.synced
       this.network.state = "finished"
     },
@@ -196,8 +156,3 @@ export default defineComponent({
   }
 })
 </script>
-
-<style lang="sass">
-.list-move
-  transition: transform 0.5s
-</style>

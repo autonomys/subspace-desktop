@@ -1,7 +1,9 @@
-import { Vec } from '@polkadot/types/codec'
-import { PeerInfo } from '@polkadot/types/interfaces/system'
-import mitt, { Emitter } from 'mitt'
+import { Vec } from "@polkadot/types/codec"
+import { PeerInfo } from "@polkadot/types/interfaces/system"
+import mitt, { Emitter } from "mitt"
 import { ApexOptions } from "apexcharts"
+import type { AccountId32 } from "@polkadot/types/interfaces"
+import type { Struct, u64 } from "@polkadot/types"
 
 export interface FarmedBlock {
   author: string
@@ -13,15 +15,23 @@ export interface FarmedBlock {
   id: string
 }
 
-export interface AutoLaunchParams { appName: string, appPath: string, minimized: boolean }
+export interface AutoLaunchParams {
+  appName: string
+  appPath: string
+  minimized: boolean
+}
 
+export interface ChildReturnData {
+  stdout: string[]
+  stderr: string[]
+}
 
-export interface ChildReturnData { stdout: string[], stderr: string[] }
-
-export interface NetStatus { peers: Vec<PeerInfo> }
+export interface NetStatus {
+  peers: Vec<PeerInfo>
+}
 
 export interface PeerData {
-  status: 'disconnected' | 'unstable' | 'connected' | string
+  status: "disconnected" | "unstable" | "connected" | string
   name: string // do peers have some string identifier?
   ip: string
   receivedBytes: number
@@ -29,7 +39,7 @@ export interface PeerData {
 }
 
 export interface ClientNetwork {
-  status: 'disconnected' | 'unstable' | 'connected' | string
+  status: "disconnected" | "unstable" | "connected" | string
   peers: PeerData[]
   details: {
     // physical network interface
@@ -38,10 +48,9 @@ export interface ClientNetwork {
 }
 
 export interface ClientPlot {
-  status: 'active' | 'verifying' | 'corrupted' | 'syncing' | string
+  status: "active" | "verifying" | "corrupted" | "syncing" | string
   plotSizeGB: number // size of the plot file in GigaBytes
   plotFile: string // drive directory where the plot file is located
-  lastSegmentIndex: number
   details: {
     // additional information could be placed here
   }
@@ -56,8 +65,8 @@ export interface Block {
 }
 
 export interface ClientFarming {
-  status: 'active' | 'paused' | string
-  farmed: FarmedBlock[],
+  status: "active" | "paused" | string
+  farmed: FarmedBlock[]
   events: Emitter<any>
 }
 
@@ -68,14 +77,13 @@ export interface ClientData {
 }
 
 export interface ClientIdentity {
-  publicKey: string,
-  mnemonic: string
+  publicKey: AccountId32
 }
 
 export const emptyClientData: ClientData = {
-  plot: { details: {}, plotFile: '', plotSizeGB: 0, status: '', lastSegmentIndex: 0 },
-  farming: { farmed: [], status: '', events: mitt() },
-  network: { details: {}, peers: [], status: '' }
+  plot: { details: {}, plotFile: "", plotSizeGB: 0, status: "" },
+  farming: { farmed: [], status: "", events: mitt() },
+  network: { details: {}, peers: [], status: "" }
 }
 
 export const chartOptions: ApexOptions = {
@@ -106,4 +114,13 @@ export interface StatsType {
   safeAvailableGB: number
   utilizedGB: number
   freeGB: number
+}
+
+interface Solution extends Struct {
+  readonly public_key: AccountId32
+}
+
+export interface SubPreDigest extends Struct {
+  readonly slot: u64
+  readonly solution: Solution
 }
