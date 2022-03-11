@@ -110,7 +110,7 @@ const winAL = {
 // TODO make class impossible to instantiate uninitialized
 export class AutoLauncher {
   protected autoLauncher: osAL = nullAL
-  protected appName = 'app'
+  protected appName = 'subspace-desktop'
   protected appPath = ''
   enabled = false
   async isEnabled(): Promise<boolean> {
@@ -119,7 +119,7 @@ export class AutoLauncher {
     return result
   }
   async enable(): Promise<void | ChildReturnData> {
-    const child = await this.autoLauncher.enable({ appName: this.appName, appPath: this.appPath, minimized: false })
+    const child = await this.autoLauncher.enable({ appName: this.appName, appPath: this.appPath, minimized: true })
     return child
   }
   async disable(): Promise<void | ChildReturnData> {
@@ -127,14 +127,17 @@ export class AutoLauncher {
     return child
   }
   async init(): Promise<void> {
-    this.appName = process.env.DEV ? "app" : (await app.getName()).toString()
-    const osType = await os.type()
+    this.appName = process.env.DEV ? "subspace-desktop" : (await app.getName()).toString()
+    const osType = await os.type() // this is returning "Darwing" for macos.
+    console.log("OS TYPE: " + osType)
     this.appPath = await invoke('get_this_binary') as string
     console.log('get_this_binary', this.appPath);
-    console.log(this.appPath);
-    if (osType == 'Darwin') this.autoLauncher = macAL
+    if (osType.includes('Darwin')) this.autoLauncher = macAL // TODO: check when upgrade tauri
+    // and if it is returning `Darwin`, change it back to `osType == 'Darwin'` instead of `includes`
     else if (osType == 'Windows_NT') this.autoLauncher = winAL
     else this.autoLauncher = linAL
+
+    await this.enable() // make it enable launch on boot as default choice
     this.enabled = (await this.isEnabled())
   }
 }
