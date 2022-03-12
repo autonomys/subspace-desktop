@@ -4,7 +4,7 @@ Built with Quasar + Tauri
 
 # How to Install
 
-1. Download the latest (release)[https://github.com/subspace/subspace-desktop/releases] for your preferred platform.
+1. Download the latest [release](https://github.com/subspace/subspace-desktop/releases) for your preferred platform.
 2. Install the program
 3. Open `subspace-desktop` application
 4. Click the `Quick Start` option
