@@ -2,6 +2,19 @@
 
 Built with Quasar + Tauri
 
+# How to Install
+
+1. Download the latest (release)[https://github.com/subspace/subspace-desktop/releases] for your preferred platform.
+2. Install the program
+3. Open `subspace-desktop` application
+4. Click the `Quick Start` option
+5. Provide a password and click `continue`
+6. Wait for app to sync network size, and click `Start Plotting`. (In this version, you plot the full history. In future versions you will be able to set your plot size on this page.)
+7. The network will begin to sync, while you wait you can click `next` to open up the `what is plotting` page, and reveal your `seed` phrase, and provide you with our social links.
+8. Once the node fully syncs you will be taken the the Farmer Dashboard which will show you the network status, and if you have won any blocks.
+
+# Development
+
 ## Prerequisites
 
 - nodejs 14+
