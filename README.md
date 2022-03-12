@@ -13,7 +13,7 @@ Built with Quasar + Tauri
 7. The network will begin to sync, while you wait you can click `next` to open up the `what is plotting` page, and reveal your `seed` phrase, and provide you with our social links.
 8. Once the node fully syncs you will be taken the the Farmer Dashboard which will show you the network status, and if you have won any blocks.
 
-# Devlopment
+# Development
 
 ## Prerequisites
 
