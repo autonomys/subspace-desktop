@@ -36,7 +36,7 @@
     .row
       p Private keys are your password for your subspace farmer and wallet, this cannot be changed, guessed(easily), or reset if lost. It is imperative that this is stored in a secure, safe location. Without the Private Key you will not have access to your funds. Furthermore, anyone who steals your private keys will be able to do as they please with your funds.
   .row.q-pt-md
-    q-checkbox(:label="lang.userConfirm" size="lg" v-model="userConfirm")
+    q-checkbox(:label="lang.userConfirm" size="lg" v-model="userConfirm" :disable="!revealKey")
 </template>
 
 <script lang="ts">
@@ -55,11 +55,6 @@ export default defineComponent({
     const mnemonic = global.client.getMnemonic()
     const revealKey = false
     return { revealKey, userConfirm, lang, mnemonic }
-  },
-  computed: {
-    canContinue(): boolean {
-      return this.userConfirm
-    }
   },
   watch: {
     userConfirm(val) {
