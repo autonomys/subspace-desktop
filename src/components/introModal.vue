@@ -31,11 +31,11 @@ mixin page3
       li
         p Did you know that subspace stores all data On-Chain!
       li
-        p You can talk with us on #[a(href="https://discord.gg/5MAp8CD684") Discord]
+        p You can talk with us on #[a(href="https://discord.gg/5MAp8CD684" target="_blank") Discord]
       li
-        p You can talk with us on #[a(href="https://t.me/subspacelabs") Telegram]
+        p You can talk with us on #[a(href="https://t.me/subspacelabs" target="_blank") Telegram]
       li
-        p Visit us on #[a(href="https://twitter.com/NetworkSubspace") Twitter]
+        p Visit us on #[a(href="https://twitter.com/NetworkSubspace" target="_blank") Twitter]
       li
         p Read up about subspace on #[a(href="https://medium.com/subspace-network" target="_blank") Medium]
 
