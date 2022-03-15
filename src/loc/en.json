@@ -97,6 +97,8 @@
     "back": "back"
   },
   "mainMenu": {
+    "nonIncentivizedLabel": "Non-Incentivized Testnet",
+    "nonIncentivizedTooltip": "Farming and rewards have no real financial benefit at this time.",
     "reset": "Reset",
     "autoStart": "Start on Boot",
     "willAutoLaunch": "Subspace will launch automatically during boot",
