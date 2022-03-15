@@ -10,7 +10,7 @@ q-card(bordered flat)
         h6 {{ farmedBlocksList?.length }}
       .col-auto.q-mr-md
         .text-weight-light Total Earned
-        p {{ farmedTotalEarned }} SSC
+        p {{ farmedTotalEarned }} tSSC
       q-space
       .col.col-auto
         .row.justify-center
@@ -55,7 +55,7 @@ q-card(bordered flat)
           .col-4
             p {{ new Date(block.time).toLocaleString() }}
           .col-2
-            p {{ block.blockReward }} SSC
+            p {{ block.blockReward }} tSSC
           .col-auto
             q-btn(color="grey" flat icon="info" size="sm")
 </template>
