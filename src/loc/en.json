@@ -98,7 +98,7 @@
   },
   "mainMenu": {
     "nonIncentivizedLabel": "Non-Incentivized Testnet",
-    "nonIncentivizedTooltip": "Farming and rewards have no real financial benefit at this time.",
+    "nonIncentivizedTooltip": "Rewards (tSSC) you earn from farming do not and will not hold a real value throughout the testnet phase.",
     "reset": "Reset",
     "autoStart": "Start on Boot",
     "willAutoLaunch": "Subspace will launch automatically during boot",
