@@ -70,4 +70,4 @@ jobs:
           releaseName: "__VERSION__"
           body: "See the assets to download this version and install."
           draft: true
-          prerelease: true
+          prerelease: false
