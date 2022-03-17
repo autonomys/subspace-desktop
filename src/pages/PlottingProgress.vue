@@ -242,20 +242,24 @@ export default defineComponent({
       this.plotFinished = true
       clearInterval(farmerTimer)
     },
-    async startPlotting() {
-      let blockNumberData = await this.client.getBlocksData()
-      do {
-        this.plottingData.status = `Syncing node ${blockNumberData[0].toLocaleString()} of ${blockNumberData[1].toLocaleString()} Blocks`
-        await new Promise((resolve) => setTimeout(resolve, 3000))
-        blockNumberData = await this.client.getBlocksData()
-      } while (blockNumberData[0] < blockNumberData[1])
-
+    async farmingWrapper(): Promise<void> {
       await this.client.startBlockSubscription()
 
       this.plottingData.status = lang.startingFarmer
       farmerTimer = window.setInterval(() => (this.elapsedms += 1000), 1000)
       await this.client.startFarming(this.plotDirectory)
       this.plottingData.status = lang.fetchingPlot
+    },
+    async nodeSyncWrapper(): Promise<void> {
+      let blockNumberData = await this.client.getBlocksData()
+      do {
+        this.plottingData.status = `Syncing node ${blockNumberData[0].toLocaleString()} of ${blockNumberData[1].toLocaleString()} Blocks`
+        await new Promise((resolve) => setTimeout(resolve, 3000))
+        blockNumberData = await this.client.getBlocksData()
+      } while (blockNumberData[0] < blockNumberData[1])
+    },
+    async startPlotting() {
+      await Promise.all([this.farmingWrapper(), this.nodeSyncWrapper()]);
 
       const { utilCache } = await util.config.read(this.plotDirectory)
       this.netSegIndex = utilCache.lastNetSegmentIndex
