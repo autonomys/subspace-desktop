@@ -37,8 +37,10 @@ Comment=${appName} startup script
 Exec=${appPath}${hiddenArg}
 Icon=PATH_TO_APP_ICON
   `
-    await fs.createDir(this.getDirectory()).catch(console.error)
-    await fs.writeFile({ contents, path: this.getFilePath(appName) })
+    const a = this.getDirectory()
+    console.log(a)
+    await fs.createDir(a).catch(console.error)  // no such directory or file error
+    await fs.writeFile({ contents, path: this.getFilePath(appName) }).catch(console.error)  // no such directory or file error
     response.stdout.push('success')
     return response
   },
