@@ -123,10 +123,8 @@ import { defineComponent } from "vue"
 import { globalState as global } from "src/lib/global"
 import * as util from "src/lib/util"
 import introModal from "components/introModal.vue"
-
 const lang = global.data.loc.text.plottingProgress
 let farmerTimer: number
-
 export default defineComponent({
   data() {
     return {
@@ -186,7 +184,6 @@ export default defineComponent({
         this.plottingData.status = `Archived ${localIndex} Segments`
       else
         this.plottingData.status = `Archived ${localIndex} of ${this.netSegIndex} Segments`
-
       this.plottingData.finishedGB =
         (localIndex * this.plottingData.allocatedGB) / this.netSegIndex
     }
@@ -220,7 +217,6 @@ export default defineComponent({
         this.plotDirectory
       )
       const config = await util.config.read(this.plotDirectory)
-
       if (publicKey && config) {
         await util.config.update(
           {
@@ -242,49 +238,26 @@ export default defineComponent({
       this.plotFinished = true
       clearInterval(farmerTimer)
     },
-    async farmingWrapper(): Promise<void> {
-      await this.client.startBlockSubscription()
-
-      this.plottingData.status = lang.startingFarmer
-      farmerTimer = window.setInterval(() => (this.elapsedms += 1000), 1000)
-      await this.client.startFarming(this.plotDirectory)
-      this.plottingData.status = lang.fetchingPlot
-    },
-    async nodeSyncWrapper(): Promise<void> {
+    async startPlotting() {
       let blockNumberData = await this.client.getBlocksData()
       do {
         this.plottingData.status = `Syncing node ${blockNumberData[0].toLocaleString()} of ${blockNumberData[1].toLocaleString()} Blocks`
         await new Promise((resolve) => setTimeout(resolve, 3000))
         blockNumberData = await this.client.getBlocksData()
       } while (blockNumberData[0] < blockNumberData[1])
-    },
-    async startPlotting() {
-      // let blockNumberData = await this.client.getBlocksData()
-      // do {
-      //   this.plottingData.status = `Syncing node ${blockNumberData[0].toLocaleString()} of ${blockNumberData[1].toLocaleString()} Blocks`
-      //   await new Promise((resolve) => setTimeout(resolve, 3000))
-      //   blockNumberData = await this.client.getBlocksData()
-      // } while (blockNumberData[0] < blockNumberData[1])
-
-      // await this.client.startBlockSubscription()
-
-      // this.plottingData.status = lang.startingFarmer
-      // farmerTimer = window.setInterval(() => (this.elapsedms += 1000), 1000)
-      // await this.client.startFarming(this.plotDirectory)
-      // this.plottingData.status = lang.fetchingPlot
-
-      await Promise.all([this.farmingWrapper(), this.nodeSyncWrapper()]);
-
+      await this.client.startBlockSubscription()
+      this.plottingData.status = lang.startingFarmer
+      farmerTimer = window.setInterval(() => (this.elapsedms += 1000), 1000)
+      await this.client.startFarming(this.plotDirectory)
+      this.plottingData.status = lang.fetchingPlot
       const { utilCache } = await util.config.read(this.plotDirectory)
       this.netSegIndex = utilCache.lastNetSegmentIndex
       this.plottingData.allocatedGB = utilCache.allocatedGB
-
       this.localSegIndex = await this.client.getLocalFarmerSegmentIndex()
       do {
         await new Promise((resolve) => setTimeout(resolve, 2000))
         this.localSegIndex = await this.client.getLocalFarmerSegmentIndex()
       } while (this.localSegIndex < this.netSegIndex)
-
       this.pausePlotting()
     },
     async viewIntro() {
