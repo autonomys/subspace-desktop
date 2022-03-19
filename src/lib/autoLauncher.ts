@@ -26,8 +26,7 @@ const nullAL = {
 const linAL = {
 
   async enable({ appName, appPath, minimized }: AutoLaunchParams): Promise<ChildReturnData> {
-    const autostartDirectory = (await path.configDir()) + "/autostart"
-    const autostartAppFile = autostartDirectory + "/" + appName + ".desktop"
+    const autostartAppFile = await this.getAutostartFilePath(appName)
     const response: ChildReturnData = { stderr: [], stdout: [] }
     const hiddenArg = minimized ? ' --minimized' : '';
     // TODO setup correct PATH_TO_APP_ICON currently the icon is packed inside the executable only.
@@ -44,8 +43,7 @@ Icon=PATH_TO_APP_ICON
     return response
   },
   async disable(appName: string): Promise<ChildReturnData> {
-    const autostartDirectory = (await path.configDir()) + "/autostart"
-    const autostartAppFile = autostartDirectory + "/" + appName + ".desktop"
+    const autostartAppFile = await this.getAutostartFilePath(appName)
     const response: ChildReturnData = { stderr: [], stdout: [] }
     await fs.removeFile(autostartAppFile).catch(console.error)
     response.stdout.push("success")
@@ -53,14 +51,18 @@ Icon=PATH_TO_APP_ICON
   },
   async isEnabled(appName: string): Promise<boolean> {
     try {
-      const autostartDirectory = (await path.configDir()) + "/autostart"
-      const autostartAppFile = autostartDirectory + "/" + appName + ".desktop"
+      const autostartAppFile = await this.getAutostartFilePath(appName)
       await fs.readTextFile(autostartAppFile).catch(console.error)
       return true
     } catch (error) {
       console.error(error)
       return false
     }
+  },
+  async getAutostartFilePath(appName:string): Promise<string> {
+    const autostartDirectory = (await path.configDir()) + "/autostart"
+    const autostartAppFile = autostartDirectory + "/" + appName + ".desktop"
+    return autostartAppFile
   }
 }
 
