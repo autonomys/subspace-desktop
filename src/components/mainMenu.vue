@@ -87,10 +87,8 @@ export default defineComponent({
         ok: { label: "reset", icon: "refresh", flat: true, color: "red" },
         cancel: true
       }).onOk(async () => {
-        const appDir = await util.getAppDir()
-        await util.reset(appDir)
+        await util.resetAndClear()
         relaunch()
-        // this.$router.replace({ name: "index" })
       })
     },
     async initMenu() {

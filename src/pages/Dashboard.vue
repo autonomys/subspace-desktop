@@ -32,6 +32,7 @@ import farmedList from "components/farmedList.vue"
 import netCard from "components/netCard.vue"
 import plotCard from "components/plotCard.vue"
 import { emptyClientData, ClientData, FarmedBlock } from "src/lib/types"
+import { configFile } from "src/lib/directories/configFile"
 const lang = global.data.loc.text.dashboard
 
 export default defineComponent({
@@ -73,29 +74,32 @@ export default defineComponent({
     }
   },
   async mounted() {
-    const appDir = await util.getAppDir()
-    const config = await util.config.read(appDir)
-    this.plot.plotSizeGB = config.utilCache.allocatedGB
+    const config = await configFile.getConfigFile()
+    if (config) {
+      this.plot.plotSizeGB = config.segmentCache.allocatedGB
 
-    if (this.client.isFirstLoad() === false) {
-      await this.client.connectPublicApi()
-      await this.client.waitNodeStartApiConnect(config.plot.nodeLocation)
-      await this.client.startFarming(config.plot.location)
-      await this.client.startBlockSubscription()
+      if (this.client.isFirstLoad() === false) {
+        await this.client.connectPublicApi()
+        await this.client.waitNodeStartApiConnect(config.plot.location)
+        await this.client.startFarming(config.plot.location)
+        await this.client.startBlockSubscription()
+      }
+
+      this.global.status.state = "loading"
+      this.global.status.message = "loading..."
+
+      this.clientData = global.client.data
+      this.loading = false
+      this.peerInterval = window.setInterval(this.getNetInfo, 10000)
+      this.client.data.farming.events.on("newBlock", this.newBlock)
+      this.client.data.farming.events.on("farmedBlock", this.farmBlock)
+      this.global.status.state = "live"
+      this.global.status.message = lang.syncedMsg
+      this.checkNodeAndNetwork()
+      this.checkFarmerAndPlot()
+    } else {
+      console.error("DASH MOUNTED | ERROR | NO CONFIG LOADED")
     }
-
-    this.global.status.state = "loading"
-    this.global.status.message = "loading..."
-
-    this.clientData = global.client.data
-    this.loading = false
-    this.peerInterval = window.setInterval(this.getNetInfo, 10000)
-    this.client.data.farming.events.on("newBlock", this.newBlock)
-    this.client.data.farming.events.on("farmedBlock", this.farmBlock)
-    this.global.status.state = "live"
-    this.global.status.message = lang.syncedMsg
-    this.checkNodeAndNetwork()
-    this.checkFarmerAndPlot()
   },
   unmounted() {
     this.unsubscribe()
