@@ -65,7 +65,7 @@ jobs:
         run: yarn install --network-timeout 1000000 && yarn build
 
       - name: tauri run
-        uses: tauri-apps/tauri-action@v0.2
+        uses: tauri-apps/tauri-action@v0.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
