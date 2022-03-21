@@ -4,7 +4,7 @@ import { invoke } from '@tauri-apps/api/tauri'
 import { AutoLaunchParams, ChildReturnData } from './types'
 import * as fs from "@tauri-apps/api/fs"
 import * as native from './native'
-
+import * as path from "@tauri-apps/api/path"
 
 type osAL = typeof macAL | typeof winAL | typeof linAL | typeof nullAL
 
@@ -26,6 +26,7 @@ const nullAL = {
 const linAL = {
 
   async enable({ appName, appPath, minimized }: AutoLaunchParams): Promise<ChildReturnData> {
+    const autostartAppFile = await this.getAutostartFilePath(appName)
     const response: ChildReturnData = { stderr: [], stdout: [] }
     const hiddenArg = minimized ? ' --minimized' : '';
     // TODO setup correct PATH_TO_APP_ICON currently the icon is packed inside the executable only.
@@ -37,30 +38,32 @@ Comment=${appName} startup script
 Exec=${appPath}${hiddenArg}
 Icon=PATH_TO_APP_ICON
   `
-    const a = this.getDirectory()
-    console.log(a)
-    await fs.createDir(a).catch(console.error)  // no such directory or file error
-    await fs.writeFile({ contents, path: this.getFilePath(appName) }).catch(console.error)  // no such directory or file error
-    response.stdout.push('success')
+    await fs.writeFile({ contents, path: autostartAppFile }).catch(console.error)
+    response.stdout.push("success")
     return response
   },
   async disable(appName: string): Promise<ChildReturnData> {
+    const autostartAppFile = await this.getAutostartFilePath(appName)
     const response: ChildReturnData = { stderr: [], stdout: [] }
-    await fs.removeFile(this.getFilePath(appName))
+    await fs.removeFile(autostartAppFile).catch(console.error)
     response.stdout.push("success")
     return response
   },
   async isEnabled(appName: string): Promise<boolean> {
     try {
-      await fs.readTextFile(this.getFilePath(appName))
+      const autostartAppFile = await this.getAutostartFilePath(appName)
+      await fs.readTextFile(autostartAppFile).catch(console.error)
       return true
     } catch (error) {
       console.error(error)
       return false
     }
   },
-  getDirectory(): string { return '~/.config/autostart/'; },
-  getFilePath(appName: string): string { return `${this.getDirectory()}${appName}.desktop`; }
+  async getAutostartFilePath(appName:string): Promise<string> {
+    const autostartDirectory = (await path.configDir()) + "/autostart"
+    const autostartAppFile = autostartDirectory + "/" + appName + ".desktop"
+    return autostartAppFile
+  }
 }
 
 const macAL = {
