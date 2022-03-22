@@ -205,7 +205,7 @@ export default defineComponent({
   },
   async mounted() {
     await this.updateDriveStats()
-    this.defaultPath = (await tauri.path.homeDir()) + util.dirName
+    this.defaultPath = (await tauri.path.dataDir()) + util.dirName
     this.plotDirectory = this.defaultPath
     do {
       const config = await configFile.getConfigFile()

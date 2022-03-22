@@ -10,7 +10,7 @@ import * as process from "process"
 import { appDir } from "./directories/appDir"
 import { configFile } from "./directories/configFile"
 
-export const dirName = process.env.DEFAULT_APP_DIR || ".subspace-desktop"
+export const dirName = process.env.DEFAULT_APP_DIR || "subspace-desktop"
 
 export const random = (min: number, max: number): number =>
   Math.floor(Math.random() * (max - min)) + min

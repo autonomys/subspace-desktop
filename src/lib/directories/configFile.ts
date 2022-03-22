@@ -8,7 +8,7 @@ import { ConfigFile, emptyConfig } from "../util"
 
 const tauri = { dialog, fs, path, invoke }
 
-export const dirName = process.env.DEFAULT_APP_DIR || ".subspace-desktop"
+export const dirName = process.env.DEFAULT_APP_DIR || "subspace-desktop"
 
 /**  
   Linux: Resolves to $XDG_CONFIG_HOME or $HOME/.config.
