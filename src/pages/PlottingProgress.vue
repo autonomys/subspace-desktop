@@ -154,17 +154,12 @@ export default defineComponent({
       )
       return isNaN(progress) ? 0 : progress <= 100 ? progress : 100
     },
-    remainingTime(): number {
-      const ms =
-        (this.elapsedms * this.netSegIndex) / this.localSegIndex -
-        this.elapsedms
-      this.changes(ms)
-      return util.toFixed(ms > this.remainingms ? this.remainingms : ms, 2)
-    },
     printRemainingTime(): string {
-      return this.plotFinished || this.elapsedms === 0
-        ? util.formatMS(0)
-        : util.formatMS(this.remainingTime)
+      const val =
+        this.plotFinished || this.elapsedms === 0
+          ? util.formatMS(0)
+          : util.formatMS(this.remainingms)
+      return val
     },
     printElapsedTime(): string {
       return util.formatMS(this.elapsedms)
@@ -183,9 +178,9 @@ export default defineComponent({
     },
     localSegIndex(localIndex) {
       if (localIndex >= this.netSegIndex)
-        this.plottingData.status = `Archived ${localIndex} Segments`
+        this.plottingData.status = `Archived ${localIndex.toLocaleString()} Segments`
       else
-        this.plottingData.status = `Archived ${localIndex} of ${this.netSegIndex} Segments`
+        this.plottingData.status = `Archived ${localIndex.toLocaleString()} of ${this.netSegIndex.toLocaleString()} Segments`
 
       this.plottingData.finishedGB =
         (localIndex * this.plottingData.allocatedGB) / this.netSegIndex
@@ -194,15 +189,13 @@ export default defineComponent({
   async mounted() {
     await this.getPlotConfig()
     await this.waitNode()
+    this.startTimers()
     this.startPlotting()
   },
   unmounted() {
     if (farmerTimer) clearInterval(farmerTimer)
   },
   methods: {
-    changes(rMs: number) {
-      this.remainingms = rMs
-    },
     async getPlotConfig() {
       try {
         this.client.setFirstLoad()
@@ -242,20 +235,10 @@ export default defineComponent({
       this.plotFinished = true
       clearInterval(farmerTimer)
     },
-    async startPlotting() {
-      let blockNumberData = await this.client.getBlocksData()
-      do {
-        this.plottingData.status = `Syncing node ${blockNumberData[0].toLocaleString()} of ${blockNumberData[1].toLocaleString()} Blocks`
-        await new Promise((resolve) => setTimeout(resolve, 3000))
-        blockNumberData = await this.client.getBlocksData()
-      } while (blockNumberData[0] < blockNumberData[1])
-
+    async farmingWrapper(): Promise<void> {
       await this.client.startBlockSubscription()
 
-      this.plottingData.status = lang.startingFarmer
-      farmerTimer = window.setInterval(() => (this.elapsedms += 1000), 1000)
       await this.client.startFarming(this.plotDirectory)
-      this.plottingData.status = lang.fetchingPlot
 
       const { utilCache } = await util.config.read(this.plotDirectory)
       this.netSegIndex = utilCache.lastNetSegmentIndex
@@ -266,7 +249,18 @@ export default defineComponent({
         await new Promise((resolve) => setTimeout(resolve, 2000))
         this.localSegIndex = await this.client.getLocalFarmerSegmentIndex()
       } while (this.localSegIndex < this.netSegIndex)
-
+    },
+    startTimers() {
+      farmerTimer = window.setInterval(() => {
+        this.elapsedms += 1000
+        const ms =
+          (this.elapsedms * this.netSegIndex) / this.localSegIndex -
+          this.elapsedms
+        this.remainingms = util.toFixed(ms, 2)
+      }, 1000)
+    },
+    async startPlotting() {
+      await this.farmingWrapper()
       this.pausePlotting()
     },
     async viewIntro() {
