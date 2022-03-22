@@ -65,7 +65,6 @@ export default defineComponent({
           badgeStyle: "visibility:hidden;"
         })
       if (this.autoLaunch) {
-        await this.launchOnBoot.disable()
         await this.launchOnBoot.enable()
       } else {
         await this.launchOnBoot.disable()
@@ -93,7 +92,7 @@ export default defineComponent({
     },
     async initMenu() {
       console.log("Init Menu", typeof this.launchOnBoot.enabled)
-      // this.disableAutoLaunch = true
+
       if (this.launchOnBoot.enabled != undefined)
         this.autoLaunch = this.launchOnBoot.enabled
       else {
