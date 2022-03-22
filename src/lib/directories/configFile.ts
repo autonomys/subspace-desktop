@@ -17,7 +17,7 @@ export const dirName = process.env.DEFAULT_APP_DIR || ".subspace-desktop"
  */
 export const configFile = {
   async getConfigFile(): Promise<ConfigFile | void> {
-    const configDir = (await tauri.path.configDir()) + "/" + dirName
+    const configDir = (await tauri.path.configDir()) + dirName
     const result = await tauri.fs
       .readTextFile(configDir + "/config.json")
       .catch(console.error)
@@ -31,7 +31,7 @@ export const configFile = {
     await this.writeConfigFile(configFile)
   },
   async writeConfigFile(config: ConfigFile): Promise<void> {
-    const configDir = (await tauri.path.configDir()) + "/" + dirName
+    const configDir = (await tauri.path.configDir()) + dirName
     await tauri.fs
       .writeFile({
         path: configDir + "/config.json",
@@ -40,12 +40,12 @@ export const configFile = {
       .catch(console.error)
   },
   async initConfigFile(): Promise<void> {
-    const configDir = (await tauri.path.configDir()) + "/" + dirName
+    const configDir = (await tauri.path.configDir()) + dirName
     await tauri.fs.createDir(configDir).catch(console.error)
     await this.writeConfigFile(emptyConfig)
   },
   async clearConfigDir(): Promise<void> {
-    const configDir = (await tauri.path.configDir()) + "/" + dirName
+    const configDir = (await tauri.path.configDir()) + dirName
     await tauri.fs
       .removeDir(configDir, { recursive: true })
       .catch(console.error)
