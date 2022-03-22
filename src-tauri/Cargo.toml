@@ -1,6 +1,6 @@
 [package]
 name = "subspace-desktop"
-version = "0.2.5"
+version = "0.2.1"
 description = "Subspace desktop"
 authors = ["Subspace Labs <https://subspace.network>"]
 license = "Apache-2.0"
