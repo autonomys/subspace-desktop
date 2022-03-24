@@ -184,4 +184,4 @@ export const apiTypes = {
 
 export const PIECE_SIZE = 4096
 export const GB = 1024 * 1024 * 1024
-export const CONTEXT_MENU = process.env.CONTEXT_MENU || "OFF"
+export const CONTEXT_MENU = process.env.DEV || "OFF" // enables context menu only if DEV mode is on
