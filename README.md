@@ -15,13 +15,15 @@ Built with Quasar + Tauri
 
 # How to Upgrade
 
-1. Download the latest [release](https://github.com/subspace/subspace-desktop/releases) for your preferred platform.
-2. Install the program
-3. Run the application, it should detect your old plot and continue farming as usual.
+1. Simply uninstall the old application from your computer
+2. Download the latest [release](https://github.com/subspace/subspace-desktop/releases) for your preferred platform.
+3. Install the program
+4. Run the application, it should detect your old plot and continue farming as usual.
 
 **UNLESS STATED OTHERWISE IN THE RELEASE NOTES:**
 - You don't need to delete your existing plot
 - You don't need to create a new identity
+- You don't need to delete the config files
 
 # Development
 
