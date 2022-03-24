@@ -27,10 +27,12 @@ jobs:
         with:
           node-version: 16
 
+      # TODO: when https://github.com/rust-lang/rust/issues/95267 and https://github.com/briansmith/ring/issues/1469
+      # are resolved, revert back to `nightly`
       - name: install Rust nightly
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly
+          toolchain: nightly-2022-02-15
           target: wasm32-unknown-unknown
           override: true
           components: rustfmt, clippy
@@ -65,7 +67,7 @@ jobs:
         run: yarn install --network-timeout 1000000 && yarn build
 
       - name: tauri run
-        uses: tauri-apps/tauri-action@v0.2
+        uses: tauri-apps/tauri-action@v0.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

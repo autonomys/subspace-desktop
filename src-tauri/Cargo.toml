@@ -9,7 +9,7 @@ edition = "2021"
 
 [build-dependencies]
 substrate-build-script-utils = { version = "3.0.0", git = "https://github.com/paritytech/substrate", rev = "e6def65920d30029e42d498cb07cec5dd433b927" }
-tauri-build = { version = "1.0.0-beta.4" }
+tauri-build = { version = "1.0.0-rc.4", features = [] }
 
 [dependencies]
 anyhow = "1.0.44"
@@ -41,8 +41,10 @@ tokio = { version = "1.11.0", features = ["macros", "rt-multi-thread"] }
 winreg = "0.10.1"
 
 [dependencies.tauri]
-version = "1.0.0-beta.8"
-features = ["api-all", "system-tray"]
+default-features = false
+# `wry` and `objc-exception` features are default, but we disable `compression` feature to avoid `zstd` crate version conflicts
+features = ["api-all", "objc-exception", "system-tray", "wry"]
+version = "1.0.0-rc.4"
 
 [features]
 default = [ "custom-protocol" ]

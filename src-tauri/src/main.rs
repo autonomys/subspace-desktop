@@ -22,7 +22,7 @@ use subspace_farmer::{
 use subspace_solving::SubspaceCodec;
 use tauri::{
     api::{self},
-    CustomMenuItem, Event, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu,
+    CustomMenuItem, Env, Manager, RunEvent, SystemTray, SystemTrayEvent, SystemTrayMenu,
     SystemTrayMenuItem,
 };
 use tokio::runtime::Handle;
@@ -71,7 +71,7 @@ fn get_disk_stats(dir: String) -> DiskStats {
 
 #[tauri::command]
 fn get_this_binary() -> PathBuf {
-    let bin = api::process::current_binary();
+    let bin = api::process::current_binary(&Env::default());
     bin.unwrap()
 }
 
@@ -139,7 +139,7 @@ async fn main() -> Result<()> {
         .expect("error while running tauri application");
 
     app.run(|app_handle, e| match e {
-        Event::CloseRequested { label, api, .. } => {
+        RunEvent::CloseRequested { label, api, .. } => {
             let app_handle = app_handle.clone();
             let window = app_handle.get_window(&label).unwrap();
             // use the exposed close api, and prevent the event loop to close
@@ -153,7 +153,7 @@ async fn main() -> Result<()> {
             let item_handle = tray_handle.get_item("toggle_visibility");
             item_handle.set_title("Show").unwrap(); // update the tray menu title to reflect the hidden state of the window
         }
-        Event::ExitRequested { api, .. } => {
+        RunEvent::ExitRequested { api, .. } => {
             api.prevent_exit();
         }
         _ => {}
