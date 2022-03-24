@@ -49,7 +49,23 @@
       "active": false
     },
     "allowlist": {
-      "all": true
+      "all": true,
+      "fs": {
+        "all": true,
+        "scope": ["$HOME/*"]
+      },
+      "shell": {
+        "all": true,
+        "execute": true,
+        "open": true,
+        "scope": [
+          {
+            "name": "run-osascript",
+            "cmd": "osascript",
+            "args": true
+          }
+        ]
+      }
     },
     "windows": [
       {
