@@ -6,7 +6,7 @@ export async function execString(command: string): Promise<ChildReturnData> {
   const args = ['-e', command]
   console.log("Executing applescript:", args);
 
-  const child = new shell.Command('osascript', args)
+  const child = new shell.Command('run-osascript', args)
   return new Promise((res) => {
     const returnData: ChildReturnData = { stdout: [], stderr: [] }
     child.on('close', data => {
