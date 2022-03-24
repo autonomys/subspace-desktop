@@ -29,14 +29,13 @@ const linAL = {
     const autostartAppFile = await this.getAutostartFilePath(appName)
     const response: ChildReturnData = { stderr: [], stdout: [] }
     const hiddenArg = minimized ? ' --minimized' : '';
-    // TODO setup correct PATH_TO_APP_ICON currently the icon is packed inside the executable only.
     const contents = `
 [Desktop Entry]
 Type=Application
 Name=${appName}
 Comment=${appName} startup script
 Exec=${appPath}${hiddenArg}
-Icon=PATH_TO_APP_ICON
+Icon=${appName}
   `
     await fs.writeFile({ contents, path: autostartAppFile }).catch(console.error)
     response.stdout.push("success")
