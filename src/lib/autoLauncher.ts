@@ -145,7 +145,7 @@ export class AutoLauncher {
     else if (osType == 'Windows_NT') this.autoLauncher = winAL
     else this.autoLauncher = linAL
 
-    // the app may be initialized before, but then use decided to move the app to another directory
+    // the app may be initialized before, but then user may have decided to move the app to another directory
     // in this case, we have to delete the previous autoLaunch entry, and create a new one
     const alreadyEnabled = await this.isEnabled()
     if (alreadyEnabled) {
