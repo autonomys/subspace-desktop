@@ -17,7 +17,7 @@
   "properties": {
     "ss58Format": 2254,
     "tokenDecimals": 18,
-    "tokenSymbol": "tSSC"
+    "tokenSymbol": "testnetSSC"
   },
   "consensusEngine": null,
   "codeSubstitutes": {},

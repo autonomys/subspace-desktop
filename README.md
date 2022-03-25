@@ -1,13 +1,14 @@
 # subspace / desktop-farmer
 
-Built with Quasar + Tauri
+Standalone Desktop Client for Subspace Farmer (includes node and farmer).
+Download and run this application to be a farmer on Subspace Network (currently on testnet).
 
 # How to Install
 
 1. Download the latest [release](https://github.com/subspace/subspace-desktop/releases) for your preferred platform.
 2. Install the program
 3. Open `subspace-desktop` application
-4. Click the `Quick Start` option (`Advanced` is not fully functional yet)
+4. Click the `Quick Start` option
 5. Provide a password and click `continue`
 6. Wait for app to sync network size, and click `Start Plotting`. (In this version, you plot the full history. In future versions you will be able to set your plot size on this page.)
 7. The network will begin to sync, while you wait you can click `next` to open up the `what is plotting` page, and reveal your `seed` phrase, and provide you with our social links.

@@ -2,8 +2,7 @@
   "index": {
     "pageTitle": "Welcome",
     "quickStart": "Quick Start",
-    "subtitle": "Subspace Farmer is the easiest way to participate as a farmer in the Subspace Network.",
-    "advanced": "advanced"
+    "subtitle": "Subspace Farmer is the easiest way to participate as a farmer in the Subspace Network."
   },
   "setPassword": {
     "continue": "continue",
@@ -55,7 +54,7 @@
     "remainingTime": "Remaining Time",
     "hint": "Hint:",
     "resume": "Resume Plotting",
-    "hintInfo": "Join the Subspace Discord while you wait, meet the community and earn some tSSC",
+    "hintInfo": "Join the Subspace Discord while you wait, meet the community and earn some testnetSSC",
     "remaining": "Remaining",
     "next": "Next"
   },
@@ -91,14 +90,9 @@
     "imported": "Private Key Imported",
     "continue": "continue"
   },
-  "advanced": {
-    "pageTitle": "Advanced",
-    "importKey": "Import Private Key",
-    "back": "back"
-  },
   "mainMenu": {
     "nonIncentivizedLabel": "Non-Incentivized Testnet",
-    "nonIncentivizedTooltip": "Rewards (tSSC) you earn from farming do not and will not hold a real value throughout the testnet phase.",
+    "nonIncentivizedTooltip": "Rewards (testnetSSC) you earn from farming do not and will not hold a real value throughout the testnet phase.",
     "reset": "Reset",
     "autoStart": "Start on Boot",
     "willAutoLaunch": "Subspace will launch automatically during boot",
