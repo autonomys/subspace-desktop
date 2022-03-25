@@ -67,8 +67,12 @@ Icon=${appName}
 
 const macAL = {
   async enable({ appName, appPath, minimized }: AutoLaunchParams): Promise<ChildReturnData> {
+    // on macOS, tauri is returning the binary (which is a UnixExecutable). We want the `.app` file instead.
+    // appPath -> "/Users/xxx/subspace-desktop.app/Contents/MacOS/subspace-desktop"
+    // path -> "/Users/xxx/subspace-desktop.app"
+    const path = appPath.split("/Contents")[0]
     const isHiddenValue = minimized ? 'true' : 'false';
-    const properties = `{path:"${appPath}", hidden:${isHiddenValue}, name:"${appName}"}`;
+    const properties = `{path:"${path}", hidden:${isHiddenValue}, name:"${appName}"}`;
     console.log('properties', properties);
     return native.execApplescriptCommand(`make login item at end with properties ${properties}`);
   },
@@ -141,6 +145,12 @@ export class AutoLauncher {
     else if (osType == 'Windows_NT') this.autoLauncher = winAL
     else this.autoLauncher = linAL
 
+    // the app may be initialized before, but then use decided to move the app to another directory
+    // in this case, we have to delete the previous autoLaunch entry, and create a new one
+    const alreadyEnabled = await this.isEnabled()
+    if (alreadyEnabled) {
+      await this.disable()
+    }
     await this.enable() // make it enable launch on boot as default choice
     this.enabled = (await this.isEnabled())
   }
