@@ -11,13 +11,6 @@ q-page(padding)
       outline
       size="xl"
     )
-  .row.justify-center.q-mt-sm
-    q-btn(
-      :label="lang.advanced"
-      @click="$router.push({ name: 'advanced' })"
-      color="grey"
-      flat
-    )
 </template>
 
 <script lang="ts">
