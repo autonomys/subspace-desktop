@@ -2,6 +2,7 @@ import { reactive } from "vue";
 import { getLang, LangType } from "../loc/lang"
 import { Client } from "src/lib/client"
 import { AutoLauncher } from "src/lib/autoLauncher"
+import { appConfig } from "./appConfig";
 
 const text: LangType = {}
 // TODO use dependency injection to ensure methods and properties can't be accessed unless they are initialized and valid
@@ -17,6 +18,7 @@ export class Global {
     this.data.loc.text = await getLang(this.data.loc.selected)
   }
   async init(): Promise<void> {
+    appConfig.initAppConfig()
     await Promise.all(
       [
         this.autoLauncher.init(),

@@ -70,7 +70,7 @@ export default defineComponent({
           passHash: util.password.encrypt(this.pw1),
           farmerPublicKey: ""
         },
-        null
+        null, null
       )
       this.$router.replace({ name: "setupPlot" })
     }

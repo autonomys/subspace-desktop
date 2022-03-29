@@ -5,6 +5,7 @@ import { AutoLaunchParams, ChildReturnData } from './types'
 import * as fs from "@tauri-apps/api/fs"
 import * as native from './native'
 import * as path from "@tauri-apps/api/path"
+import { appConfig } from "src/lib/appConfig"
 
 type osAL = typeof macAL | typeof winAL | typeof linAL | typeof nullAL
 
@@ -136,10 +137,12 @@ export class AutoLauncher {
   }
   async enable(): Promise<void | ChildReturnData> {
     const child = await this.autoLauncher.enable({ appName: this.appName, appPath: this.appPath, minimized: true })
+    appConfig.updateAppConfig(null, null, null, true)
     return child
   }
   async disable(): Promise<void | ChildReturnData> {
     const child = this.autoLauncher.disable(this.appName)
+    appConfig.updateAppConfig(null, null, null, false)
     return child
   }
   async init(): Promise<void> {
@@ -148,23 +151,24 @@ export class AutoLauncher {
     console.log("OS TYPE: " + osType)
     this.appPath = await invoke('get_this_binary') as string
     console.log('get_this_binary', this.appPath);
-    if (osType.includes('Darwin')) this.autoLauncher = macAL // TODO: check when upgrade tauri
-    // and if it is returning `Darwin`, change it back to `osType == 'Darwin'` instead of `includes`
+    if (osType == 'Darwin') this.autoLauncher = macAL
     else if (osType == 'Windows_NT') {
       this.autoLauncher = winAL
-      // From Windows 11 Tests: get_this_binary returns a string with a prefix "\\?\" on C:\Users......". On boot, autostart can't locate "\\?\c:\DIR\subspace-desktop.exe 
+      // From Windows 11 Tests: get_this_binary returns a string with a prefix "\\?\" on C:\Users......". On boot, autostart can't locate "\\?\c:\DIR\subspace-desktop.exe
       const appPath = this.appPath
       this.appPath = appPath.startsWith("\\\\?\\") ? appPath.replace("\\\\?\\", "") : appPath
     }
     else this.autoLauncher = linAL
 
-    // the app may be initialized before, but then user may have decided to move the app to another directory
-    // in this case, we have to delete the previous autoLaunch entry, and create a new one
-    const alreadyEnabled = await this.isEnabled()
-    if (alreadyEnabled) {
+    // check whether the user has set autoLaunch to `true`
+    const config = appConfig.getAppConfig()
+    if (config && config.launchPreference === true || !config) {
+      // the app may be initialized before, but then user may have decided to move the app to another directory
+      // in this case, we have to delete the previous autoLaunch entry, and create a new one
       await this.disable()
+      await this.enable() // make it enable launch on boot as default choice
+      this.enabled = (await this.isEnabled())
     }
-    await this.enable() // make it enable launch on boot as default choice
-    this.enabled = (await this.isEnabled())
+    // if launch preference is `false`, we don't need to do anything here, it should stay as it is
   }
 }
