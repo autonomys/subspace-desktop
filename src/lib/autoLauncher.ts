@@ -58,18 +58,18 @@ Icon=${appName}
       return false
     }
   },
-  async getAutostartFilePath(appName:string): Promise<string> {
-    const autostartDirectory = (await path.configDir()) + "/autostart"
-    const autostartAppFile = autostartDirectory + "/" + appName + ".desktop"
+  async getAutostartFilePath(appName: string): Promise<string> {
+    const autostartAppFile =
+      (await path.configDir()) + "autostart/" + appName + ".desktop"
     return autostartAppFile
   },
   async createAutostartDir(appName: string): Promise<string> {
-    const autostartDirectory = (await path.configDir()) + "autostart"
+    const autostartDirectory = (await path.configDir()) + "autostart/"
     const existDir = await fs.readDir(autostartDirectory).catch(console.error)
     if (!existDir) {
       await fs.createDir(autostartDirectory).catch(console.error)
     }
-    return autostartDirectory + "/" + appName + ".desktop"
+    return autostartDirectory + appName + ".desktop"
   }
 }
 
