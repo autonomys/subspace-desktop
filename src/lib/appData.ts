@@ -1,12 +1,6 @@
-import * as dialog from "@tauri-apps/api/dialog"
 import * as fs from "@tauri-apps/api/fs"
-import * as path from "@tauri-apps/api/path"
-import { invoke } from "@tauri-apps/api/tauri"
 import { Dialog } from "quasar"
-import * as native from "./native"
 import { appConfig } from "./appConfig"
-
-const tauri = { dialog, fs, path, invoke }
 
 export const appData = {
   getDataDirPath(): string | void {
@@ -16,10 +10,10 @@ export const appData = {
   async clearDataDir(): Promise<void> {
     const dataDir = this.getDataDirPath()
     if (!dataDir) return
-    await tauri.fs.removeDir(dataDir, { recursive: true }).catch(console.error)
+    await fs.removeDir(dataDir, { recursive: true }).catch(console.error)
   },
   async createCustomDataDir(location: string): Promise<void> {
-    await native.createDir(location).catch(console.error)
+    await fs.createDir(location).catch(console.error)
   }
 }
 
