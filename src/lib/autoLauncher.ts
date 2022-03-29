@@ -146,7 +146,12 @@ export class AutoLauncher {
     console.log('get_this_binary', this.appPath);
     if (osType.includes('Darwin')) this.autoLauncher = macAL // TODO: check when upgrade tauri
     // and if it is returning `Darwin`, change it back to `osType == 'Darwin'` instead of `includes`
-    else if (osType == 'Windows_NT') this.autoLauncher = winAL
+    else if (osType == 'Windows_NT') {
+      this.autoLauncher = winAL
+      // From Windows 11 Tests: get_this_binary returns a string with a prefix "\\?\" on C:\Users......". On boot, autostart can't locate "\\?\c:\DIR\subspace-desktop.exe 
+      const appPath = this.appPath
+      this.appPath = appPath.startsWith("\\\\?\\") ? appPath.replace("\\\\?\\", "") : appPath
+    }
     else this.autoLauncher = linAL
 
     await this.enable() // make it enable launch on boot as default choice
