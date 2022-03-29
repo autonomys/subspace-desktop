@@ -33,9 +33,6 @@ export async function execString(executable: string, args: string[] | string): P
 
   console.log('pid:', child.pid)
 }
-export async function createDir(path: string): Promise<void> {
-  await tauri.fs.createDir(path).catch(console.error)
-}
 export async function selectDir(defaultPath: undefined | string): Promise<string | null> {
   let exists: boolean = false
   if (defaultPath) exists = await dirExists(defaultPath)
