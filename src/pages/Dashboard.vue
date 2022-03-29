@@ -32,7 +32,7 @@ import farmedList from "components/farmedList.vue"
 import netCard from "components/netCard.vue"
 import plotCard from "components/plotCard.vue"
 import { emptyClientData, ClientData, FarmedBlock } from "src/lib/types"
-import { configFile } from "src/lib/directories/configFile"
+import { appConfig } from "src/lib/appConfig"
 const lang = global.data.loc.text.dashboard
 
 export default defineComponent({
@@ -74,7 +74,7 @@ export default defineComponent({
     }
   },
   async mounted() {
-    const config = await configFile.getConfigFile()
+    const config = appConfig.getAppConfig()
     if (config) {
       this.plot.plotSizeGB = config.segmentCache.allocatedGB
 

@@ -83,7 +83,7 @@ export default defineComponent({
     },
     blocksListStyle(): { [index: string]: string } {
       return this.expanded ? { height: "370px" } : { height: "185px" }
-    }
+    } 
   }
 })
 </script>

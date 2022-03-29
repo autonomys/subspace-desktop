@@ -126,10 +126,9 @@ import { chartOptions, ChartDataType, StatsType } from "src/lib/types"
 import * as native from "src/lib/native"
 import { debounce } from "quasar"
 import { globalState as global } from "src/lib/global"
-import * as dialogs from "src/lib/directories/dialogs"
 import * as fs from "@tauri-apps/api/fs"
-import { configFile } from "src/lib/directories/configFile"
-import { appDir } from "src/lib/directories/appDir"
+import { appConfig } from "src/lib/appConfig"
+import { appData, appDataDialog } from "src/lib/appData"
 
 const tauri = { path, fs }
 const lang = global.data.loc.text.setupPlot
@@ -208,10 +207,7 @@ export default defineComponent({
     this.defaultPath = (await tauri.path.dataDir()) + util.dirName
     this.plotDirectory = this.defaultPath
     do {
-      const config = await configFile.getConfigFile()
-      if (config) {
-        this.allocatedGB = config.segmentCache.allocatedGB
-      }
+      this.allocatedGB = appConfig.getAppConfig()?.segmentCache.allocatedGB || 0
       await new Promise((resolve) => setTimeout(resolve, 1000))
     } while (this.allocatedGB <= 0)
   },
@@ -244,32 +240,28 @@ export default defineComponent({
 
         if (files) {
           if (files.length === 0) {
-            dialogs.existingDirectoryConfirm(
+            appDataDialog.existingDirectoryConfirm(
               this.plotDirectory,
               this.startPlotting
             )
           } else if (files.length > 0) {
-            dialogs.emptyDirectoryInfo(this.plotDirectory)
+            appDataDialog.emptyDirectoryInfo(this.plotDirectory)
           }
         }
       } else if (!dirExists) {
-        dialogs.newDirectoryConfirm(this.plotDirectory, this.startPlotting)
+        appDataDialog.newDirectoryConfirm(
+          this.plotDirectory,
+          this.startPlotting
+        )
       }
     },
     async startPlotting() {
       if (this.plotDirectory.charAt(this.plotDirectory.length - 1) == "/")
         this.plotDirectory.slice(-1)
 
-      const conf = await configFile.getConfigFile()
-      if (conf) {
-        await configFile.updateConfigFile({
-          ...conf,
-          plot: { location: this.plotDirectory }
-        })
-        await appDir.createCustomDataDir(this.plotDirectory)
-
-        this.$router.replace({ name: "plottingProgress" })
-      }
+      await appData.createCustomDataDir(this.plotDirectory)
+      appConfig.updateAppConfig({ location: this.plotDirectory }, null, null)
+      this.$router.replace({ name: "plottingProgress" })
     },
     async updateDriveStats() {
       const stats = await native.driveStats(this.plotDirectory)

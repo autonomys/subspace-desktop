@@ -27,7 +27,7 @@ q-page.q-pl-xl.q-pr-xl.q-pt-lg
 import { defineComponent } from "vue"
 import { globalState as global } from "src/lib/global"
 import * as util from "src/lib/util"
-import { configFile} from "src/lib/directories/configFile"
+import { appConfig } from "src/lib/appConfig"
 
 const lang = global.data.loc.text.setPassword
 
@@ -63,18 +63,16 @@ export default defineComponent({
     }
   },
   methods: {
-    async continue() {
-      const config = await configFile.getConfigFile()
-      if (config) {
-        await configFile.updateConfigFile({
-          ...config,
-          account: {
-            passHash: util.password.encrypt(this.pw1),
-            farmerPublicKey: ""
-          }
-        })
-        this.$router.replace({ name: "setupPlot" })
-      }
+    continue() {
+      appConfig.updateAppConfig(
+        null,
+        {
+          passHash: util.password.encrypt(this.pw1),
+          farmerPublicKey: ""
+        },
+        null
+      )
+      this.$router.replace({ name: "setupPlot" })
     }
   }
 })

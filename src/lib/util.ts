@@ -7,8 +7,8 @@ import {
 import { Component } from "vue"
 import * as bcrypt from "bcryptjs"
 import * as process from "process"
-import { appDir } from "./directories/appDir"
-import { configFile } from "./directories/configFile"
+import { appConfig } from "./appConfig"
+import { appData } from "./appData"
 
 export const dirName = process.env.DEFAULT_APP_DIR || "subspace-desktop"
 
@@ -39,15 +39,9 @@ export function plotTimeMsEstimate(gb: number): number {
 }
 
 export async function resetAndClear(): Promise<void> {
-  try {
-    await appDir.clearDataDir()
-    await configFile.clearConfigDir()
-    LocalStorage.clear()
-  } catch (error) {
-    console.error(error)
-  }
+  await appData.clearDataDir()
 }
-export interface ConfigFile {
+export interface AppConfig {
   [index: string]: any
   plot: Plot
   account: Account
@@ -66,7 +60,7 @@ export interface Plot {
   location: string
 }
 
-export const emptyConfig: ConfigFile = {
+export const emptyAppConfig: AppConfig = {
   plot: { location: "" },
   account: { farmerPublicKey: "", passHash: "" },
   segmentCache: { lastNetSegmentIndex: 0, allocatedGB: 0 }

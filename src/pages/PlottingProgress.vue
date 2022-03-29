@@ -123,7 +123,7 @@ import { defineComponent } from "vue"
 import { globalState as global } from "src/lib/global"
 import * as util from "src/lib/util"
 import introModal from "components/introModal.vue"
-import { configFile } from "src/lib/directories/configFile"
+import { appConfig } from "src/lib/appConfig"
 
 const lang = global.data.loc.text.plottingProgress
 let farmerTimer: number
@@ -199,7 +199,7 @@ export default defineComponent({
   methods: {
     async getPlotConfig() {
       this.client.setFirstLoad()
-      const config = await configFile.getConfigFile()
+      const config = appConfig.getAppConfig()
       if (config) {
         this.plottingData.remainingGB = config.segmentCache.allocatedGB
         this.plottingData.allocatedGB = config.segmentCache.allocatedGB
@@ -213,16 +213,19 @@ export default defineComponent({
         this.plotDirectory
       )
       if (publicKey) {
-        const config = await configFile.getConfigFile()
+        const config = appConfig.getAppConfig()
         if (config) {
-          await configFile.updateConfigFile({
-            ...config,
-            account: {
+          appConfig.updateAppConfig(
+            null,
+            {
               farmerPublicKey: publicKey.toString(),
               passHash: config.account.passHash
-            }
-          })
+            },
+            null
+          )
         }
+      }else{
+        console.error("PLOT PROGRESS | ERROR | NO PUBLIC KEY")
       }
     },
     pausePlotting() {
@@ -234,7 +237,7 @@ export default defineComponent({
 
       await this.client.startFarming(this.plotDirectory)
 
-      const config = await configFile.getConfigFile()
+      const config = appConfig.getAppConfig()
       if (config) {
         const { lastNetSegmentIndex, allocatedGB } = config.segmentCache
         this.netSegIndex = lastNetSegmentIndex

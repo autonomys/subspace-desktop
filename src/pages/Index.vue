@@ -24,17 +24,18 @@ q-page(padding)
 import { defineComponent } from "vue"
 import { globalState as global } from "src/lib/global"
 import * as util from "src/lib/util"
-import { configFile } from "src/lib/directories/configFile"
+import { appConfig } from "src/lib/appConfig"
+import { LocalStorage } from "quasar"
 const lang = global.data.loc.text.index
 
 export default defineComponent({
   data() {
     return { lang, client: global.client }
   },
-  async mounted() {
+  mounted() {
     try {
       this.checkDev()
-      const config = await configFile.getConfigFile()
+      const config = appConfig.getAppConfig()
       if (config) {
         const { plot, account } = config
         if (
@@ -63,9 +64,10 @@ export default defineComponent({
     dashboard() {
       this.$router.replace({ name: "dashboard" })
     },
-    async clear() {
+    clear() {
       console.log("INDEX - First Time RUN.")
-      await configFile.initConfigFile()
+      LocalStorage.clear()
+      appConfig.initAppConfig()
       this.loadNetworkData()
     },
     async loadNetworkData() {
@@ -73,16 +75,10 @@ export default defineComponent({
       const lastNetSegmentIndex = await this.client.getNetworkSegmentIndex()
       const totalSize = lastNetSegmentIndex * 256 * util.PIECE_SIZE
       const allocatedGB = Math.round((totalSize * 100) / util.GB) / 100
-      const config = await configFile.getConfigFile()
-      if (config) {
-        await configFile.updateConfigFile({
-          ...config,
-          segmentCache: {
-            lastNetSegmentIndex,
-            allocatedGB: allocatedGB === 0 ? 0.1 : allocatedGB
-          }
-        })
-      }
+      appConfig.updateAppConfig(null, null, {
+        lastNetSegmentIndex,
+        allocatedGB: allocatedGB === 0 ? 0.1 : allocatedGB
+      })
     }
   }
 })

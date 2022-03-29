@@ -22,7 +22,7 @@ q-menu(auto-close)
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import { Dialog, Notify } from "quasar"
+import { Dialog, LocalStorage, Notify } from "quasar"
 import { relaunch } from "@tauri-apps/api/process"
 import * as util from "src/lib/util"
 import { globalState as global } from "src/lib/global"
@@ -87,7 +87,9 @@ export default defineComponent({
         cancel: true
       }).onOk(async () => {
         await util.resetAndClear()
-        relaunch()
+        LocalStorage.clear()
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+        await relaunch()
       })
     },
     async initMenu() {
