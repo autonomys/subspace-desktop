@@ -1,13 +1,11 @@
 import {
   Dialog,
   DialogChainObject,
-  LocalStorage,
   LooseDictionary
 } from "quasar"
 import { Component } from "vue"
 import * as bcrypt from "bcryptjs"
 import * as process from "process"
-import { appConfig } from "./appConfig"
 import { appData } from "./appData"
 
 export const dirName = process.env.DEFAULT_APP_DIR || "subspace-desktop"

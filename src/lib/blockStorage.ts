@@ -18,11 +18,8 @@ export function getStoredBlocks(): FarmedBlock[] {
 
 export function storeBlocks(blocks: FarmedBlock[]): void {
   const farmed: { [index: string]: FarmedBlock } = {}
-  if (blocks.length === 0) LocalStorage.set("farmedBlocks", farmed)
-  else {
-    for (const block of blocks) {
-      farmed[block.id] = block
-    }
-    LocalStorage.set("farmedBlocks", farmed)
+  for (const block of blocks) {
+    farmed[block.id] = block
   }
+  LocalStorage.set("farmedBlocks", farmed)
 }
