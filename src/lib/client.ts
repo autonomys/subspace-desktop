@@ -243,7 +243,8 @@ export class Client {
 
   /* FARMER INTEGRATION */
   public async startFarming(path: string): Promise<void> {
-    return await tauri.invoke("farming", { path })
+    const reward_address = "st8BEmYq9j3zxgwbb6ZxSKKZw6rv5SUVWMibgBuP6ADV151rA"
+    return await tauri.invoke("farming", { path, rewardAddress: reward_address })
   }
 
   /* MNEMONIC displayed only FIRST LOAD on SaveKeys Modal. */

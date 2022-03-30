@@ -237,7 +237,6 @@ export default defineComponent({
     },
     async farmingWrapper(): Promise<void> {
       await this.client.startBlockSubscription()
-
       await this.client.startFarming(this.plotDirectory)
 
       const { utilCache } = await util.config.read(this.plotDirectory)

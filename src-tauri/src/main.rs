@@ -15,7 +15,7 @@ use serde::Serialize;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
-use subspace_core_primitives::PIECE_SIZE;
+use subspace_core_primitives::{PublicKey, PIECE_SIZE};
 use subspace_farmer::{
     Commitments, FarmerData, Farming, Identity, ObjectMappings, Plot, Plotting, RpcClient, WsRpc,
 };
@@ -48,8 +48,30 @@ fn plot_progress_tracker() -> usize {
 }
 
 #[tauri::command]
-async fn farming(path: String) {
-    farm(path.into(), "ws://127.0.0.1:9944").await.unwrap();
+fn check_reward_address_validity(s: &str) -> bool {
+    s.parse::<sp_core::sr25519::Public>()
+        .map(|key| PublicKey::from(key.0))
+        .is_ok()
+}
+
+#[tauri::command]
+async fn farming(path: String, reward_address: String) {
+    match reward_address.len() {
+        0 => {
+            farm(path.into(), "ws://127.0.0.1:9944", None)
+                .await
+                .unwrap();
+        }
+        _ => {
+            if let Ok(address) = parse_reward_address(&reward_address) {
+                farm(path.into(), "ws://127.0.0.1:9944", Some(address))
+                    .await
+                    .unwrap();
+            } else {
+                error!("Reward address could not be parsed!");
+            }
+        }
+    }
 }
 
 #[tauri::command]
@@ -121,7 +143,8 @@ async fn main() -> Result<()> {
                 get_this_binary,
                 farming,
                 plot_progress_tracker,
-                start_node
+                start_node,
+                check_reward_address_validity
             ],
             #[cfg(target_os = "windows")]
             tauri::generate_handler![
@@ -132,7 +155,8 @@ async fn main() -> Result<()> {
                 get_disk_stats,
                 farming,
                 plot_progress_tracker,
-                start_node
+                start_node,
+                check_reward_address_validity
             ],
         )
         .build(tauri::generate_context!())
@@ -196,7 +220,11 @@ async fn init_node(base_directory: PathBuf) -> Result<FarmerIdentity> {
 
 /// Start farming by using plot in specified path and connecting to WebSocket server at specified
 /// address.
-async fn farm(base_directory: PathBuf, node_rpc_url: &str) -> Result<()> {
+async fn farm(
+    base_directory: PathBuf,
+    node_rpc_url: &str,
+    reward_address: Option<PublicKey>,
+) -> Result<()> {
     let identity = Identity::open_or_create(&base_directory)?;
 
     info!("Opening plot");
@@ -245,13 +273,15 @@ async fn farm(base_directory: PathBuf, node_rpc_url: &str) -> Result<()> {
         .map_err(|error| anyhow::Error::msg(error.to_string()))?;
 
     let subspace_codec = SubspaceCodec::new(identity.public_key());
-    let reward_address = identity
-        .public_key()
-        .as_ref()
-        .to_vec()
-        .try_into()
-        .map(From::<[u8; 32]>::from)
-        .unwrap();
+    let reward_address = reward_address.unwrap_or_else(|| {
+        identity
+            .public_key()
+            .as_ref()
+            .to_vec()
+            .try_into()
+            .map(From::<[u8; 32]>::from)
+            .expect("Length of public key is always correct")
+    });
 
     // start the farming task
     let farming_instance = Farming::start(
@@ -284,4 +314,9 @@ async fn farm(base_directory: PathBuf, node_rpc_url: &str) -> Result<()> {
     });
 
     Ok(())
+}
+
+fn parse_reward_address(s: &str) -> Result<PublicKey, sp_core::crypto::PublicError> {
+    s.parse::<sp_core::sr25519::Public>()
+        .map(|key| PublicKey::from(key.0))
 }
