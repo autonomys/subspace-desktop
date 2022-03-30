@@ -3,8 +3,8 @@ q-page(padding)
   .row.justify-center.q-mt-xl
     .text-h4 {{ lang.pageTitle }}
   .row.justify-center.q-mt-xl
-    .text-p {{ lang.privateKey }}
-  .row.justify-center
+    .text-p {{ lang.rewardAddress }}
+  .row.justify-center.q-mt-sm
     .col-auto
       .row
         div {{ lang.securePassword }}
@@ -16,10 +16,20 @@ q-page(padding)
         )
       .row.justify-center.q-mt-md(style="height: 50px")
         p(:class="statusMsgStyle" style="font-size: 20px") {{ KeyStatusMsg }}
+
+    .text-p {{ lang.extraTip }}
+  .row.justify-center.q-mt-sm
+    .col-auto
+      .row
+        q-btn(
+        :label="lang.connectWallet"
+        outline
+        size="lg"
+      )
   .row.justify-center.q-mt-sm
   .row.justify-end.items-center.q-mt-lg.absolute-bottom.q-pa-lg
     .col-auto.q-mr-md
-      q-btn(@click="$router.back()" color="grey" flat icon="west")
+      q-btn(@click="skip()" color="grey" label="Skip" flat icon-right="east")
     .col-auto
       q-btn(
         :disable="!validKey"
@@ -78,6 +88,9 @@ export default defineComponent({
         this.$router.replace({ name: "setupPlot" })
         Loading.hide()
       }, ms("3s"))
+    },
+    skip() {
+      this.$router.replace({ name: "setupPlot" })
     }
   }
 })

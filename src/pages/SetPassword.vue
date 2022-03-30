@@ -66,7 +66,7 @@ export default defineComponent({
   },
   methods: {
     async continue() {
-      this.$router.replace({ name: "setupPlot" })
+      this.$router.replace({ name: "importKey" })
       this.$nextTick(() => {
         setTimeout(async () => {
           const passHash = util.password.encrypt(this.pw1)

@@ -2,7 +2,8 @@
   "index": {
     "pageTitle": "Welcome",
     "quickStart": "Quick Start",
-    "subtitle": "Subspace Farmer is the easiest way to participate as a farmer in the Subspace Network."
+    "subtitle": "Subspace Farmer is the easiest way to participate as a farmer in the Subspace Network.",
+    "rewardAddress": "Reward Address"
   },
   "setPassword": {
     "continue": "continue",
@@ -82,12 +83,14 @@
     "rewards": "Reward + Fees"
   },
   "importKey": {
-    "tooltip": "Please provide a valid key first.",
-    "pageTitle": "Import Private Key",
-    "privateKey": "Private Key",
-    "validKey": "Valid Key",
-    "importing": "Importing private key...",
-    "imported": "Private Key Imported",
+    "tooltip": "Please provide a valid Reward Address first.",
+    "pageTitle": "Import Reward Address",
+    "rewardAddress": "Please enter your Reward Address in SS58 format (it should start with the letters \"st\")",
+    "validKey": "Valid Address",
+    "importing": "Importing Reward Address...",
+    "extraTip": "Your Reward Address is the public key of your Subspace account under your polkadot.js wallet.",
+    "connectWallet": "Connect Wallet",
+    "imported": "Reward Address Imported",
     "continue": "continue"
   },
   "mainMenu": {
