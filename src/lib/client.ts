@@ -7,6 +7,7 @@ import { invoke } from "@tauri-apps/api/tauri"
 import { reactive } from "vue"
 import * as process from "process"
 import * as util from "src/lib/util"
+import { LocalStorage } from "quasar"
 import { getStoredBlocks, storeBlocks } from "./blockStorage"
 import {
   emptyClientData,
@@ -243,8 +244,8 @@ export class Client {
 
   /* FARMER INTEGRATION */
   public async startFarming(path: string): Promise<void> {
-    const rewardAddress = "st8qyiyEtr9xdfyG1exTbAmWxqG7zx5FfsGAt75LMjCJ8vRgA"
-    return await tauri.invoke("farming", { path, rewardAddress: rewardAddress })
+    const rewardAddress = LocalStorage.getItem("rewardAddress")?.toString()
+    return await tauri.invoke("farming", { path, rewardAddress })
   }
 
   /* MNEMONIC displayed only FIRST LOAD on SaveKeys Modal. */

@@ -89,9 +89,11 @@
     "validKey": "Valid Address",
     "importing": "Importing Reward Address...",
     "extraTip": "Your Reward Address is the public key of your Subspace account under your polkadot.js wallet.",
+    "extraTip2": "You can also connect to your wallet to automate this process.",
     "connectWallet": "Connect Wallet",
     "imported": "Reward Address Imported",
-    "continue": "continue"
+    "continue": "continue",
+    "or": "OR"
   },
   "mainMenu": {
     "nonIncentivizedLabel": "Non-Incentivized Testnet",

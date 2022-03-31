@@ -2,23 +2,24 @@
 q-page(padding)
   .row.justify-center.q-mt-xl
     .text-h4 {{ lang.pageTitle }}
-  .row.justify-center.q-mt-xl
+  .row.justify-center.q-mt-md
     .text-p {{ lang.rewardAddress }}
   .row.justify-center.q-mt-sm
-    .col-auto
-      .row
-        div {{ lang.securePassword }}
-        q-input(
-          input-class="pwinput"
-          outlined
-          type="password"
-          v-model="keyInput"
-        )
-      .row.justify-center.q-mt-md(style="height: 50px")
-        p(:class="statusMsgStyle" style="font-size: 20px") {{ KeyStatusMsg }}
-
-    .text-p {{ lang.extraTip }}
+    div {{ lang.securePassword }}
+    q-input(
+      outlined
+      dense
+      class="reward-address"
+      v-model="rewardAddress"
+      input-class="text-center"
+    )
+  .row.justify-center.q-mt-xl
+    .text-h4 {{ lang.or }}
+  .row.justify-center.q-mt-xl
+    div {{ lang.extraTip }}
   .row.justify-center.q-mt-sm
+    div {{ lang.extraTip2 }}
+  .row.justify-center.q-mt-md
     .col-auto
       .row
         q-btn(
@@ -45,49 +46,32 @@ q-page(padding)
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import { Loading } from "quasar"
+import { LocalStorage } from "quasar"
 import { globalState as global } from "src/lib/global"
+import { invoke } from '@tauri-apps/api/tauri'
 const lang = global.data.loc.text.importKey
-import ms from "ms"
+
 export default defineComponent({
   data() {
     return {
-      keyInput: "",
+      rewardAddress: "",
       global: global.data,
       lang
     }
   },
-  computed: {
-    KeyStatusMsg(): string {
-      if (this.keyInput.length > 0) return lang.validKey
-      else return ""
-    },
-    validKey(): boolean {
-      if (this.keyInput.length > 0) return true
-      else return false
-    },
-    statusMsgStyle(): string[] {
-      if (this.validKey) return ["greenMsg"]
-      else return ["redMsg"]
-    }
-  },
   methods: {
-    importKey() {
-      Loading.show({
-        message: lang.importing,
-        boxClass: "bg-grey-2 text-grey-9"
-      })
-      setTimeout(() => {
-        Loading.show({
-          message: lang.imported,
-          boxClass: "bg-grey-2 text-grey-9",
-          spinnerColor: "green"
-        })
-      }, ms("2s"))
-      setTimeout(() => {
+    async validKey(): Promise<boolean> {
+      return invoke("check_reward_address_validity", { s: this.rewardAddress })
+    },
+    async importKey() {
+      if (await this.validKey) {
+        console.log("REWARD ADDRESS IS CORRECT")
+        LocalStorage.set("rewardAddress", this.rewardAddress)
         this.$router.replace({ name: "setupPlot" })
-        Loading.hide()
-      }, ms("3s"))
+      } else {
+        console.log("REWARD ADDRESS IS INVALID")
+      }
+
     },
     skip() {
       this.$router.replace({ name: "setupPlot" })
@@ -96,3 +80,11 @@ export default defineComponent({
 })
 </script>
 
+
+<style lang="sass">
+.reward-address
+  width: 500px
+  font-size: 17px
+  padding-top: 5px
+  margin-top: 0px
+</style>
