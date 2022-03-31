@@ -27,6 +27,7 @@ q-page.q-pl-xl.q-pr-xl.q-pt-lg
 import { defineComponent } from "vue"
 import { globalState as global } from "src/lib/global"
 import * as util from "src/lib/util"
+import { appConfig } from "src/lib/appConfig"
 
 const lang = global.data.loc.text.setPassword
 
@@ -61,23 +62,17 @@ export default defineComponent({
       return this.passwordValid && matching
     }
   },
-  mounted() {
-    // Dialog.create({ message: "hello" })
-  },
   methods: {
-    async continue() {
+    continue() {
+      appConfig.updateAppConfig(
+        null,
+        {
+          passHash: util.password.encrypt(this.pw1),
+          farmerPublicKey: ""
+        },
+        null
+      )
       this.$router.replace({ name: "setupPlot" })
-      this.$nextTick(() => {
-        setTimeout(async () => {
-          const passHash = util.password.encrypt(this.pw1)
-          const config = await util.config.read()
-          // Second config update, still no custom directory.
-          util.config.update({
-            ...config,
-            account: { passHash, farmerPublicKey: "" }
-          })
-        }, 3000)
-      })
     }
   }
 })

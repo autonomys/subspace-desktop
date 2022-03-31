@@ -26,7 +26,7 @@ const nullAL = {
 const linAL = {
 
   async enable({ appName, appPath, minimized }: AutoLaunchParams): Promise<ChildReturnData> {
-    const autostartAppFile = await this.getAutostartFilePath(appName)
+    const autostartAppFile = await this.createAutostartDir(appName)
     const response: ChildReturnData = { stderr: [], stdout: [] }
     const hiddenArg = minimized ? ' --minimized' : '';
     const contents = `
@@ -58,10 +58,18 @@ Icon=${appName}
       return false
     }
   },
-  async getAutostartFilePath(appName:string): Promise<string> {
-    const autostartDirectory = (await path.configDir()) + "/autostart"
-    const autostartAppFile = autostartDirectory + "/" + appName + ".desktop"
+  async getAutostartFilePath(appName: string): Promise<string> {
+    const autostartAppFile =
+      (await path.configDir()) + "autostart/" + appName + ".desktop"
     return autostartAppFile
+  },
+  async createAutostartDir(appName: string): Promise<string> {
+    const autostartDirectory = (await path.configDir()) + "autostart/"
+    const existDir = await fs.readDir(autostartDirectory).catch(console.error)
+    if (!existDir) {
+      await fs.createDir(autostartDirectory).catch(console.error)
+    }
+    return autostartDirectory + appName + ".desktop"
   }
 }
 
@@ -142,7 +150,12 @@ export class AutoLauncher {
     console.log('get_this_binary', this.appPath);
     if (osType.includes('Darwin')) this.autoLauncher = macAL // TODO: check when upgrade tauri
     // and if it is returning `Darwin`, change it back to `osType == 'Darwin'` instead of `includes`
-    else if (osType == 'Windows_NT') this.autoLauncher = winAL
+    else if (osType == 'Windows_NT') {
+      this.autoLauncher = winAL
+      // From Windows 11 Tests: get_this_binary returns a string with a prefix "\\?\" on C:\Users......". On boot, autostart can't locate "\\?\c:\DIR\subspace-desktop.exe 
+      const appPath = this.appPath
+      this.appPath = appPath.startsWith("\\\\?\\") ? appPath.replace("\\\\?\\", "") : appPath
+    }
     else this.autoLauncher = linAL
 
     // the app may be initialized before, but then user may have decided to move the app to another directory

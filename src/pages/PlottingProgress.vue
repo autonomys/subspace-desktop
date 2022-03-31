@@ -123,6 +123,7 @@ import { defineComponent } from "vue"
 import { globalState as global } from "src/lib/global"
 import * as util from "src/lib/util"
 import introModal from "components/introModal.vue"
+import { appConfig } from "src/lib/appConfig"
 
 const lang = global.data.loc.text.plottingProgress
 let farmerTimer: number
@@ -197,38 +198,34 @@ export default defineComponent({
   },
   methods: {
     async getPlotConfig() {
-      try {
-        this.client.setFirstLoad()
-        const appDir = await util.getAppDir()
-        const config = await util.config.read(appDir)
-        this.plottingData.remainingGB = config.utilCache.allocatedGB
-        this.plottingData.allocatedGB = config.utilCache.allocatedGB
+      this.client.setFirstLoad()
+      const config = appConfig.getAppConfig()
+      if (config) {
+        this.plottingData.remainingGB = config.segmentCache.allocatedGB
+        this.plottingData.allocatedGB = config.segmentCache.allocatedGB
         this.plotDirectory = config.plot.location
-      } catch (e) {
-        console.error("PLOT PROGRESS getPlotConfig | ERROR", e)
+      } else {
+        console.error("PLOT PROGRESS | ERROR | NO CONFIG LOADED")
       }
     },
     async waitNode() {
       const { publicKey } = await this.client.waitNodeStartApiConnect(
         this.plotDirectory
       )
-      const config = await util.config.read(this.plotDirectory)
-
-      if (publicKey && config) {
-        await util.config.update(
-          {
-            ...config,
-            plot: {
-              location: this.plotDirectory,
-              nodeLocation: this.plotDirectory
-            },
-            account: {
+      if (publicKey) {
+        const config = appConfig.getAppConfig()
+        if (config) {
+          appConfig.updateAppConfig(
+            null,
+            {
               farmerPublicKey: publicKey.toString(),
               passHash: config.account.passHash
-            }
-          },
-          this.plotDirectory
-        )
+            },
+            null
+          )
+        }
+      }else{
+        console.error("PLOT PROGRESS | ERROR | NO PUBLIC KEY")
       }
     },
     pausePlotting() {
@@ -240,15 +237,17 @@ export default defineComponent({
 
       await this.client.startFarming(this.plotDirectory)
 
-      const { utilCache } = await util.config.read(this.plotDirectory)
-      this.netSegIndex = utilCache.lastNetSegmentIndex
-      this.plottingData.allocatedGB = utilCache.allocatedGB
-
-      this.localSegIndex = await this.client.getLocalFarmerSegmentIndex()
-      do {
-        await new Promise((resolve) => setTimeout(resolve, 2000))
+      const config = appConfig.getAppConfig()
+      if (config) {
+        const { lastNetSegmentIndex, allocatedGB } = config.segmentCache
+        this.netSegIndex = lastNetSegmentIndex
+        this.plottingData.allocatedGB = allocatedGB
         this.localSegIndex = await this.client.getLocalFarmerSegmentIndex()
-      } while (this.localSegIndex < this.netSegIndex)
+        do {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+          this.localSegIndex = await this.client.getLocalFarmerSegmentIndex()
+        } while (this.localSegIndex < this.netSegIndex)
+      }
     },
     startTimers() {
       farmerTimer = window.setInterval(() => {
