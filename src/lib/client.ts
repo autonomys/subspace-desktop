@@ -82,6 +82,8 @@ export class Client {
                   // TODO
                 }
               })
+              const addr: string | null = LocalStorage.getItem("rewardAddress")
+              const addr2: string = addr ?? farmerPublicKey
               const block: FarmedBlock = {
                 author: farmerPublicKey,
                 id: hash.toString(),
@@ -89,7 +91,8 @@ export class Client {
                 transactions: 0,
                 blockNum,
                 blockReward,
-                feeReward: 0
+                feeReward: 0,
+                rewardAddr: addr2
               }
               this.data.farming.farmed = [block].concat(
                 this.data.farming.farmed

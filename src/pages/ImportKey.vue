@@ -64,7 +64,7 @@ export default defineComponent({
       return invoke("check_reward_address_validity", { s: this.rewardAddress })
     },
     async importKey() {
-      if (await this.validKey) {
+      if (await this.validKey()) {
         console.log("REWARD ADDRESS IS CORRECT")
         LocalStorage.set("rewardAddress", this.rewardAddress)
         this.$router.replace({ name: "setupPlot" })

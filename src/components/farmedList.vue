@@ -49,7 +49,7 @@ q-card(bordered flat)
         q-separator
         .row.q-gutter-sm.q-pa-xs.q-ml-sm
           .col-3.ellipsis
-            p {{ block.author.substring(0, 9) + '...' + block.author.substring(block.author.length - 9, block.author.length - 1) }}
+            p {{ block.rewardAddr.substring(0, 9) + '...' + block.rewardAddr.substring(block.rewardAddr.length - 9, block.rewardAddr.length - 1) }}
           .col-1
             p {{ block.blockNum }}
           .col-4
