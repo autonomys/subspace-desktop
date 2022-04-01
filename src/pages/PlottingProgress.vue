@@ -223,8 +223,7 @@ export default defineComponent({
               nodeLocation: this.plotDirectory
             },
             account: {
-              farmerPublicKey: publicKey.toString(),
-              passHash: config.account.passHash
+              farmerPublicKey: publicKey.toString()
             }
           },
           this.plotDirectory

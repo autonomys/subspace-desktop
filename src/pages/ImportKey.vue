@@ -13,34 +13,20 @@ q-page(padding)
       v-model="rewardAddress"
       input-class="text-center"
     )
-  .row.justify-center.q-mt-xl
-    .text-h4 {{ lang.or }}
-  .row.justify-center.q-mt-xl
-    div {{ lang.extraTip }}
-  .row.justify-center.q-mt-sm
-    div {{ lang.extraTip2 }}
-  .row.justify-center.q-mt-md
-    .col-auto
-      .row
-        q-btn(
-        :label="lang.connectWallet"
-        outline
-        size="lg"
-      )
   .row.justify-center.q-mt-sm
   .row.justify-end.items-center.q-mt-lg.absolute-bottom.q-pa-lg
     .col-auto.q-mr-md
       q-btn(@click="skip()" color="grey" label="Skip" flat icon-right="east")
     .col-auto
       q-btn(
-        :disable="!validKey"
+        :disable="!isValidSubstrateAddress"
         :label="lang.continue"
         @click="importKey()"
         icon-right="arrow_forward"
         outline
         size="lg"
       )
-      q-tooltip.q-pa-md(v-if="!validKey")
+      q-tooltip.q-pa-md(v-if="!isValidSubstrateAddress")
         p.q-mb-lg {{ lang.tooltip }}
 </template>
 
@@ -48,7 +34,9 @@ q-page(padding)
 import { defineComponent } from "vue"
 import { LocalStorage } from "quasar"
 import { globalState as global } from "src/lib/global"
-import { invoke } from '@tauri-apps/api/tauri'
+// Import Polkadot.js API dependencies.
+import { decodeAddress, encodeAddress } from "@polkadot/keyring"
+import { hexToU8a, isHex } from "@polkadot/util"
 const lang = global.data.loc.text.importKey
 
 export default defineComponent({
@@ -59,19 +47,21 @@ export default defineComponent({
       lang
     }
   },
-  methods: {
-    async validKey(): Promise<boolean> {
-      return invoke("check_reward_address_validity", { s: this.rewardAddress })
-    },
-    async importKey() {
-      if (await this.validKey()) {
-        console.log("REWARD ADDRESS IS CORRECT")
-        LocalStorage.set("rewardAddress", this.rewardAddress)
-        this.$router.replace({ name: "setupPlot" })
-      } else {
-        console.log("REWARD ADDRESS IS INVALID")
+  computed: {
+    isValidSubstrateAddress(): boolean {
+      try {
+        encodeAddress(isHex(this.rewardAddress) ? hexToU8a(this.rewardAddress) : decodeAddress(this.rewardAddress))
+        return true
+      } catch (error) {
+        return false
       }
+    },
+  },
+  methods: {
 
+    async importKey() {
+      LocalStorage.set("rewardAddress", this.rewardAddress)
+      this.$router.replace({ name: "setupPlot" })
     },
     skip() {
       this.$router.replace({ name: "setupPlot" })

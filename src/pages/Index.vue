@@ -7,9 +7,16 @@ q-page(padding)
   .row.justify-center.q-mt-xl
     q-btn(
       :label="lang.quickStart"
-      @click="$router.push({ name: 'setPassword' })"
+      @click="$router.push({ name: 'setupPlot' })"
       outline
       size="xl"
+    )
+  .row.justify-center.q-mt-sm
+    q-btn(
+      :label="lang.advanced"
+      @click="$router.push({ name: 'importKey' })"
+      color="grey"
+      flat
     )
 </template>
 

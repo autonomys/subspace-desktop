@@ -48,13 +48,6 @@ fn plot_progress_tracker() -> usize {
 }
 
 #[tauri::command]
-fn check_reward_address_validity(s: &str) -> bool {
-    s.parse::<sp_core::sr25519::Public>()
-        .map(|key| PublicKey::from(key.0))
-        .is_ok()
-}
-
-#[tauri::command]
 async fn farming(path: String, reward_address: String) {
     match reward_address.len() {
         0 => {
@@ -144,7 +137,6 @@ async fn main() -> Result<()> {
                 farming,
                 plot_progress_tracker,
                 start_node,
-                check_reward_address_validity
             ],
             #[cfg(target_os = "windows")]
             tauri::generate_handler![
@@ -156,7 +148,6 @@ async fn main() -> Result<()> {
                 farming,
                 plot_progress_tracker,
                 start_node,
-                check_reward_address_validity
             ],
         )
         .build(tauri::generate_context!())

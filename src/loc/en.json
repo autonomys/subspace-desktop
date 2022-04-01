@@ -3,18 +3,7 @@
     "pageTitle": "Welcome",
     "quickStart": "Quick Start",
     "subtitle": "Subspace Farmer is the easiest way to participate as a farmer in the Subspace Network.",
-    "rewardAddress": "Reward Address"
-  },
-  "setPassword": {
-    "continue": "continue",
-    "pageTitle": "Setup Password",
-    "infoDialog": "This password will be used to encrypt your keys. If you lose your password then the only way to recover your account is to re-import your private keys.",
-    "securePassword": "Secure Password",
-    "confirmPassword": "Confirm Password",
-    "pwError1": "Password is too short",
-    "pwError2": "Passwords don't match",
-    "pwSuccess": "Password is valid",
-    "tooltip": "Please enter a valid password to continue"
+    "advanced": "Advanced"
   },
   "saveKeys": {
     "pageTitle": "Backup Private Key",
@@ -83,7 +72,7 @@
     "rewards": "Reward + Fees"
   },
   "importKey": {
-    "tooltip": "Please provide a valid Reward Address first.",
+    "tooltip": "Please provide a valid Reward Address to proceed.",
     "pageTitle": "Import Reward Address",
     "rewardAddress": "Please enter your Reward Address in SS58 format (it should start with the letters \"st\")",
     "validKey": "Valid Address",

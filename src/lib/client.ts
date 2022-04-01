@@ -247,7 +247,7 @@ export class Client {
 
   /* FARMER INTEGRATION */
   public async startFarming(path: string): Promise<void> {
-    const rewardAddress = LocalStorage.getItem("rewardAddress")?.toString()
+    const rewardAddress = LocalStorage.getItem("rewardAddress")?.toString() || ""
     return await tauri.invoke("farming", { path, rewardAddress })
   }
 

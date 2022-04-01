@@ -65,12 +65,12 @@ export async function reset(dir?: string): Promise<void> {
 export interface ConfigFile {
   [index: string]: any
   plot: { location: string; nodeLocation: string }
-  account: { farmerPublicKey: string; passHash: string }
+  account: { farmerPublicKey: string }
   utilCache: { lastNetSegmentIndex: number; allocatedGB: number }
 }
 const emptyConfig: ConfigFile = {
   plot: { location: "", nodeLocation: "" },
-  account: { farmerPublicKey: "", passHash: "" },
+  account: { farmerPublicKey: "" },
   utilCache: { lastNetSegmentIndex: 0, allocatedGB: 0 }
 }
 export const config = {
@@ -79,7 +79,6 @@ export const config = {
     if (
       plot.location.length > 0 &&
       plot.nodeLocation.length > 0 &&
-      account.passHash.length > 0 &&
       account.farmerPublicKey.length > 0
     ) {
       return true
@@ -159,17 +158,6 @@ export function formatMS(duration: number): string {
   ret += "" + mins + ":" + (secs < 10 ? "0" : "")
   ret += "" + secs
   return ret
-}
-
-export const password = {
-  encrypt(pass: string): string {
-    const salt = bcrypt.genSaltSync(10)
-    const hash = bcrypt.hashSync(pass, salt)
-    return hash
-  },
-  check(pass: string, hash: string): boolean {
-    return bcrypt.compareSync(pass, hash) // true
-  }
 }
 
 export const apiTypes = {
