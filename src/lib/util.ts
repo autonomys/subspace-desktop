@@ -1,21 +1,13 @@
 import {
   Dialog,
   DialogChainObject,
-  LocalStorage,
   LooseDictionary
 } from "quasar"
 import { Component } from "vue"
-import * as dialog from "@tauri-apps/api/dialog"
-import * as fs from "@tauri-apps/api/fs"
-import * as path from "@tauri-apps/api/path"
-import { invoke } from "@tauri-apps/api/tauri"
-import * as native from "./native"
-import * as bcrypt from "bcryptjs"
 import * as process from "process"
+import { appData } from "./appData"
 
-const tauri = { dialog, fs, path, invoke }
-
-export const dirName = process.env.DEFAULT_APP_DIR || ".subspace-desktop-farmer"
+export const dirName = process.env.DEFAULT_APP_DIR || "subspace-desktop"
 
 export const random = (min: number, max: number): number =>
   Math.floor(Math.random() * (max - min)) + min
@@ -43,102 +35,31 @@ export function plotTimeMsEstimate(gb: number): number {
   return gb * 5e4
 }
 
-export async function getAppDir(): Promise<string> {
-  const appDir = LocalStorage.getItem("appDir")?.toString()
-  if (appDir) return appDir
-  return (await tauri.path.homeDir()) + dirName
+export async function resetAndClear(): Promise<void> {
+  await appData.clearDataDir()
 }
-
-export async function reset(dir?: string): Promise<void> {
-  try {
-    const { plot } = await config.read(dir)
-    if (plot?.location) await config.clear(plot.location)
-    else {
-      await config.clear()
-    }
-    LocalStorage.clear()
-  } catch (error) {
-    console.error(error)
-  }
-}
-
-export interface ConfigFile {
+export interface AppConfig {
   [index: string]: any
-  plot: { location: string; nodeLocation: string }
-  account: { farmerPublicKey: string }
-  utilCache: { lastNetSegmentIndex: number; allocatedGB: number }
+  plot: Plot
+  account: Account
+  segmentCache: SegmentCache
 }
-const emptyConfig: ConfigFile = {
-  plot: { location: "", nodeLocation: "" },
-  account: { farmerPublicKey: "" },
-  utilCache: { lastNetSegmentIndex: 0, allocatedGB: 0 }
-}
-export const config = {
-  validate(config: ConfigFile): boolean {
-    const { plot, account } = config
-    if (
-      plot.location.length > 0 &&
-      plot.nodeLocation.length > 0 &&
-      account.farmerPublicKey.length > 0
-    ) {
-      return true
-    }
-    return false
-  },
-  async read(dir?: string): Promise<ConfigFile> {
-    if (!dir) dir = (await tauri.path.homeDir()) + dirName
-    const result = await tauri.fs.readTextFile(dir + "/config.json")
-    const config: ConfigFile = JSON.parse(result)
-    return config
-  },
-  async write(dir: string = "", config: ConfigFile): Promise<void> {
-    if (dir == "") dir = (await tauri.path.homeDir()) + dirName
-    await native.createDir(dir).catch(console.error)
-    await tauri.fs
-      .writeFile({
-        path: dir + "/config.json",
-        contents: JSON.stringify(config, null, 2)
-      })
-      .catch(console.error)
-  },
-  async clear(dir?: string): Promise<void> {
-    if (!dir) dir = (await tauri.path.homeDir()) + dirName
-    await tauri.fs.removeDir(dir, { recursive: true }).catch(console.error)
-  },
-  async update(newData: ConfigFile, dir?: string): Promise<void> {
-    const config = (await this.read(dir).catch(console.error)) || emptyConfig
-    for (const [key, value] of Object.entries(newData)) {
-      Object.assign(config[key], value)
-    }
-    await this.write(dir, config)
-  },
-  async writeEmpty(): Promise<void> {
-    const dir = (await tauri.path.homeDir()) + dirName
-    await native.createDir(dir).catch(console.error)
-    await tauri.fs
-      .writeFile({
-        path: dir + "/config.json",
-        contents: JSON.stringify(emptyConfig, null, 2)
-      })
-      .catch(console.error)
-  },
-  async moveToSelectedDir(defaultDir: string, newDir: string): Promise<void> {
-    const config = await this.read(defaultDir).catch(console.error)
-    await native.createDir(newDir).catch(console.error)
-    await tauri.fs
-      .writeFile({
-        path: newDir + "/config.json",
-        contents: JSON.stringify(config, null, 2)
-      })
-      .catch(console.error)
 
-    await tauri.fs
-      .removeDir(defaultDir, { recursive: true })
-      .catch(console.error)
-  },
-  showErrorModal(): DialogChainObject {
-    return Dialog.create({ message: "Config file is corrupted, resetting..." })
-  }
+export interface SegmentCache {
+  lastNetSegmentIndex: number
+  allocatedGB: number
+}
+export interface Account {
+  farmerPublicKey: string
+}
+export interface Plot {
+  location: string
+}
+
+export const emptyAppConfig: AppConfig = {
+  plot: { location: "" },
+  account: { farmerPublicKey: "" },
+  segmentCache: { lastNetSegmentIndex: 0, allocatedGB: 0 }
 }
 
 export function formatMS(duration: number): string {

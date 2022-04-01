@@ -22,7 +22,7 @@ q-menu(auto-close)
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import { Dialog, Notify } from "quasar"
+import { Dialog, LocalStorage, Notify } from "quasar"
 import { relaunch } from "@tauri-apps/api/process"
 import * as util from "src/lib/util"
 import { globalState as global } from "src/lib/global"
@@ -86,10 +86,10 @@ export default defineComponent({
         ok: { label: "reset", icon: "refresh", flat: true, color: "red" },
         cancel: true
       }).onOk(async () => {
-        const appDir = await util.getAppDir()
-        await util.reset(appDir)
-        relaunch()
-        // this.$router.replace({ name: "index" })
+        await util.resetAndClear()
+        LocalStorage.clear()
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+        await relaunch()
       })
     },
     async initMenu() {

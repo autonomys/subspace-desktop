@@ -107,7 +107,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
     .col-auto
       q-btn(
         :disable="!canContinue"
-        @click="startPlotting()"
+        @click="confirmCreateDir()"
         color="blue-8"
         icon-right="downloading"
         label="Start Plotting"
@@ -126,9 +126,11 @@ import { chartOptions, ChartDataType, StatsType } from "src/lib/types"
 import * as native from "src/lib/native"
 import { debounce } from "quasar"
 import { globalState as global } from "src/lib/global"
-import { LocalStorage } from "quasar"
+import * as fs from "@tauri-apps/api/fs"
+import { appConfig } from "src/lib/appConfig"
+import { appData, appDataDialog } from "src/lib/appData"
 
-const tauri = { path }
+const tauri = { path, fs }
 const lang = global.data.loc.text.setupPlot
 
 export default defineComponent({
@@ -201,61 +203,64 @@ export default defineComponent({
     }
   },
   async mounted() {
-    const config = await util.config.read()
-    console.log("SETUP PLOT CONFIG", config)
-    const homeDir = await tauri.path.homeDir()
-    this.plotDirectory = homeDir
     await this.updateDriveStats()
-    this.defaultPath = (await tauri.path.homeDir()) + util.dirName
+    this.defaultPath = (await tauri.path.dataDir()) + util.dirName
     this.plotDirectory = this.defaultPath
-
-    try {
-      do {
-        const config = await util.config.read()
-        this.allocatedGB = config.utilCache?.allocatedGB || 0
-        await new Promise((resolve) => setTimeout(resolve, 500))
-      } while (this.allocatedGB <= 0)
-    } catch (error) {
-      console.log("mounted error", error)
-    }
+    do {
+      this.allocatedGB = appConfig.getAppConfig()?.segmentCache.allocatedGB || 0
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+    } while (this.allocatedGB <= 0)
   },
   async created() {
     this.$watch(
       "plotDirectory",
-      debounce(async (val): Promise<null> => {
-        if (this.plotDirectory == this.defaultPath) {
-          this.validPath = true
-          return null
+      debounce((val): null => {
+        if (val.length === 0) {
+          this.validPath = false
+        } else {
+          if (this.plotDirectory == this.defaultPath) {
+            this.validPath = true
+          } else {
+            // TODO: check if path is valid on any OS
+            this.validPath = true
+          }
         }
-        this.validPath = await native.dirExists(val)
-        if (this.validPath) await this.updateDriveStats()
         return null
       }, 500)
     )
   },
   methods: {
+    async confirmCreateDir() {
+      const dirExists = await native.dirExists(this.plotDirectory)
+
+      if (dirExists) {
+        const files = await tauri.fs
+          .readDir(this.plotDirectory)
+          .catch(console.error)
+
+        if (files) {
+          if (files.length === 0) {
+            appDataDialog.existingDirectoryConfirm(
+              this.plotDirectory,
+              this.startPlotting
+            )
+          } else if (files.length > 0) {
+            appDataDialog.emptyDirectoryInfo(this.plotDirectory)
+          }
+        }
+      } else if (!dirExists) {
+        appDataDialog.newDirectoryConfirm(
+          this.plotDirectory,
+          this.startPlotting
+        )
+      }
+    },
     async startPlotting() {
       if (this.plotDirectory.charAt(this.plotDirectory.length - 1) == "/")
         this.plotDirectory.slice(-1)
 
-      // If user a directory different than default, config.json file must be move from default directory to selected directory.
-      if (this.defaultPath != this.plotDirectory)
-        await util.config.moveToSelectedDir(
-          this.defaultPath,
-          this.plotDirectory
-        )
-      const config = await util.config.read(this.plotDirectory)
-      await util.config.update(
-        {
-          ...config,
-          plot: {
-            location: this.plotDirectory,
-            nodeLocation: this.plotDirectory
-          }
-        },
-        this.plotDirectory
-      )
-      LocalStorage.set("appDir", this.plotDirectory)
+      await appData.createCustomDataDir(this.plotDirectory)
+      appConfig.updateAppConfig({ location: this.plotDirectory }, null, null)
       this.$router.replace({ name: "plottingProgress" })
     },
     async updateDriveStats() {

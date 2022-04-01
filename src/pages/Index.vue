@@ -24,28 +24,34 @@ q-page(padding)
 import { defineComponent } from "vue"
 import { globalState as global } from "src/lib/global"
 import * as util from "src/lib/util"
+import { appConfig } from "src/lib/appConfig"
+import { LocalStorage } from "quasar"
 const lang = global.data.loc.text.index
 
 export default defineComponent({
   data() {
     return { lang, client: global.client }
   },
-  async mounted() {
+  mounted() {
     try {
       this.checkDev()
-      const appDir = await util.getAppDir()
-      const config = await util.config.read(appDir)
-      const validConfig = util.config.validate(config)
-      const { plot, account } = config
-
-      if (validConfig && plot && account) {
-        console.log("INDEX - NOT First Time RUN.")
-        this.dashboard()
-      } else {
-        await this.clear()
+      const config = appConfig.getAppConfig()
+      if (config) {
+        const { plot, account } = config
+        if (
+          plot &&
+          account &&
+          plot.location.length > 0 &&
+          account.passHash.length > 0
+        ) {
+          console.log("INDEX - NOT First Time RUN.")
+          this.dashboard()
+          return
+        }
       }
+      this.clear()
     } catch (e) {
-      await this.clear()
+      this.clear()
     }
   },
   methods: {
@@ -58,10 +64,10 @@ export default defineComponent({
     dashboard() {
       this.$router.replace({ name: "dashboard" })
     },
-    async clear() {
+    clear() {
       console.log("INDEX - First Time RUN.")
-      await util.config.clear()
-      await util.config.writeEmpty()
+      LocalStorage.clear()
+      appConfig.initAppConfig()
       this.loadNetworkData()
     },
     async loadNetworkData() {
@@ -69,14 +75,9 @@ export default defineComponent({
       const lastNetSegmentIndex = await this.client.getNetworkSegmentIndex()
       const totalSize = lastNetSegmentIndex * 256 * util.PIECE_SIZE
       const allocatedGB = Math.round((totalSize * 100) / util.GB) / 100
-
-      const config = await util.config.read()
-      await util.config.update({
-        ...config,
-        utilCache: {
-          lastNetSegmentIndex,
-          allocatedGB: allocatedGB === 0 ? 0.1 : allocatedGB
-        }
+      appConfig.updateAppConfig(null, null, {
+        lastNetSegmentIndex,
+        allocatedGB: allocatedGB === 0 ? 0.1 : allocatedGB
       })
     }
   }

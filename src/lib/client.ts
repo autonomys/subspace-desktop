@@ -16,6 +16,7 @@ import {
   ClientIdentity,
   SubPreDigest
 } from "src/lib/types"
+import { appConfig } from "./appConfig"
 
 const tauri = { event, invoke }
 const SUNIT = 1000000000000000000n
@@ -49,8 +50,9 @@ export class Client {
         this.stop()
       },
       start: async (): Promise<void> => {
-        const appDir = await util.getAppDir()
-        const { farmerPublicKey } = (await util.config.read(appDir)).account
+        const config = appConfig.getAppConfig()
+        if (!config) return
+        const { farmerPublicKey } = config.account
 
         this.unsubscribe = await this.localApi.rpc.chain.subscribeNewHeads(
           async ({ hash, number }) => {
@@ -77,7 +79,7 @@ export class Client {
                     "u128",
                     data[1]
                   )
-                  blockReward =  Number(reward.toBigInt() * 100n / SUNIT) / 100
+                  blockReward = Number((reward.toBigInt() * 100n) / SUNIT) / 100
                 } else if (section === "transactionFees") {
                   // TODO
                 }
@@ -224,7 +226,7 @@ export class Client {
     await this.connectLocalApi()
     return clientIdentity
   }
-
+  
   // TODO: Disable mnemonic return from tauri commmand instead of this validation.
   private async startNode(path: string): Promise<ClientIdentity> {
     const { publicKey, mnemonic } = await tauri.invoke("start_node", { path })
