@@ -41,8 +41,7 @@ export default defineComponent({
         if (
           plot &&
           account &&
-          plot.location.length > 0 &&
-          account.passHash.length > 0
+          plot.location.length > 0
         ) {
           console.log("INDEX - NOT First Time RUN.")
           this.dashboard()

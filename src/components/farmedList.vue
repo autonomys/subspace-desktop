@@ -34,11 +34,12 @@ q-card(bordered flat)
           )
 
   q-separator
-  .row.q-gutter-sm.q-pa-md
+  .row.q-pa-xs.q-ml-sm.q-ma-sm
     .col-3 {{ lang.farmedBy }}
-    .col-1 {{ lang.blockNum }}
-    .col-4 {{ lang.time }}
+    .col-2 {{ lang.blockNum }}
+    .col-2 {{ lang.time }}
     .col-2 {{ lang.rewards }}
+    .col-3 {{ lang.rewardAddr }}
   q-scroll-area(:style="blocksListStyle")
     transition-group(
       appear
@@ -47,17 +48,17 @@ q-card(bordered flat)
     )
       .bg-white(:key="block.time" v-for="block of farmedBlocksList")
         q-separator
-        .row.q-gutter-sm.q-pa-xs.q-ml-sm
-          .col-3.ellipsis
-            p {{ block.rewardAddr.substring(0, 9) + '...' + block.rewardAddr.substring(block.rewardAddr.length - 9, block.rewardAddr.length - 1) }}
-          .col-1
-            p {{ block.blockNum }}
-          .col-4
-            p {{ new Date(block.time).toLocaleString() }}
+        .row.q-pa-xs.q-ml-sm.q-ma-xs
+          .col-3
+            p {{ block.author.substring(0, 7) + '...' + block.author.substring(block.author.length - 7, block.author.length) }}
+          .col-2
+            a(:href="block.appsLink" target="_blank") # {{ block.blockNum.toLocaleString() }}
+          .col-2
+            p.text-weight-light {{ formatDate(block.time) }}
           .col-2
             p {{ block.blockReward }} testnetSSC
-          .col-auto
-            q-btn(color="grey" flat icon="info" size="sm")
+          .col-3
+            p {{ block.rewardAddr.substring(0, 8) + '...' + block.rewardAddr.substring(block.rewardAddr.length - 8, block.rewardAddr.length) }}
 </template>
 
 <script lang="ts">
@@ -65,6 +66,7 @@ import { defineComponent } from "vue"
 import * as util from "src/lib/util"
 import { globalState as global } from "src/lib/global"
 import { FarmedBlock } from "src/lib/types"
+import { formatDistanceToNowStrict } from "date-fns"
 
 const lang = global.data.loc.text.dashboard
 
@@ -83,6 +85,11 @@ export default defineComponent({
     },
     blocksListStyle(): { [index: string]: string } {
       return this.expanded ? { height: "370px" } : { height: "185px" }
+    }
+  },
+  methods: {
+    formatDate(date: Date) {
+      return formatDistanceToNowStrict(date)
     }
   }
 })

@@ -23,6 +23,7 @@ const SUNIT = 1000000000000000000n
 
 const NETWORK_RPC = process.env.PUBLIC_API_WS || "ws://localhost:9944"
 const LOCAL_RPC = process.env.LOCAL_API_WS || "ws://localhost:9944"
+const appsLink = "https://polkadot.js.org/apps/?rpc=" + NETWORK_RPC + "#/explorer/query/"
 export class Client {
   protected firstLoad = false
   protected mnemonic = ""
@@ -94,7 +95,8 @@ export class Client {
                 blockNum,
                 blockReward,
                 feeReward: 0,
-                rewardAddr: addr2
+                rewardAddr: addr2,
+                appsLink: appsLink + blockNum.toString()
               }
               this.data.farming.farmed = [block].concat(
                 this.data.farming.farmed
