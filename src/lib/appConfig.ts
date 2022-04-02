@@ -3,7 +3,8 @@ import { Account, AppConfig, Plot, emptyAppConfig, SegmentCache } from "./util"
 
 export const appConfig = {
   initAppConfig(): void {
-    LocalStorage.set("appConfig", emptyAppConfig)
+    if(!this.getAppConfig())
+      LocalStorage.set("appConfig", emptyAppConfig)
   },
   getAppConfig(): AppConfig | void {
     const appConfig = LocalStorage.getItem("appConfig")
@@ -12,7 +13,8 @@ export const appConfig = {
   updateAppConfig(
     plot: Plot | null,
     account: Account | null,
-    segmentCache: SegmentCache | null
+    segmentCache: SegmentCache | null,
+    launchOnBoot: boolean | null
   ): void {
     const appConfig = this.getAppConfig()
     if (appConfig) {
@@ -20,6 +22,7 @@ export const appConfig = {
       if (plot) newAppConfig.plot = plot
       if (account) newAppConfig.account = account
       if (segmentCache) newAppConfig.segmentCache = segmentCache
+      if (launchOnBoot) newAppConfig.launchOnBoot = launchOnBoot
       LocalStorage.set("appConfig", newAppConfig)
     }
   }

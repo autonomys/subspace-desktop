@@ -221,7 +221,7 @@ export default defineComponent({
               farmerPublicKey: publicKey.toString(),
               passHash: config.account.passHash
             },
-            null
+            null, null
           )
         }
       }else{
