@@ -17,8 +17,6 @@ pub fn get_tray_menu() -> SystemTray {
 
 pub fn get_menu() -> Menu {
     let my_app_menu = Menu::new()
-        .add_native_item(MenuItem::Services)
-        .add_native_item(MenuItem::Separator)
         .add_native_item(MenuItem::Hide)
         .add_native_item(MenuItem::Separator)
         .add_native_item(MenuItem::Quit)
