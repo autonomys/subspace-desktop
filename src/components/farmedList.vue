@@ -36,9 +36,9 @@ q-card(bordered flat)
   q-separator
   .row.q-pa-sm.q-ml-lg.q-ma-sm
     .col-4 {{ lang.farmedBy }}
-    .col {{ lang.blockNum }}
-    .col {{ lang.time }}
-    .col {{ lang.rewards }}
+    .col-3 {{ lang.blockNum }}
+    .col-3 {{ lang.time }}
+    .col-2 {{ lang.rewards }}
   q-scroll-area(:style="blocksListStyle")
     transition-group(
       appear
@@ -48,11 +48,11 @@ q-card(bordered flat)
       .bg-white(:key="block.time" v-for="block of farmedBlocksList")
         q-separator
         .row.q-pa-xs.q-ml-sm.q-ma-xs
-          .col-3
+          .col-4
             p {{ block.rewardAddr.substring(0, 8) + '...' + block.rewardAddr.substring(block.rewardAddr.length - 8, block.rewardAddr.length) }}
-          .col-2
+          .col-3
             a(:href="block.appsLink" target="_blank") # {{ block.blockNum.toLocaleString() }}
-          .col-2
+          .col-3
             p.text-weight-light {{ formatDate(block.time) }}
           .col-2
             p {{ block.blockReward }} testnetSSC
