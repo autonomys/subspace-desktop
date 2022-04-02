@@ -6,6 +6,7 @@
 #[cfg(target_os = "windows")]
 mod windows;
 
+mod menu;
 mod node;
 
 use anyhow::Result;
@@ -20,10 +21,10 @@ use subspace_farmer::{
     Commitments, FarmerData, Farming, Identity, ObjectMappings, Plot, Plotting, RpcClient, WsRpc,
 };
 use subspace_solving::SubspaceCodec;
+use tauri::SystemTrayEvent;
 use tauri::{
     api::{self},
-    CustomMenuItem, Env, Manager, Menu, MenuItem, RunEvent, Submenu, SystemTray, SystemTrayEvent,
-    SystemTrayMenu, SystemTrayMenuItem,
+    Env, Manager, RunEvent,
 };
 use tokio::runtime::Handle;
 
@@ -77,28 +78,9 @@ fn get_this_binary() -> PathBuf {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let quit = CustomMenuItem::new("quit".to_string(), "Quit");
-    let toggle_visibility = CustomMenuItem::new("toggle_visibility".to_string(), "Hide");
-    let tray_menu = SystemTrayMenu::new()
-        .add_item(toggle_visibility)
-        .add_native_item(SystemTrayMenuItem::Separator)
-        .add_item(quit);
-    let tray = SystemTray::new().with_menu(tray_menu);
-
-    let my_app_menu = Menu::new()
-        .add_native_item(MenuItem::Cut)
-        .add_native_item(MenuItem::Copy)
-        .add_native_item(MenuItem::Paste)
-        .add_native_item(MenuItem::Undo)
-        .add_native_item(MenuItem::Redo)
-        .add_native_item(MenuItem::Hide)
-        .add_native_item(MenuItem::Minimize)
-        .add_native_item(MenuItem::Quit);
-    let menu = Menu::new().add_submenu(Submenu::new("My app", my_app_menu));
-
     let app = tauri::Builder::default()
-        .menu(menu)
-        .system_tray(tray)
+        .menu(menu::get_menu())
+        .system_tray(menu::get_tray_menu())
         .on_system_tray_event(|app, event| {
             if let SystemTrayEvent::MenuItemClick { id, .. } = event {
                 let item_handle = app.tray_handle().get_item(&id);
