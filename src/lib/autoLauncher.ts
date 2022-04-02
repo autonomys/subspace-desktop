@@ -162,7 +162,7 @@ export class AutoLauncher {
 
     // check whether the user has set autoLaunch to `true`
     const config = appConfig.getAppConfig()
-    if (config && config.launchPreference === true || !config) {
+    if (config && config.launchOnBoot === true || !config) {
       // the app may be initialized before, but then user may have decided to move the app to another directory
       // in this case, we have to delete the previous autoLaunch entry, and create a new one
       await this.disable()

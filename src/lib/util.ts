@@ -44,7 +44,7 @@ export interface AppConfig {
   plot: Plot
   account: Account
   segmentCache: SegmentCache
-  launchPreference: boolean
+  launchOnBoot: boolean
 }
 
 export interface SegmentCache {
@@ -63,7 +63,7 @@ export const emptyAppConfig: AppConfig = {
   plot: { location: "" },
   account: { farmerPublicKey: "", passHash: "" },
   segmentCache: { lastNetSegmentIndex: 0, allocatedGB: 0 },
-  launchPreference: true
+  launchOnBoot: true
 }
 
 export function formatMS(duration: number): string {
