@@ -66,7 +66,6 @@ export default defineComponent({
     clear() {
       console.log("INDEX - First Time RUN.")
       LocalStorage.clear()
-      appConfig.initAppConfig()
       this.loadNetworkData()
     },
     async loadNetworkData() {
@@ -77,7 +76,7 @@ export default defineComponent({
       appConfig.updateAppConfig(null, null, {
         networkSegmentCount,
         allocatedGB: allocatedGB === 0 ? 0.1 : allocatedGB
-      })
+      }, null)
     }
   }
 })
