@@ -183,14 +183,12 @@ export class Client {
     return signedBlock.block.header.number.toNumber()
   }
 
-  /* SEGMENT INDEX */
-  // Used to check archived segments locally and display farmer plot status.
-  public async getLocalFarmerSegmentIndex(): Promise<number> {
+  public async getLocalSegmentCount(): Promise<number> {
     const plot_progress_tracker =
       ((await invoke("plot_progress_tracker")) as number) / 256
     return plot_progress_tracker <= 1 ? 1 : plot_progress_tracker - 1
   }
-  public async getNetworkSegmentIndex(): Promise<number> {
+  public async getNetworkSegmentCount(): Promise<number> {
     const recordsRoot = await this.publicApi.query.subspace.counterForRecordsRoot() as u32
     return recordsRoot.toNumber()
   }
