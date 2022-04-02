@@ -120,8 +120,8 @@ export default defineComponent({
       this.plot.state = "verifying"
       this.plot.message = lang.verifyingPlot
 
-      const lastNetSegmentIndex = await this.client.getNetworkSegmentIndex()
-      const totalSize = lastNetSegmentIndex * 256 * util.PIECE_SIZE
+      const networkSegmentCount = await this.client.getNetworkSegmentCount()
+      const totalSize = networkSegmentCount * 256 * util.PIECE_SIZE
       const allocatedGB = Math.round((totalSize * 100) / util.GB) / 100
       this.plot.plotSizeGB = allocatedGB
 
