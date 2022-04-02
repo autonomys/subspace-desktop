@@ -31,8 +31,7 @@ pub fn get_menu() -> Menu {
         .add_native_item(MenuItem::Cut)
         .add_native_item(MenuItem::Copy)
         .add_native_item(MenuItem::Paste)
-        .add_native_item(MenuItem::SelectAll)
-        .add_native_item(MenuItem::Separator);
+        .add_native_item(MenuItem::SelectAll);
 
     let window_menu = Menu::new()
         .add_native_item(MenuItem::Minimize)
