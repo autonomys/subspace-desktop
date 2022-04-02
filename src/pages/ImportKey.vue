@@ -12,6 +12,7 @@ q-page(padding)
       class="reward-address"
       v-model="rewardAddress"
       input-class="text-center"
+      :rules="[val => isValidSubstrateAddress(val) || 'Invalid address']"
     )
   .row.justify-center.q-mt-sm
   .row.justify-end.items-center.q-mt-lg.absolute-bottom.q-pa-lg
@@ -19,14 +20,14 @@ q-page(padding)
       q-btn(@click="skip()" color="grey" label="Skip" flat icon-right="east")
     .col-auto
       q-btn(
-        :disable="!isValidSubstrateAddress"
+        :disable="!isValidSubstrateAddress(rewardAddress)"
         :label="lang.continue"
         @click="importKey()"
         icon-right="arrow_forward"
         outline
         size="lg"
       )
-      q-tooltip.q-pa-md(v-if="!isValidSubstrateAddress")
+      q-tooltip.q-pa-md(v-if="!isValidSubstrateAddress(rewardAddress)")
         p.q-mb-lg {{ lang.tooltip }}
 </template>
 
@@ -34,7 +35,6 @@ q-page(padding)
 import { defineComponent } from "vue"
 import { LocalStorage } from "quasar"
 import { globalState as global } from "src/lib/global"
-// Import Polkadot.js API dependencies.
 import { decodeAddress, encodeAddress } from "@polkadot/keyring"
 import { hexToU8a, isHex } from "@polkadot/util"
 const lang = global.data.loc.text.importKey
@@ -47,18 +47,15 @@ export default defineComponent({
       lang
     }
   },
-  computed: {
-    isValidSubstrateAddress(): boolean {
+  methods: {
+    isValidSubstrateAddress(val: string): boolean {
       try {
-        encodeAddress(isHex(this.rewardAddress) ? hexToU8a(this.rewardAddress) : decodeAddress(this.rewardAddress))
+        encodeAddress(isHex(val) ? hexToU8a(val) : decodeAddress(val))
         return true
       } catch (error) {
         return false
       }
     },
-  },
-  methods: {
-
     async importKey() {
       LocalStorage.set("rewardAddress", this.rewardAddress)
       this.$router.replace({ name: "setupPlot" })
