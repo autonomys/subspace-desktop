@@ -76,14 +76,7 @@
     "tooltip": "Please provide a valid Reward Address to proceed.",
     "pageTitle": "Import Reward Address",
     "rewardAddress": "Please enter your Reward Address in SS58 format (it should start with the letters \"st\")",
-    "validKey": "Valid Address",
-    "importing": "Importing Reward Address...",
-    "extraTip": "Your Reward Address is the public key of your Subspace account under your polkadot.js wallet.",
-    "extraTip2": "You can also connect to your wallet to automate this process.",
-    "connectWallet": "Connect Wallet",
-    "imported": "Reward Address Imported",
-    "continue": "continue",
-    "or": "OR"
+    "continue": "continue"
   },
   "mainMenu": {
     "nonIncentivizedLabel": "Non-Incentivized Testnet",
