@@ -34,12 +34,11 @@ q-card(bordered flat)
           )
 
   q-separator
-  .row.q-pa-xs.q-ml-sm.q-ma-sm
-    .col-3 {{ lang.farmedBy }}
-    .col-2 {{ lang.blockNum }}
-    .col-2 {{ lang.time }}
-    .col-2 {{ lang.rewards }}
-    .col-3 {{ lang.rewardAddr }}
+  .row.q-pa-sm.q-ml-lg.q-ma-sm
+    .col-4 {{ lang.farmedBy }}
+    .col {{ lang.blockNum }}
+    .col {{ lang.time }}
+    .col {{ lang.rewards }}
   q-scroll-area(:style="blocksListStyle")
     transition-group(
       appear
@@ -50,15 +49,13 @@ q-card(bordered flat)
         q-separator
         .row.q-pa-xs.q-ml-sm.q-ma-xs
           .col-3
-            p {{ block.author.substring(0, 7) + '...' + block.author.substring(block.author.length - 7, block.author.length) }}
+            p {{ block.rewardAddr.substring(0, 8) + '...' + block.rewardAddr.substring(block.rewardAddr.length - 8, block.rewardAddr.length) }}
           .col-2
             a(:href="block.appsLink" target="_blank") # {{ block.blockNum.toLocaleString() }}
           .col-2
             p.text-weight-light {{ formatDate(block.time) }}
           .col-2
             p {{ block.blockReward }} testnetSSC
-          .col-3
-            p {{ block.rewardAddr.substring(0, 8) + '...' + block.rewardAddr.substring(block.rewardAddr.length - 8, block.rewardAddr.length) }}
 </template>
 
 <script lang="ts">
