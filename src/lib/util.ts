@@ -47,7 +47,7 @@ export interface AppConfig {
 }
 
 export interface SegmentCache {
-  lastNetSegmentIndex: number
+  networkSegmentCount: number
   allocatedGB: number
 }
 export interface Account {
@@ -61,7 +61,7 @@ export interface Plot {
 export const emptyAppConfig: AppConfig = {
   plot: { location: "" },
   account: { farmerPublicKey: "", passHash: "" },
-  segmentCache: { lastNetSegmentIndex: 0, allocatedGB: 0 }
+  segmentCache: { networkSegmentCount: 0, allocatedGB: 0 }
 }
 
 export function formatMS(duration: number): string {
