@@ -1,7 +1,7 @@
 import { ApiPromise, WsProvider } from "@polkadot/api"
 import type { Vec } from "@polkadot/types/codec"
-import type { u128 } from "@polkadot/types"
-import type { Hash, AccountId32 } from "@polkadot/types/interfaces"
+import type { u128, u32 } from "@polkadot/types"
+import type { AccountId32 } from "@polkadot/types/interfaces"
 import * as event from "@tauri-apps/api/event"
 import { invoke } from "@tauri-apps/api/tauri"
 import { reactive } from "vue"
@@ -189,35 +189,14 @@ export class Client {
     return signedBlock.block.header.number.toNumber()
   }
 
-  /* SEGMENT INDEX */
-  // Used to check archived segments locally and display farmer plot status.
-  public async getLocalFarmerSegmentIndex(): Promise<number> {
+  public async getLocalSegmentCount(): Promise<number> {
     const plot_progress_tracker =
       ((await invoke("plot_progress_tracker")) as number) / 256
     return plot_progress_tracker <= 1 ? 1 : plot_progress_tracker - 1
   }
-  // Used to check archived segments locally and display farmer plot status.
-  // TODO: Improve this, check if can get from storage queries.
-  public async getNetworkSegmentIndex(hash?: Hash): Promise<number> {
-    let signedBlock
-    if (hash) signedBlock = await this.publicApi.rpc.chain.getBlock(hash)
-    else signedBlock = await this.publicApi.rpc.chain.getBlock()
-    if (signedBlock.block.header.number.toNumber() < 100) return 1
-    else {
-      const allRecords: Vec<any> = await this.publicApi.query.system.events.at(
-        signedBlock.block.header.parentHash
-      )
-      for (const record of allRecords) {
-        const { section, method, data } = record.event
-        if (section === "subspace" && method === "RootBlockStored") {
-          const segmentIndex = data[0].asV0.segmentIndex.toNumber()
-          return segmentIndex <= 1 ? 1 : segmentIndex
-        }
-      }
-      return await this.getNetworkSegmentIndex(
-        signedBlock.block.header.parentHash
-      )
-    }
+  public async getNetworkSegmentCount(): Promise<number> {
+    const recordsRoot = await this.publicApi.query.subspace.counterForRecordsRoot() as u32
+    return recordsRoot.toNumber()
   }
 
   /* NODE INTEGRATION */

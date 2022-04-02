@@ -143,15 +143,15 @@ export default defineComponent({
       client: global.client,
       viewedIntro: false,
       plotFinished: false,
-      localSegIndex: 0,
-      netSegIndex: 0,
+      localSegmentCount: 0,
+      networkSegmentCount: 0,
       plotDirectory: ""
     }
   },
   computed: {
     progresspct(): number {
       const progress = parseFloat(
-        ((this.localSegIndex * 100) / this.netSegIndex).toFixed(2)
+        ((this.localSegmentCount * 100) / this.networkSegmentCount).toFixed(2)
       )
       return isNaN(progress) ? 0 : progress <= 100 ? progress : 100
     },
@@ -177,14 +177,14 @@ export default defineComponent({
       if (this.plottingData.finishedGB >= this.plottingData.allocatedGB)
         this.plottingData.finishedGB = this.plottingData.allocatedGB
     },
-    localSegIndex(localIndex) {
-      if (localIndex >= this.netSegIndex)
-        this.plottingData.status = `Archived ${localIndex.toLocaleString()} Segments`
+    localSegmentCount(localCount) {
+      if (localCount >= this.networkSegmentCount)
+        this.plottingData.status = `Archived ${localCount.toLocaleString()} Segments`
       else
-        this.plottingData.status = `Archived ${localIndex.toLocaleString()} of ${this.netSegIndex.toLocaleString()} Segments`
+        this.plottingData.status = `Archived ${localCount.toLocaleString()} of ${this.networkSegmentCount.toLocaleString()} Segments`
 
       this.plottingData.finishedGB =
-        (localIndex * this.plottingData.allocatedGB) / this.netSegIndex
+        (localCount * this.plottingData.allocatedGB) / this.networkSegmentCount
     }
   },
   async mounted() {
@@ -237,21 +237,21 @@ export default defineComponent({
 
       const config = appConfig.getAppConfig()
       if (config) {
-        const { lastNetSegmentIndex, allocatedGB } = config.segmentCache
-        this.netSegIndex = lastNetSegmentIndex
+        const { networkSegmentCount, allocatedGB } = config.segmentCache
+        this.networkSegmentCount = networkSegmentCount
         this.plottingData.allocatedGB = allocatedGB
-        this.localSegIndex = await this.client.getLocalFarmerSegmentIndex()
+        this.localSegmentCount = await this.client.getLocalSegmentCount()
         do {
           await new Promise((resolve) => setTimeout(resolve, 2000))
-          this.localSegIndex = await this.client.getLocalFarmerSegmentIndex()
-        } while (this.localSegIndex < this.netSegIndex)
+          this.localSegmentCount = await this.client.getLocalSegmentCount()
+        } while (this.localSegmentCount < this.networkSegmentCount)
       }
     },
     startTimers() {
       farmerTimer = window.setInterval(() => {
         this.elapsedms += 1000
         const ms =
-          (this.elapsedms * this.netSegIndex) / this.localSegIndex -
+          (this.elapsedms * this.networkSegmentCount) / this.localSegmentCount -
           this.elapsedms
         this.remainingms = util.toFixed(ms, 2)
       }, 1000)
