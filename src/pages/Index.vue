@@ -48,9 +48,9 @@ export default defineComponent({
           return
         }
       }
-      this.clear()
+      this.firstLoad()
     } catch (e) {
-      this.clear()
+      this.firstLoad()
     }
   },
   methods: {
@@ -63,9 +63,8 @@ export default defineComponent({
     dashboard() {
       this.$router.replace({ name: "dashboard" })
     },
-    clear() {
+    firstLoad() {
       console.log("INDEX - First Time RUN.")
-      LocalStorage.clear()
       this.loadNetworkData()
     },
     async loadNetworkData() {
