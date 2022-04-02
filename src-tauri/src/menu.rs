@@ -1,6 +1,7 @@
-use tauri::{
-    CustomMenuItem, Menu, MenuItem, Submenu, SystemTray, SystemTrayMenu, SystemTrayMenuItem,
-};
+use tauri::{CustomMenuItem, Menu, SystemTray, SystemTrayMenu, SystemTrayMenuItem};
+
+#[cfg(target_os = "macos")]
+use tauri::{MenuItem, Submenu};
 
 pub fn get_tray_menu() -> SystemTray {
     let quit = CustomMenuItem::new("quit".to_string(), "Quit");
