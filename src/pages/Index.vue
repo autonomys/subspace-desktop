@@ -25,7 +25,7 @@ import { defineComponent } from "vue"
 import { globalState as global } from "src/lib/global"
 import * as util from "src/lib/util"
 import { appConfig } from "src/lib/appConfig"
-import { LocalStorage } from "quasar"
+import { Notify } from "quasar"
 const lang = global.data.loc.text.index
 
 export default defineComponent({
@@ -66,6 +66,13 @@ export default defineComponent({
     firstLoad() {
       console.log("INDEX - First Time RUN.")
       this.loadNetworkData()
+      const config = appConfig.getAppConfig()
+      if (config && config.launchOnBoot == true) {
+        Notify.create({
+          message: "Subspace Desktop will be started on boot. You can disable this from settings (the gear icon on top-right).",
+          icon: "info"
+        })
+      }
     },
     async loadNetworkData() {
       await this.client.connectPublicApi()
