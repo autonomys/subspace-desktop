@@ -218,13 +218,12 @@ export default defineComponent({
           appConfig.updateAppConfig(
             null,
             {
-              farmerPublicKey: publicKey.toString(),
-              passHash: config.account.passHash
+              farmerPublicKey: publicKey.toString()
             },
             null, null
           )
         }
-      }else{
+      } else {
         console.error("PLOT PROGRESS | ERROR | NO PUBLIC KEY")
       }
     },
@@ -234,7 +233,6 @@ export default defineComponent({
     },
     async farmingWrapper(): Promise<void> {
       await this.client.startBlockSubscription()
-
       await this.client.startFarming(this.plotDirectory)
 
       const config = appConfig.getAppConfig()

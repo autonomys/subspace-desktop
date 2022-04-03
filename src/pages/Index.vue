@@ -7,9 +7,16 @@ q-page(padding)
   .row.justify-center.q-mt-xl
     q-btn(
       :label="lang.quickStart"
-      @click="$router.push({ name: 'setPassword' })"
+      @click="$router.push({ name: 'setupPlot' })"
       outline
       size="xl"
+    )
+  .row.justify-center.q-mt-sm
+    q-btn(
+      :label="lang.advanced"
+      @click="$router.push({ name: 'importKey' })"
+      color="grey"
+      flat
     )
 </template>
 
@@ -34,17 +41,16 @@ export default defineComponent({
         if (
           plot &&
           account &&
-          plot.location.length > 0 &&
-          account.passHash.length > 0
+          plot.location.length > 0
         ) {
           console.log("INDEX - NOT First Time RUN.")
           this.dashboard()
           return
         }
       }
-      this.clear()
+      this.firstLoad()
     } catch (e) {
-      this.clear()
+      this.firstLoad()
     }
   },
   methods: {
@@ -57,9 +63,8 @@ export default defineComponent({
     dashboard() {
       this.$router.replace({ name: "dashboard" })
     },
-    clear() {
+    firstLoad() {
       console.log("INDEX - First Time RUN.")
-      LocalStorage.clear()
       this.loadNetworkData()
     },
     async loadNetworkData() {
