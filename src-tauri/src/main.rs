@@ -6,6 +6,7 @@
 #[cfg(target_os = "windows")]
 mod windows;
 
+mod menu;
 mod node;
 
 use anyhow::Result;
@@ -20,10 +21,10 @@ use subspace_farmer::{
     Commitments, FarmerData, Farming, Identity, ObjectMappings, Plot, Plotting, RpcClient, WsRpc,
 };
 use subspace_solving::SubspaceCodec;
+use tauri::SystemTrayEvent;
 use tauri::{
     api::{self},
-    CustomMenuItem, Env, Manager, RunEvent, SystemTray, SystemTrayEvent, SystemTrayMenu,
-    SystemTrayMenuItem,
+    Env, Manager, RunEvent,
 };
 use tokio::runtime::Handle;
 
@@ -92,17 +93,9 @@ fn get_this_binary() -> PathBuf {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let quit = CustomMenuItem::new("quit".to_string(), "Quit");
-    let toggle_visibility = CustomMenuItem::new("toggle_visibility".to_string(), "Hide");
-
-    let tray_menu = SystemTrayMenu::new()
-        .add_item(toggle_visibility)
-        .add_native_item(SystemTrayMenuItem::Separator)
-        .add_item(quit);
-    let tray = SystemTray::new().with_menu(tray_menu);
-
     let app = tauri::Builder::default()
-        .system_tray(tray)
+        .menu(menu::get_menu())
+        .system_tray(menu::get_tray_menu())
         .on_system_tray_event(|app, event| {
             if let SystemTrayEvent::MenuItemClick { id, .. } = event {
                 let item_handle = app.tray_handle().get_item(&id);
