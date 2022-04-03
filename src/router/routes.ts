@@ -9,7 +9,6 @@ const routes: RouteRecordRaw[] = [
       { name: "dashboard", path: '/dashboard', component: (): RouteComponent => import('pages/Dashboard.vue') },
       { name: "plottingProgress", path: '/plottingProgress', component: (): RouteComponent => import('pages/PlottingProgress.vue') },
       { name: "setupPlot", path: '/setupPlot', component: (): RouteComponent => import('pages/SetupPlot.vue') },
-      { name: "setPassword", path: '/setPassword', component: (): RouteComponent => import('pages/SetPassword.vue') },
       { name: "index", path: '', component: (): RouteComponent => import('pages/Index.vue') },
     ],
   },

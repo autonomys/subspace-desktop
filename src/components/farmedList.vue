@@ -34,10 +34,10 @@ q-card(bordered flat)
           )
 
   q-separator
-  .row.q-gutter-sm.q-pa-md
-    .col-3 {{ lang.farmedBy }}
-    .col-1 {{ lang.blockNum }}
-    .col-4 {{ lang.time }}
+  .row.q-pa-sm.q-ml-lg.q-ma-sm
+    .col-4 {{ lang.farmedBy }}
+    .col-3 {{ lang.blockNum }}
+    .col-3 {{ lang.time }}
     .col-2 {{ lang.rewards }}
   q-scroll-area(:style="blocksListStyle")
     transition-group(
@@ -47,17 +47,15 @@ q-card(bordered flat)
     )
       .bg-white(:key="block.time" v-for="block of farmedBlocksList")
         q-separator
-        .row.q-gutter-sm.q-pa-xs.q-ml-sm
-          .col-3.ellipsis
-            p {{ block.author.substring(0, 9) + '...' + block.author.substring(block.author.length - 9, block.author.length - 1) }}
-          .col-1
-            p {{ block.blockNum }}
+        .row.q-pa-xs.q-ml-sm.q-ma-xs
           .col-4
-            p {{ new Date(block.time).toLocaleString() }}
+            p {{ block.rewardAddr.substring(0, 8) + '...' + block.rewardAddr.substring(block.rewardAddr.length - 8, block.rewardAddr.length) }}
+          .col-3
+            a(:href="block.appsLink" target="_blank") # {{ block.blockNum.toLocaleString() }}
+          .col-3
+            p.text-weight-light {{ formatDate(block.time) }}
           .col-2
             p {{ block.blockReward }} testnetSSC
-          .col-auto
-            q-btn(color="grey" flat icon="info" size="sm")
 </template>
 
 <script lang="ts">
@@ -65,6 +63,7 @@ import { defineComponent } from "vue"
 import * as util from "src/lib/util"
 import { globalState as global } from "src/lib/global"
 import { FarmedBlock } from "src/lib/types"
+import { formatDistanceToNowStrict } from "date-fns"
 
 const lang = global.data.loc.text.dashboard
 
@@ -83,6 +82,11 @@ export default defineComponent({
     },
     blocksListStyle(): { [index: string]: string } {
       return this.expanded ? { height: "370px" } : { height: "185px" }
+    }
+  },
+  methods: {
+    formatDate(date: Date) {
+      return formatDistanceToNowStrict(date)
     }
   }
 })

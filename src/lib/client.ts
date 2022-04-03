@@ -7,6 +7,7 @@ import { invoke } from "@tauri-apps/api/tauri"
 import { reactive } from "vue"
 import * as process from "process"
 import * as util from "src/lib/util"
+import { LocalStorage } from "quasar"
 import { getStoredBlocks, storeBlocks } from "./blockStorage"
 import {
   emptyClientData,
@@ -22,6 +23,7 @@ const SUNIT = 1000000000000000000n
 
 const NETWORK_RPC = process.env.PUBLIC_API_WS || "ws://localhost:9944"
 const LOCAL_RPC = process.env.LOCAL_API_WS || "ws://localhost:9944"
+const appsLink = "https://polkadot.js.org/apps/?rpc=" + NETWORK_RPC + "#/explorer/query/"
 export class Client {
   protected firstLoad = false
   protected mnemonic = ""
@@ -83,6 +85,8 @@ export class Client {
                   // TODO
                 }
               })
+              const addr: string | null = LocalStorage.getItem("rewardAddress")
+              const addr2: string = addr ?? farmerPublicKey
               const block: FarmedBlock = {
                 author: farmerPublicKey,
                 id: hash.toString(),
@@ -90,7 +94,9 @@ export class Client {
                 transactions: 0,
                 blockNum,
                 blockReward,
-                feeReward: 0
+                feeReward: 0,
+                rewardAddr: addr2,
+                appsLink: appsLink + blockNum.toString()
               }
               this.data.farming.farmed = [block].concat(
                 this.data.farming.farmed
@@ -224,7 +230,8 @@ export class Client {
 
   /* FARMER INTEGRATION */
   public async startFarming(path: string): Promise<void> {
-    return await tauri.invoke("farming", { path })
+    const rewardAddress = LocalStorage.getItem("rewardAddress")?.toString() || ""
+    return await tauri.invoke("farming", { path, rewardAddress })
   }
 
   /* MNEMONIC displayed only FIRST LOAD on SaveKeys Modal. */

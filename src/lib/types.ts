@@ -13,6 +13,8 @@ export interface FarmedBlock {
   blockReward: number
   feeReward: number
   id: string
+  rewardAddr: string
+  appsLink: string
 }
 
 export interface AutoLaunchParams {

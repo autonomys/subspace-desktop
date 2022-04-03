@@ -4,7 +4,6 @@ import {
   LooseDictionary
 } from "quasar"
 import { Component } from "vue"
-import * as bcrypt from "bcryptjs"
 import * as process from "process"
 import { appData } from "./appData"
 
@@ -53,7 +52,6 @@ export interface SegmentCache {
 }
 export interface Account {
   farmerPublicKey: string
-  passHash: string
 }
 export interface Plot {
   location: string
@@ -61,7 +59,7 @@ export interface Plot {
 
 export const emptyAppConfig: AppConfig = {
   plot: { location: "" },
-  account: { farmerPublicKey: "", passHash: "" },
+  account: { farmerPublicKey: "" },
   segmentCache: { networkSegmentCount: 0, allocatedGB: 0 },
   launchOnBoot: true
 }
@@ -83,17 +81,6 @@ export function formatMS(duration: number): string {
   ret += "" + mins + ":" + (secs < 10 ? "0" : "")
   ret += "" + secs
   return ret
-}
-
-export const password = {
-  encrypt(pass: string): string {
-    const salt = bcrypt.genSaltSync(10)
-    const hash = bcrypt.hashSync(pass, salt)
-    return hash
-  },
-  check(pass: string, hash: string): boolean {
-    return bcrypt.compareSync(pass, hash) // true
-  }
 }
 
 export const apiTypes = {
