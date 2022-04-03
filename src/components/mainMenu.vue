@@ -7,10 +7,10 @@ q-menu(auto-close)
           q-toggle(
             :disable="disableAutoLaunch"
             @click="toggleClicked()"
-            v-model="autoLaunch"
+            v-model="launchOnStart"
           )
         .col
-          p.text-grey(v-if="!autoLaunch") {{ lang.autoStart }}
+          p.text-grey(v-if="!launchOnStart") {{ lang.autoStart }}
           p.text-black(v-else) {{ lang.autoStart }}
     q-item(@click="reset()" clickable)
       .row.items-center
@@ -32,8 +32,8 @@ export default defineComponent({
   data() {
     return {
       lang,
-      autoLaunch: false,
-      launchOnBoot: global.autoLauncher,
+      launchOnStart: false,
+      autoLauncher: global.autoLauncher,
       disableAutoLaunch: false
     }
   },
@@ -49,8 +49,8 @@ export default defineComponent({
         })
         return
       }
-      console.log("toggle Clicked", this.autoLaunch)
-      if (this.autoLaunch)
+      console.log("toggle Clicked", this.launchOnStart)
+      if (this.launchOnStart)
         Notify.create({
           message: lang.willAutoLaunch,
           icon: "info",
@@ -64,10 +64,10 @@ export default defineComponent({
           group: 1,
           badgeStyle: "visibility:hidden;"
         })
-      if (this.autoLaunch) {
-        await this.launchOnBoot.enable()
+      if (this.launchOnStart) {
+        await this.autoLauncher.enable()
       } else {
-        await this.launchOnBoot.disable()
+        await this.autoLauncher.disable()
       }
     },
     reset() {
@@ -93,12 +93,11 @@ export default defineComponent({
       })
     },
     async initMenu() {
-      console.log("Init Menu", typeof this.launchOnBoot.enabled)
-
-      if (this.launchOnBoot.enabled != undefined)
-        this.autoLaunch = this.launchOnBoot.enabled
+      if (this.autoLauncher.enabled != undefined) {
+        this.launchOnStart = await this.autoLauncher.enabled
+      }
       else {
-        this.autoLaunch = false
+        this.launchOnStart = false
         this.disableAutoLaunch = true
       }
     }

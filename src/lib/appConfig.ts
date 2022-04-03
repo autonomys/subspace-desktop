@@ -22,7 +22,7 @@ export const appConfig = {
       if (plot) newAppConfig.plot = plot
       if (account) newAppConfig.account = account
       if (segmentCache) newAppConfig.segmentCache = segmentCache
-      if (launchOnBoot) newAppConfig.launchOnBoot = launchOnBoot
+      if (launchOnBoot != null) newAppConfig.launchOnBoot = launchOnBoot
       LocalStorage.set("appConfig", newAppConfig)
     }
   }
