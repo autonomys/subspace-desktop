@@ -11,15 +11,23 @@ mod node;
 
 use anyhow::Result;
 use bip39::{Language, Mnemonic};
+use jsonrpsee::ws_server::WsServerBuilder;
 use log::{debug, error, info};
 use serde::Serialize;
+use std::mem;
+use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
+use std::time::Duration;
 use subspace_core_primitives::{PublicKey, PIECE_SIZE};
+use subspace_farmer::ws_rpc_server::{RpcServer, RpcServerImpl};
 use subspace_farmer::{
     Commitments, FarmerData, Farming, Identity, ObjectMappings, Plot, Plotting, RpcClient, WsRpc,
 };
+use subspace_networking::libp2p::{multiaddr::Protocol, Multiaddr};
+use subspace_networking::multimess::MultihashCode;
+use subspace_networking::Config;
 use subspace_solving::SubspaceCodec;
 use tauri::SystemTrayEvent;
 use tauri::{
@@ -49,18 +57,44 @@ fn plot_progress_tracker() -> usize {
 }
 
 #[tauri::command]
-async fn farming(path: String, reward_address: String) {
+async fn farming(
+    path: String,
+    reward_address: String,
+    bootstrap_nodes: Vec<Multiaddr>,
+    listen_on: Vec<Multiaddr>,
+    ws_server_listen_addr: SocketAddr,
+    plot_size: u64,
+    best_block_number_check_interval: Duration,
+) {
     match reward_address.len() {
         0 => {
-            farm(path.into(), "ws://127.0.0.1:9944", None)
-                .await
-                .unwrap();
+            farm(
+                path.into(),
+                "ws://127.0.0.1:9944",
+                None,
+                bootstrap_nodes,
+                listen_on,
+                ws_server_listen_addr,
+                plot_size,
+                best_block_number_check_interval,
+            )
+            .await
+            .unwrap();
         }
         _ => {
             if let Ok(address) = parse_reward_address(&reward_address) {
-                farm(path.into(), "ws://127.0.0.1:9944", Some(address))
-                    .await
-                    .unwrap();
+                farm(
+                    path.into(),
+                    "ws://127.0.0.1:9944",
+                    Some(address),
+                    bootstrap_nodes,
+                    listen_on,
+                    ws_server_listen_addr,
+                    plot_size,
+                    best_block_number_check_interval,
+                )
+                .await
+                .unwrap();
             } else {
                 error!("Reward address could not be parsed!");
             }
@@ -208,18 +242,44 @@ async fn farm(
     base_directory: PathBuf,
     node_rpc_url: &str,
     reward_address: Option<PublicKey>,
+    bootstrap_nodes: Vec<Multiaddr>,
+    listen_on: Vec<Multiaddr>,
+    ws_server_listen_addr: SocketAddr,
+    plot_size: u64,
+    best_block_number_check_interval: Duration,
 ) -> Result<()> {
     let identity = Identity::open_or_create(&base_directory)?;
+    let address = identity.public_key().to_bytes().into();
 
+    let reward_address = reward_address.unwrap_or(address);
+
+    info!("Connecting to node at {}", node_rpc_url);
+    let client = WsRpc::new(&node_rpc_url).await?;
+
+    let farmer_metadata = client.farmer_metadata().await.unwrap();
+
+    // TODO: This doesn't account for the fact that node can
+    // have a completely different history to what farmer expects
     info!("Opening plot");
     let plot_fut = tokio::task::spawn_blocking({
         let base_directory = base_directory.clone();
+        let plot_size = plot_size / PIECE_SIZE as u64;
 
-        move || Plot::open_or_create(&base_directory)
+        // TODO: This should be removed once multi replica is merged, as all the disk space will be
+        // used for plotting.
+        if plot_size > farmer_metadata.max_plot_size {
+            log::debug!(
+                "Plot size ({plot_size}) is too large. Maximum plot size is {}",
+                farmer_metadata.max_plot_size,
+            );
+        }
+
+        // TODO: Piece count should account for database overhead of various additional databases
+        move || Plot::open_or_create(&base_directory, address, plot_size)
     });
-
     let plot = plot_fut.await.unwrap()?;
 
+    // Keep track of the plotting for Desktop App
     plot.on_progress_change(Arc::new(|plotted_pieces| {
         PLOTTED_PIECES.fetch_add(
             plotted_pieces.plotted_piece_count / PIECE_SIZE,
@@ -248,23 +308,71 @@ async fn farm(
     })
     .await??;
 
-    info!("Connecting to node at {}", node_rpc_url);
-    let client = WsRpc::new(node_rpc_url).await?;
-
-    let farmer_metadata = client
-        .farmer_metadata()
-        .await
-        .map_err(|error| anyhow::Error::msg(error.to_string()))?;
-
     let subspace_codec = SubspaceCodec::new(identity.public_key());
-    let reward_address = reward_address.unwrap_or_else(|| {
-        identity
-            .public_key()
-            .as_ref()
-            .to_vec()
-            .try_into()
-            .map(From::<[u8; 32]>::from)
-            .expect("Length of public key is always correct")
+
+    // Start RPC server
+    let ws_server = WsServerBuilder::default()
+        .build(ws_server_listen_addr)
+        .await?;
+    let ws_server_addr = ws_server.local_addr()?;
+    let rpc_server = RpcServerImpl::new(
+        farmer_metadata.record_size,
+        farmer_metadata.recorded_history_segment_size,
+        plot.clone(),
+        object_mappings.clone(),
+        subspace_codec,
+    );
+    let _stop_handle = ws_server.start(rpc_server.into_rpc())?;
+
+    info!("WS RPC server listening on {}", ws_server_addr);
+
+    let (node, mut node_runner) = subspace_networking::create(Config {
+        bootstrap_nodes,
+        listen_on,
+        value_getter: Arc::new({
+            let plot = plot.clone();
+
+            move |key| {
+                let code = key.code();
+
+                if code == u64::from(MultihashCode::Piece)
+                    || code == u64::from(MultihashCode::PieceIndex)
+                {
+                    let piece_index =
+                        u64::from_le_bytes(key.digest()[..mem::size_of::<u64>()].try_into().ok()?);
+                    let mut piece = plot.read_piece(piece_index).ok()?;
+
+                    subspace_codec
+                        .decode(&mut piece, piece_index)
+                        .expect("Decoding of local pieces must never fail");
+                    Some(piece)
+                } else {
+                    None
+                }
+            }
+        }),
+        allow_non_globals_in_dht: true,
+        // TODO: Persistent identity
+        ..Config::with_generated_keypair()
+    })
+    .await?;
+
+    node.on_new_listener(Arc::new({
+        let node_id = node.id();
+
+        move |multiaddr| {
+            info!(
+                "Listening on {}",
+                multiaddr.clone().with(Protocol::P2p(node_id.into()))
+            );
+        }
+    }))
+    .detach();
+
+    tokio::spawn(async move {
+        info!("Starting subspace network node instance");
+
+        node_runner.run().await;
     });
 
     // start the farming task
@@ -272,30 +380,28 @@ async fn farm(
         plot.clone(),
         commitments.clone(),
         client.clone(),
-        identity.clone(),
+        identity,
         reward_address,
     );
-    let farmer_data = FarmerData::new(plot.clone(), commitments, object_mappings, farmer_metadata);
+
+    let farmer_data = FarmerData::new(plot, commitments, object_mappings, farmer_metadata);
 
     // start the background plotting
     let plotting_instance = Plotting::start(
         farmer_data,
         client,
         subspace_codec,
-        std::time::Duration::from_secs(5),
+        best_block_number_check_interval,
     );
 
-    // wait for the farming and plotting in the background
-    tokio::spawn(async {
-        tokio::select! {
-            res = plotting_instance.wait() => if let Err(error) = res {
-                error!("Plotting created the error: {error}");
-            },
-            res = farming_instance.wait() => if let Err(error) = res {
-                error!("Farming created the error: {error}");
-            },
-        }
-    });
+    tokio::select! {
+        res = plotting_instance.wait() => if let Err(error) = res {
+            error!("Plotting created the error: {error}");
+        },
+        res = farming_instance.wait() => if let Err(error) = res {
+            error!("Plotting created the error: {error}");
+        },
+    }
 
     Ok(())
 }
