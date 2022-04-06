@@ -131,7 +131,7 @@ async fn main() -> Result<()> {
                 get_this_binary,
                 farming,
                 plot_progress_tracker,
-                start_node,
+                start_node
             ],
             #[cfg(target_os = "windows")]
             tauri::generate_handler![
@@ -142,7 +142,7 @@ async fn main() -> Result<()> {
                 get_disk_stats,
                 farming,
                 plot_progress_tracker,
-                start_node,
+                start_node
             ],
         )
         .build(tauri::generate_context!())

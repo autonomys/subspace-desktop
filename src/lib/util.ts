@@ -48,19 +48,20 @@ export interface AppConfig {
 
 export interface SegmentCache {
   networkSegmentCount: number
-  allocatedGB: number
+  blockchainSizeGB: number
 }
 export interface Account {
   farmerPublicKey: string
 }
 export interface Plot {
   location: string
+  sizeGB: number
 }
 
 export const emptyAppConfig: AppConfig = {
-  plot: { location: "" },
+  plot: { location: "", sizeGB: 0 },
   account: { farmerPublicKey: "" },
-  segmentCache: { networkSegmentCount: 0, allocatedGB: 0 },
+  segmentCache: { networkSegmentCount: 0, blockchainSizeGB: 0 },
   launchOnBoot: true
 }
 

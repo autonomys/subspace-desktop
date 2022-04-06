@@ -207,7 +207,7 @@ export class Client {
     await this.connectLocalApi()
     return clientIdentity
   }
-  
+
   // TODO: Disable mnemonic return from tauri commmand instead of this validation.
   private async startNode(path: string): Promise<ClientIdentity> {
     const { publicKey, mnemonic } = await tauri.invoke("start_node", { path })
@@ -229,9 +229,10 @@ export class Client {
   }
 
   /* FARMER INTEGRATION */
-  public async startFarming(path: string): Promise<void> {
+  public async startFarming(path: string, plotSizeGB: number): Promise<void> {
+    const plotSize = plotSizeGB * 1048576
     const rewardAddress = LocalStorage.getItem("rewardAddress")?.toString() || ""
-    return await tauri.invoke("farming", { path, rewardAddress })
+    return await tauri.invoke("farming", { path, rewardAddress, plotSize })
   }
 
   /* MNEMONIC displayed only FIRST LOAD on SaveKeys Modal. */

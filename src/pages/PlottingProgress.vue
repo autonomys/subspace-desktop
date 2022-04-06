@@ -201,8 +201,8 @@ export default defineComponent({
       this.client.setFirstLoad()
       const config = appConfig.getAppConfig()
       if (config) {
-        this.plottingData.remainingGB = config.segmentCache.allocatedGB
-        this.plottingData.allocatedGB = config.segmentCache.allocatedGB
+        this.plottingData.remainingGB = config.plot.sizeGB
+        this.plottingData.allocatedGB = config.plot.sizeGB
         this.plotDirectory = config.plot.location
       } else {
         console.error("PLOT PROGRESS | ERROR | NO CONFIG LOADED")
@@ -232,14 +232,15 @@ export default defineComponent({
       clearInterval(farmerTimer)
     },
     async farmingWrapper(): Promise<void> {
-      await this.client.startBlockSubscription()
-      await this.client.startFarming(this.plotDirectory)
+
 
       const config = appConfig.getAppConfig()
       if (config) {
-        const { networkSegmentCount, allocatedGB } = config.segmentCache
+        await this.client.startBlockSubscription()
+        await this.client.startFarming(this.plotDirectory, config.plot.sizeGB)
+        const networkSegmentCount = config.segmentCache.networkSegmentCount
         this.networkSegmentCount = networkSegmentCount
-        this.plottingData.allocatedGB = allocatedGB
+        this.plottingData.allocatedGB = config.plot.sizeGB
         this.localSegmentCount = await this.client.getLocalSegmentCount()
         do {
           await new Promise((resolve) => setTimeout(resolve, 2000))
