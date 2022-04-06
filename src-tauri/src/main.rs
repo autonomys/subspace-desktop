@@ -218,7 +218,7 @@ async fn farm(
     let reward_address = reward_address.unwrap_or_else(|| identity.public_key().to_bytes().into());
 
     info!("Connecting to node at {}", node_rpc_url);
-    let client = WsRpc::new(&node_rpc_url).await?;
+    let client = WsRpc::new(node_rpc_url).await?;
 
     let farmer_metadata = client
         .farmer_metadata()
