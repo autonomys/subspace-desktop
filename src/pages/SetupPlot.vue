@@ -153,7 +153,7 @@ export default defineComponent({
       revealKey: false,
       userConfirm: false,
       plotDirectory: "/",
-      allocatedGB: 0,
+      allocatedGB: 1,
       blockchainSizeGB: 0,
       validPath: true,
       defaultPath: "/",
