@@ -232,17 +232,8 @@ async fn farm(
         let base_directory = base_directory.clone();
         let plot_size = plot_size / PIECE_SIZE as u64;
 
-        // TODO: This should be removed once multi replica is merged, as all the disk space will be
-        // used for plotting.
-        if plot_size > farmer_metadata.max_plot_size {
-            log::debug!(
-                "Plot size ({plot_size}) is too large. Maximum plot size is {}",
-                farmer_metadata.max_plot_size,
-            );
-        }
-
         // TODO: Piece count should account for database overhead of various additional databases
-        move || Plot::open_or_create(&base_directory, address, plot_size)
+        move || Plot::open_or_create(&base_directory, address, Some(plot_size))
     });
     let plot = plot_fut.await.unwrap()?;
 

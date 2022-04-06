@@ -30,11 +30,11 @@ serde_json = "1.0.79"
 serde = { version = "1.0.136", features = [ "derive" ] }
 sp-core = { version = "6.0.0", git = "https://github.com/paritytech/substrate", rev = "c364008a6c7da8456e17967f55edf51e45146998" }
 sp-panic-handler = { version = "4.0.0", git = "https://github.com/paritytech/substrate", rev = "c364008a6c7da8456e17967f55edf51e45146998" }
-subspace-core-primitives = { git = "https://github.com/subspace/subspace", rev = "1ac638fe212e1e0acde39aa5fe16d5c383e38599" }
-subspace-farmer = { git = "https://github.com/subspace/subspace", rev = "1ac638fe212e1e0acde39aa5fe16d5c383e38599" }
-subspace-runtime = { git = "https://github.com/subspace/subspace", rev = "1ac638fe212e1e0acde39aa5fe16d5c383e38599" }
-subspace-service = { git = "https://github.com/subspace/subspace", rev = "1ac638fe212e1e0acde39aa5fe16d5c383e38599" }
-subspace-solving = { git = "https://github.com/subspace/subspace", rev = "1ac638fe212e1e0acde39aa5fe16d5c383e38599" }
+subspace-core-primitives = { git = "https://github.com/subspace/subspace", rev = "46420f74bc87f38795a7a4a0196d7214f90ed929" }
+subspace-farmer = { git = "https://github.com/subspace/subspace", rev = "46420f74bc87f38795a7a4a0196d7214f90ed929" }
+subspace-runtime = { git = "https://github.com/subspace/subspace", rev = "46420f74bc87f38795a7a4a0196d7214f90ed929" }
+subspace-service = { git = "https://github.com/subspace/subspace", rev = "46420f74bc87f38795a7a4a0196d7214f90ed929" }
+subspace-solving = { git = "https://github.com/subspace/subspace", rev = "46420f74bc87f38795a7a4a0196d7214f90ed929" }
 tiny-bip39 = "0.8.2"
 tokio = { version = "1.11.0", features = ["macros", "rt-multi-thread"] }
 

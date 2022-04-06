@@ -986,47 +986,19 @@ dependencies = [
 [[package]]
 name = "cirrus-node-primitives"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
 dependencies = [
  "futures 0.3.21",
  "parity-scale-codec",
  "scale-info",
  "serde",
+ "sp-application-crypto",
  "sp-consensus-slots",
  "sp-core",
  "sp-executor",
  "sp-runtime",
  "subspace-core-primitives",
  "subspace-runtime-primitives",
-]
-
-[[package]]
-name = "cirrus-pallet-executive"
-version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
-dependencies = [
- "frame-executive",
- "frame-support",
- "frame-system",
- "parity-scale-codec",
- "scale-info",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-std",
- "sp-tracing",
-]
-
-[[package]]
-name = "cirrus-primitives"
-version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
-dependencies = [
- "parity-scale-codec",
- "sp-api",
- "sp-core",
- "sp-runtime",
- "sp-std",
 ]
 
 [[package]]
@@ -3268,6 +3240,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "integer-encoding"
+version = "3.0.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0e85a1509a128c855368e135cffcde7eac17d8e1083f41e2b98c58bc1a5074be"
+
+[[package]]
 name = "integer-sqrt"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4899,6 +4877,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "memory-lru"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "beeb98b3d1ed2c0054bd81b5ba949a0243c3ccad751d45ea898fa8059fa2860a"
+dependencies = [
+ "lru 0.6.6",
+]
+
+[[package]]
 name = "memory_units"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4938,13 +4925,24 @@ dependencies = [
 [[package]]
 name = "metered-channel"
 version = "0.9.13"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
 dependencies = [
  "derive_more",
  "futures 0.3.21",
  "futures-timer",
  "thiserror",
  "tracing",
+]
+
+[[package]]
+name = "mick-jaeger"
+version = "0.1.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "69672161530e8aeca1d1400fbf3f1a1747ff60ea604265a4e906c2442df20532"
+dependencies = [
+ "futures 0.3.21",
+ "rand 0.8.5",
+ "thrift",
 ]
 
 [[package]]
@@ -5646,6 +5644,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ordered-float"
+version = "1.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3305af35278dd29f46fcdd139e0b1fbfae2153f0e5928b39b035542dd31e37b7"
+dependencies = [
+ "num-traits",
+]
+
+[[package]]
 name = "ordered-stream"
 version = "0.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5727,7 +5734,7 @@ dependencies = [
 [[package]]
 name = "pallet-executor"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -5741,7 +5748,7 @@ dependencies = [
 [[package]]
 name = "pallet-feeds"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -5749,35 +5756,14 @@ dependencies = [
  "parity-scale-codec",
  "scale-info",
  "sp-core",
- "sp-runtime",
  "sp-std",
  "subspace-core-primitives",
 ]
 
 [[package]]
-name = "pallet-grandpa-finality-verifier"
-version = "1.0.0"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
-dependencies = [
- "finality-grandpa",
- "frame-support",
- "frame-system",
- "log",
- "num-traits",
- "parity-scale-codec",
- "scale-info",
- "serde",
- "sp-core",
- "sp-finality-grandpa",
- "sp-runtime",
- "sp-std",
- "sp-trie",
-]
-
-[[package]]
 name = "pallet-object-store"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -5792,7 +5778,7 @@ dependencies = [
 [[package]]
 name = "pallet-offences-subspace"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -5807,7 +5793,7 @@ dependencies = [
 [[package]]
 name = "pallet-rewards"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -5819,7 +5805,7 @@ dependencies = [
 [[package]]
 name = "pallet-subspace"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -5871,7 +5857,7 @@ dependencies = [
 [[package]]
 name = "pallet-transaction-fees"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -5963,38 +5949,6 @@ dependencies = [
  "gobject-sys 0.15.10",
  "libc",
  "system-deps 6.0.2",
-]
-
-[[package]]
-name = "parachain-template-runtime"
-version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
-dependencies = [
- "cirrus-pallet-executive",
- "cirrus-primitives",
- "frame-support",
- "frame-system",
- "frame-system-rpc-runtime-api",
- "log",
- "pallet-balances",
- "pallet-transaction-payment",
- "pallet-transaction-payment-rpc-runtime-api",
- "parity-scale-codec",
- "scale-info",
- "serde",
- "smallvec",
- "sp-api",
- "sp-block-builder",
- "sp-core",
- "sp-inherents",
- "sp-io",
- "sp-offchain",
- "sp-runtime",
- "sp-session",
- "sp-std",
- "sp-transaction-pool",
- "sp-version",
- "substrate-wasm-builder",
 ]
 
 [[package]]
@@ -6438,17 +6392,16 @@ dependencies = [
 [[package]]
 name = "polkadot-node-collation-generation"
 version = "0.9.13"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
 dependencies = [
  "cirrus-node-primitives",
  "futures 0.3.21",
  "parity-scale-codec",
  "polkadot-node-subsystem",
+ "polkadot-node-subsystem-util",
  "sp-core",
  "sp-executor",
  "sp-maybe-compressed-blob",
- "sp-runtime",
- "subspace-core-primitives",
  "subspace-runtime-primitives",
  "thiserror",
  "tracing",
@@ -6457,22 +6410,27 @@ dependencies = [
 [[package]]
 name = "polkadot-node-core-chain-api"
 version = "0.9.13"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
 dependencies = [
  "futures 0.3.21",
  "polkadot-node-subsystem",
+ "polkadot-node-subsystem-util",
  "sc-client-api",
  "sp-blockchain",
  "subspace-runtime-primitives",
+ "tracing",
 ]
 
 [[package]]
 name = "polkadot-node-core-runtime-api"
 version = "0.9.13"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
 dependencies = [
  "futures 0.3.21",
+ "memory-lru",
+ "parity-util-mem",
  "polkadot-node-subsystem",
+ "polkadot-node-subsystem-util",
  "sp-api",
  "sp-core",
  "sp-executor",
@@ -6481,10 +6439,40 @@ dependencies = [
 ]
 
 [[package]]
+name = "polkadot-node-jaeger"
+version = "0.9.13"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
+dependencies = [
+ "async-std",
+ "lazy_static",
+ "log",
+ "mick-jaeger",
+ "parity-scale-codec",
+ "parking_lot 0.12.0",
+ "sc-network",
+ "sp-core",
+ "sp-runtime",
+ "subspace-runtime-primitives",
+ "thiserror",
+]
+
+[[package]]
+name = "polkadot-node-metrics"
+version = "0.9.13"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
+dependencies = [
+ "futures 0.3.21",
+ "futures-timer",
+ "metered-channel",
+ "substrate-prometheus-endpoint",
+]
+
+[[package]]
 name = "polkadot-node-subsystem"
 version = "0.9.13"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
 dependencies = [
+ "polkadot-node-jaeger",
  "polkadot-node-subsystem-types",
  "polkadot-overseer",
 ]
@@ -6492,10 +6480,11 @@ dependencies = [
 [[package]]
 name = "polkadot-node-subsystem-types"
 version = "0.9.13"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
 dependencies = [
  "cirrus-node-primitives",
  "futures 0.3.21",
+ "polkadot-node-jaeger",
  "polkadot-overseer-gen",
  "sc-network",
  "smallvec",
@@ -6508,15 +6497,39 @@ dependencies = [
 ]
 
 [[package]]
+name = "polkadot-node-subsystem-util"
+version = "0.9.13"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
+dependencies = [
+ "async-trait",
+ "futures 0.3.21",
+ "metered-channel",
+ "pin-project 1.0.10",
+ "polkadot-node-jaeger",
+ "polkadot-node-metrics",
+ "polkadot-node-subsystem",
+ "polkadot-overseer",
+ "sp-core",
+ "sp-executor",
+ "sp-runtime",
+ "subspace-core-primitives",
+ "subspace-runtime-primitives",
+ "thiserror",
+ "tracing",
+]
+
+[[package]]
 name = "polkadot-overseer"
 version = "0.9.13"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
 dependencies = [
  "cirrus-node-primitives",
  "futures 0.3.21",
  "futures-timer",
  "lru 0.7.5",
+ "parity-util-mem",
  "parking_lot 0.12.0",
+ "polkadot-node-metrics",
  "polkadot-node-subsystem-types",
  "polkadot-overseer-gen",
  "sc-client-api",
@@ -6528,7 +6541,7 @@ dependencies = [
 [[package]]
 name = "polkadot-overseer-gen"
 version = "0.9.13"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
 dependencies = [
  "async-trait",
  "futures 0.3.21",
@@ -6544,7 +6557,7 @@ dependencies = [
 [[package]]
 name = "polkadot-overseer-gen-proc-macro"
 version = "0.9.13"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
 dependencies = [
  "proc-macro-crate 1.1.3",
  "proc-macro2",
@@ -7527,7 +7540,7 @@ dependencies = [
 [[package]]
 name = "sc-consensus-subspace"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
 dependencies = [
  "async-trait",
  "fork-tree",
@@ -7565,7 +7578,7 @@ dependencies = [
 [[package]]
 name = "sc-consensus-subspace-rpc"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
 dependencies = [
  "async-oneshot",
  "futures 0.3.21",
@@ -8798,7 +8811,7 @@ dependencies = [
 [[package]]
 name = "sp-consensus-subspace"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
 dependencies = [
  "async-trait",
  "parity-scale-codec",
@@ -8909,17 +8922,14 @@ dependencies = [
 [[package]]
 name = "sp-executor"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
  "sp-api",
  "sp-consensus-slots",
  "sp-core",
- "sp-externalities",
  "sp-runtime",
- "sp-runtime-interface",
- "sp-state-machine",
  "sp-std",
  "sp-trie",
  "subspace-core-primitives",
@@ -9461,7 +9471,7 @@ dependencies = [
 [[package]]
 name = "subspace-archiving"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
 dependencies = [
  "merkletree",
  "parity-scale-codec",
@@ -9476,7 +9486,7 @@ dependencies = [
 [[package]]
 name = "subspace-core-primitives"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
 dependencies = [
  "hmac 0.12.1",
  "parity-scale-codec",
@@ -9524,7 +9534,7 @@ dependencies = [
 [[package]]
 name = "subspace-farmer"
 version = "0.3.0"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
 dependencies = [
  "anyhow",
  "arc-swap",
@@ -9561,28 +9571,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "subspace-fraud-proof"
-version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
-dependencies = [
- "hash-db",
- "parity-scale-codec",
- "sc-client-api",
- "sp-api",
- "sp-blockchain",
- "sp-core",
- "sp-executor",
- "sp-externalities",
- "sp-runtime",
- "sp-state-machine",
- "sp-trie",
- "tracing",
-]
-
-[[package]]
 name = "subspace-networking"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
 dependencies = [
  "bytes 1.1.0",
  "event-listener-primitives",
@@ -9600,7 +9591,7 @@ dependencies = [
 [[package]]
 name = "subspace-rpc-primitives"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
 dependencies = [
  "hex-buffer-serde",
  "serde",
@@ -9610,7 +9601,7 @@ dependencies = [
 [[package]]
 name = "subspace-runtime"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
 dependencies = [
  "frame-executive",
  "frame-support",
@@ -9620,7 +9611,6 @@ dependencies = [
  "pallet-balances",
  "pallet-executor",
  "pallet-feeds",
- "pallet-grandpa-finality-verifier",
  "pallet-object-store",
  "pallet-offences-subspace",
  "pallet-rewards",
@@ -9631,7 +9621,6 @@ dependencies = [
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc-runtime-api",
  "pallet-utility",
- "parachain-template-runtime",
  "parity-scale-codec",
  "scale-info",
  "sp-api",
@@ -9649,14 +9638,13 @@ dependencies = [
  "sp-version",
  "subspace-core-primitives",
  "subspace-runtime-primitives",
- "subspace-wasm-tools",
  "substrate-wasm-builder",
 ]
 
 [[package]]
 name = "subspace-runtime-primitives"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
 dependencies = [
  "parity-scale-codec",
  "parity-util-mem",
@@ -9670,7 +9658,7 @@ dependencies = [
 [[package]]
 name = "subspace-service"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
 dependencies = [
  "cirrus-node-primitives",
  "frame-support",
@@ -9683,6 +9671,7 @@ dependencies = [
  "polkadot-node-collation-generation",
  "polkadot-node-core-chain-api",
  "polkadot-node-core-runtime-api",
+ "polkadot-node-subsystem-util",
  "polkadot-overseer",
  "sc-basic-authorship",
  "sc-client-api",
@@ -9704,7 +9693,6 @@ dependencies = [
  "sp-block-builder",
  "sp-blockchain",
  "sp-consensus",
- "sp-consensus-slots",
  "sp-consensus-subspace",
  "sp-core",
  "sp-executor",
@@ -9714,7 +9702,6 @@ dependencies = [
  "sp-timestamp",
  "sp-transaction-pool",
  "sp-trie",
- "subspace-fraud-proof",
  "subspace-runtime-primitives",
  "substrate-frame-rpc-system",
  "substrate-prometheus-endpoint",
@@ -9724,7 +9711,7 @@ dependencies = [
 [[package]]
 name = "subspace-solving"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
+source = "git+https://github.com/subspace/subspace?rev=46420f74bc87f38795a7a4a0196d7214f90ed929#46420f74bc87f38795a7a4a0196d7214f90ed929"
 dependencies = [
  "log",
  "num_cpus",
@@ -9734,13 +9721,7 @@ dependencies = [
  "sloth256-189",
  "subspace-core-primitives",
  "thiserror",
- "uint",
 ]
-
-[[package]]
-name = "subspace-wasm-tools"
-version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=1ac638fe212e1e0acde39aa5fe16d5c383e38599#1ac638fe212e1e0acde39aa5fe16d5c383e38599"
 
 [[package]]
 name = "substrate-bip39"
@@ -10215,6 +10196,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d050e60b33d41c19108b32cea32164033a9013fe3b46cbd4457559bfbf77afaa"
 dependencies = [
  "num_cpus",
+]
+
+[[package]]
+name = "thrift"
+version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b82ca8f46f95b3ce96081fe3dd89160fdea970c254bb72925255d1b62aae692e"
+dependencies = [
+ "byteorder 1.4.3",
+ "integer-encoding",
+ "log",
+ "ordered-float",
+ "threadpool",
 ]
 
 [[package]]
