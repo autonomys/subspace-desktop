@@ -32,7 +32,6 @@ sp-core = { version = "6.0.0", git = "https://github.com/paritytech/substrate", 
 sp-panic-handler = { version = "4.0.0", git = "https://github.com/paritytech/substrate", rev = "c364008a6c7da8456e17967f55edf51e45146998" }
 subspace-core-primitives = { git = "https://github.com/subspace/subspace", rev = "c42e91eb9" }
 subspace-farmer = { git = "https://github.com/subspace/subspace", rev = "c42e91eb9" }
-subspace-networking = { git = "https://github.com/subspace/subspace", rev = "c42e91eb9" }
 subspace-runtime = { git = "https://github.com/subspace/subspace", rev = "c42e91eb9" }
 subspace-service = { git = "https://github.com/subspace/subspace", rev = "c42e91eb9" }
 subspace-solving = { git = "https://github.com/subspace/subspace", rev = "c42e91eb9" }

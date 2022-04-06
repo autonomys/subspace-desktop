@@ -11,23 +11,16 @@ mod node;
 
 use anyhow::Result;
 use bip39::{Language, Mnemonic};
-use jsonrpsee::ws_server::WsServerBuilder;
 use log::{debug, error, info};
 use serde::Serialize;
-use std::mem;
-use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 use subspace_core_primitives::{PublicKey, PIECE_SIZE};
-use subspace_farmer::ws_rpc_server::{RpcServer, RpcServerImpl};
 use subspace_farmer::{
     Commitments, FarmerData, Farming, Identity, ObjectMappings, Plot, Plotting, RpcClient, WsRpc,
 };
-use subspace_networking::libp2p::{multiaddr::Protocol, Multiaddr};
-use subspace_networking::multimess::MultihashCode;
-use subspace_networking::Config;
 use subspace_solving::SubspaceCodec;
 use tauri::SystemTrayEvent;
 use tauri::{
@@ -37,6 +30,7 @@ use tauri::{
 use tokio::runtime::Handle;
 
 static PLOTTED_PIECES: AtomicUsize = AtomicUsize::new(0);
+const BEST_BLOCK_NUMBER_CHECK_INTERVAL: Duration = Duration::from_secs(5);
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -57,44 +51,18 @@ fn plot_progress_tracker() -> usize {
 }
 
 #[tauri::command]
-async fn farming(
-    path: String,
-    reward_address: String,
-    bootstrap_nodes: Vec<Multiaddr>,
-    listen_on: Vec<Multiaddr>,
-    ws_server_listen_addr: SocketAddr,
-    plot_size: u64,
-    best_block_number_check_interval: Duration,
-) {
+async fn farming(path: String, reward_address: String, plot_size: u64) {
     match reward_address.len() {
         0 => {
-            farm(
-                path.into(),
-                "ws://127.0.0.1:9944",
-                None,
-                bootstrap_nodes,
-                listen_on,
-                ws_server_listen_addr,
-                plot_size,
-                best_block_number_check_interval,
-            )
-            .await
-            .unwrap();
+            farm(path.into(), "ws://127.0.0.1:9944", None, plot_size)
+                .await
+                .unwrap();
         }
         _ => {
             if let Ok(address) = parse_reward_address(&reward_address) {
-                farm(
-                    path.into(),
-                    "ws://127.0.0.1:9944",
-                    Some(address),
-                    bootstrap_nodes,
-                    listen_on,
-                    ws_server_listen_addr,
-                    plot_size,
-                    best_block_number_check_interval,
-                )
-                .await
-                .unwrap();
+                farm(path.into(), "ws://127.0.0.1:9944", Some(address), plot_size)
+                    .await
+                    .unwrap();
             } else {
                 error!("Reward address could not be parsed!");
             }
@@ -242,21 +210,20 @@ async fn farm(
     base_directory: PathBuf,
     node_rpc_url: &str,
     reward_address: Option<PublicKey>,
-    bootstrap_nodes: Vec<Multiaddr>,
-    listen_on: Vec<Multiaddr>,
-    ws_server_listen_addr: SocketAddr,
     plot_size: u64,
-    best_block_number_check_interval: Duration,
 ) -> Result<()> {
     let identity = Identity::open_or_create(&base_directory)?;
     let address = identity.public_key().to_bytes().into();
 
-    let reward_address = reward_address.unwrap_or(address);
+    let reward_address = reward_address.unwrap_or_else(|| identity.public_key().to_bytes().into());
 
     info!("Connecting to node at {}", node_rpc_url);
     let client = WsRpc::new(&node_rpc_url).await?;
 
-    let farmer_metadata = client.farmer_metadata().await.unwrap();
+    let farmer_metadata = client
+        .farmer_metadata()
+        .await
+        .map_err(|error| anyhow::Error::msg(error.to_string()))?;
 
     // TODO: This doesn't account for the fact that node can
     // have a completely different history to what farmer expects
@@ -310,71 +277,6 @@ async fn farm(
 
     let subspace_codec = SubspaceCodec::new(identity.public_key());
 
-    // Start RPC server
-    let ws_server = WsServerBuilder::default()
-        .build(ws_server_listen_addr)
-        .await?;
-    let ws_server_addr = ws_server.local_addr()?;
-    let rpc_server = RpcServerImpl::new(
-        farmer_metadata.record_size,
-        farmer_metadata.recorded_history_segment_size,
-        plot.clone(),
-        object_mappings.clone(),
-        subspace_codec,
-    );
-    let _stop_handle = ws_server.start(rpc_server.into_rpc())?;
-
-    info!("WS RPC server listening on {}", ws_server_addr);
-
-    let (node, mut node_runner) = subspace_networking::create(Config {
-        bootstrap_nodes,
-        listen_on,
-        value_getter: Arc::new({
-            let plot = plot.clone();
-
-            move |key| {
-                let code = key.code();
-
-                if code == u64::from(MultihashCode::Piece)
-                    || code == u64::from(MultihashCode::PieceIndex)
-                {
-                    let piece_index =
-                        u64::from_le_bytes(key.digest()[..mem::size_of::<u64>()].try_into().ok()?);
-                    let mut piece = plot.read_piece(piece_index).ok()?;
-
-                    subspace_codec
-                        .decode(&mut piece, piece_index)
-                        .expect("Decoding of local pieces must never fail");
-                    Some(piece)
-                } else {
-                    None
-                }
-            }
-        }),
-        allow_non_globals_in_dht: true,
-        // TODO: Persistent identity
-        ..Config::with_generated_keypair()
-    })
-    .await?;
-
-    node.on_new_listener(Arc::new({
-        let node_id = node.id();
-
-        move |multiaddr| {
-            info!(
-                "Listening on {}",
-                multiaddr.clone().with(Protocol::P2p(node_id.into()))
-            );
-        }
-    }))
-    .detach();
-
-    tokio::spawn(async move {
-        info!("Starting subspace network node instance");
-
-        node_runner.run().await;
-    });
-
     // start the farming task
     let farming_instance = Farming::start(
         plot.clone(),
@@ -391,17 +293,20 @@ async fn farm(
         farmer_data,
         client,
         subspace_codec,
-        best_block_number_check_interval,
+        BEST_BLOCK_NUMBER_CHECK_INTERVAL,
     );
 
-    tokio::select! {
-        res = plotting_instance.wait() => if let Err(error) = res {
-            error!("Plotting created the error: {error}");
-        },
-        res = farming_instance.wait() => if let Err(error) = res {
-            error!("Plotting created the error: {error}");
-        },
-    }
+    // wait for the farming and plotting in the background
+    tokio::spawn(async {
+        tokio::select! {
+            res = plotting_instance.wait() => if let Err(error) = res {
+                error!("Plotting created the error: {error}");
+            },
+            res = farming_instance.wait() => if let Err(error) = res {
+                error!("Farming created the error: {error}");
+            },
+        }
+    });
 
     Ok(())
 }
