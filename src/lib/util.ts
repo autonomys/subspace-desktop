@@ -44,6 +44,7 @@ export interface AppConfig {
   account: Account
   segmentCache: SegmentCache
   launchOnBoot: boolean
+  importedRewAddr: boolean
 }
 
 export interface SegmentCache {
@@ -61,7 +62,8 @@ export const emptyAppConfig: AppConfig = {
   plot: { location: "" },
   account: { farmerPublicKey: "" },
   segmentCache: { networkSegmentCount: 0, allocatedGB: 0 },
-  launchOnBoot: true
+  launchOnBoot: true,
+  importedRewAddr: false
 }
 
 export function formatMS(duration: number): string {

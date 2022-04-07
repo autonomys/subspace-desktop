@@ -82,7 +82,7 @@ export default defineComponent({
       appConfig.updateAppConfig(null, null, {
         networkSegmentCount,
         allocatedGB: allocatedGB === 0 ? 0.1 : allocatedGB
-      }, null)
+      }, null, null)
     }
   }
 })
