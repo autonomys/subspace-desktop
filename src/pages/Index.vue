@@ -82,7 +82,7 @@ export default defineComponent({
       appConfig.updateAppConfig(null, null, {
         networkSegmentCount,
         blockchainSizeGB: blockchainSizeGB === 0 ? 0.1 : blockchainSizeGB
-      }, null)
+      }, null, null)
     }
   }
 })

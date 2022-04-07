@@ -17,7 +17,8 @@ q-page(padding)
   .row.justify-center.q-mt-sm
   .row.justify-end.items-center.q-mt-lg.absolute-bottom.q-pa-lg
     .col-auto.q-mr-md
-      q-btn(@click="skip()" color="grey" label="Skip" flat icon-right="east")
+      q-btn(@click="$router.back()" label="Cancel" outline size="lg" icon-right="cancel")
+    q-space
     .col-auto
       q-btn(
         :disable="!isValidSubstrateAddress(rewardAddress)"
@@ -35,6 +36,7 @@ q-page(padding)
 import { defineComponent } from "vue"
 import { LocalStorage } from "quasar"
 import { globalState as global } from "src/lib/global"
+import { appConfig } from "src/lib/appConfig"
 import { decodeAddress, encodeAddress } from "@polkadot/keyring"
 import { hexToU8a, isHex } from "@polkadot/util"
 const lang = global.data.loc.text.importKey
@@ -58,6 +60,7 @@ export default defineComponent({
     },
     async importKey() {
       LocalStorage.set("rewardAddress", this.rewardAddress)
+      appConfig.updateAppConfig(null, null, null, null, true)
       this.$router.replace({ name: "setupPlot" })
     },
     skip() {

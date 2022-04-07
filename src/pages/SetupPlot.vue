@@ -278,7 +278,7 @@ export default defineComponent({
         this.plotDirectory.slice(-1)
 
       await appData.createCustomDataDir(this.plotDirectory)
-      appConfig.updateAppConfig({ location: this.plotDirectory, sizeGB: this.allocatedGB }, null, null, null)
+      appConfig.updateAppConfig({ location: this.plotDirectory, sizeGB: this.allocatedGB }, null, null, null, null)
       this.$router.replace({ name: "plottingProgress" })
     },
     async updateDriveStats() {

@@ -63,12 +63,12 @@ q-dialog(@hide="onDialogHide" persistent ref="dialog")
             )
           .row.justify-end
             q-btn(
-              @click="currentPage++"
+              @click="proceedToMnemonic"
               label="next"
               outline
               size="lg"
               stretch
-              v-if="currentPage != 2"
+              v-if="currentPage == 1"
             )
             q-btn(
               :disabled="!userConfirmed"
@@ -77,14 +77,22 @@ q-dialog(@hide="onDialogHide" persistent ref="dialog")
               outline
               size="lg"
               stretch
-              v-else
+              v-if="currentPage == 2"
+            )
+            q-btn(
+              @click="currentPage++"
+              label="next"
+              outline
+              size="lg"
+              stretch
+              v-if="currentPage == 3"
             )
 </template>
 
 <script>
 import { defineComponent } from "vue"
 import saveKeys from "components/SaveKeys.vue"
-
+import { appConfig } from "src/lib/appConfig"
 const component = defineComponent({
   components: { saveKeys },
   props: {
@@ -109,6 +117,14 @@ const component = defineComponent({
     }
   },
   methods: {
+    proceedToMnemonic() {
+      const config = appConfig.getAppConfig()
+      if (config && config.importedRewAddr) {
+        this.currentPage += 2
+      } else {
+        this.currentPage += 1
+      }
+    },
     userConfirm(val) {
       this.userConfirmed = val
     },

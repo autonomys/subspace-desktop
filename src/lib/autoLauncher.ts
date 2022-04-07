@@ -139,14 +139,14 @@ export class AutoLauncher {
     const child = await this.autoLauncher.enable({ appName: this.appName, appPath: this.appPath, minimized: true })
     this.enabled = await this.isEnabled()
     if (this.enabled == false) console.log("ENABLE DID NOT WORK")
-    else appConfig.updateAppConfig(null, null, null, true)
+    else appConfig.updateAppConfig(null, null, null, true, null)
     return child
   }
   async disable(): Promise<void | ChildReturnData> {
     const child = this.autoLauncher.disable(this.appName)
     this.enabled = await this.isEnabled()
     if (this.enabled == true) console.log("DISABLE DID NOT WORK")
-    else appConfig.updateAppConfig(null, null, null, false)
+    else appConfig.updateAppConfig(null, null, null, false, null)
     return child
   }
   async init(): Promise<void> {
