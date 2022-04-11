@@ -6,11 +6,14 @@ q-card(bordered flat)
         .row.items-center
           q-icon.q-mr-sm(color="grey" name="grid_view" size="40px")
           .text-h6.text-weight-light {{ lang.farmedBlocks }}:
-      .col-auto.q-mr-md
+      .col-auto.q-mr-xl
         h6 {{ farmedBlocksList?.length }}
-      .col-auto.q-mr-md
+      .col-auto.q-mr-xl
         .text-weight-light Total Earned
         p {{ farmedTotalEarned }} testnetSSC
+      .col-auto
+        .text-weight-light Reward Address
+        .reward-address {{ rewardAddress }}
       q-space
       .col.col-auto
         .row.justify-center
@@ -64,6 +67,8 @@ import * as util from "src/lib/util"
 import { globalState as global } from "src/lib/global"
 import { FarmedBlock } from "src/lib/types"
 import { formatDistanceToNowStrict } from "date-fns"
+import { LocalStorage } from "quasar"
+import { appConfig } from "src/lib/appConfig"
 
 const lang = global.data.loc.text.dashboard
 
@@ -74,7 +79,10 @@ export default defineComponent({
   },
   emits: ["expand"],
   data() {
-    return { lang, util, global: global.data, client: global.client }
+    return { lang, util, global: global.data, client: global.client, rewardAddress: "", }
+  },
+  mounted() {
+    this.rewardAddress = this.displayRewardAddress()
   },
   computed: {
     farmedBlocksList(): FarmedBlock[] {
@@ -87,7 +95,29 @@ export default defineComponent({
   methods: {
     formatDate(date: Date) {
       return formatDistanceToNowStrict(date)
+    },
+    displayRewardAddress() {
+      const addr: string | null = LocalStorage.getItem("rewardAddress")
+      if (addr == null) {
+        const config = appConfig.getAppConfig()
+        if (config) {
+          const { farmerPublicKey } = config.account
+          const addr2: string = addr ?? farmerPublicKey
+          return addr2
+        }
+        console.error("Cannot read config file to retrieve Public Key of the farmer")
+        return "???"
+      } else {
+        return addr
+      }
     }
   }
 })
 </script>
+
+<style lang="sass">
+.reward-address
+  padding-top: 5px
+  padding-bottom: 6px
+  font-size: 10px
+</style>
