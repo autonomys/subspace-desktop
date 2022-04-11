@@ -230,7 +230,7 @@ export class Client {
 
   /* FARMER INTEGRATION */
   public async startFarming(path: string, plotSizeGB: number): Promise<void> {
-    const plotSize = plotSizeGB * 1048576
+    const plotSize = Math.round(plotSizeGB * 1048576)
     const rewardAddress = LocalStorage.getItem("rewardAddress")?.toString() || ""
     return await tauri.invoke("farming", { path, rewardAddress, plotSize })
   }
