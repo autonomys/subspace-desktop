@@ -97,6 +97,7 @@ export default defineComponent({
       this.global.status.message = lang.syncedMsg
       this.checkNodeAndNetwork()
       this.checkFarmerAndPlot()
+      this.client.disconnectPublicApi()
     } else {
       console.error("DASH MOUNTED | ERROR | NO CONFIG LOADED")
     }

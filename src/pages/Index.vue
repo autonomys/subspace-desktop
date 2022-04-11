@@ -77,6 +77,7 @@ export default defineComponent({
     async loadNetworkData() {
       await this.client.connectPublicApi()
       const networkSegmentCount = await this.client.getNetworkSegmentCount()
+      await this.client.disconnectPublicApi()
       const totalSize = networkSegmentCount * 256 * util.PIECE_SIZE
       const allocatedGB = Math.round((totalSize * 100) / util.GB) / 100
       appConfig.updateAppConfig(null, null, {
