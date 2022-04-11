@@ -16,6 +16,7 @@ use serde::Serialize;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
+use std::time::Duration;
 use subspace_core_primitives::{PublicKey, PIECE_SIZE};
 use subspace_farmer::{
     Commitments, FarmerData, Farming, Identity, ObjectMappings, Plot, Plotting, RpcClient, WsRpc,
@@ -29,6 +30,7 @@ use tauri::{
 use tokio::runtime::Handle;
 
 static PLOTTED_PIECES: AtomicUsize = AtomicUsize::new(0);
+const BEST_BLOCK_NUMBER_CHECK_INTERVAL: Duration = Duration::from_secs(5);
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -49,16 +51,16 @@ fn plot_progress_tracker() -> usize {
 }
 
 #[tauri::command]
-async fn farming(path: String, reward_address: String) {
+async fn farming(path: String, reward_address: String, plot_size: u64) {
     match reward_address.len() {
         0 => {
-            farm(path.into(), "ws://127.0.0.1:9944", None)
+            farm(path.into(), "ws://127.0.0.1:9944", None, plot_size)
                 .await
                 .unwrap();
         }
         _ => {
             if let Ok(address) = parse_reward_address(&reward_address) {
-                farm(path.into(), "ws://127.0.0.1:9944", Some(address))
+                farm(path.into(), "ws://127.0.0.1:9944", Some(address), plot_size)
                     .await
                     .unwrap();
             } else {
@@ -129,7 +131,7 @@ async fn main() -> Result<()> {
                 get_this_binary,
                 farming,
                 plot_progress_tracker,
-                start_node,
+                start_node
             ],
             #[cfg(target_os = "windows")]
             tauri::generate_handler![
@@ -140,7 +142,7 @@ async fn main() -> Result<()> {
                 get_disk_stats,
                 farming,
                 plot_progress_tracker,
-                start_node,
+                start_node
             ],
         )
         .build(tauri::generate_context!())
@@ -208,18 +210,34 @@ async fn farm(
     base_directory: PathBuf,
     node_rpc_url: &str,
     reward_address: Option<PublicKey>,
+    plot_size: u64,
 ) -> Result<()> {
     let identity = Identity::open_or_create(&base_directory)?;
+    let address = identity.public_key().to_bytes().into();
 
+    let reward_address = reward_address.unwrap_or_else(|| identity.public_key().to_bytes().into());
+
+    info!("Connecting to node at {}", node_rpc_url);
+    let client = WsRpc::new(node_rpc_url).await?;
+
+    let farmer_metadata = client
+        .farmer_metadata()
+        .await
+        .map_err(|error| anyhow::Error::msg(error.to_string()))?;
+
+    // TODO: This doesn't account for the fact that node can
+    // have a completely different history to what farmer expects
     info!("Opening plot");
     let plot_fut = tokio::task::spawn_blocking({
         let base_directory = base_directory.clone();
+        let plot_size = plot_size / PIECE_SIZE as u64;
 
-        move || Plot::open_or_create(&base_directory)
+        // TODO: Piece count should account for database overhead of various additional databases
+        move || Plot::open_or_create(&base_directory, address, Some(plot_size))
     });
-
     let plot = plot_fut.await.unwrap()?;
 
+    // Keep track of the plotting for Desktop App
     plot.on_progress_change(Arc::new(|plotted_pieces| {
         PLOTTED_PIECES.fetch_add(
             plotted_pieces.plotted_piece_count / PIECE_SIZE,
@@ -248,41 +266,25 @@ async fn farm(
     })
     .await??;
 
-    info!("Connecting to node at {}", node_rpc_url);
-    let client = WsRpc::new(node_rpc_url).await?;
-
-    let farmer_metadata = client
-        .farmer_metadata()
-        .await
-        .map_err(|error| anyhow::Error::msg(error.to_string()))?;
-
     let subspace_codec = SubspaceCodec::new(identity.public_key());
-    let reward_address = reward_address.unwrap_or_else(|| {
-        identity
-            .public_key()
-            .as_ref()
-            .to_vec()
-            .try_into()
-            .map(From::<[u8; 32]>::from)
-            .expect("Length of public key is always correct")
-    });
 
     // start the farming task
     let farming_instance = Farming::start(
         plot.clone(),
         commitments.clone(),
         client.clone(),
-        identity.clone(),
+        identity,
         reward_address,
     );
-    let farmer_data = FarmerData::new(plot.clone(), commitments, object_mappings, farmer_metadata);
+
+    let farmer_data = FarmerData::new(plot, commitments, object_mappings, farmer_metadata);
 
     // start the background plotting
     let plotting_instance = Plotting::start(
         farmer_data,
         client,
         subspace_codec,
-        std::time::Duration::from_secs(5),
+        BEST_BLOCK_NUMBER_CHECK_INTERVAL,
     );
 
     // wait for the farming and plotting in the background

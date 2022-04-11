@@ -1,6 +1,6 @@
 [package]
 name = "subspace-desktop"
-version = "0.3.3"
+version = "0.4.0"
 description = "Subspace desktop"
 authors = ["Subspace Labs <https://subspace.network>"]
 license = "Apache-2.0"
@@ -8,7 +8,7 @@ repository = "https://github.com/subspace/subspace-desktop"
 edition = "2021"
 
 [build-dependencies]
-substrate-build-script-utils = { version = "3.0.0", git = "https://github.com/paritytech/substrate", rev = "e6def65920d30029e42d498cb07cec5dd433b927" }
+substrate-build-script-utils = { version = "3.0.0", git = "https://github.com/paritytech/substrate", rev = "c364008a6c7da8456e17967f55edf51e45146998" }
 tauri-build = { version = "1.0.0-rc.4", features = [] }
 
 [dependencies]
@@ -18,22 +18,23 @@ event-listener-primitives = "2.0.1"
 fdlimit = "0.2.1"
 fs2 = "0.4.3"
 hex = "0.4.3"
+jsonrpsee = { version = "0.8.0", features = ["client", "macros", "server"] }
 log = "0.4.14"
 names = { version = "0.12.0", default-features = false }
-sc-chain-spec = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate", rev = "e6def65920d30029e42d498cb07cec5dd433b927" }
-sc-executor = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "e6def65920d30029e42d498cb07cec5dd433b927", features = ["wasmtime"] }
-sc-network = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "e6def65920d30029e42d498cb07cec5dd433b927" }
-sc-service = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "e6def65920d30029e42d498cb07cec5dd433b927" }
-sc-tracing = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate", rev = "e6def65920d30029e42d498cb07cec5dd433b927" }
-serde_json = "1.0"
-serde = { version = "1.0", features = [ "derive" ] }
-sp-core = { version = "5.0.0", git = "https://github.com/paritytech/substrate", rev = "e6def65920d30029e42d498cb07cec5dd433b927" }
-sp-panic-handler = { version = "4.0.0", git = "https://github.com/paritytech/substrate", rev = "e6def65920d30029e42d498cb07cec5dd433b927" }
-subspace-core-primitives = { git = "https://github.com/subspace/subspace", rev = "042302ed2c86abd765be56c93b6f3ee535a1573a" }
-subspace-farmer = { git = "https://github.com/subspace/subspace", rev = "042302ed2c86abd765be56c93b6f3ee535a1573a" }
-subspace-runtime = { git = "https://github.com/subspace/subspace", rev = "042302ed2c86abd765be56c93b6f3ee535a1573a" }
-subspace-service = { git = "https://github.com/subspace/subspace", rev = "042302ed2c86abd765be56c93b6f3ee535a1573a" }
-subspace-solving = { git = "https://github.com/subspace/subspace", rev = "042302ed2c86abd765be56c93b6f3ee535a1573a" }
+sc-chain-spec = { git = "https://github.com/paritytech/substrate", rev = "c364008a6c7da8456e17967f55edf51e45146998" }
+sc-executor = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "c364008a6c7da8456e17967f55edf51e45146998", features = ["wasmtime"] }
+sc-network = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "c364008a6c7da8456e17967f55edf51e45146998" }
+sc-service = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "c364008a6c7da8456e17967f55edf51e45146998", features = ["wasmtime"] }
+sc-tracing = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate", rev = "c364008a6c7da8456e17967f55edf51e45146998" }
+serde_json = "1.0.79"
+serde = { version = "1.0.136", features = [ "derive" ] }
+sp-core = { version = "6.0.0", git = "https://github.com/paritytech/substrate", rev = "c364008a6c7da8456e17967f55edf51e45146998" }
+sp-panic-handler = { version = "4.0.0", git = "https://github.com/paritytech/substrate", rev = "c364008a6c7da8456e17967f55edf51e45146998" }
+subspace-core-primitives = { git = "https://github.com/subspace/subspace", rev = "46420f74bc87f38795a7a4a0196d7214f90ed929" }
+subspace-farmer = { git = "https://github.com/subspace/subspace", rev = "46420f74bc87f38795a7a4a0196d7214f90ed929" }
+subspace-runtime = { git = "https://github.com/subspace/subspace", rev = "46420f74bc87f38795a7a4a0196d7214f90ed929" }
+subspace-service = { git = "https://github.com/subspace/subspace", rev = "46420f74bc87f38795a7a4a0196d7214f90ed929" }
+subspace-solving = { git = "https://github.com/subspace/subspace", rev = "46420f74bc87f38795a7a4a0196d7214f90ed929" }
 tiny-bip39 = "0.8.2"
 tokio = { version = "1.11.0", features = ["macros", "rt-multi-thread"] }
 

@@ -29,7 +29,7 @@
     "availableSpace": "How much free space there are in the disk.",
     "utilizedSpace": "How much space is currently being used.",
     "allocatedSpace": "Space to be shared with Subspace Protocol.",
-    "estimatingSpace": "Requesting the plot size from the network.",
+    "estimatingSpace": "Requesting the blockchain size from the network.",
     "plotsDirectory": "Plots Directory"
   },
   "plottingProgress": {
