@@ -82,7 +82,7 @@ export default defineComponent({
     return { lang, util, global: global.data, client: global.client, rewardAddress: "", }
   },
   mounted() {
-    this.displayRewardAddress()
+    this.rewardAddress = this.displayRewardAddress()
   },
   computed: {
     farmedBlocksList(): FarmedBlock[] {
@@ -103,11 +103,12 @@ export default defineComponent({
         if (config) {
           const { farmerPublicKey } = config.account
           const addr2: string = addr ?? farmerPublicKey
-          return this.rewardAddress = addr2
+          return addr2
         }
-      return this.rewardAddress = ""
+        console.error("Cannot read config file to retrieve Public Key of the farmer")
+        return "???"
       } else {
-        return this.rewardAddress = addr
+        return addr
       }
     }
   }
