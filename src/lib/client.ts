@@ -218,7 +218,7 @@ export class Client {
   // TODO: Disable mnemonic return from tauri commmand instead of this validation.
   private async startNode(path: string): Promise<ClientIdentity> {
     const { publicKey, mnemonic } = await tauri.invoke("start_node", { path })
-    const farmerPublicKey: AccountId32 = this.publicApi.registry.createType(
+    const farmerPublicKey: AccountId32 = this.localApi.registry.createType(
       "AccountId32",
       publicKey
     )
