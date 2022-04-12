@@ -78,26 +78,31 @@ export default defineComponent({
     if (config) {
       this.plot.plotSizeGB = config.plot.sizeGB
 
-      if (this.client.isFirstLoad() === false) {
-        await this.client.connectPublicApi()
-        await this.client.waitNodeStartApiConnect(config.plot.location)
-        await this.client.startFarming(config.plot.location, config.plot.sizeGB)
-        await this.client.startBlockSubscription()
-      }
+      const raceResult = util.promiseTimeout(7000, this.client.connectPublicApi())
+      raceResult.then(async() => {
+        if (this.client.isFirstLoad() === false) {
+          await this.client.waitNodeStartApiConnect(config.plot.location)
+          await this.client.startFarming(config.plot.location, config.plot.sizeGB)
+          await this.client.startBlockSubscription()
+        }
 
-      this.global.status.state = "loading"
-      this.global.status.message = "loading..."
+        this.global.status.state = "loading"
+        this.global.status.message = "loading..."
 
-      this.clientData = global.client.data
-      this.loading = false
-      this.peerInterval = window.setInterval(this.getNetInfo, 10000)
-      this.client.data.farming.events.on("newBlock", this.newBlock)
-      this.client.data.farming.events.on("farmedBlock", this.farmBlock)
-      this.global.status.state = "live"
-      this.global.status.message = lang.syncedMsg
-      this.checkNodeAndNetwork()
-      this.checkFarmerAndPlot()
-      this.client.disconnectPublicApi()
+        this.clientData = global.client.data
+        this.loading = false
+        this.peerInterval = window.setInterval(this.getNetInfo, 10000)
+        this.client.data.farming.events.on("newBlock", this.newBlock)
+        this.client.data.farming.events.on("farmedBlock", this.farmBlock)
+        this.global.status.state = "live"
+        this.global.status.message = lang.syncedMsg
+        await this.checkNodeAndNetwork()
+        await this.checkFarmerAndPlot()
+        await this.client.disconnectPublicApi()
+      })
+      raceResult.catch(_ => {
+        console.log("The server seems to be too congested! Please try again later...")
+      })
     } else {
       console.error("DASH MOUNTED | ERROR | NO CONFIG LOADED")
     }
