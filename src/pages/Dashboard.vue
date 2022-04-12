@@ -76,12 +76,12 @@ export default defineComponent({
   async mounted() {
     const config = appConfig.getAppConfig()
     if (config) {
-      this.plot.plotSizeGB = config.segmentCache.allocatedGB
+      this.plot.plotSizeGB = config.plot.sizeGB
 
       if (this.client.isFirstLoad() === false) {
         await this.client.connectPublicApi()
         await this.client.waitNodeStartApiConnect(config.plot.location)
-        await this.client.startFarming(config.plot.location)
+        await this.client.startFarming(config.plot.location, config.plot.sizeGB)
         await this.client.startBlockSubscription()
       }
 
@@ -121,10 +121,8 @@ export default defineComponent({
       this.plot.state = "verifying"
       this.plot.message = lang.verifyingPlot
 
-      const networkSegmentCount = await this.client.getNetworkSegmentCount()
-      const totalSize = networkSegmentCount * 256 * util.PIECE_SIZE
-      const allocatedGB = Math.round((totalSize * 100) / util.GB) / 100
-      this.plot.plotSizeGB = allocatedGB
+      const config = appConfig.getAppConfig()
+      if (config) this.plot.plotSizeGB = config.plot.sizeGB
 
       this.plot.message = lang.syncedMsg
       this.plot.state = "finished"

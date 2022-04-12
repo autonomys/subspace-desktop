@@ -59,17 +59,16 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
                   style="margin-left: 6px"
                   color="black"
                   size="12px"
-                  v-if="allocatedGB === 0"
+                  v-if="blockchainSizeGB === 0"
                 )
               q-input(
                 color="blue"
                 dense
                 input-class="setupPlotInput"
                 outlined
-                readonly
                 suffix="GB"
                 v-model="allocatedGB"
-                v-if="allocatedGB > 0"
+                v-if="blockchainSizeGB > 0"
               )
                 q-tooltip.q-pa-sm
                   p {{ lang.allocatedSpace }}
@@ -79,8 +78,8 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
                 input-class="setupPlotInput"
                 outlined
                 readonly
-                prefix="Estimating plot size ..."
-                v-if="allocatedGB === 0"
+                prefix="Estimating blockchain size ..."
+                v-if="blockchainSizeGB === 0"
               )
                 q-tooltip.q-pa-sm
                   p {{ lang.estimatingSpace }}
@@ -88,7 +87,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
         .col.q-pr-md
           .row.justify-center(
             style="transform: scale(-1, 1)"
-            v-if="allocatedGB > 0"
+            v-if="blockchainSizeGB > 0"
           )
             apexchart(
               :options="chartOptions"
@@ -98,6 +97,21 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
             )
           .row.justify-center(v-else)
             q-spinner-pie(color="grey" size="120px" thickness="1")
+          .row.q-mt-md
+            .col-1
+            .col
+              q-slider(
+                :max="getMaxPlotSize()"
+                :min="1"
+                :step="1"
+                color="blue"
+                markers
+                snap
+                style="height: 25px"
+                v-model="allocatedGB"
+                v-if="blockchainSizeGB > 0"
+              )
+            .col-1
   .row.justify-end.q-mt-sm.absolute-bottom.q-pb-md
     .col-auto.q-pr-md
       div {{ lang.hint }}
@@ -139,7 +153,8 @@ export default defineComponent({
       revealKey: false,
       userConfirm: false,
       plotDirectory: "/",
-      allocatedGB: 0,
+      allocatedGB: 1,
+      blockchainSizeGB: 0,
       validPath: true,
       defaultPath: "/",
       driveStats: <native.DriveStats>{ freeBytes: 0, totalBytes: 0 },
@@ -174,7 +189,7 @@ export default defineComponent({
       }
     },
     canContinue(): boolean {
-      return this.allocatedGB > 0 && this.validPath
+      return this.blockchainSizeGB > 0 && this.validPath
     },
     unsafeFree(): boolean {
       return this.stats.freeGB < 20
@@ -207,9 +222,9 @@ export default defineComponent({
     this.defaultPath = (await tauri.path.dataDir()) + util.dirName
     this.plotDirectory = this.defaultPath
     do {
-      this.allocatedGB = appConfig.getAppConfig()?.segmentCache.allocatedGB || 0
+      this.blockchainSizeGB = appConfig.getAppConfig()?.segmentCache.blockchainSizeGB || 0
       await new Promise((resolve) => setTimeout(resolve, 1000))
-    } while (this.allocatedGB <= 0)
+    } while (this.blockchainSizeGB <= 0)
   },
   async created() {
     this.$watch(
@@ -230,6 +245,9 @@ export default defineComponent({
     )
   },
   methods: {
+    getMaxPlotSize() {
+      return Math.min(this.stats.safeAvailableGB, this.blockchainSizeGB, 100)
+    },
     async confirmCreateDir() {
       const dirExists = await native.dirExists(this.plotDirectory)
 
@@ -260,7 +278,7 @@ export default defineComponent({
         this.plotDirectory.slice(-1)
 
       await appData.createCustomDataDir(this.plotDirectory)
-      appConfig.updateAppConfig({ location: this.plotDirectory }, null, null, null, null)
+      appConfig.updateAppConfig({ location: this.plotDirectory, sizeGB: this.allocatedGB }, null, null, null, null)
       this.$router.replace({ name: "plottingProgress" })
     },
     async updateDriveStats() {

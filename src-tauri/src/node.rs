@@ -11,7 +11,7 @@ use sc_service::config::{
 };
 use sc_service::{
     BasePath, Configuration, DatabaseSource, KeepBlocks, PruningMode, Role, RpcMethods,
-    TracingReceiver, TransactionStorageMode,
+    TracingReceiver,
 };
 use sc_tracing::logging::LoggerBuilder;
 use sp_core::crypto::Ss58AddressFormat;
@@ -159,7 +159,6 @@ fn create_configuration<CS: ChainSpec + 'static>(
         // TODO: Change to constrained eventually (need DSN for this)
         state_pruning: PruningMode::ArchiveAll,
         keep_blocks: KeepBlocks::All,
-        transaction_storage: TransactionStorageMode::BlockBody,
         wasm_method: WasmExecutionMethod::Compiled,
         wasm_runtime_overrides: None,
         execution_strategies: ExecutionStrategies {
