@@ -119,7 +119,6 @@ pub(crate) async fn create_full_client<CS: ChainSpec + 'static>(
     )?;
 
     subspace_service::new_full::<subspace_runtime::RuntimeApi, ExecutorDispatch>(config, true)
-        .await
         .map_err(Into::into)
 }
 

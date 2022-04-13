@@ -15,11 +15,14 @@ use log::{debug, error};
 use serde::Serialize;
 use std::path::PathBuf;
 use std::sync::atomic::Ordering;
+use std::time::Duration;
 use tauri::SystemTrayEvent;
 use tauri::{
     api::{self},
     Env, Manager, RunEvent,
 };
+
+const BEST_BLOCK_NUMBER_CHECK_INTERVAL: Duration = Duration::from_secs(5);
 
 #[derive(Serialize)]
 struct DiskStats {
@@ -36,15 +39,27 @@ fn plot_progress_tracker() -> usize {
 async fn farming(path: String, reward_address: String, plot_size: u64) {
     match reward_address.len() {
         0 => {
-            farmer::farm(path.into(), "ws://127.0.0.1:9944", None, plot_size)
-                .await
-                .unwrap();
+            farmer::farm(
+                path.into(),
+                "ws://127.0.0.1:9944",
+                None,
+                plot_size,
+                BEST_BLOCK_NUMBER_CHECK_INTERVAL,
+            )
+            .await
+            .unwrap();
         }
         _ => {
             if let Ok(address) = farmer::parse_reward_address(&reward_address) {
-                farmer::farm(path.into(), "ws://127.0.0.1:9944", Some(address), plot_size)
-                    .await
-                    .unwrap();
+                farmer::farm(
+                    path.into(),
+                    "ws://127.0.0.1:9944",
+                    Some(address),
+                    plot_size,
+                    BEST_BLOCK_NUMBER_CHECK_INTERVAL,
+                )
+                .await
+                .unwrap();
             } else {
                 error!("Reward address could not be parsed!");
             }
@@ -59,11 +74,6 @@ async fn start_node(path: String) -> String {
         .await
         .unwrap();
     node_name
-}
-
-#[tauri::command]
-fn identity_create(path: String) -> String {
-    farmer::create_identity(path.into()).unwrap()
 }
 
 #[tauri::command]
