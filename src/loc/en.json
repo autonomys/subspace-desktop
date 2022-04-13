@@ -30,6 +30,7 @@
     "utilizedSpace": "How much space is currently being used.",
     "allocatedSpace": "Space to be shared with Subspace Protocol.",
     "estimatingSpace": "Requesting the blockchain size from the network.",
+    "nodeSpace": "Space Requied for Node",
     "plotsDirectory": "Plots Directory"
   },
   "plottingProgress": {

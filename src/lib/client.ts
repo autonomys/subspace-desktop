@@ -239,12 +239,9 @@ export class Client {
   }
 
   /* FARMER INTEGRATION */
-  public async startFarming(path: string, plotSizeGB: number): Promise<boolean> {
-    const plotSize = Math.round(plotSizeGB * 1048576)
-    const rewardAddress: string | null = LocalStorage.getItem("rewardAddress")
-    if (rewardAddress == null) {
-      console.error("Tried to send empty reward address to backend!")
-    }
+  public async startFarming(path: string, plotSizeGB: number): Promise<void> {
+    const plotSize = Math.round(plotSizeGB * 1024 * 1024 * 1024)
+    const rewardAddress = LocalStorage.getItem("rewardAddress")?.toString() || ""
     return await tauri.invoke("farming", { path, rewardAddress, plotSize })
   }
 

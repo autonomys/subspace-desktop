@@ -1,7 +1,8 @@
 use anyhow::{anyhow, Result};
 use log::info;
 use std::path::PathBuf;
-use std::sync::atomic::AtomicUsize;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::Arc;
 use std::time::Duration;
 use subspace_core_primitives::{PublicKey, PIECE_SIZE};
 use subspace_farmer::multi_farming::MultiFarming;
@@ -27,7 +28,7 @@ pub(crate) async fn farm(
     };
 
     info!("Connecting to node at {}", node_rpc_url);
-    let client = WsRpc::new(&node_rpc_url).await?;
+    let client = WsRpc::new(node_rpc_url).await?;
 
     let FarmerMetadata {
         record_size: _,
@@ -71,6 +72,17 @@ pub(crate) async fn farm(
         best_block_number_check_interval,
     )
     .await?;
+
+    let plots = multi_farming.plots.clone();
+    let first_plot = plots.iter().next().unwrap();
+    first_plot
+        .on_progress_change(Arc::new(|plotted_pieces| {
+            PLOTTED_PIECES.fetch_add(
+                plotted_pieces.plotted_piece_count / PIECE_SIZE,
+                Ordering::SeqCst,
+            );
+        }))
+        .detach();
 
     multi_farming.wait().await
 }

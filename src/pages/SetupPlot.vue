@@ -62,7 +62,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
                   v-if="blockchainSizeGB === 0"
                 )
               q-input(
-                color="blue"
+                bg-color="blue-2"
                 dense
                 input-class="setupPlotInput"
                 outlined
@@ -83,6 +83,16 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
               )
                 q-tooltip.q-pa-sm
                   p {{ lang.estimatingSpace }}
+              .q-mt-sm {{ lang.nodeSpace }}
+              q-input(
+                bg-color="orange-2"
+                dense
+                input-class="setupPlotInput"
+                outlined
+                readonly
+                suffix="GB"
+                v-model="nodeSpaceGB"
+              )
 
         .col.q-pr-md
           .row.justify-center(
@@ -101,11 +111,10 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
             .col-1
             .col
               q-slider(
-                :max="getMaxPlotSize()"
+                :max="this.stats.safeAvailableGB"
                 :min="1"
-                :step="1"
+                :step="5"
                 color="blue"
-                markers
                 snap
                 style="height: 25px"
                 v-model="allocatedGB"
@@ -154,6 +163,7 @@ export default defineComponent({
       revealKey: false,
       plotDirectory: "/",
       allocatedGB: 1,
+      nodeSpaceGB: 20,
       blockchainSizeGB: 0,
       validPath: true,
       defaultPath: "/",
@@ -167,6 +177,7 @@ export default defineComponent({
     chartData(): ChartDataType {
       return [
         this.stats.utilizedGB,
+        this.nodeSpaceGB,
         this.stats.freeGB,
         this.allocatedGB < 5 ? 5 : this.allocatedGB
       ]
@@ -248,9 +259,6 @@ export default defineComponent({
     )
   },
   methods: {
-    getMaxPlotSize() {
-      return Math.min(this.stats.safeAvailableGB, this.blockchainSizeGB, 100)
-    },
     async confirmCreateDir() {
       const dirExists = await native.dirExists(this.plotDirectory)
 

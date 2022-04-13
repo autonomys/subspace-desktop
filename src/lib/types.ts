@@ -85,7 +85,7 @@ export const emptyClientData: ClientData = {
 
 export const chartOptions: ApexOptions = {
   legend: { show: false },
-  colors: ["#E0E0E0", "#FFFFFF", "#2081F0"],
+  colors: ["#E0E0E0", "#D6642F", "#FFFFFF", "#2081F0"],
   plotOptions: {
     pie: {
       startAngle: 0,
