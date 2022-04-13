@@ -11,13 +11,6 @@ mixin page1
     br
     p If your "fruit is ripe" aka if you have a plot that wins the current challenge then you are rewarded with subspace credits. aka "Winning the block".
 mixin page2
-  .row.justify-center.q-mb-md
-    .col-auto
-    //- q-icon(color="blue-3" name="vpn_key" size="80px")
-    .col
-      .row.q-mb-md
-        saveKeys(@userConfirm="userConfirm")
-mixin page3
   .row.justify-center.q-pb-md.items-center
     .col-auto.q-mr-md
       q-icon(color="yellow" name="lightbulb" size="100px")
@@ -51,8 +44,6 @@ q-dialog(@hide="onDialogHide" persistent ref="dialog")
           +page1
         div(v-if="currentPage == 2")
           +page2
-        div(v-if="currentPage == 3")
-          +page3
         .absolute-bottom.q-pa-md
           .row.justify-center.absolute-bottom
             q-icon.q-mr-xs(
@@ -63,36 +54,17 @@ q-dialog(@hide="onDialogHide" persistent ref="dialog")
             )
           .row.justify-end
             q-btn(
-              @click="proceedToMnemonic"
-              label="next"
-              outline
-              size="lg"
-              stretch
-              v-if="currentPage == 1"
-            )
-            q-btn(
-              :disabled="!userConfirmed"
               @click="currentPage++"
               label="next"
               outline
               size="lg"
               stretch
-              v-if="currentPage == 2"
-            )
-            q-btn(
-              @click="currentPage++"
-              label="next"
-              outline
-              size="lg"
-              stretch
-              v-if="currentPage == 3"
             )
 </template>
 
 <script>
 import { defineComponent } from "vue"
 import saveKeys from "components/SaveKeys.vue"
-import { appConfig } from "src/lib/appConfig"
 const component = defineComponent({
   components: { saveKeys },
   props: {
@@ -106,9 +78,8 @@ const component = defineComponent({
   ],
   data() {
     return {
-      totalPages: 3,
+      totalPages: 2,
       currentPage: 1,
-      userConfirmed: false
     }
   },
   watch: {
@@ -117,17 +88,6 @@ const component = defineComponent({
     }
   },
   methods: {
-    proceedToMnemonic() {
-      const config = appConfig.getAppConfig()
-      if (config && config.importedRewAddr) {
-        this.currentPage += 2
-      } else {
-        this.currentPage += 1
-      }
-    },
-    userConfirm(val) {
-      this.userConfirmed = val
-    },
     // following method is REQUIRED
     // (don't change its name --> "show")
     show() {
