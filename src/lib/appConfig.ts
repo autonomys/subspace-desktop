@@ -15,7 +15,8 @@ export const appConfig = {
     account: Account | null,
     segmentCache: SegmentCache | null,
     launchOnBoot: boolean | null,
-    importedRewAddr: boolean | null
+    importedRewAddr: boolean | null,
+    plottingStarted: boolean | null
   ): void {
     const appConfig = this.getAppConfig()
     if (appConfig) {
@@ -25,6 +26,7 @@ export const appConfig = {
       if (segmentCache) newAppConfig.segmentCache = segmentCache
       if (launchOnBoot != null) newAppConfig.launchOnBoot = launchOnBoot
       if (importedRewAddr != null) newAppConfig.importedRewAddr = importedRewAddr
+      if (plottingStarted != null) newAppConfig.plottingStarted = plottingStarted
       LocalStorage.set("appConfig", newAppConfig)
     }
   }

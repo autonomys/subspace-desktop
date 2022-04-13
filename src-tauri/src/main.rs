@@ -33,13 +33,6 @@ static PLOTTED_PIECES: AtomicUsize = AtomicUsize::new(0);
 const BEST_BLOCK_NUMBER_CHECK_INTERVAL: Duration = Duration::from_secs(5);
 
 #[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-struct FarmerIdentity {
-    public_key: [u8; 32],
-    mnemonic: String,
-}
-
-#[derive(Serialize)]
 struct DiskStats {
     free_bytes: u64,
     total_bytes: u64,
@@ -71,8 +64,13 @@ async fn farming(path: String, reward_address: String, plot_size: u64) {
 }
 
 #[tauri::command]
-async fn start_node(path: String) -> FarmerIdentity {
+async fn start_node(path: String) -> [u8; 32] {
     init_node(path.into()).await.unwrap()
+}
+
+#[tauri::command]
+fn identity_create(path: String) -> String {
+    create_identity(path.into()).unwrap()
 }
 
 #[tauri::command]
@@ -131,7 +129,8 @@ async fn main() -> Result<()> {
                 get_this_binary,
                 farming,
                 plot_progress_tracker,
-                start_node
+                start_node,
+                identity_create
             ],
             #[cfg(target_os = "windows")]
             tauri::generate_handler![
@@ -142,7 +141,8 @@ async fn main() -> Result<()> {
                 get_disk_stats,
                 farming,
                 plot_progress_tracker,
-                start_node
+                start_node,
+                identity_create
             ],
         )
         .build(tauri::generate_context!())
@@ -172,7 +172,7 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn init_node(base_directory: PathBuf) -> Result<FarmerIdentity> {
+async fn init_node(base_directory: PathBuf) -> Result<[u8; 32]> {
     let identity = Identity::open_or_create(&base_directory)?;
     let public_key = identity.public_key().to_bytes();
 
@@ -196,12 +196,17 @@ async fn init_node(base_directory: PathBuf) -> Result<FarmerIdentity> {
         }
     });
 
-    Ok(FarmerIdentity {
-        public_key,
-        mnemonic: Mnemonic::from_entropy(identity.entropy(), Language::English)
+    Ok(public_key)
+}
+
+fn create_identity(base_directory: PathBuf) -> Result<String> {
+    let identity = Identity::open_or_create(&base_directory)?;
+
+    Ok(
+        Mnemonic::from_entropy(identity.entropy(), Language::English)
             .unwrap()
             .into_phrase(),
-    })
+    )
 }
 
 /// Start farming by using plot in specified path and connecting to WebSocket server at specified

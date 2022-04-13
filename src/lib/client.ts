@@ -210,14 +210,16 @@ export class Client {
 
   // TODO: Disable mnemonic return from tauri commmand instead of this validation.
   private async startNode(path: string): Promise<ClientIdentity> {
-    const { publicKey, mnemonic } = await tauri.invoke("start_node", { path })
+    const publicKey = await tauri.invoke("start_node", { path })
+    // TODO: move farmerPublicKey setup to createIdentity function if possible
+    // can't do it now, because don't know how to initialize AccountId32 without localApi
+    // and localApi starts when node starts
     const farmerPublicKey: AccountId32 = this.publicApi.registry.createType(
       "AccountId32",
       publicKey
     )
-    if (this.firstLoad) {
-      this.mnemonic = mnemonic
-    } else {
+
+    if (!this.firstLoad) {
       this.loadStoredBlocks()
     }
     return { publicKey: farmerPublicKey }
@@ -226,6 +228,11 @@ export class Client {
   private loadStoredBlocks(): void {
     this.farmed = getStoredBlocks()
     this.data.farming.farmed = this.farmed
+  }
+
+  public async createIdentity(path: string): Promise<void> {
+    const mnemonic: string = await tauri.invoke("identity_create", { path })
+    this.mnemonic = mnemonic
   }
 
   /* FARMER INTEGRATION */

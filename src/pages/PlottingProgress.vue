@@ -220,7 +220,7 @@ export default defineComponent({
             {
               farmerPublicKey: publicKey.toString()
             },
-            null, null, null
+            null, null, null, null
           )
         }
       } else {
@@ -232,8 +232,6 @@ export default defineComponent({
       clearInterval(farmerTimer)
     },
     async farmingWrapper(): Promise<void> {
-
-
       const config = appConfig.getAppConfig()
       if (config) {
         await this.client.startBlockSubscription()
@@ -247,6 +245,7 @@ export default defineComponent({
           this.localSegmentCount = await this.client.getLocalSegmentCount()
         } while (this.localSegmentCount < this.networkSegmentCount)
       }
+      appConfig.updateAppConfig(null, null, null, null, null, true)
     },
     startTimers() {
       farmerTimer = window.setInterval(() => {

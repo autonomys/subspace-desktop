@@ -143,6 +143,7 @@ import { globalState as global } from "src/lib/global"
 import * as fs from "@tauri-apps/api/fs"
 import { appConfig } from "src/lib/appConfig"
 import { appData, appDataDialog } from "src/lib/appData"
+import mnemonicModal from "components/mnemonicModal.vue"
 
 const tauri = { path, fs }
 const lang = global.data.loc.text.setupPlot
@@ -257,10 +258,11 @@ export default defineComponent({
           .catch(console.error)
 
         if (files) {
-          if (files.length === 0) {
+          console.log("FILES ARE: :", files)
+          if (files.length === 0 || !files.some(item=> item.name === "chains" )) {
             appDataDialog.existingDirectoryConfirm(
               this.plotDirectory,
-              this.startPlotting
+              this.prepareForPlotting
             )
           } else if (files.length > 0) {
             appDataDialog.emptyDirectoryInfo(this.plotDirectory)
@@ -269,17 +271,18 @@ export default defineComponent({
       } else if (!dirExists) {
         appDataDialog.newDirectoryConfirm(
           this.plotDirectory,
-          this.startPlotting
+          this.prepareForPlotting
         )
       }
     },
-    async startPlotting() {
+    async prepareForPlotting() {
       if (this.plotDirectory.charAt(this.plotDirectory.length - 1) == "/")
         this.plotDirectory.slice(-1)
 
       await appData.createCustomDataDir(this.plotDirectory)
-      appConfig.updateAppConfig({ location: this.plotDirectory, sizeGB: this.allocatedGB }, null, null, null, null)
-      this.$router.replace({ name: "plottingProgress" })
+      appConfig.updateAppConfig({ location: this.plotDirectory, sizeGB: this.allocatedGB }, null, null, null, null, null)
+
+      await this.checkIdentity()
     },
     async updateDriveStats() {
       const stats = await native.driveStats(this.plotDirectory)
@@ -291,6 +294,19 @@ export default defineComponent({
         .selectDir(this.plotDirectory)
         .catch(console.error)
       if (result) this.plotDirectory = result
+    },
+    async checkIdentity() {
+      const config = appConfig.getAppConfig()
+      if (config && config.importedRewAddr === false) {
+        await this.client.createIdentity(this.plotDirectory)
+        await this.viewMnemonic()
+      }
+    },
+    async viewMnemonic() {
+      const modal = await util.showModal(mnemonicModal)
+      modal?.onDismiss(() => {
+        this.$router.replace({ name: "plottingProgress" })
+      })
     }
   }
 })

@@ -60,7 +60,7 @@ export default defineComponent({
     },
     async importKey() {
       LocalStorage.set("rewardAddress", this.rewardAddress)
-      appConfig.updateAppConfig(null, null, null, null, true)
+      appConfig.updateAppConfig(null, null, null, null, true, null)
       this.$router.replace({ name: "setupPlot" })
     },
     skip() {

@@ -36,7 +36,7 @@ export const appDataDialog = {
   },
   newDirectoryConfirm(
     plotDirectory: string,
-    startPlotting: () => Promise<void>
+    prepareForPlotting: () => Promise<void>
   ): void {
     Dialog.create({
       title: `Do you want to create a new directory?`,
@@ -53,12 +53,12 @@ export const appDataDialog = {
       ok: { label: "Create", icon: "check", flat: true, color: "blue" },
       cancel: { label: "Cancel", icon: "cancel", flat: true, color: "grey" }
     }).onOk(() => {
-      startPlotting()
+      prepareForPlotting()
     })
   },
   existingDirectoryConfirm(
     plotDirectory: string,
-    startPlotting: () => Promise<void>
+    prepareForPlotting: () => Promise<void>
   ): void {
     Dialog.create({
       title: `Confirm selected directory.`,
@@ -85,7 +85,7 @@ export const appDataDialog = {
         color: "grey"
       }
     }).onOk(() => {
-      startPlotting()
+      prepareForPlotting()
     })
   }
 }
