@@ -1,5 +1,5 @@
 use anyhow::Result;
-use log::warn;
+use log::{error, warn};
 use names::{Generator, Name};
 use sc_chain_spec::ChainSpec;
 use sc_executor::NativeExecutionDispatch;
@@ -19,6 +19,7 @@ use std::env;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::Once;
+use subspace_farmer::Identity;
 use subspace_service::{FullClient, NewFull};
 use tokio::runtime::Handle;
 
@@ -49,6 +50,33 @@ impl NativeExecutionDispatch for ExecutorDispatch {
     fn native_version() -> sc_executor::NativeVersion {
         subspace_runtime::native_version()
     }
+}
+
+pub(crate) async fn init_node(base_directory: PathBuf, node_name: String) -> Result<[u8; 32]> {
+    let identity = Identity::open_or_create(&base_directory)?;
+    let public_key = identity.public_key().to_bytes();
+
+    let chain_spec =
+        sc_service::GenericChainSpec::<subspace_runtime::GenesisConfig>::from_json_bytes(
+            include_bytes!("../chain-spec.json").as_ref(),
+        )
+        .map_err(anyhow::Error::msg)?;
+
+    let full_client_fut = tokio::task::spawn_blocking(move || {
+        Handle::current().block_on(create_full_client(chain_spec, base_directory, node_name))
+    });
+    let mut full_client = full_client_fut.await??;
+
+    // TODO: Make this interruptable if needed
+    tokio::spawn(async move {
+        if let Err(error) = full_client.task_manager.future().await {
+            error!("Task manager exited with error: {error}");
+        } else {
+            error!("Task manager exited without error");
+        }
+    });
+
+    Ok(public_key)
 }
 
 // TODO: Allow customization of a bunch of these things
