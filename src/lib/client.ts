@@ -170,6 +170,11 @@ export class Client {
     await this.publicApi.isReady
   }
 
+   /* Disconnects from PUBLIC-rpc node - Example: farm-rpc.subspace.network */
+  public async disconnectPublicApi(): Promise<void> {
+    await this.publicApi.disconnect()
+  }
+
   public async getBlocksData(): Promise<[number, number]> {
     const blocksNumbers = await Promise.all([
       this.getLocalLastBlockNumber(),
@@ -212,7 +217,7 @@ export class Client {
   // TODO: Disable mnemonic return from tauri commmand instead of this validation.
   private async startNode(path: string): Promise<ClientIdentity> {
     const publicKey = await tauri.invoke("start_node", { path })
-    const farmerPublicKey: AccountId32 = this.publicApi.registry.createType(
+    const farmerPublicKey: AccountId32 = this.localApi.registry.createType(
       "AccountId32",
       publicKey
     )
