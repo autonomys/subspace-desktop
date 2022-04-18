@@ -152,7 +152,6 @@ export default defineComponent({
   data() {
     return {
       revealKey: false,
-      userConfirm: false,
       plotDirectory: "/",
       allocatedGB: 1,
       blockchainSizeGB: 0,
