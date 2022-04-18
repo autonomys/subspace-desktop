@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@polkadot/api": "^7.2.1",
+    "@polkadot/util-crypto": "^9.0.1",
     "@quasar/extras": "^1.0.0",
     "@tauri-apps/api": "^1.0.0-rc.2",
     "@tsmx/human-readable": "^1.0.6",

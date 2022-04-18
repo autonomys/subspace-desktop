@@ -95,7 +95,16 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
       div {{ lang.hintInfo }}
     .col-auto.q-pr-md
     .col-expand
-    .col-auto(v-if="viewedIntro")
+    .col-auto
+      q-btn(
+        :label="lang.hints"
+        @click="viewIntro()"
+        color="blue-8"
+        icon-right="info"
+        outline
+        size="lg"
+      )
+    .col-auto
       q-btn(
         :label="lang.next"
         @click="$router.replace({ name: 'dashboard' })"
@@ -107,15 +116,6 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
       )
       q-tooltip.q-pa-md(v-if="!plotFinished")
         p.q-mb-lg {{ lang.waitPlotting }}
-    .col-auto(v-else)
-      q-btn(
-        :label="lang.next"
-        @click="viewIntro()"
-        color="blue-8"
-        icon-right="play_arrow"
-        outline
-        size="lg"
-      )
 </template>
 
 <script lang="ts">
@@ -220,7 +220,7 @@ export default defineComponent({
             {
               farmerPublicKey: publicKey.toString()
             },
-            null, null, null
+            null, null, null, null
           )
         }
       } else {
@@ -232,8 +232,6 @@ export default defineComponent({
       clearInterval(farmerTimer)
     },
     async farmingWrapper(): Promise<void> {
-
-
       const config = appConfig.getAppConfig()
       if (config) {
         await this.client.startBlockSubscription()
@@ -247,6 +245,7 @@ export default defineComponent({
           this.localSegmentCount = await this.client.getLocalSegmentCount()
         } while (this.localSegmentCount < this.networkSegmentCount)
       }
+      appConfig.updateAppConfig(null, null, null, null, null, true)
     },
     startTimers() {
       farmerTimer = window.setInterval(() => {

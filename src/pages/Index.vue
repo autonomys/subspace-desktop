@@ -37,11 +37,9 @@ export default defineComponent({
       this.checkDev()
       const config = appConfig.getAppConfig()
       if (config) {
-        const { plot, account } = config
+        const { plottingStarted } = config
         if (
-          plot &&
-          account &&
-          plot.location.length > 0
+          plottingStarted
         ) {
           console.log("INDEX - NOT First Time RUN.")
           this.dashboard()
@@ -84,7 +82,7 @@ export default defineComponent({
         appConfig.updateAppConfig(null, null, {
           networkSegmentCount,
           blockchainSizeGB: blockchainSizeGB === 0 ? 0.1 : blockchainSizeGB
-        }, null, null)
+        }, null, null, null)
       })
       raceResult.catch(_ => {
         console.log("The server seems to be too congested! Please try again later...")

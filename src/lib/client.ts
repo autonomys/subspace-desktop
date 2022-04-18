@@ -1,7 +1,8 @@
-import { ApiPromise, WsProvider } from "@polkadot/api"
+import { ApiPromise, Keyring, WsProvider } from "@polkadot/api"
 import type { Vec } from "@polkadot/types/codec"
 import type { u128, u32 } from "@polkadot/types"
 import type { AccountId32 } from "@polkadot/types/interfaces"
+import { mnemonicGenerate } from "@polkadot/util-crypto"
 import * as event from "@tauri-apps/api/event"
 import { invoke } from "@tauri-apps/api/tauri"
 import { reactive } from "vue"
@@ -215,14 +216,13 @@ export class Client {
 
   // TODO: Disable mnemonic return from tauri commmand instead of this validation.
   private async startNode(path: string): Promise<ClientIdentity> {
-    const { publicKey, mnemonic } = await tauri.invoke("start_node", { path })
+    const publicKey = await tauri.invoke("start_node", { path })
     const farmerPublicKey: AccountId32 = this.localApi.registry.createType(
       "AccountId32",
       publicKey
     )
-    if (this.firstLoad) {
-      this.mnemonic = mnemonic
-    } else {
+
+    if (!this.firstLoad) {
       this.loadStoredBlocks()
     }
     return { publicKey: farmerPublicKey }
@@ -231,6 +231,15 @@ export class Client {
   private loadStoredBlocks(): void {
     this.farmed = getStoredBlocks()
     this.data.farming.farmed = this.farmed
+  }
+
+  public async createRewardAddress(): Promise<void> {
+    const mnemonic = mnemonicGenerate()
+    const keyring = new Keyring()
+    const pair = keyring.createFromUri(mnemonic)
+    keyring.setSS58Format(2254); // 2254 is the prefix for subspace-testnet
+    LocalStorage.set("rewardAddress", pair.address)
+    this.mnemonic = mnemonic
   }
 
   /* FARMER INTEGRATION */

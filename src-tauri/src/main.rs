@@ -10,7 +10,6 @@ mod menu;
 mod node;
 
 use anyhow::Result;
-use bip39::{Language, Mnemonic};
 use log::{debug, error, info};
 use serde::Serialize;
 use std::path::PathBuf;
@@ -31,13 +30,6 @@ use tokio::runtime::Handle;
 
 static PLOTTED_PIECES: AtomicUsize = AtomicUsize::new(0);
 const BEST_BLOCK_NUMBER_CHECK_INTERVAL: Duration = Duration::from_secs(5);
-
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-struct FarmerIdentity {
-    public_key: [u8; 32],
-    mnemonic: String,
-}
 
 #[derive(Serialize)]
 struct DiskStats {
@@ -71,7 +63,7 @@ async fn farming(path: String, reward_address: String, plot_size: u64) {
 }
 
 #[tauri::command]
-async fn start_node(path: String) -> FarmerIdentity {
+async fn start_node(path: String) -> [u8; 32] {
     init_node(path.into()).await.unwrap()
 }
 
@@ -172,7 +164,7 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn init_node(base_directory: PathBuf) -> Result<FarmerIdentity> {
+async fn init_node(base_directory: PathBuf) -> Result<[u8; 32]> {
     let identity = Identity::open_or_create(&base_directory)?;
     let public_key = identity.public_key().to_bytes();
 
@@ -196,12 +188,7 @@ async fn init_node(base_directory: PathBuf) -> Result<FarmerIdentity> {
         }
     });
 
-    Ok(FarmerIdentity {
-        public_key,
-        mnemonic: Mnemonic::from_entropy(identity.entropy(), Language::English)
-            .unwrap()
-            .into_phrase(),
-    })
+    Ok(public_key)
 }
 
 /// Start farming by using plot in specified path and connecting to WebSocket server at specified

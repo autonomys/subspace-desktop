@@ -13,7 +13,7 @@
                 input-class="mnemonic"
                 outlined
                 readonly
-                ref="pkDisplay"
+                ref="mnemonicDisplay"
                 style="width: 800px; height: 100px"
                 type="textarea"
                 v-model="mnemonic"
@@ -29,7 +29,7 @@
           .row.justify-center.q-mt-md(v-if="revealKey")
             q-btn(
               :label="lang.copy"
-              @click="copyPk"
+              @click="copyMnemonic"
               color="primary"
               style="max-width: 200px"
             )
@@ -65,13 +65,13 @@ export default defineComponent({
     global.client.clearMnemonic()
   },
   methods: {
-    copyPk() {
-      const displaypk = this.$refs["pkDisplay"] as QInput
+    copyMnemonic() {
+      const displayMnemonic = this.$refs["mnemonicDisplay"] as QInput
       const previousState = this.revealKey
       this.revealKey = true
       this.$nextTick(() => {
-        displaypk.focus()
-        displaypk.select()
+        displayMnemonic.focus()
+        displayMnemonic.select()
         var successful = document.execCommand("copy")
         var msg = successful ? "successful" : "unsuccessful"
         console.log(msg)
