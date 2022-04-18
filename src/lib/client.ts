@@ -171,9 +171,7 @@ export class Client {
 
    /* Disconnects from PUBLIC-rpc node - Example: farm-rpc.subspace.network */
   public async disconnectPublicApi(): Promise<void> {
-    if (this.publicApi.isConnected) {
-      await this.publicApi.disconnect()
-    }
+    await this.publicApi.disconnect()
   }
 
   public async getBlocksData(): Promise<[number, number]> {
