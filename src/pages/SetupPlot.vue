@@ -298,7 +298,7 @@ export default defineComponent({
     async checkIdentity() {
       const config = appConfig.getAppConfig()
       if (config && config.importedRewAddr === false) {
-        await this.client.createIdentity(this.plotDirectory)
+        await this.client.createRewardAddress()
         await this.viewMnemonic()
       }
     },

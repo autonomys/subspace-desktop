@@ -35,7 +35,6 @@ subspace-farmer = { git = "https://github.com/subspace/subspace", rev = "46420f7
 subspace-runtime = { git = "https://github.com/subspace/subspace", rev = "46420f74bc87f38795a7a4a0196d7214f90ed929" }
 subspace-service = { git = "https://github.com/subspace/subspace", rev = "46420f74bc87f38795a7a4a0196d7214f90ed929" }
 subspace-solving = { git = "https://github.com/subspace/subspace", rev = "46420f74bc87f38795a7a4a0196d7214f90ed929" }
-tiny-bip39 = "0.8.2"
 tokio = { version = "1.11.0", features = ["macros", "rt-multi-thread"] }
 
 [target.'cfg(windows)'.dependencies]

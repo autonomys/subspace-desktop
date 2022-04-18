@@ -9526,7 +9526,6 @@ dependencies = [
  "substrate-build-script-utils",
  "tauri",
  "tauri-build",
- "tiny-bip39",
  "tokio",
  "winreg 0.10.1",
 ]

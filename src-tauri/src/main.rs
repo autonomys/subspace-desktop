@@ -10,7 +10,6 @@ mod menu;
 mod node;
 
 use anyhow::Result;
-use bip39::{Language, Mnemonic};
 use log::{debug, error, info};
 use serde::Serialize;
 use std::path::PathBuf;
@@ -69,11 +68,6 @@ async fn start_node(path: String) -> [u8; 32] {
 }
 
 #[tauri::command]
-fn identity_create(path: String) -> String {
-    create_identity(path.into()).unwrap()
-}
-
-#[tauri::command]
 fn get_disk_stats(dir: String) -> DiskStats {
     debug!("{}", dir);
     let free: u64 = fs2::available_space(&dir).expect("error");
@@ -129,8 +123,7 @@ async fn main() -> Result<()> {
                 get_this_binary,
                 farming,
                 plot_progress_tracker,
-                start_node,
-                identity_create
+                start_node
             ],
             #[cfg(target_os = "windows")]
             tauri::generate_handler![
@@ -141,8 +134,7 @@ async fn main() -> Result<()> {
                 get_disk_stats,
                 farming,
                 plot_progress_tracker,
-                start_node,
-                identity_create
+                start_node
             ],
         )
         .build(tauri::generate_context!())
@@ -197,16 +189,6 @@ async fn init_node(base_directory: PathBuf) -> Result<[u8; 32]> {
     });
 
     Ok(public_key)
-}
-
-fn create_identity(base_directory: PathBuf) -> Result<String> {
-    let identity = Identity::open_or_create(&base_directory)?;
-
-    Ok(
-        Mnemonic::from_entropy(identity.entropy(), Language::English)
-            .unwrap()
-            .into_phrase(),
-    )
 }
 
 /// Start farming by using plot in specified path and connecting to WebSocket server at specified
