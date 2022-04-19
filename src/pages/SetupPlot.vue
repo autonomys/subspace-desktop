@@ -177,8 +177,11 @@ export default defineComponent({
       const utilizedGB = util.toFixed(totalDiskSizeGB - safeAvailableGB, 2)
       const freeGB = ((): number => {
         const val = util.toFixed(safeAvailableGB - this.allocatedGB, 2)
-        if (val >= 0) return val
-        else return 0
+        if (val >= 0) {
+          return val
+        } else {
+          return 0
+        }
       })()
 
       return {

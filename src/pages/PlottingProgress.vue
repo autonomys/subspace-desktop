@@ -178,10 +178,11 @@ export default defineComponent({
         this.plottingData.finishedGB = this.plottingData.allocatedGB
     },
     localSegmentCount(localCount) {
-      if (localCount >= this.networkSegmentCount)
+      if (localCount >= this.networkSegmentCount) {
         this.plottingData.status = `Archived ${localCount.toLocaleString()} Segments`
-      else
+      } else {
         this.plottingData.status = `Archived ${localCount.toLocaleString()} of ${this.networkSegmentCount.toLocaleString()} Segments`
+      }
 
       this.plottingData.finishedGB =
         (localCount * this.plottingData.allocatedGB) / this.networkSegmentCount
@@ -220,8 +221,11 @@ export default defineComponent({
       if (config) {
         await this.client.startBlockSubscription()
         const publicKey = await this.client.startFarming(this.plotDirectory, config.plot.sizeGB)
-        if (publicKey) appConfig.updateAppConfig(null, { farmerPublicKey: publicKey.toString() }, null, null, null, true)
-        else console.log("NO PUBLIC KEY RETURNED FROM FARMER")
+        if (publicKey) {
+          appConfig.updateAppConfig(null, { farmerPublicKey: publicKey.toString() }, null, null, null, true)
+        } else {
+          console.error("NO PUBLIC KEY RETURNED FROM FARMER")
+        }
         const networkSegmentCount = config.segmentCache.networkSegmentCount
         this.networkSegmentCount = networkSegmentCount
         this.plottingData.allocatedGB = config.plot.sizeGB

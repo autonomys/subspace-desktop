@@ -85,7 +85,7 @@ export default defineComponent({
         }, null, null, null)
       })
       raceResult.catch(_ => {
-        console.log("The server seems to be too congested! Please try again later...")
+        console.error("The server seems to be too congested! Please try again later...")
       })
     }
   }

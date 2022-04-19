@@ -101,7 +101,7 @@ export default defineComponent({
         await this.client.disconnectPublicApi()
       })
       raceResult.catch(_ => {
-        console.log("The server seems to be too congested! Please try again later...")
+        console.error("The server seems to be too congested! Please try again later...")
       })
     } else {
       console.error("DASH MOUNTED | ERROR | NO CONFIG LOADED")

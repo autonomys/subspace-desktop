@@ -105,22 +105,31 @@ const winAL = {
   async enable({ appName, appPath, minimized }: AutoLaunchParams): Promise<ChildReturnData> {
     const returnVal = <ChildReturnData>{ stdout: [], stderr: [] }
     const result = await native.winregSet(this.subKey, appName, appPath)
-    if (result.search('success') > -1) returnVal.stdout.push(result)
-    else returnVal.stderr.push(result)
+    if (result.search('success') > -1) {
+      returnVal.stdout.push(result)
+    } else {
+      returnVal.stderr.push(result)
+    }
     return returnVal
   },
   async disable(appName: string): Promise<ChildReturnData> {
     const returnVal = <ChildReturnData>{ stdout: [], stderr: [] }
     const result = <string>(await native.winregDelete(this.subKey, appName))
-    if (result.search('success') > -1) returnVal.stdout.push(result)
-    else returnVal.stderr.push(result)
+    if (result.search('success') > -1) {
+      returnVal.stdout.push(result)
+    } else {
+      returnVal.stderr.push(result)
+    }
     return returnVal
   },
   async isEnabled(appName: string): Promise<boolean> {
     const result = <string>(await native.winregGet(this.subKey, appName))
     console.log('isEnabled result:', result);
-    if (result.search('The system cannot find the file specified.') > -1) return false
-    else return true
+    if (result.search('The system cannot find the file specified.') > -1) {
+      return false
+    } else {
+      return true
+    }
   }
 }
 
@@ -138,15 +147,21 @@ export class AutoLauncher {
   async enable(): Promise<void | ChildReturnData> {
     const child = await this.autoLauncher.enable({ appName: this.appName, appPath: this.appPath, minimized: true })
     this.enabled = await this.isEnabled()
-    if (this.enabled == false) console.log("ENABLE DID NOT WORK")
-    else appConfig.updateAppConfig(null, null, null, true, null, null)
+    if (this.enabled == false) {
+      console.error("ENABLE DID NOT WORK")
+    } else {
+      appConfig.updateAppConfig(null, null, null, true, null, null)
+    }
     return child
   }
   async disable(): Promise<void | ChildReturnData> {
     const child = this.autoLauncher.disable(this.appName)
     this.enabled = await this.isEnabled()
-    if (this.enabled == true) console.log("DISABLE DID NOT WORK")
-    else appConfig.updateAppConfig(null, null, null, false, null, null)
+    if (this.enabled == true) {
+      console.error("DISABLE DID NOT WORK")
+    } else {
+      appConfig.updateAppConfig(null, null, null, false, null, null)
+    }
     return child
   }
   async init(): Promise<void> {
@@ -155,14 +170,16 @@ export class AutoLauncher {
     console.log("OS TYPE: " + osType)
     this.appPath = await invoke('get_this_binary') as string
     console.log('get_this_binary', this.appPath);
-    if (osType == 'Darwin') this.autoLauncher = macAL
-    else if (osType == 'Windows_NT') {
+    if (osType == 'Darwin') {
+      this.autoLauncher = macAL
+    } else if (osType == 'Windows_NT') {
       this.autoLauncher = winAL
       // From Windows 11 Tests: get_this_binary returns a string with a prefix "\\?\" on C:\Users......". On boot, autostart can't locate "\\?\c:\DIR\subspace-desktop.exe
       const appPath = this.appPath
       this.appPath = appPath.startsWith("\\\\?\\") ? appPath.replace("\\\\?\\", "") : appPath
+    } else {
+      this.autoLauncher = linAL
     }
-    else this.autoLauncher = linAL
 
     const config = appConfig.getAppConfig()
     if (config) {

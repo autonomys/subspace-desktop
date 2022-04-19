@@ -50,20 +50,21 @@ export default defineComponent({
         return
       }
       console.log("toggle Clicked", this.launchOnStart)
-      if (this.launchOnStart)
+      if (this.launchOnStart) {
         Notify.create({
           message: lang.willAutoLaunch,
           icon: "info",
           group: 1,
           badgeStyle: "visibility:hidden;"
         })
-      else
+      } else {
         Notify.create({
           message: lang.willNotAutoLaunch,
           icon: "info",
           group: 1,
           badgeStyle: "visibility:hidden;"
         })
+      }
       if (this.launchOnStart) {
         await this.autoLauncher.enable()
       } else {
@@ -95,8 +96,7 @@ export default defineComponent({
     async initMenu() {
       if (this.autoLauncher.enabled != undefined) {
         this.launchOnStart = await this.autoLauncher.enabled
-      }
-      else {
+      } else {
         this.launchOnStart = false
         this.disableAutoLaunch = true
       }

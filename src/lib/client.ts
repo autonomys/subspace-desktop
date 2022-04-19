@@ -85,26 +85,27 @@ export class Client {
                   // TODO
                 }
               })
-              const addr_unchecked: string | null = LocalStorage.getItem("rewardAddress")
-              let addr!: string;
-              if (addr_unchecked) addr = addr_unchecked
-              else console.log("Error: Reward Address should not be null!")
-              const block: FarmedBlock = {
-                author: farmerPublicKey,
-                id: hash.toString(),
-                time: Date.now(),
-                transactions: 0,
-                blockNum,
-                blockReward,
-                feeReward: 0,
-                rewardAddr: addr,
-                appsLink: appsLink + blockNum.toString()
+              const addr: string | null = LocalStorage.getItem("rewardAddress")
+              if (addr) {
+                const block: FarmedBlock = {
+                  author: farmerPublicKey,
+                  id: hash.toString(),
+                  time: Date.now(),
+                  transactions: 0,
+                  blockNum,
+                  blockReward,
+                  feeReward: 0,
+                  rewardAddr: addr,
+                  appsLink: appsLink + blockNum.toString()
+                }
+                this.data.farming.farmed = [block].concat(
+                  this.data.farming.farmed
+                )
+                storeBlocks(this.data.farming.farmed)
+                this.data.farming.events.emit("farmedBlock", block)
+              } else {
+                console.error("CLIENT: Reward address was null!")
               }
-              this.data.farming.farmed = [block].concat(
-                this.data.farming.farmed
-              )
-              storeBlocks(this.data.farming.farmed)
-              this.data.farming.events.emit("farmedBlock", block)
             }
             this.data.farming.events.emit("newBlock", blockNum)
           }
