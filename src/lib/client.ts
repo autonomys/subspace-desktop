@@ -14,7 +14,6 @@ import {
   emptyClientData,
   NetStatus,
   FarmedBlock,
-  ClientIdentity,
   SubPreDigest
 } from "src/lib/types"
 import { appConfig } from "./appConfig"
@@ -206,26 +205,19 @@ export class Client {
   }
 
   /* NODE INTEGRATION */
-  public async waitNodeStartApiConnect(path: string): Promise<ClientIdentity> {
-    const clientIdentity = await this.startNode(path)
+  public async waitNodeStartApiConnect(path: string): Promise<void> {
+    await this.startNode(path)
     // TODO: workaround in case node takes some time to fully start.
     await new Promise((resolve) => setTimeout(resolve, 7000))
     await this.connectLocalApi()
-    return clientIdentity
   }
 
   // TODO: Disable mnemonic return from tauri commmand instead of this validation.
-  private async startNode(path: string): Promise<ClientIdentity> {
-    const publicKey = await tauri.invoke("start_node", { path })
-    const farmerPublicKey: AccountId32 = this.localApi.registry.createType(
-      "AccountId32",
-      publicKey
-    )
-
+  private async startNode(path: string): Promise<void> {
+    await tauri.invoke("start_node", { path })
     if (!this.firstLoad) {
       this.loadStoredBlocks()
     }
-    return { publicKey: farmerPublicKey }
   }
 
   private loadStoredBlocks(): void {
@@ -243,7 +235,7 @@ export class Client {
   }
 
   /* FARMER INTEGRATION */
-  public async startFarming(path: string, plotSizeGB: number): Promise<void> {
+  public async startFarming(path: string, plotSizeGB: number): Promise<string> {
     const plotSize = Math.round(plotSizeGB * 1048576)
     const rewardAddress = LocalStorage.getItem("rewardAddress")?.toString() || ""
     return await tauri.invoke("farming", { path, rewardAddress, plotSize })

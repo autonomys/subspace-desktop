@@ -78,10 +78,6 @@ export interface ClientData {
   farming: ClientFarming
 }
 
-export interface ClientIdentity {
-  publicKey: AccountId32
-}
-
 export const emptyClientData: ClientData = {
   plot: { details: {}, plotFile: "", plotSizeGB: 0, status: "" },
   farming: { farmed: [], status: "", events: mitt() },

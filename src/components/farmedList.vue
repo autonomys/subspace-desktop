@@ -4,7 +4,6 @@ q-card(bordered flat)
     .row.items-center
       .col-auto.q-mr-sm
         .row.items-center
-          q-icon.q-mr-sm(color="grey" name="grid_view" size="40px")
           .text-h6.text-weight-light {{ lang.farmedBlocks }}:
       .col-auto.q-mr-xl
         h6 {{ farmedBlocksList?.length }}

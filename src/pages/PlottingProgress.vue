@@ -209,23 +209,7 @@ export default defineComponent({
       }
     },
     async waitNode() {
-      const { publicKey } = await this.client.waitNodeStartApiConnect(
-        this.plotDirectory
-      )
-      if (publicKey) {
-        const config = appConfig.getAppConfig()
-        if (config) {
-          appConfig.updateAppConfig(
-            null,
-            {
-              farmerPublicKey: publicKey.toString()
-            },
-            null, null, null, null
-          )
-        }
-      } else {
-        console.error("PLOT PROGRESS | ERROR | NO PUBLIC KEY")
-      }
+      await this.client.waitNodeStartApiConnect(this.plotDirectory)
     },
     pausePlotting() {
       this.plotFinished = true
@@ -235,7 +219,9 @@ export default defineComponent({
       const config = appConfig.getAppConfig()
       if (config) {
         await this.client.startBlockSubscription()
-        await this.client.startFarming(this.plotDirectory, config.plot.sizeGB)
+        const publicKey = await this.client.startFarming(this.plotDirectory, config.plot.sizeGB)
+        if (publicKey) appConfig.updateAppConfig(null, { farmerPublicKey: publicKey.toString() }, null, null, null, true)
+        else console.log("NO PUBLIC KEY RETURNED FROM FARMER")
         const networkSegmentCount = config.segmentCache.networkSegmentCount
         this.networkSegmentCount = networkSegmentCount
         this.plottingData.allocatedGB = config.plot.sizeGB
@@ -245,7 +231,6 @@ export default defineComponent({
           this.localSegmentCount = await this.client.getLocalSegmentCount()
         } while (this.localSegmentCount < this.networkSegmentCount)
       }
-      appConfig.updateAppConfig(null, null, null, null, null, true)
     },
     startTimers() {
       farmerTimer = window.setInterval(() => {
