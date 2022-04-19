@@ -98,13 +98,7 @@ export default defineComponent({
     displayRewardAddress() {
       const addr: string | null = LocalStorage.getItem("rewardAddress")
       if (addr == null) {
-        const config = appConfig.getAppConfig()
-        if (config) {
-          const { farmerPublicKey } = config.account
-          const addr2: string = addr ?? farmerPublicKey
-          return addr2
-        }
-        console.error("Cannot read config file to retrieve Public Key of the farmer")
+        console.error("Reward Address was null!")
         return "???"
       } else {
         return addr

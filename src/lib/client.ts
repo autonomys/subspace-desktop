@@ -85,8 +85,10 @@ export class Client {
                   // TODO
                 }
               })
-              const addr: string | null = LocalStorage.getItem("rewardAddress")
-              const addr2: string = addr ?? farmerPublicKey
+              const addr_unchecked: string | null = LocalStorage.getItem("rewardAddress")
+              let addr!: string;
+              if (addr_unchecked) addr = addr_unchecked
+              else console.log("Error: Reward Address should not be null!")
               const block: FarmedBlock = {
                 author: farmerPublicKey,
                 id: hash.toString(),
@@ -95,7 +97,7 @@ export class Client {
                 blockNum,
                 blockReward,
                 feeReward: 0,
-                rewardAddr: addr2,
+                rewardAddr: addr,
                 appsLink: appsLink + blockNum.toString()
               }
               this.data.farming.farmed = [block].concat(
