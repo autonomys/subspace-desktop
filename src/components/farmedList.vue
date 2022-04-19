@@ -4,7 +4,6 @@ q-card(bordered flat)
     .row.items-center
       .col-auto.q-mr-sm
         .row.items-center
-          q-icon.q-mr-sm(color="grey" name="grid_view" size="40px")
           .text-h6.text-weight-light {{ lang.farmedBlocks }}:
       .col-auto.q-mr-xl
         h6 {{ farmedBlocksList?.length }}
@@ -99,13 +98,7 @@ export default defineComponent({
     displayRewardAddress() {
       const addr: string | null = LocalStorage.getItem("rewardAddress")
       if (addr == null) {
-        const config = appConfig.getAppConfig()
-        if (config) {
-          const { farmerPublicKey } = config.account
-          const addr2: string = addr ?? farmerPublicKey
-          return addr2
-        }
-        console.error("Cannot read config file to retrieve Public Key of the farmer")
+        console.error("Reward Address was null!")
         return "???"
       } else {
         return addr

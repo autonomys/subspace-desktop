@@ -178,10 +178,11 @@ export default defineComponent({
         this.plottingData.finishedGB = this.plottingData.allocatedGB
     },
     localSegmentCount(localCount) {
-      if (localCount >= this.networkSegmentCount)
+      if (localCount >= this.networkSegmentCount) {
         this.plottingData.status = `Archived ${localCount.toLocaleString()} Segments`
-      else
+      } else {
         this.plottingData.status = `Archived ${localCount.toLocaleString()} of ${this.networkSegmentCount.toLocaleString()} Segments`
+      }
 
       this.plottingData.finishedGB =
         (localCount * this.plottingData.allocatedGB) / this.networkSegmentCount
@@ -209,23 +210,7 @@ export default defineComponent({
       }
     },
     async waitNode() {
-      const { publicKey } = await this.client.waitNodeStartApiConnect(
-        this.plotDirectory
-      )
-      if (publicKey) {
-        const config = appConfig.getAppConfig()
-        if (config) {
-          appConfig.updateAppConfig(
-            null,
-            {
-              farmerPublicKey: publicKey.toString()
-            },
-            null, null, null, null
-          )
-        }
-      } else {
-        console.error("PLOT PROGRESS | ERROR | NO PUBLIC KEY")
-      }
+      await this.client.waitNodeStartApiConnect(this.plotDirectory)
     },
     pausePlotting() {
       this.plotFinished = true
@@ -235,7 +220,10 @@ export default defineComponent({
       const config = appConfig.getAppConfig()
       if (config) {
         await this.client.startBlockSubscription()
-        await this.client.startFarming(this.plotDirectory, config.plot.sizeGB)
+        const farmerStarted = await this.client.startFarming(this.plotDirectory, config.plot.sizeGB)
+        if (!farmerStarted) {
+          console.error("PLOTTING PROGRESS | Farmer start error!")
+        }
         const networkSegmentCount = config.segmentCache.networkSegmentCount
         this.networkSegmentCount = networkSegmentCount
         this.plottingData.allocatedGB = config.plot.sizeGB
@@ -245,7 +233,6 @@ export default defineComponent({
           this.localSegmentCount = await this.client.getLocalSegmentCount()
         } while (this.localSegmentCount < this.networkSegmentCount)
       }
-      appConfig.updateAppConfig(null, null, null, null, null, true)
     },
     startTimers() {
       farmerTimer = window.setInterval(() => {

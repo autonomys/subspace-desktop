@@ -81,13 +81,13 @@ export default defineComponent({
         await this.client.disconnectPublicApi()
         const totalSize = networkSegmentCount * 256 * util.PIECE_SIZE
         const blockchainSizeGB = Math.round((totalSize * 100) / util.GB) / 100
-        appConfig.updateAppConfig(null, null, {
+        appConfig.updateAppConfig(null, {
           networkSegmentCount,
           blockchainSizeGB: blockchainSizeGB === 0 ? 0.1 : blockchainSizeGB
         }, null, null, null)
       })
       raceResult.catch(_ => {
-        console.log("The server seems to be too congested! Please try again later...")
+        console.error("The server seems to be too congested! Please try again later...")
       })
     },
     async viewDisclaimer(destination: string) {

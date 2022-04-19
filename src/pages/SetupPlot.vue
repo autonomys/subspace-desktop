@@ -177,8 +177,11 @@ export default defineComponent({
       const utilizedGB = util.toFixed(totalDiskSizeGB - safeAvailableGB, 2)
       const freeGB = ((): number => {
         const val = util.toFixed(safeAvailableGB - this.allocatedGB, 2)
-        if (val >= 0) return val
-        else return 0
+        if (val >= 0) {
+          return val
+        } else {
+          return 0
+        }
       })()
 
       return {
@@ -279,7 +282,7 @@ export default defineComponent({
         this.plotDirectory.slice(-1)
 
       await appData.createCustomDataDir(this.plotDirectory)
-      appConfig.updateAppConfig({ location: this.plotDirectory, sizeGB: this.allocatedGB }, null, null, null, null, null)
+      appConfig.updateAppConfig({ location: this.plotDirectory, sizeGB: this.allocatedGB }, null, null, null, null)
 
       await this.checkIdentity()
     },
@@ -304,6 +307,7 @@ export default defineComponent({
     async viewMnemonic() {
       const modal = await util.showModal(mnemonicModal)
       modal?.onDismiss(() => {
+        appConfig.updateAppConfig(null, null, null, true, null)
         this.$router.replace({ name: "plottingProgress" })
       })
     }

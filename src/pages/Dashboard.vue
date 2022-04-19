@@ -82,7 +82,10 @@ export default defineComponent({
       raceResult.then(async() => {
         if (this.client.isFirstLoad() === false) {
           await this.client.waitNodeStartApiConnect(config.plot.location)
-          await this.client.startFarming(config.plot.location, config.plot.sizeGB)
+          const farmerStarted = await this.client.startFarming(config.plot.location, config.plot.sizeGB)
+          if (!farmerStarted) {
+            console.error("DASHBOARD | Farmer start error!")
+          }
           await this.client.startBlockSubscription()
         }
 
@@ -101,7 +104,7 @@ export default defineComponent({
         await this.client.disconnectPublicApi()
       })
       raceResult.catch(_ => {
-        console.log("The server seems to be too congested! Please try again later...")
+        console.error("The server seems to be too congested! Please try again later...")
       })
     } else {
       console.error("DASH MOUNTED | ERROR | NO CONFIG LOADED")
