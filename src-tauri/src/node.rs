@@ -19,7 +19,6 @@ use std::env;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::Once;
-use subspace_farmer::Identity;
 use subspace_service::{FullClient, NewFull};
 use tokio::runtime::Handle;
 
@@ -52,10 +51,7 @@ impl NativeExecutionDispatch for ExecutorDispatch {
     }
 }
 
-pub(crate) async fn init_node(base_directory: PathBuf, node_name: String) -> Result<[u8; 32]> {
-    let identity = Identity::open_or_create(&base_directory)?;
-    let public_key = identity.public_key().to_bytes();
-
+pub(crate) async fn init_node(base_directory: PathBuf, node_name: String) -> Result<()> {
     let chain_spec =
         sc_service::GenericChainSpec::<subspace_runtime::GenesisConfig>::from_json_bytes(
             include_bytes!("../chain-spec.json").as_ref(),
@@ -76,7 +72,7 @@ pub(crate) async fn init_node(base_directory: PathBuf, node_name: String) -> Res
         }
     });
 
-    Ok(public_key)
+    Ok(())
 }
 
 // TODO: Allow customization of a bunch of these things

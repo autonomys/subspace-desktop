@@ -43,7 +43,7 @@ export interface AppConfig {
   plot: Plot
   segmentCache: SegmentCache
   launchOnBoot: boolean
-  importedRewAddr: boolean
+  rewardAddress: string
   plottingStarted: boolean
 }
 
@@ -60,7 +60,7 @@ export const emptyAppConfig: AppConfig = {
   plot: { location: "", sizeGB: 0 },
   segmentCache: { networkSegmentCount: 0, blockchainSizeGB: 0 },
   launchOnBoot: true,
-  importedRewAddr: false,
+  rewardAddress: "",
   plottingStarted: false
 }
 
@@ -101,7 +101,8 @@ export function promiseTimeout<T>(ms: number, promise: Promise<T>): Promise<T> {
 
 export const apiTypes = {
   Solution: {
-    public_key: "AccountId32"
+    public_key: "AccountId32",
+    reward_address: "AccountId32"
   },
   SubPreDigest: {
     slot: "u64",

@@ -83,16 +83,6 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
               )
                 q-tooltip.q-pa-sm
                   p {{ lang.estimatingSpace }}
-              .q-mt-sm {{ lang.nodeSpace }}
-              q-input(
-                bg-color="orange-2"
-                dense
-                input-class="setupPlotInput"
-                outlined
-                readonly
-                suffix="GB"
-                v-model="nodeSpaceGB"
-              )
 
         .col.q-pr-md
           .row.justify-center(
@@ -163,7 +153,6 @@ export default defineComponent({
       revealKey: false,
       plotDirectory: "/",
       allocatedGB: 1,
-      nodeSpaceGB: 20,
       blockchainSizeGB: 0,
       validPath: true,
       defaultPath: "/",
@@ -177,14 +166,13 @@ export default defineComponent({
     chartData(): ChartDataType {
       return [
         this.stats.utilizedGB,
-        this.nodeSpaceGB,
         this.stats.freeGB,
         this.allocatedGB < 5 ? 5 : this.allocatedGB
       ]
     },
     stats(): StatsType {
       const totalDiskSizeGB = util.toFixed(this.driveStats.totalBytes / 1e9, 2)
-      const safeAvailableGB = this.driveStats.freeBytes / 1e9
+      const safeAvailableGB = this.driveStats.freeBytes / 1e9 - 20
       const utilizedGB = util.toFixed(totalDiskSizeGB - safeAvailableGB, 2)
       const freeGB = ((): number => {
         const val = util.toFixed(safeAvailableGB - this.allocatedGB, 2)
@@ -307,7 +295,7 @@ export default defineComponent({
     },
     async checkIdentity() {
       const config = appConfig.getAppConfig()
-      if (config && config.importedRewAddr === false) {
+      if (config) {
         await this.client.createRewardAddress()
         await this.viewMnemonic()
       }

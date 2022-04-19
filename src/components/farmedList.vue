@@ -95,9 +95,9 @@ export default defineComponent({
       return formatDistanceToNowStrict(date)
     },
     displayRewardAddress() {
-      const addr: string | null = LocalStorage.getItem("rewardAddress")
+      const addr: string | undefined = appConfig.getAppConfig()?.rewardAddress
       if (addr == null) {
-        console.error("Reward Address was null!")
+        console.error("Reward Address was null/undefined!")
         return "???"
       } else {
         return addr

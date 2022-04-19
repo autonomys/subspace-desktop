@@ -85,7 +85,7 @@ export const emptyClientData: ClientData = {
 
 export const chartOptions: ApexOptions = {
   legend: { show: false },
-  colors: ["#E0E0E0", "#D6642F", "#FFFFFF", "#2081F0"],
+  colors: ["#E0E0E0", "#FFFFFF", "#2081F0"],
   plotOptions: {
     pie: {
       startAngle: 0,
@@ -115,6 +115,7 @@ export interface StatsType {
 
 interface Solution extends Struct {
   readonly public_key: AccountId32
+  readonly reward_address: AccountId32;
 }
 
 export interface SubPreDigest extends Struct {

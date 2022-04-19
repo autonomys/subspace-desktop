@@ -17,7 +17,7 @@ q-page(padding)
   .row.justify-center.q-mt-sm
   .row.justify-end.items-center.q-mt-lg.absolute-bottom.q-pa-lg
     .col-auto.q-mr-md
-      q-btn(@click="$router.back()" label="Cancel" outline size="lg" icon-right="cancel")
+      q-btn(@click="$router.replace({ name: 'index' })" label="Cancel" outline size="lg" icon-right="cancel")
     q-space
     .col-auto
       q-btn(
@@ -59,8 +59,7 @@ export default defineComponent({
       }
     },
     async importKey() {
-      LocalStorage.set("rewardAddress", this.rewardAddress)
-      appConfig.updateAppConfig(null, null, null, true, null)
+      appConfig.updateAppConfig(null, null, null, this.rewardAddress, null)
       this.$router.replace({ name: "setupPlot" })
     },
     skip() {

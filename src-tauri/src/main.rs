@@ -11,7 +11,7 @@ mod menu;
 mod node;
 
 use anyhow::Result;
-use log::{debug, error};
+use log::debug;
 use serde::Serialize;
 use std::path::PathBuf;
 use std::sync::atomic::Ordering;
@@ -36,34 +36,21 @@ fn plot_progress_tracker() -> usize {
 }
 
 #[tauri::command]
-async fn farming(path: String, reward_address: String, plot_size: u64) {
-    match reward_address.len() {
-        0 => {
-            farmer::farm(
-                path.into(),
-                "ws://127.0.0.1:9944",
-                None,
-                plot_size,
-                BEST_BLOCK_NUMBER_CHECK_INTERVAL,
-            )
-            .await
-            .unwrap();
-        }
-        _ => {
-            if let Ok(address) = farmer::parse_reward_address(&reward_address) {
-                farmer::farm(
-                    path.into(),
-                    "ws://127.0.0.1:9944",
-                    Some(address),
-                    plot_size,
-                    BEST_BLOCK_NUMBER_CHECK_INTERVAL,
-                )
-                .await
-                .unwrap();
-            } else {
-                error!("Reward address could not be parsed!");
-            }
-        }
+async fn farming(path: String, reward_address: String, plot_size: u64) -> bool {
+    if let Ok(address) = farmer::parse_reward_address(&reward_address) {
+        farmer::farm(
+            path.into(),
+            "ws://127.0.0.1:9944",
+            Some(address),
+            plot_size,
+            BEST_BLOCK_NUMBER_CHECK_INTERVAL,
+        )
+        .await
+        .unwrap();
+        true
+    } else {
+        // reward address could not be parsed, and farmer did not start
+        false
     }
 }
 

@@ -30,12 +30,7 @@ pub(crate) async fn farm(
     info!("Connecting to node at {}", node_rpc_url);
     let client = WsRpc::new(node_rpc_url).await?;
 
-    let FarmerMetadata {
-        record_size: _,
-        recorded_history_segment_size: _,
-        max_plot_size,
-        ..
-    } = client
+    let FarmerMetadata { max_plot_size, .. } = client
         .farmer_metadata()
         .await
         .map_err(|error| anyhow!(error))?;
@@ -84,7 +79,9 @@ pub(crate) async fn farm(
         }))
         .detach();
 
-    multi_farming.wait().await
+    tokio::spawn(async { multi_farming.wait().await });
+
+    Ok(())
 }
 
 pub(crate) fn parse_reward_address(s: &str) -> Result<PublicKey, sp_core::crypto::PublicError> {
