@@ -1,5 +1,5 @@
 import { LocalStorage } from "quasar"
-import { Account, AppConfig, Plot, emptyAppConfig, SegmentCache } from "./util"
+import { AppConfig, Plot, emptyAppConfig, SegmentCache } from "./util"
 
 export const appConfig = {
   initAppConfig(): void {
@@ -12,7 +12,6 @@ export const appConfig = {
   },
   updateAppConfig(
     plot: Plot | null,
-    account: Account | null,
     segmentCache: SegmentCache | null,
     launchOnBoot: boolean | null,
     importedRewAddr: boolean | null,
@@ -22,7 +21,6 @@ export const appConfig = {
     if (appConfig) {
       const newAppConfig = appConfig
       if (plot) newAppConfig.plot = plot
-      if (account) newAppConfig.account = account
       if (segmentCache) newAppConfig.segmentCache = segmentCache
       if (launchOnBoot != null) newAppConfig.launchOnBoot = launchOnBoot
       if (importedRewAddr != null) newAppConfig.importedRewAddr = importedRewAddr

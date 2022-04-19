@@ -220,11 +220,9 @@ export default defineComponent({
       const config = appConfig.getAppConfig()
       if (config) {
         await this.client.startBlockSubscription()
-        const publicKey = await this.client.startFarming(this.plotDirectory, config.plot.sizeGB)
-        if (publicKey) {
-          appConfig.updateAppConfig(null, { farmerPublicKey: publicKey.toString() }, null, null, null, true)
-        } else {
-          console.error("NO PUBLIC KEY RETURNED FROM FARMER")
+        const farmerStarted = await this.client.startFarming(this.plotDirectory, config.plot.sizeGB)
+        if (!farmerStarted) {
+          console.error("PLOTTING PROGRESS | Farmer start error!")
         }
         const networkSegmentCount = config.segmentCache.networkSegmentCount
         this.networkSegmentCount = networkSegmentCount

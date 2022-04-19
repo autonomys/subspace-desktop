@@ -43,13 +43,15 @@ fn plot_progress_tracker() -> usize {
 }
 
 #[tauri::command]
-async fn farming(path: String, reward_address: String, plot_size: u64) -> [u8; 32] {
+async fn farming(path: String, reward_address: String, plot_size: u64) -> bool {
     if let Ok(address) = parse_reward_address(&reward_address) {
         farm(path.into(), "ws://127.0.0.1:9944", Some(address), plot_size)
             .await
-            .unwrap()
+            .unwrap();
+        true
     } else {
-        unreachable!("Reward address could not be parsed on the backend!")
+        // reward address could not be parsed, and farmer did not start
+        false
     }
 }
 
@@ -186,7 +188,7 @@ async fn farm(
     node_rpc_url: &str,
     reward_address: Option<PublicKey>,
     plot_size: u64,
-) -> Result<[u8; 32]> {
+) -> Result<()> {
     let identity = Identity::open_or_create(&base_directory)?;
     let address = identity.public_key().to_bytes().into();
 
@@ -274,7 +276,7 @@ async fn farm(
         }
     });
 
-    Ok(identity.public_key().to_bytes())
+    Ok(())
 }
 
 fn parse_reward_address(s: &str) -> Result<PublicKey, sp_core::crypto::PublicError> {

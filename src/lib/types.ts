@@ -6,7 +6,6 @@ import type { AccountId32 } from "@polkadot/types/interfaces"
 import type { Struct, u64 } from "@polkadot/types"
 
 export interface FarmedBlock {
-  author: string
   blockNum: number
   time: number
   transactions: number

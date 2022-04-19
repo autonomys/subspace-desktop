@@ -150,7 +150,7 @@ export class AutoLauncher {
     if (this.enabled == false) {
       console.error("ENABLE DID NOT WORK")
     } else {
-      appConfig.updateAppConfig(null, null, null, true, null, null)
+      appConfig.updateAppConfig(null, null, true, null, null)
     }
     return child
   }
@@ -160,7 +160,7 @@ export class AutoLauncher {
     if (this.enabled == true) {
       console.error("DISABLE DID NOT WORK")
     } else {
-      appConfig.updateAppConfig(null, null, null, false, null, null)
+      appConfig.updateAppConfig(null, null, false, null, null)
     }
     return child
   }

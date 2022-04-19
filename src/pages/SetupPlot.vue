@@ -282,7 +282,7 @@ export default defineComponent({
         this.plotDirectory.slice(-1)
 
       await appData.createCustomDataDir(this.plotDirectory)
-      appConfig.updateAppConfig({ location: this.plotDirectory, sizeGB: this.allocatedGB }, null, null, null, null, null)
+      appConfig.updateAppConfig({ location: this.plotDirectory, sizeGB: this.allocatedGB }, null, null, null, null)
 
       await this.checkIdentity()
     },
@@ -307,7 +307,7 @@ export default defineComponent({
     async viewMnemonic() {
       const modal = await util.showModal(mnemonicModal)
       modal?.onDismiss(() => {
-        appConfig.updateAppConfig(null, null, null, null, true, null)
+        appConfig.updateAppConfig(null, null, null, true, null)
         this.$router.replace({ name: "plottingProgress" })
       })
     }
