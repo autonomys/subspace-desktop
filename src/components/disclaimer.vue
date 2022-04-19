@@ -9,7 +9,7 @@ q-dialog(@hide="onDialogHide" persistent ref="dialog")
         q-space
         q-icon(color="grey" name="info" size="40px")
     q-card-section.q-pt-none
-      | Tokens/credits generated on the Subspace Network testnet ("TSSCs") do not equate to Subspace Network mainnet tokens, have no monetary value, and cannot be exchanged for cash, cash equivalent, or other tokens or cryptocurrencies.
+      | Tokens/credits generated on the Subspace Network testnet ("tSSCs") do not equate to Subspace Network mainnet tokens, have no monetary value, and cannot be exchanged for cash, cash equivalent, or other tokens or cryptocurrencies.
     q-card-actions(align='right')
       q-btn(flat='', label='I understand', color='primary', v-close-popup='')
 
