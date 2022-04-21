@@ -14,7 +14,6 @@ import {
   emptyClientData,
   NetStatus,
   FarmedBlock,
-  ClientIdentity,
   SubPreDigest
 } from "src/lib/types"
 import { appConfig } from "./appConfig"
@@ -52,9 +51,12 @@ export class Client {
         this.stop()
       },
       start: async (): Promise<void> => {
-        const config = appConfig.getAppConfig()
-        if (!config) return
-        const { farmerPublicKey } = config.account
+
+        const farmerAddress = LocalStorage.getItem("rewardAddress")
+        if (farmerAddress === null) {
+          console.error("Reward address should not have been null...")
+          return
+        }
 
         this.unsubscribe = await this.localApi.rpc.chain.subscribeNewHeads(
           async ({ hash, number }) => {
@@ -69,7 +71,7 @@ export class Client {
                 "SubPreDigest",
                 preRuntimes[0].asPreRuntime[1]
               )
-            if (solution.public_key.toString() === farmerPublicKey) {
+            if (solution.public_key.toString() === farmerAddress) {
               console.log("Farmed by me:", blockNum)
               let blockReward = 0
               const allRecords: Vec<any> =
@@ -86,17 +88,15 @@ export class Client {
                   // TODO
                 }
               })
-              const addr: string | null = LocalStorage.getItem("rewardAddress")
-              const addr2: string = addr ?? farmerPublicKey
+
               const block: FarmedBlock = {
-                author: farmerPublicKey,
                 id: hash.toString(),
                 time: Date.now(),
                 transactions: 0,
                 blockNum,
                 blockReward,
                 feeReward: 0,
-                rewardAddr: addr2,
+                rewardAddr: farmerAddress,
                 appsLink: appsLink + blockNum.toString()
               }
               this.data.farming.farmed = [block].concat(
@@ -104,6 +104,7 @@ export class Client {
               )
               storeBlocks(this.data.farming.farmed)
               this.data.farming.events.emit("farmedBlock", block)
+
             }
             this.data.farming.events.emit("newBlock", blockNum)
           }
@@ -206,26 +207,19 @@ export class Client {
   }
 
   /* NODE INTEGRATION */
-  public async waitNodeStartApiConnect(path: string): Promise<ClientIdentity> {
-    const clientIdentity = await this.startNode(path)
+  public async waitNodeStartApiConnect(path: string): Promise<void> {
+    await this.startNode(path)
     // TODO: workaround in case node takes some time to fully start.
     await new Promise((resolve) => setTimeout(resolve, 7000))
     await this.connectLocalApi()
-    return clientIdentity
   }
 
   // TODO: Disable mnemonic return from tauri commmand instead of this validation.
-  private async startNode(path: string): Promise<ClientIdentity> {
-    const publicKey = await tauri.invoke("start_node", { path })
-    const farmerPublicKey: AccountId32 = this.localApi.registry.createType(
-      "AccountId32",
-      publicKey
-    )
-
+  private async startNode(path: string): Promise<void> {
+    await tauri.invoke("start_node", { path })
     if (!this.firstLoad) {
       this.loadStoredBlocks()
     }
-    return { publicKey: farmerPublicKey }
   }
 
   private loadStoredBlocks(): void {
@@ -243,9 +237,12 @@ export class Client {
   }
 
   /* FARMER INTEGRATION */
-  public async startFarming(path: string, plotSizeGB: number): Promise<void> {
+  public async startFarming(path: string, plotSizeGB: number): Promise<boolean> {
     const plotSize = Math.round(plotSizeGB * 1048576)
-    const rewardAddress = LocalStorage.getItem("rewardAddress")?.toString() || ""
+    const rewardAddress: string | null = LocalStorage.getItem("rewardAddress")
+    if (rewardAddress == null) {
+      console.error("Tried to send empty reward address to backend!")
+    }
     return await tauri.invoke("farming", { path, rewardAddress, plotSize })
   }
 

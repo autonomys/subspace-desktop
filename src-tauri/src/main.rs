@@ -43,28 +43,21 @@ fn plot_progress_tracker() -> usize {
 }
 
 #[tauri::command]
-async fn farming(path: String, reward_address: String, plot_size: u64) {
-    match reward_address.len() {
-        0 => {
-            farm(path.into(), "ws://127.0.0.1:9944", None, plot_size)
-                .await
-                .unwrap();
-        }
-        _ => {
-            if let Ok(address) = parse_reward_address(&reward_address) {
-                farm(path.into(), "ws://127.0.0.1:9944", Some(address), plot_size)
-                    .await
-                    .unwrap();
-            } else {
-                error!("Reward address could not be parsed!");
-            }
-        }
+async fn farming(path: String, reward_address: String, plot_size: u64) -> bool {
+    if let Ok(address) = parse_reward_address(&reward_address) {
+        farm(path.into(), "ws://127.0.0.1:9944", Some(address), plot_size)
+            .await
+            .unwrap();
+        true
+    } else {
+        // reward address could not be parsed, and farmer did not start
+        false
     }
 }
 
 #[tauri::command]
-async fn start_node(path: String) -> [u8; 32] {
-    init_node(path.into()).await.unwrap()
+async fn start_node(path: String) {
+    init_node(path.into()).await.unwrap();
 }
 
 #[tauri::command]
@@ -164,10 +157,7 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn init_node(base_directory: PathBuf) -> Result<[u8; 32]> {
-    let identity = Identity::open_or_create(&base_directory)?;
-    let public_key = identity.public_key().to_bytes();
-
+async fn init_node(base_directory: PathBuf) -> Result<()> {
     let chain_spec =
         sc_service::GenericChainSpec::<subspace_runtime::GenesisConfig>::from_json_bytes(
             include_bytes!("../chain-spec.json").as_ref(),
@@ -188,7 +178,7 @@ async fn init_node(base_directory: PathBuf) -> Result<[u8; 32]> {
         }
     });
 
-    Ok(public_key)
+    Ok(())
 }
 
 /// Start farming by using plot in specified path and connecting to WebSocket server at specified
@@ -260,7 +250,7 @@ async fn farm(
         plot.clone(),
         commitments.clone(),
         client.clone(),
-        identity,
+        identity.clone(),
         reward_address,
     );
 

@@ -7,14 +7,14 @@ q-page(padding)
   .row.justify-center.q-mt-xl
     q-btn(
       :label="lang.quickStart"
-      @click="$router.push({ name: 'setupPlot' })"
+      @click="viewDisclaimer('setupPlot')"
       outline
       size="xl"
     )
   .row.justify-center.q-mt-sm
     q-btn(
       :label="lang.advanced"
-      @click="$router.push({ name: 'importKey' })"
+      @click="viewDisclaimer('importKey')"
       color="grey"
       flat
     )
@@ -26,6 +26,8 @@ import { globalState as global } from "src/lib/global"
 import * as util from "src/lib/util"
 import { appConfig } from "src/lib/appConfig"
 import { Notify } from "quasar"
+import disclaimer from "components/disclaimer.vue"
+
 const lang = global.data.loc.text.index
 
 export default defineComponent({
@@ -79,13 +81,19 @@ export default defineComponent({
         await this.client.disconnectPublicApi()
         const totalSize = networkSegmentCount * 256 * util.PIECE_SIZE
         const blockchainSizeGB = Math.round((totalSize * 100) / util.GB) / 100
-        appConfig.updateAppConfig(null, null, {
+        appConfig.updateAppConfig(null, {
           networkSegmentCount,
           blockchainSizeGB: blockchainSizeGB === 0 ? 0.1 : blockchainSizeGB
         }, null, null, null)
       })
       raceResult.catch(_ => {
-        console.log("The server seems to be too congested! Please try again later...")
+        console.error("The server seems to be too congested! Please try again later...")
+      })
+    },
+    async viewDisclaimer(destination: string) {
+      const modal = await util.showModal(disclaimer)
+      modal?.onDismiss(() => {
+        this.$router.replace({ name: destination })
       })
     }
   }

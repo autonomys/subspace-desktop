@@ -6,7 +6,6 @@ import type { AccountId32 } from "@polkadot/types/interfaces"
 import type { Struct, u64 } from "@polkadot/types"
 
 export interface FarmedBlock {
-  author: string
   blockNum: number
   time: number
   transactions: number
@@ -76,10 +75,6 @@ export interface ClientData {
   plot: ClientPlot
   network: ClientNetwork
   farming: ClientFarming
-}
-
-export interface ClientIdentity {
-  publicKey: AccountId32
 }
 
 export const emptyClientData: ClientData = {
