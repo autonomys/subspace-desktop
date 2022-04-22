@@ -296,9 +296,15 @@ export default defineComponent({
     async checkIdentity() {
       const config = appConfig.getAppConfig()
       if (config) {
-        await this.client.createRewardAddress()
-        await this.viewMnemonic()
+        if (config.rewardAddress == "") {
+          await this.client.createRewardAddress()
+          await this.viewMnemonic()
+        }
+        else {
+          this.$router.replace({ name: "plottingProgress" })
+        }
       }
+
     },
     async viewMnemonic() {
       const modal = await util.showModal(mnemonicModal)
