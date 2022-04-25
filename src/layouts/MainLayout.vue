@@ -5,13 +5,15 @@ q-layout(view="hHh lpr fFf")
       q-img(no-spinner src="subspacelogo.png" width="150px")
       q-toolbar-title
         .row
+          .col-auto.q-mr-lg.relative-position
+            p {{ "0.4.1 "}}
           .col-auto.q-mr-md.relative-position
             q-badge(color="grey" text-color="white")
               .q-pa-xs(style="font-size: 14px") {{ lang.nonIncentivizedLabel }}
             q-tooltip
               .col
                 p.no-margin(style="font-size: 12px") {{ lang.nonIncentivizedTooltip }}
-          // Show the dashboard status indicator when on the dashboard page. 
+          // Show the dashboard status indicator when on the dashboard page.
           .col-auto.q-mr-md.relative-position(
             v-if="$route.name == 'dashboard'"
           )
@@ -33,6 +35,12 @@ q-layout(view="hHh lpr fFf")
               .col
                 p Farmer Status:
                 p <b>{{ global.status.message }}</b>
+          .col-auto.q-mr-xs.relative-position(
+            v-if="nodeName != ''"
+          )
+            q-badge(color="blue-8" text-color="white")
+              .q-ma-xs(style="font-size: 14px") {{ "Node Name:" }}
+              .q-mr-xs(class="text-italic" style="font-size: 14px") {{ nodeName }}
       div
         q-btn(flat icon="settings" round)
           MainMenu
@@ -46,6 +54,8 @@ import { defineComponent } from "vue"
 import { globalState as global } from "src/lib/global"
 import * as util from "src/lib/util"
 import MainMenu from "components/mainMenu.vue"
+import { myEmitter } from "src/lib/client"
+
 const lang = global.data.loc.text.mainMenu
 
 export default defineComponent({
@@ -58,10 +68,21 @@ export default defineComponent({
       lang,
       global: global.data,
       util,
-      autoLaunch: false
+      autoLaunch: false,
+      nodeName: ''
     }
   },
-
-  methods: {}
+  mounted() {
+    this.nodeNameChanger()
+  },
+  methods: {
+    async nodeNameChanger() {
+      let _this = this
+      myEmitter.on("nodeName", function nodeNameListener(arg1: string) {
+        console.log(`event with parameters ${arg1} in listener`);
+        _this.nodeName = arg1
+      });
+    },
+  }
 })
 </script>

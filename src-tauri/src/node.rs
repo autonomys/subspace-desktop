@@ -55,6 +55,7 @@ impl NativeExecutionDispatch for ExecutorDispatch {
 pub(crate) async fn create_full_client<CS: ChainSpec + 'static>(
     chain_spec: CS,
     base_path: PathBuf,
+    node_name: String,
 ) -> Result<NewFull<Arc<FullClient<subspace_runtime::RuntimeApi, ExecutorDispatch>>>> {
     // This must only be initialized once
     INITIALIZE_SUBSTRATE.call_once(|| {
@@ -86,6 +87,7 @@ pub(crate) async fn create_full_client<CS: ChainSpec + 'static>(
         BasePath::Permanenent(base_path),
         chain_spec,
         Handle::current(),
+        node_name,
     )?;
 
     subspace_service::new_full::<subspace_runtime::RuntimeApi, ExecutorDispatch>(config, true)
@@ -117,6 +119,7 @@ fn create_configuration<CS: ChainSpec + 'static>(
     base_path: BasePath,
     chain_spec: CS,
     tokio_handle: tokio::runtime::Handle,
+    node_name: String,
 ) -> Result<Configuration> {
     let impl_name = "Subspace-desktop".to_string();
     let impl_version = env!("SUBSTRATE_CLI_IMPL_VERSION").to_string();
@@ -125,7 +128,7 @@ fn create_configuration<CS: ChainSpec + 'static>(
     let client_id = format!("{}/v{}", impl_name, impl_version);
     let database_cache_size = 1024;
     let mut network = NetworkConfiguration::new(
-        generate_node_name(),
+        node_name,
         client_id,
         NodeKeyConfig::Ed25519(Secret::File(net_config_dir.join(NODE_KEY_ED25519_FILE))),
         Some(net_config_dir),

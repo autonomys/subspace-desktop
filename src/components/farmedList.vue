@@ -67,7 +67,6 @@ import { globalState as global } from "src/lib/global"
 import { FarmedBlock } from "src/lib/types"
 import { formatDistanceToNowStrict } from "date-fns"
 import { LocalStorage } from "quasar"
-import { appConfig } from "src/lib/appConfig"
 
 const lang = global.data.loc.text.dashboard
 
