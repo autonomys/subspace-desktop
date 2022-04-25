@@ -77,10 +77,8 @@ export default defineComponent({
   },
   methods: {
     async nodeNameChanger() {
-      let _this = this
-      myEmitter.on("nodeName", function nodeNameListener(arg1: string) {
-        console.log(`event with parameters ${arg1} in listener`);
-        _this.nodeName = arg1
+      myEmitter.on("nodeName", (arg1: string) => {
+        this.nodeName = arg1
       });
     },
   }
