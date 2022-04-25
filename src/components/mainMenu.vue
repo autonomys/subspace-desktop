@@ -12,7 +12,7 @@ q-menu(auto-close)
         .col
           p.text-grey(v-if="!launchOnStart") {{ lang.autoStart }}
           p.text-black(v-else) {{ lang.autoStart }}
-    q-item(@click="reset()" clickable)
+    q-item(@click="reset()" clickable v-if="devMode")
       .row.items-center
         .col-auto.q-mr-md
           q-icon(color="red" name="refresh")
@@ -34,13 +34,19 @@ export default defineComponent({
       lang,
       launchOnStart: false,
       autoLauncher: global.autoLauncher,
-      disableAutoLaunch: false
+      disableAutoLaunch: false,
+      devMode: false
     }
   },
   mounted() {
+    this.checkDev()
     this.initMenu()
   },
   methods: {
+    checkDev() {
+      if (util.CONTEXT_MENU != "OFF")
+        this.devMode = true
+    },
     async toggleClicked() {
       if (this.disableAutoLaunch) {
         Notify.create({
