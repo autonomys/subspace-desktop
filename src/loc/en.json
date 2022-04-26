@@ -45,7 +45,7 @@
     "hint": "Hint:",
     "hints": "Hints",
     "resume": "Resume Plotting",
-    "hintInfo": "Join the Subspace Discord while you wait, meet the community and earn some testnetSSC",
+    "hintInfo": "Join the Subspace Discord while you wait, meet the community and earn some testSSC",
     "remaining": "Remaining",
     "next": "Next"
   },
@@ -80,7 +80,7 @@
   },
   "mainMenu": {
     "nonIncentivizedLabel": "Non-Incentivized Testnet",
-    "nonIncentivizedTooltip": "Rewards (testnetSSC) you earn from farming do not and will not hold a real value throughout the testnet phase.",
+    "nonIncentivizedTooltip": "Rewards (testSSC) you earn from farming do not and will not hold a real value throughout the testnet phase.",
     "reset": "Reset",
     "autoStart": "Start on Boot",
     "willAutoLaunch": "Subspace will launch automatically during boot",

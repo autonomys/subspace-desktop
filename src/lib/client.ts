@@ -15,8 +15,8 @@ import {
   FarmedBlock,
   SubPreDigest
 } from "src/lib/types"
+import EventEmitter from "events"
 
-const EventEmitter = require('events');
 export const myEmitter = new EventEmitter();
 
 const tauri = { event, invoke }
