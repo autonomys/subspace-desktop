@@ -141,7 +141,6 @@ export default defineComponent({
         status: lang.fetchingPlot
       },
       client: global.client,
-      viewedIntro: false,
       plotFinished: false,
       localSegmentCount: 0,
       networkSegmentCount: 0,
@@ -248,10 +247,7 @@ export default defineComponent({
       this.pausePlotting()
     },
     async viewIntro() {
-      const modal = await util.showModal(introModal)
-      modal?.onDismiss(() => {
-        this.viewedIntro = true
-      })
+      await util.showModal(introModal)
     }
   }
 })

@@ -13,6 +13,12 @@ q-layout(view="hHh lpr fFf")
             q-tooltip
               .col
                 p.no-margin(style="font-size: 12px") {{ lang.nonIncentivizedTooltip }}
+          .col-auto.q-mr-md.relative-position(
+            v-if="nodeName != ''"
+          )
+            q-badge(color="blue-8" text-color="white")
+              .q-ma-xs(style="font-size: 14px") {{ "Node Name:" }}
+              .q-mr-xs(class="text-italic" style="font-size: 14px") {{ nodeName }}
           // Show the dashboard status indicator when on the dashboard page.
           .col-auto.q-mr-md.relative-position(
             v-if="$route.name == 'dashboard'"
@@ -35,12 +41,6 @@ q-layout(view="hHh lpr fFf")
               .col
                 p Farmer Status:
                 p <b>{{ global.status.message }}</b>
-          .col-auto.q-mr-xs.relative-position(
-            v-if="nodeName != ''"
-          )
-            q-badge(color="blue-8" text-color="white")
-              .q-ma-xs(style="font-size: 14px") {{ "Node Name:" }}
-              .q-mr-xs(class="text-italic" style="font-size: 14px") {{ nodeName }}
       div
         q-btn(flat icon="settings" round)
           MainMenu
