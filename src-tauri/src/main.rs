@@ -56,8 +56,10 @@ async fn farming(path: String, reward_address: String, plot_size: u64) -> bool {
 }
 
 #[tauri::command]
-async fn start_node(path: String) {
-    init_node(path.into()).await.unwrap();
+async fn start_node(path: String) -> String {
+    let node_name = node::generate_node_name();
+    init_node(path.into(), node_name.clone()).await.unwrap();
+    node_name
 }
 
 #[tauri::command]
@@ -157,7 +159,7 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn init_node(base_directory: PathBuf) -> Result<()> {
+async fn init_node(base_directory: PathBuf, node_name: String) -> Result<()> {
     let chain_spec =
         sc_service::GenericChainSpec::<subspace_runtime::GenesisConfig>::from_json_bytes(
             include_bytes!("../chain-spec.json").as_ref(),
@@ -165,7 +167,11 @@ async fn init_node(base_directory: PathBuf) -> Result<()> {
         .map_err(anyhow::Error::msg)?;
 
     let full_client_fut = tokio::task::spawn_blocking(move || {
-        Handle::current().block_on(node::create_full_client(chain_spec, base_directory))
+        Handle::current().block_on(node::create_full_client(
+            chain_spec,
+            base_directory,
+            node_name,
+        ))
     });
     let mut full_client = full_client_fut.await??;
 

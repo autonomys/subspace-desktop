@@ -307,7 +307,7 @@ export default defineComponent({
     async viewMnemonic() {
       const modal = await util.showModal(mnemonicModal)
       modal?.onDismiss(() => {
-        appConfig.updateAppConfig(null, null, null, true, null)
+        appConfig.updateAppConfig(null, null, null, null, true)
         this.$router.replace({ name: "plottingProgress" })
       })
     }

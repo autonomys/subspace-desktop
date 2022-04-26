@@ -9,7 +9,7 @@ q-card(bordered flat)
         h6 {{ farmedBlocksList?.length }}
       .col-auto.q-mr-xl
         .text-weight-light Total Earned
-        p {{ farmedTotalEarned }} testnetSSC
+        p {{ farmedTotalEarned }} testSSC
       .col-auto
         .text-weight-light Reward Address
         .reward-address {{ rewardAddress }}
@@ -57,7 +57,7 @@ q-card(bordered flat)
           .col-3
             p.text-weight-light {{ formatDate(block.time) }}
           .col-2
-            p {{ block.blockReward }} testnetSSC
+            p {{ block.blockReward }} testSSC
 </template>
 
 <script lang="ts">
@@ -67,7 +67,6 @@ import { globalState as global } from "src/lib/global"
 import { FarmedBlock } from "src/lib/types"
 import { formatDistanceToNowStrict } from "date-fns"
 import { LocalStorage } from "quasar"
-import { appConfig } from "src/lib/appConfig"
 
 const lang = global.data.loc.text.dashboard
 

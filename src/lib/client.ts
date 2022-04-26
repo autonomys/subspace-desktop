@@ -1,7 +1,6 @@
 import { ApiPromise, Keyring, WsProvider } from "@polkadot/api"
 import type { Vec } from "@polkadot/types/codec"
 import type { u128, u32 } from "@polkadot/types"
-import type { AccountId32 } from "@polkadot/types/interfaces"
 import { mnemonicGenerate } from "@polkadot/util-crypto"
 import * as event from "@tauri-apps/api/event"
 import { invoke } from "@tauri-apps/api/tauri"
@@ -16,7 +15,9 @@ import {
   FarmedBlock,
   SubPreDigest
 } from "src/lib/types"
-import { appConfig } from "./appConfig"
+import EventEmitter from "events"
+
+export const myEmitter = new EventEmitter();
 
 const tauri = { event, invoke }
 const SUNIT = 1000000000000000000n
@@ -216,7 +217,8 @@ export class Client {
 
   // TODO: Disable mnemonic return from tauri commmand instead of this validation.
   private async startNode(path: string): Promise<void> {
-    await tauri.invoke("start_node", { path })
+    const nodeName: string = await tauri.invoke("start_node", { path })
+    myEmitter.emit("nodeName", nodeName)
     if (!this.firstLoad) {
       this.loadStoredBlocks()
     }

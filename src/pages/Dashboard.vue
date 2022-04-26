@@ -160,7 +160,7 @@ export default defineComponent({
         progress: true,
         message: `${lang.farmedBlock}: ${block.blockNum} ${lang.reward} ${
           block.blockReward + block.feeReward
-        } testnetSSC`,
+        } testSSC`,
         position: "bottom-right"
       })
     }
