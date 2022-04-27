@@ -34,7 +34,6 @@ q-page(padding)
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import { LocalStorage } from "quasar"
 import { globalState as global } from "src/lib/global"
 import { appConfig } from "src/lib/appConfig"
 import { decodeAddress, encodeAddress } from "@polkadot/keyring"

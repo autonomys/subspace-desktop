@@ -147,7 +147,7 @@ export class AutoLauncher {
   async enable(): Promise<void | ChildReturnData> {
     const child = await this.autoLauncher.enable({ appName: this.appName, appPath: this.appPath, minimized: true })
     this.enabled = await this.isEnabled()
-    if (this.enabled == false) {
+    if (!this.enabled) {
       console.error("ENABLE DID NOT WORK")
     } else {
       appConfig.updateAppConfig(null, null, true, null, null)
@@ -157,7 +157,7 @@ export class AutoLauncher {
   async disable(): Promise<void | ChildReturnData> {
     const child = this.autoLauncher.disable(this.appName)
     this.enabled = await this.isEnabled()
-    if (this.enabled == true) {
+    if (this.enabled) {
       console.error("DISABLE DID NOT WORK")
     } else {
       appConfig.updateAppConfig(null, null, false, null, null)
@@ -183,7 +183,7 @@ export class AutoLauncher {
 
     const config = appConfig.getAppConfig()
     if (config) {
-      if (config.launchOnBoot === true)
+      if (config.launchOnBoot)
       {
         // the app may be initialized before, but then user may have decided to move the app to another directory
         // in this case, we have to delete the previous autoLaunch entry, and create a new one

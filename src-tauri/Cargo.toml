@@ -20,21 +20,21 @@ fs2 = "0.4.3"
 hex = "0.4.3"
 log = "0.4.14"
 names = { version = "0.12.0", default-features = false }
-sc-chain-spec = { git = "https://github.com/paritytech/substrate", rev = "c364008a6c7da8456e17967f55edf51e45146998" }
-sc-executor = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "c364008a6c7da8456e17967f55edf51e45146998", features = ["wasmtime"] }
-sc-network = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "c364008a6c7da8456e17967f55edf51e45146998" }
-sc-service = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "c364008a6c7da8456e17967f55edf51e45146998", features = ["wasmtime"] }
-sc-tracing = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate", rev = "c364008a6c7da8456e17967f55edf51e45146998" }
+sc-chain-spec = { git = "https://github.com/paritytech/substrate", rev = "c4f3d028621edb293d2c423516221aa396f76a2d" }
+sc-executor = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "c4f3d028621edb293d2c423516221aa396f76a2d", features = ["wasmtime"] }
+sc-network = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "c4f3d028621edb293d2c423516221aa396f76a2d" }
+sc-service = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "c4f3d028621edb293d2c423516221aa396f76a2d", features = ["wasmtime"] }
+sc-tracing = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate", rev = "c4f3d028621edb293d2c423516221aa396f76a2d" }
 serde_json = "1.0.79"
 serde = { version = "1.0.136", features = [ "derive" ] }
-sp-core = { version = "6.0.0", git = "https://github.com/paritytech/substrate", rev = "c364008a6c7da8456e17967f55edf51e45146998" }
-sp-panic-handler = { version = "4.0.0", git = "https://github.com/paritytech/substrate", rev = "c364008a6c7da8456e17967f55edf51e45146998" }
-subspace-core-primitives = { git = "https://github.com/subspace/subspace", rev = "b742c26002ed67fb4c61438d2bb2047fa05f1a92" }
-subspace-farmer = { git = "https://github.com/subspace/subspace", rev = "b742c26002ed67fb4c61438d2bb2047fa05f1a92" }
-subspace-rpc-primitives = { git = "https://github.com/subspace/subspace", rev = "b742c26002ed67fb4c61438d2bb2047fa05f1a92" }
-subspace-runtime = { git = "https://github.com/subspace/subspace", rev = "b742c26002ed67fb4c61438d2bb2047fa05f1a92" }
-subspace-service = { git = "https://github.com/subspace/subspace", rev = "b742c26002ed67fb4c61438d2bb2047fa05f1a92" }
-subspace-solving = { git = "https://github.com/subspace/subspace", rev = "b742c26002ed67fb4c61438d2bb2047fa05f1a92" }
+sp-core = { version = "6.0.0", git = "https://github.com/paritytech/substrate", rev = "c4f3d028621edb293d2c423516221aa396f76a2d" }
+sp-panic-handler = { version = "4.0.0", git = "https://github.com/paritytech/substrate", rev = "c4f3d028621edb293d2c423516221aa396f76a2d" }
+subspace-core-primitives = { git = "https://github.com/subspace/subspace", rev = "72b2c44971a2db1266995a8c0fe1223ef09be784" }
+subspace-farmer = { git = "https://github.com/subspace/subspace", rev = "72b2c44971a2db1266995a8c0fe1223ef09be784" }
+subspace-rpc-primitives = { git = "https://github.com/subspace/subspace", rev = "72b2c44971a2db1266995a8c0fe1223ef09be784" }
+subspace-runtime = { git = "https://github.com/subspace/subspace", rev = "72b2c44971a2db1266995a8c0fe1223ef09be784" }
+subspace-service = { git = "https://github.com/subspace/subspace", rev = "72b2c44971a2db1266995a8c0fe1223ef09be784" }
+subspace-solving = { git = "https://github.com/subspace/subspace", rev = "72b2c44971a2db1266995a8c0fe1223ef09be784" }
 tokio = { version = "1.11.0", features = ["macros", "rt-multi-thread"] }
 
 [target.'cfg(windows)'.dependencies]
@@ -52,3 +52,9 @@ custom-protocol = [ "tauri/custom-protocol" ]
 
 [profile.dev]
 opt-level = 3
+
+[patch.crates-io]
+# TODO: Remove once chacha20poly1305 0.10 appears in libp2p's dependencies
+chacha20poly1305 = { git = "https://github.com/RustCrypto/AEADs", rev = "06dbfb5571687fd1bbe9d3c9b2193a1ba17f8e99" }
+# TODO: Remove once https://github.com/rust-rse/reed-solomon-erasure/pull/98 is released
+reed-solomon-erasure = { git = "https://github.com/nazar-pc/reed-solomon-erasure", rev = "b6596ee10904faff3b68bbb3a82faa1d8ab05a7b" }

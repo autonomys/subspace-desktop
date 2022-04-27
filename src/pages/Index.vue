@@ -67,7 +67,7 @@ export default defineComponent({
       console.log("INDEX - First Time RUN.")
       this.loadNetworkData()
       const config = appConfig.getAppConfig()
-      if (config && config.launchOnBoot == true) {
+      if (config && config.launchOnBoot) {
         Notify.create({
           message: "Subspace Desktop will be started on boot. You can disable this from settings (the gear icon on top-right).",
           icon: "info"

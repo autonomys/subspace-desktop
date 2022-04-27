@@ -55,7 +55,7 @@ export class Client {
       start: async (): Promise<void> => {
 
         const farmerAddress: string | undefined = appConfig.getAppConfig()?.rewardAddress
-        if (farmerAddress == null) {
+        if (!farmerAddress) {
           console.error("Reward address should not have been null/undefined...")
           return
         }
@@ -239,7 +239,7 @@ export class Client {
   public async startFarming(path: string, plotSizeGB: number): Promise<boolean> {
     const plotSize = Math.round(plotSizeGB * 1048576)
     const rewardAddress: string | undefined = appConfig.getAppConfig()?.rewardAddress
-    if (rewardAddress == null) {
+    if (!rewardAddress) {
       console.error("Tried to send empty reward address to backend!")
     }
     return await tauri.invoke("farming", { path, rewardAddress, plotSize })

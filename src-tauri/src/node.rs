@@ -19,7 +19,7 @@ use std::env;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::Once;
-use subspace_service::{FullClient, NewFull};
+use subspace_service::{FullClient, NewFull, SubspaceConfiguration};
 use tokio::runtime::Handle;
 
 static INITIALIZE_SUBSTRATE: Once = Once::new();
@@ -62,6 +62,8 @@ pub(crate) async fn init_node(base_directory: PathBuf, node_name: String) -> Res
         Handle::current().block_on(create_full_client(chain_spec, base_directory, node_name))
     });
     let mut full_client = full_client_fut.await??;
+
+    full_client.network_starter.start_network();
 
     // TODO: Make this interruptable if needed
     tokio::spawn(async move {
@@ -143,7 +145,7 @@ fn create_configuration<CS: ChainSpec + 'static>(
     chain_spec: CS,
     tokio_handle: tokio::runtime::Handle,
     node_name: String,
-) -> Result<Configuration> {
+) -> Result<SubspaceConfiguration> {
     let impl_name = "Subspace-desktop".to_string();
     let impl_version = env!("SUBSTRATE_CLI_IMPL_VERSION").to_string();
     let config_dir = base_path.config_dir(chain_spec.id());
@@ -171,63 +173,75 @@ fn create_configuration<CS: ChainSpec + 'static>(
     let telemetry_endpoints = chain_spec.telemetry_endpoints().clone();
 
     // Default value are used for many of parameters
-    Ok(Configuration {
-        impl_name,
-        impl_version,
-        tokio_handle,
-        transaction_pool: Default::default(),
-        network,
-        keystore_remote,
-        keystore,
-        database: database_config(&config_dir, database_cache_size, &role),
-        state_cache_size: 67_108_864,
-        state_cache_child_ratio: None,
-        // TODO: Change to constrained eventually (need DSN for this)
-        state_pruning: PruningMode::ArchiveAll,
-        keep_blocks: KeepBlocks::All,
-        wasm_method: WasmExecutionMethod::Compiled,
-        wasm_runtime_overrides: None,
-        execution_strategies: ExecutionStrategies {
-            syncing: ExecutionStrategy::AlwaysWasm,
-            importing: ExecutionStrategy::AlwaysWasm,
-            block_construction: ExecutionStrategy::AlwaysWasm,
-            offchain_worker: ExecutionStrategy::AlwaysWasm,
-            other: ExecutionStrategy::AlwaysWasm,
+    Ok(SubspaceConfiguration {
+        base: Configuration {
+            impl_name,
+            impl_version,
+            tokio_handle,
+            transaction_pool: Default::default(),
+            network,
+            keystore_remote,
+            keystore,
+            database: database_config(&config_dir, database_cache_size, &role),
+            state_cache_size: 67_108_864,
+            state_cache_child_ratio: None,
+            // TODO: Change to constrained eventually (need DSN for this)
+            state_pruning: PruningMode::keep_blocks(1024),
+            keep_blocks: KeepBlocks::Some(1024),
+            wasm_method: WasmExecutionMethod::Compiled,
+            wasm_runtime_overrides: None,
+            #[cfg(not(target_os = "windows"))]
+            execution_strategies: ExecutionStrategies {
+                syncing: ExecutionStrategy::AlwaysWasm,
+                importing: ExecutionStrategy::AlwaysWasm,
+                block_construction: ExecutionStrategy::AlwaysWasm,
+                offchain_worker: ExecutionStrategy::AlwaysWasm,
+                other: ExecutionStrategy::AlwaysWasm,
+            },
+            #[cfg(target_os = "windows")]
+            execution_strategies: ExecutionStrategies {
+                syncing: ExecutionStrategy::NativeElseWasm,
+                importing: ExecutionStrategy::NativeElseWasm,
+                block_construction: ExecutionStrategy::NativeElseWasm,
+                offchain_worker: ExecutionStrategy::NativeElseWasm,
+                other: ExecutionStrategy::NativeElseWasm,
+            },
+            rpc_http: None,
+            rpc_ws: Some("127.0.0.1:9944".parse().expect("IP and port are valid")),
+            rpc_ipc: None,
+            rpc_methods: RpcMethods::Safe,
+            rpc_ws_max_connections: None,
+            // Below CORS are default from Substrate
+            rpc_cors: Some(vec![
+                "http://localhost:*".to_string(),
+                "http://127.0.0.1:*".to_string(),
+                "https://localhost:*".to_string(),
+                "https://127.0.0.1:*".to_string(),
+                "https://polkadot.js.org".to_string(),
+                "tauri://localhost".to_string(),
+            ]),
+            rpc_max_payload: None,
+            ws_max_out_buffer_capacity: None,
+            prometheus_config: None,
+            telemetry_endpoints,
+            default_heap_pages: None,
+            offchain_worker: OffchainWorkerConfig::default(),
+            force_authoring: env::var("FORCE_AUTHORING")
+                .map(|force_authoring| force_authoring.as_str() == "1")
+                .unwrap_or_default(),
+            disable_grandpa: false,
+            dev_key_seed: None,
+            tracing_targets: None,
+            tracing_receiver: TracingReceiver::Log,
+            chain_spec: Box::new(chain_spec),
+            max_runtime_instances: 8,
+            announce_block: true,
+            role,
+            base_path: Some(base_path),
+            informant_output_format: Default::default(),
+            runtime_cache_size: 2,
         },
-        rpc_http: None,
-        rpc_ws: Some("127.0.0.1:9944".parse().expect("IP and port are valid")),
-        rpc_ipc: None,
-        rpc_methods: RpcMethods::Safe,
-        rpc_ws_max_connections: None,
-        // Below CORS are default from Substrate
-        rpc_cors: Some(vec![
-            "http://localhost:*".to_string(),
-            "http://127.0.0.1:*".to_string(),
-            "https://localhost:*".to_string(),
-            "https://127.0.0.1:*".to_string(),
-            "https://polkadot.js.org".to_string(),
-            "tauri://localhost".to_string(),
-        ]),
-        rpc_max_payload: None,
-        ws_max_out_buffer_capacity: None,
-        prometheus_config: None,
-        telemetry_endpoints,
-        default_heap_pages: None,
-        offchain_worker: OffchainWorkerConfig::default(),
-        force_authoring: env::var("FORCE_AUTHORING")
-            .map(|force_authoring| force_authoring.as_str() == "1")
-            .unwrap_or_default(),
-        disable_grandpa: false,
-        dev_key_seed: None,
-        tracing_targets: None,
-        tracing_receiver: TracingReceiver::Log,
-        chain_spec: Box::new(chain_spec),
-        max_runtime_instances: 8,
-        announce_block: true,
-        role,
-        base_path: Some(base_path),
-        informant_output_format: Default::default(),
-        runtime_cache_size: 2,
+        force_new_slot_notifications: false,
     })
 }
 

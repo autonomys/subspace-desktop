@@ -172,7 +172,8 @@ export default defineComponent({
     },
     stats(): StatsType {
       const totalDiskSizeGB = util.toFixed(this.driveStats.totalBytes / 1e9, 2)
-      const safeAvailableGB = this.driveStats.freeBytes / 1e9 - 20
+      // node will occupy AT MOST 10GB (safe margin), so deduct 10GB from safe space
+      const safeAvailableGB = this.driveStats.freeBytes / 1e9 - 10
       const utilizedGB = util.toFixed(totalDiskSizeGB - safeAvailableGB, 2)
       const freeGB = ((): number => {
         const val = util.toFixed(safeAvailableGB - this.allocatedGB, 2)
@@ -296,7 +297,7 @@ export default defineComponent({
     async checkIdentity() {
       const config = appConfig.getAppConfig()
       if (config) {
-        if (config.rewardAddress == "") {
+        if (!config.rewardAddress) {
           await this.client.createRewardAddress()
           await this.viewMnemonic()
         }

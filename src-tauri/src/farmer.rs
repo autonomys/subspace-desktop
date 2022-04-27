@@ -6,7 +6,7 @@ use std::sync::Arc;
 use std::time::Duration;
 use subspace_core_primitives::{PublicKey, PIECE_SIZE};
 use subspace_farmer::multi_farming::MultiFarming;
-use subspace_farmer::{Identity, ObjectMappings, RpcClient, WsRpc};
+use subspace_farmer::{Identity, NodeRpcClient, ObjectMappings, RpcClient};
 use subspace_rpc_primitives::FarmerMetadata;
 
 pub(crate) static PLOTTED_PIECES: AtomicUsize = AtomicUsize::new(0);
@@ -28,7 +28,7 @@ pub(crate) async fn farm(
     };
 
     info!("Connecting to node at {}", node_rpc_url);
-    let client = WsRpc::new(node_rpc_url).await?;
+    let client = NodeRpcClient::new(node_rpc_url).await?;
 
     let FarmerMetadata { max_plot_size, .. } = client
         .farmer_metadata()
