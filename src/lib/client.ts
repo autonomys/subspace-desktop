@@ -7,7 +7,7 @@ import { invoke } from "@tauri-apps/api/tauri"
 import { reactive } from "vue"
 import * as process from "process"
 import * as util from "src/lib/util"
-import { LocalStorage } from "quasar"
+import { appConfig } from "./appConfig"
 import { getStoredBlocks, storeBlocks } from "./blockStorage"
 import {
   emptyClientData,
@@ -18,6 +18,7 @@ import {
 import EventEmitter from "events"
 
 export const myEmitter = new EventEmitter();
+
 
 const tauri = { event, invoke }
 const SUNIT = 1000000000000000000n
@@ -53,9 +54,9 @@ export class Client {
       },
       start: async (): Promise<void> => {
 
-        const farmerAddress = LocalStorage.getItem("rewardAddress")
-        if (farmerAddress === null) {
-          console.error("Reward address should not have been null...")
+        const farmerAddress: string | undefined = appConfig.getAppConfig()?.rewardAddress
+        if (!farmerAddress) {
+          console.error("Reward address should not have been null/undefined...")
           return
         }
 
@@ -63,16 +64,12 @@ export class Client {
           async ({ hash, number }) => {
             const blockNum = number.toNumber()
             const signedBlock = await this.localApi.rpc.chain.getBlock(hash)
-            const preRuntimes = signedBlock.block.header.digest.logs.filter(
-              (log) =>
-                log.isPreRuntime && log.asPreRuntime[0].toString() === "SUB_"
-            )
-            const { solution }: SubPreDigest =
-              this.localApi.registry.createType(
-                "SubPreDigest",
-                preRuntimes[0].asPreRuntime[1]
-              )
-            if (solution.public_key.toString() === farmerAddress) {
+            const preRuntime: SubPreDigest = this.localApi.registry.createType(
+              'SubPreDigest',
+              signedBlock.block.header.digest.logs.find((digestItem) => digestItem.isPreRuntime)
+            ?.asPreRuntime![1]);
+
+            if (preRuntime.solution.reward_address.toString() === farmerAddress) {
               console.log("Farmed by me:", blockNum)
               let blockReward = 0
               const allRecords: Vec<any> =
@@ -97,7 +94,7 @@ export class Client {
                 blockNum,
                 blockReward,
                 feeReward: 0,
-                rewardAddr: farmerAddress,
+                rewardAddr: farmerAddress.toString(),
                 appsLink: appsLink + blockNum.toString()
               }
               this.data.farming.farmed = [block].concat(
@@ -234,15 +231,15 @@ export class Client {
     const keyring = new Keyring()
     const pair = keyring.createFromUri(mnemonic)
     keyring.setSS58Format(2254); // 2254 is the prefix for subspace-testnet
-    LocalStorage.set("rewardAddress", pair.address)
+    appConfig.updateAppConfig(null, null, null, pair.address, null)
     this.mnemonic = mnemonic
   }
 
   /* FARMER INTEGRATION */
   public async startFarming(path: string, plotSizeGB: number): Promise<boolean> {
     const plotSize = Math.round(plotSizeGB * 1048576)
-    const rewardAddress: string | null = LocalStorage.getItem("rewardAddress")
-    if (rewardAddress == null) {
+    const rewardAddress: string | undefined = appConfig.getAppConfig()?.rewardAddress
+    if (!rewardAddress) {
       console.error("Tried to send empty reward address to backend!")
     }
     return await tauri.invoke("farming", { path, rewardAddress, plotSize })

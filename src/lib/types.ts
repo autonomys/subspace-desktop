@@ -115,6 +115,7 @@ export interface StatsType {
 
 interface Solution extends Struct {
   readonly public_key: AccountId32
+  readonly reward_address: AccountId32;
 }
 
 export interface SubPreDigest extends Struct {

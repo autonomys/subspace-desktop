@@ -66,7 +66,7 @@ import * as util from "src/lib/util"
 import { globalState as global } from "src/lib/global"
 import { FarmedBlock } from "src/lib/types"
 import { formatDistanceToNowStrict } from "date-fns"
-import { LocalStorage } from "quasar"
+import { appConfig } from "src/lib/appConfig"
 
 const lang = global.data.loc.text.dashboard
 
@@ -95,9 +95,9 @@ export default defineComponent({
       return formatDistanceToNowStrict(date)
     },
     displayRewardAddress() {
-      const addr: string | null = LocalStorage.getItem("rewardAddress")
-      if (addr == null) {
-        console.error("Reward Address was null!")
+      const addr: string | undefined = appConfig.getAppConfig()?.rewardAddress
+      if (!addr) {
+        console.error("Reward Address was null/undefined!")
         return "???"
       } else {
         return addr

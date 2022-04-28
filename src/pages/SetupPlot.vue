@@ -62,7 +62,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
                   v-if="blockchainSizeGB === 0"
                 )
               q-input(
-                color="blue"
+                bg-color="blue-2"
                 dense
                 input-class="setupPlotInput"
                 outlined
@@ -101,11 +101,10 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
             .col-1
             .col
               q-slider(
-                :max="getMaxPlotSize()"
+                :max="this.stats.safeAvailableGB"
                 :min="1"
-                :step="1"
+                :step="5"
                 color="blue"
-                markers
                 snap
                 style="height: 25px"
                 v-model="allocatedGB"
@@ -173,7 +172,8 @@ export default defineComponent({
     },
     stats(): StatsType {
       const totalDiskSizeGB = util.toFixed(this.driveStats.totalBytes / 1e9, 2)
-      const safeAvailableGB = this.driveStats.freeBytes / 1e9
+      // node will occupy AT MOST 10GB (safe margin), so deduct 10GB from safe space
+      const safeAvailableGB = this.driveStats.freeBytes / 1e9 - 10
       const utilizedGB = util.toFixed(totalDiskSizeGB - safeAvailableGB, 2)
       const freeGB = ((): number => {
         const val = util.toFixed(safeAvailableGB - this.allocatedGB, 2)
@@ -248,9 +248,6 @@ export default defineComponent({
     )
   },
   methods: {
-    getMaxPlotSize() {
-      return Math.min(this.stats.safeAvailableGB, this.blockchainSizeGB, 100)
-    },
     async confirmCreateDir() {
       const dirExists = await native.dirExists(this.plotDirectory)
 
@@ -299,10 +296,16 @@ export default defineComponent({
     },
     async checkIdentity() {
       const config = appConfig.getAppConfig()
-      if (config && config.importedRewAddr === false) {
-        await this.client.createRewardAddress()
-        await this.viewMnemonic()
+      if (config) {
+        if (!config.rewardAddress) {
+          await this.client.createRewardAddress()
+          await this.viewMnemonic()
+        }
+        else {
+          this.$router.replace({ name: "plottingProgress" })
+        }
       }
+
     },
     async viewMnemonic() {
       const modal = await util.showModal(mnemonicModal)
