@@ -55,6 +55,7 @@ import { globalState as global } from "src/lib/global"
 import * as util from "src/lib/util"
 import MainMenu from "components/mainMenu.vue"
 import { myEmitter } from "src/lib/client"
+import * as process from 'process'
 
 const lang = global.data.loc.text.mainMenu
 
