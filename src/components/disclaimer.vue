@@ -18,8 +18,6 @@ q-dialog(@hide="onDialogHide" persistent ref="dialog")
 <script>
 import { defineComponent } from "vue"
 const component = defineComponent({
-  data() {},
-  watch: {},
   methods: {
     // following method is REQUIRED
     // (don't change its name --> "show")

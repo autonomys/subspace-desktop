@@ -7,6 +7,7 @@
 // https://v2.quasar.dev/quasar-cli/quasar-conf-js
 
 const { configure } = require('quasar/wrappers');
+const version = require('./package.json').version
 
 module.exports = configure(function (ctx) {
   return {
@@ -44,7 +45,13 @@ module.exports = configure(function (ctx) {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli/quasar-conf-js#Property%3A-build
     build: {
-      env: require('dotenv').config().parsed,
+      // env: require('dotenv').config().parsed,
+      env: {
+        PUBLIC_API_WS: "wss://aries-farm-rpc-b.subspace.network",
+        LOCAL_API_WS: "ws://localhost:9944",
+        DEFAULT_APP_DIR: "subspace-desktop",
+        APP_VERSION: version,
+      },
       vueRouterMode: 'hash', // available values: 'hash', 'history'
       extendWebpack(config) {
         config.resolve.fallback = { crypto: false }
