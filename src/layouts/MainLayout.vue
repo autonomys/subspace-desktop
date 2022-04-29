@@ -76,9 +76,8 @@ export default defineComponent({
   },
   mounted() {
     this.nodeNameChanger()
-    if (process.env.APP_VERSION) {
-      this.appVersion = process.env.APP_VERSION
-    }
+    this.appVersion = (process.env.APP_VERSION as string)
+
   },
   methods: {
     async nodeNameChanger() {
