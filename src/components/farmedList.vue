@@ -66,7 +66,7 @@ import * as util from "src/lib/util"
 import { globalState as global } from "src/lib/global"
 import { FarmedBlock } from "src/lib/types"
 import { formatDistanceToNowStrict } from "date-fns"
-import { appConfig } from "src/lib/appConfig"
+import { appConfig } from "src/lib/appData"
 
 const lang = global.data.loc.text.dashboard
 
@@ -79,8 +79,8 @@ export default defineComponent({
   data() {
     return { lang, util, global: global.data, client: global.client, rewardAddress: "", }
   },
-  mounted() {
-    this.rewardAddress = this.displayRewardAddress()
+  async mounted() {
+    this.rewardAddress = await this.displayRewardAddress()
   },
   computed: {
     farmedBlocksList(): FarmedBlock[] {
@@ -94,13 +94,13 @@ export default defineComponent({
     formatDate(date: Date) {
       return formatDistanceToNowStrict(date)
     },
-    displayRewardAddress() {
-      const addr: string | undefined = appConfig.getAppConfig()?.rewardAddress
-      if (!addr) {
+    async displayRewardAddress() {
+      const rewardAddress = (await appConfig.read()).rewardAddress
+      if (rewardAddress === "") {
         console.error("Reward Address was null/undefined!")
         return "???"
       } else {
-        return addr
+        return rewardAddress
       }
     }
   }

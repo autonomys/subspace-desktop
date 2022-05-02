@@ -5,9 +5,10 @@ import {
 } from "quasar"
 import { Component } from "vue"
 import * as process from "process"
-import { appData } from "./appData"
+import { appData, appConfig } from "./appData"
+import * as app from "@tauri-apps/api/app"
 
-export const dirName = process.env.DEFAULT_APP_DIR || "subspace-desktop"
+export const appName = (await app.getName()).toString()
 
 export const random = (min: number, max: number): number =>
   Math.floor(Math.random() * (max - min)) + min
@@ -37,14 +38,14 @@ export function plotTimeMsEstimate(gb: number): number {
 
 export async function resetAndClear(): Promise<void> {
   await appData.clearDataDir()
+  await appConfig.remove()
 }
-export interface AppConfig {
+export interface OldAppConfig {
   [index: string]: any
   plot: Plot
   segmentCache: SegmentCache
   launchOnBoot: boolean
   rewardAddress: string
-  plottingStarted: boolean
 }
 
 export interface SegmentCache {
@@ -56,12 +57,11 @@ export interface Plot {
   sizeGB: number
 }
 
-export const emptyAppConfig: AppConfig = {
+export const emptyAppConfig: OldAppConfig = {
   plot: { location: "", sizeGB: 0 },
   segmentCache: { networkSegmentCount: 0, blockchainSizeGB: 0 },
   launchOnBoot: true,
-  rewardAddress: "",
-  plottingStarted: false
+  rewardAddress: ""
 }
 
 export function formatMS(duration: number): string {

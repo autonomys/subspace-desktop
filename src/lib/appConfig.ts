@@ -1,21 +1,20 @@
 import { LocalStorage } from "quasar"
-import { AppConfig, Plot, emptyAppConfig, SegmentCache } from "./util"
+import { OldAppConfig, Plot, emptyAppConfig, SegmentCache } from "./util"
 
-export const appConfig = {
+export const oldAppConfig = {
   initAppConfig(): void {
     if(!this.getAppConfig())
       LocalStorage.set("appConfig", emptyAppConfig)
   },
-  getAppConfig(): AppConfig | void {
+  getAppConfig(): OldAppConfig | void {
     const appConfig = LocalStorage.getItem("appConfig")
-    if (appConfig) return appConfig as AppConfig
+    if (appConfig) return appConfig as OldAppConfig
   },
   updateAppConfig(
     plot: Plot | null,
     segmentCache: SegmentCache | null,
     launchOnBoot: boolean | null,
-    rewardAddress: string | null,
-    plottingStarted: boolean | null
+    rewardAddress: string | null
   ): void {
     const appConfig = this.getAppConfig()
     if (appConfig) {
@@ -24,7 +23,6 @@ export const appConfig = {
       if (segmentCache) newAppConfig.segmentCache = segmentCache
       if (launchOnBoot != null) newAppConfig.launchOnBoot = launchOnBoot
       if (rewardAddress) newAppConfig.rewardAddress = rewardAddress
-      if (plottingStarted != null) newAppConfig.plottingStarted = plottingStarted
       LocalStorage.set("appConfig", newAppConfig)
     }
   }

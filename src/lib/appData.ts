@@ -1,20 +1,96 @@
 import * as fs from "@tauri-apps/api/fs"
-import { Dialog } from "quasar"
-import { appConfig } from "./appConfig"
+import * as path from "@tauri-apps/api/path"
+import { Dialog, DialogChainObject } from "quasar"
+import { appName, Plot } from "./util"
+
+const configDir = (await path.configDir()) + appName
+const configFullPath = (await path.configDir()) + appName + "/" + appName + ".cfg"
+
+export interface ConfigFile {
+  [index: string]: any
+  plot: Plot
+  rewardAddress: string,
+  launchOnBoot: boolean,
+  version: string
+}
+
+const emptyConfig: ConfigFile = {
+  plot: { location: "", sizeGB: 0 },
+  rewardAddress: "",
+  launchOnBoot: true,
+  version: ""
+}
+
+export const appConfig = {
+  validate(config: ConfigFile): boolean {
+    const { plot, rewardAddress } = config
+    if (
+      plot.location.length > 0 &&
+      plot.sizeGB > 0 &&
+      rewardAddress.length > 0
+    ) {
+      return true
+    }
+    return false
+  },
+  async remove(): Promise<void> {
+    await fs.removeFile(configFullPath).catch(console.error)
+  },
+
+  async read(): Promise<ConfigFile> {
+    const result = await fs.readTextFile(configFullPath)
+    const config: ConfigFile = JSON.parse(result)
+    return config
+  },
+  async write(config: ConfigFile): Promise<void> {
+    await fs.createDir(configDir).catch(console.error)
+    await fs.writeFile({
+        path: configFullPath,
+        contents: JSON.stringify(config, null, 2)
+      })
+      .catch(console.error)
+  },
+  async update(
+    plot: Plot | null,
+    rewardAddress: string | null,
+    launchOnBoot: boolean | null,
+    version: string | null
+  ): Promise<void> {
+    const newAppConfig = await this.read()
+    if (plot) newAppConfig.plot = plot
+    if (launchOnBoot != null) newAppConfig.launchOnBoot = launchOnBoot
+    if (rewardAddress) newAppConfig.rewardAddress = rewardAddress
+    if (version) newAppConfig.version = version
+    this.write(newAppConfig)
+  },
+  async writeEmpty(): Promise<void> {
+    await fs.createDir(configDir).catch(console.error)
+    await fs
+      .writeFile({
+        path: configFullPath,
+        contents: JSON.stringify(emptyConfig, null, 2)
+      })
+      .catch(console.error)
+  },
+  showErrorModal(): DialogChainObject {
+    // TODO: refactor this!
+    return Dialog.create({ message: "Config file is corrupted, resetting..." })
+  }
+}
 
 export const appData = {
-  getDataDirPath(): string | void {
-    const config = appConfig.getAppConfig()
-    if (config) return config.plot.location
+  async getDataDirPath(): Promise<string> {
+    const config = await appConfig.read()
+    return config.plot.location
   },
   async clearDataDir(): Promise<void> {
-    const dataDir = this.getDataDirPath()
-    if (!dataDir) return
+    const dataDir = await this.getDataDirPath()
+    if (dataDir === "") return
     await fs.removeDir(dataDir, { recursive: true }).catch(console.error)
   },
   async createCustomDataDir(location: string): Promise<void> {
     await fs.createDir(location).catch(console.error)
-  }
+  },
 }
 
 export const appDataDialog = {

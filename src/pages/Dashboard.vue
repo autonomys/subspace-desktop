@@ -32,7 +32,7 @@ import farmedList from "components/farmedList.vue"
 import netCard from "components/netCard.vue"
 import plotCard from "components/plotCard.vue"
 import { emptyClientData, ClientData, FarmedBlock } from "src/lib/types"
-import { appConfig } from "src/lib/appConfig"
+import { appConfig } from "src/lib/appData"
 const lang = global.data.loc.text.dashboard
 
 export default defineComponent({
@@ -74,41 +74,37 @@ export default defineComponent({
     }
   },
   async mounted() {
-    const config = appConfig.getAppConfig()
-    if (config) {
-      this.plot.plotSizeGB = config.plot.sizeGB
+    const config = await appConfig.read()
+    this.plot.plotSizeGB = config.plot.sizeGB
 
-      const raceResult = util.promiseTimeout(7000, this.client.connectPublicApi())
-      raceResult.then(async() => {
-        if (this.client.isFirstLoad() === false) {
-          await this.client.waitNodeStartApiConnect(config.plot.location)
-          const farmerStarted = await this.client.startFarming(config.plot.location, config.plot.sizeGB)
-          if (!farmerStarted) {
-            console.error("DASHBOARD | Farmer start error!")
-          }
-          await this.client.startBlockSubscription()
+    const raceResult = util.promiseTimeout(7000, this.client.connectPublicApi())
+    raceResult.then(async() => {
+      if (this.client.isFirstLoad() === false) {
+        await this.client.waitNodeStartApiConnect(config.plot.location)
+        const farmerStarted = await this.client.startFarming(config.plot.location, config.plot.sizeGB)
+        if (!farmerStarted) {
+          console.error("DASHBOARD | Farmer start error!")
         }
+        await this.client.startBlockSubscription()
+      }
 
-        this.global.status.state = "loading"
-        this.global.status.message = "loading..."
+      this.global.status.state = "loading"
+      this.global.status.message = "loading..."
 
-        this.clientData = global.client.data
-        this.loading = false
-        this.peerInterval = window.setInterval(this.getNetInfo, 10000)
-        this.client.data.farming.events.on("newBlock", this.newBlock)
-        this.client.data.farming.events.on("farmedBlock", this.farmBlock)
-        this.global.status.state = "live"
-        this.global.status.message = lang.syncedMsg
-        await this.checkNodeAndNetwork()
-        await this.checkFarmerAndPlot()
-        await this.client.disconnectPublicApi()
-      })
-      raceResult.catch(_ => {
-        console.error("The server seems to be too congested! Please try again later...")
-      })
-    } else {
-      console.error("DASH MOUNTED | ERROR | NO CONFIG LOADED")
-    }
+      this.clientData = global.client.data
+      this.loading = false
+      this.peerInterval = window.setInterval(this.getNetInfo, 10000)
+      this.client.data.farming.events.on("newBlock", this.newBlock)
+      this.client.data.farming.events.on("farmedBlock", this.farmBlock)
+      this.global.status.state = "live"
+      this.global.status.message = lang.syncedMsg
+      await this.checkNodeAndNetwork()
+      await this.checkFarmerAndPlot()
+      await this.client.disconnectPublicApi()
+    })
+    raceResult.catch(_ => {
+      console.error("The server seems to be too congested! Please try again later...")
+    })
   },
   unmounted() {
     this.unsubscribe()
@@ -129,8 +125,8 @@ export default defineComponent({
       this.plot.state = "verifying"
       this.plot.message = lang.verifyingPlot
 
-      const config = appConfig.getAppConfig()
-      if (config) this.plot.plotSizeGB = config.plot.sizeGB
+      const config = await appConfig.read()
+      this.plot.plotSizeGB = config.plot.sizeGB
 
       this.plot.message = lang.syncedMsg
       this.plot.state = "finished"

@@ -123,7 +123,8 @@ import { defineComponent } from "vue"
 import { globalState as global } from "src/lib/global"
 import * as util from "src/lib/util"
 import introModal from "components/introModal.vue"
-import { appConfig } from "src/lib/appConfig"
+import { oldAppConfig } from "src/lib/appConfig"
+import { appConfig } from "src/lib/appData"
 
 const lang = global.data.loc.text.plottingProgress
 let farmerTimer: number
@@ -199,14 +200,10 @@ export default defineComponent({
   methods: {
     async getPlotConfig() {
       this.client.setFirstLoad()
-      const config = appConfig.getAppConfig()
-      if (config) {
-        this.plottingData.remainingGB = config.plot.sizeGB
-        this.plottingData.allocatedGB = config.plot.sizeGB
-        this.plotDirectory = config.plot.location
-      } else {
-        console.error("PLOT PROGRESS | ERROR | NO CONFIG LOADED")
-      }
+      const config = await appConfig.read()
+      this.plottingData.remainingGB = config.plot.sizeGB
+      this.plottingData.allocatedGB = config.plot.sizeGB
+      this.plotDirectory = config.plot.location
     },
     async waitNode() {
       await this.client.waitNodeStartApiConnect(this.plotDirectory)
@@ -216,14 +213,15 @@ export default defineComponent({
       clearInterval(farmerTimer)
     },
     async farmingWrapper(): Promise<void> {
-      const config = appConfig.getAppConfig()
-      if (config) {
+      const oldConfig = oldAppConfig.getAppConfig()
+      const config = await appConfig.read()
+      if (oldConfig) {
         await this.client.startBlockSubscription()
         const farmerStarted = await this.client.startFarming(this.plotDirectory, config.plot.sizeGB)
         if (!farmerStarted) {
           console.error("PLOTTING PROGRESS | Farmer start error!")
         }
-        const networkSegmentCount = config.segmentCache.networkSegmentCount
+        const networkSegmentCount = oldConfig.segmentCache.networkSegmentCount
         this.networkSegmentCount = networkSegmentCount
         this.plottingData.allocatedGB = config.plot.sizeGB
         this.localSegmentCount = await this.client.getLocalSegmentCount()

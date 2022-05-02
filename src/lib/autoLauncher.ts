@@ -5,7 +5,7 @@ import { AutoLaunchParams, ChildReturnData } from './types'
 import * as fs from "@tauri-apps/api/fs"
 import * as native from './native'
 import * as path from "@tauri-apps/api/path"
-import { appConfig } from "src/lib/appConfig"
+import { appConfig } from "src/lib/appData"
 
 type osAL = typeof macAL | typeof winAL | typeof linAL | typeof nullAL
 
@@ -150,7 +150,7 @@ export class AutoLauncher {
     if (!this.enabled) {
       console.error("ENABLE DID NOT WORK")
     } else {
-      appConfig.updateAppConfig(null, null, true, null, null)
+      await appConfig.update(null, null, true, null)
     }
     return child
   }
@@ -160,12 +160,12 @@ export class AutoLauncher {
     if (this.enabled) {
       console.error("DISABLE DID NOT WORK")
     } else {
-      appConfig.updateAppConfig(null, null, false, null, null)
+      await appConfig.update(null, null, false, null)
     }
     return child
   }
   async init(): Promise<void> {
-    this.appName = process.env.DEV ? "subspace-desktop" : (await app.getName()).toString()
+    this.appName = (await app.getName()).toString()
     const osType = await os.type()
     console.log("OS TYPE: " + osType)
     this.appPath = await invoke('get_this_binary') as string
@@ -181,16 +181,14 @@ export class AutoLauncher {
       this.autoLauncher = linAL
     }
 
-    const config = appConfig.getAppConfig()
-    if (config) {
-      if (config.launchOnBoot)
-      {
-        // the app may be initialized before, but then user may have decided to move the app to another directory
-        // in this case, we have to delete the previous autoLaunch entry, and create a new one
-        await this.disable()
-        await this.enable()
-        this.enabled = (await this.isEnabled())
-      }
+    const config = await appConfig.read()
+    if (config.launchOnBoot)
+    {
+      // the app may be initialized before, but then user may have decided to move the app to another directory
+      // in this case, we have to delete the previous autoLaunch entry, and create a new one
+      await this.disable()
+      await this.enable()
+      this.enabled = (await this.isEnabled())
     }
     // if launch preference is `false`, we don't need to do anything here, it should stay as it is
     // also, config is created before autoLauncher, so there should be a config always
