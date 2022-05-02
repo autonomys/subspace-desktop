@@ -4,8 +4,8 @@ Standalone Desktop application for farming on Subspace Network (includes both no
 Download and run this application to be a farmer on Subspace Network (currently on testnet).
 
 # Minimum OS Requirements
-Below is not necessarily strict boundaries, but rather what we tested and confirmed so far.
-The more we test, these minimum requirements below may get loosen.
+Below is not necessarily strict boundaries, but rather what we have tested and confirmed so far.
+The more we test, these minimum requirements below may get loosened.
 
 - Windows 10+
 - Ubuntu Linux 18.04+
