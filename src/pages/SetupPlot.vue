@@ -299,9 +299,13 @@ export default defineComponent({
     },
     async checkIdentity() {
       const config = appConfig.getAppConfig()
-      if (config && config.importedRewAddr === false) {
-        await this.client.createRewardAddress()
-        await this.viewMnemonic()
+      if (config) {
+        if (config.importedRewAddr === false) {
+          await this.client.createRewardAddress()
+          await this.viewMnemonic()
+        } else {
+          this.$router.replace({ name: "plottingProgress" })
+        }
       }
     },
     async viewMnemonic() {
