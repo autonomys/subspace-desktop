@@ -5,7 +5,7 @@ import { AutoLaunchParams, ChildReturnData } from './types'
 import * as fs from "@tauri-apps/api/fs"
 import * as native from './native'
 import * as path from "@tauri-apps/api/path"
-import { appConfig } from "src/lib/appData"
+import { appConfig } from "src/lib/appConfig"
 
 type osAL = typeof macAL | typeof winAL | typeof linAL | typeof nullAL
 
@@ -150,7 +150,7 @@ export class AutoLauncher {
     if (!this.enabled) {
       console.error("ENABLE DID NOT WORK")
     } else {
-      await appConfig.update(null, null, true, null)
+      await appConfig.update(null, null, true, null, null)
     }
     return child
   }
@@ -164,7 +164,7 @@ export class AutoLauncher {
       this.enabled = await this.isEnabled()
       trial += 1
     } while (this.enabled && trial < 5);
-    await appConfig.update(null, null, false, null)
+    await appConfig.update(null, null, false, null, null)
     return child
   }
   async init(): Promise<void> {

@@ -24,8 +24,7 @@ q-page(padding)
 import { defineComponent } from "vue"
 import { globalState as global } from "src/lib/global"
 import * as util from "src/lib/util"
-import { appConfig } from "src/lib/appData"
-import { oldAppConfig } from "src/lib/appConfig"
+import { appConfig } from "src/lib/appConfig"
 import { Notify } from "quasar"
 import disclaimer from "components/disclaimer.vue"
 
@@ -39,13 +38,12 @@ export default defineComponent({
     try {
       this.checkDev()
       const config = await appConfig.read()
-      console.log("INDEX: config: ", appConfig)
       if (appConfig.validate(config)) {
         console.log("INDEX - NOT First Time RUN.")
         this.dashboard()
         return
       }
-      // validate failed, means we are starting from scratch
+      // validate returned false, means we are starting from scratch
       this.firstLoad()
     } catch (e) {
       // config.read() failed, means we are starting from scratch
@@ -80,10 +78,10 @@ export default defineComponent({
         await this.client.disconnectPublicApi()
         const totalSize = networkSegmentCount * 256 * util.PIECE_SIZE
         const blockchainSizeGB = Math.round((totalSize * 100) / util.GB) / 100
-        oldAppConfig.updateAppConfig(null, {
+        appConfig.update(null, null, null, null, {
           networkSegmentCount,
           blockchainSizeGB: blockchainSizeGB === 0 ? 0.1 : blockchainSizeGB
-        }, null, null)
+        })
       })
       raceResult.catch(_ => {
         console.error("The server seems to be too congested! Please try again later...")

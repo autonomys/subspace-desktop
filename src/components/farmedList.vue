@@ -66,7 +66,7 @@ import * as util from "src/lib/util"
 import { globalState as global } from "src/lib/global"
 import { FarmedBlock } from "src/lib/types"
 import { formatDistanceToNowStrict } from "date-fns"
-import { appConfig } from "src/lib/appData"
+import { appConfig } from "src/lib/appConfig"
 
 const lang = global.data.loc.text.dashboard
 

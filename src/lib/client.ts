@@ -7,7 +7,7 @@ import { invoke } from "@tauri-apps/api/tauri"
 import { reactive } from "vue"
 import * as process from "process"
 import * as util from "src/lib/util"
-import { appConfig } from "./appData"
+import { appConfig } from "./appConfig"
 import { getStoredBlocks, storeBlocks } from "./blockStorage"
 import {
   emptyClientData,
@@ -231,7 +231,7 @@ export class Client {
     const keyring = new Keyring()
     const pair = keyring.createFromUri(mnemonic)
     keyring.setSS58Format(2254); // 2254 is the prefix for subspace-testnet
-    appConfig.update(null, pair.address, null, null)
+    appConfig.update(null, pair.address, null, null, null)
     this.mnemonic = mnemonic
   }
 

@@ -5,7 +5,8 @@ import {
 } from "quasar"
 import { Component } from "vue"
 import * as process from "process"
-import { appData, appConfig } from "./appData"
+import { appData } from "./appData"
+import { appConfig } from "./appConfig"
 
 export const appName:string = process.env.APP_NAME || "subspace-desktop"
 
@@ -39,29 +40,7 @@ export async function resetAndClear(): Promise<void> {
   await appData.clearDataDir()
   await appConfig.remove()
 }
-export interface OldAppConfig {
-  [index: string]: any
-  plot: Plot
-  segmentCache: SegmentCache
-  launchOnBoot: boolean
-  rewardAddress: string
-}
 
-export interface SegmentCache {
-  networkSegmentCount: number
-  blockchainSizeGB: number
-}
-export interface Plot {
-  location: string
-  sizeGB: number
-}
-
-export const emptyAppConfig: OldAppConfig = {
-  plot: { location: "", sizeGB: 0 },
-  segmentCache: { networkSegmentCount: 0, blockchainSizeGB: 0 },
-  launchOnBoot: true,
-  rewardAddress: ""
-}
 
 export function formatMS(duration: number): string {
   duration /= 1000

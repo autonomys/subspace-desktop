@@ -35,7 +35,7 @@ q-page(padding)
 <script lang="ts">
 import { defineComponent } from "vue"
 import { globalState as global } from "src/lib/global"
-import { appConfig } from "src/lib/appData"
+import { appConfig } from "src/lib/appConfig"
 import { decodeAddress, encodeAddress } from "@polkadot/keyring"
 import { hexToU8a, isHex } from "@polkadot/util"
 const lang = global.data.loc.text.importKey
@@ -58,7 +58,7 @@ export default defineComponent({
       }
     },
     async importKey() {
-      appConfig.update(null, this.rewardAddress, null, null)
+      appConfig.update(null, this.rewardAddress, null, null, null)
       this.$router.replace({ name: "setupPlot" })
     },
     skip() {

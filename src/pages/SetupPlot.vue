@@ -140,8 +140,8 @@ import * as native from "src/lib/native"
 import { debounce } from "quasar"
 import { globalState as global } from "src/lib/global"
 import * as fs from "@tauri-apps/api/fs"
-import { oldAppConfig } from "src/lib/appConfig"
-import { appData, appDataDialog, appConfig } from "src/lib/appData"
+import { appConfig } from "src/lib/appConfig"
+import { appData, appDataDialog } from "src/lib/appData"
 import mnemonicModal from "components/mnemonicModal.vue"
 
 const tauri = { path, fs }
@@ -225,7 +225,7 @@ export default defineComponent({
     this.defaultPath = (await tauri.path.dataDir()) + util.appName
     this.plotDirectory = this.defaultPath
     do {
-      this.blockchainSizeGB = oldAppConfig.getAppConfig()?.segmentCache.blockchainSizeGB || 0
+      this.blockchainSizeGB = (await appConfig.read()).segmentCache.blockchainSizeGB || 0
       await new Promise((resolve) => setTimeout(resolve, 1000))
     } while (this.blockchainSizeGB <= 0)
   },
@@ -304,7 +304,7 @@ export default defineComponent({
     async viewMnemonic() {
       const modal = await util.showModal(mnemonicModal)
       modal?.onDismiss(() => {
-        appConfig.update({ location: this.plotDirectory, sizeGB: this.allocatedGB }, null, null, null)
+        appConfig.update({ location: this.plotDirectory, sizeGB: this.allocatedGB }, null, null, null, null)
         this.$router.replace({ name: "plottingProgress" })
       })
     }

@@ -32,7 +32,7 @@ import farmedList from "components/farmedList.vue"
 import netCard from "components/netCard.vue"
 import plotCard from "components/plotCard.vue"
 import { emptyClientData, ClientData, FarmedBlock } from "src/lib/types"
-import { appConfig } from "src/lib/appData"
+import { appConfig } from "src/lib/appConfig"
 const lang = global.data.loc.text.dashboard
 
 export default defineComponent({
