@@ -3,9 +3,6 @@ import * as path from "@tauri-apps/api/path"
 import { Dialog, DialogChainObject } from "quasar"
 import { appName, Plot } from "./util"
 
-const configDir = (await path.configDir()) + appName
-const configFullPath = (await path.configDir()) + appName + "/" + appName + ".cfg"
-
 export interface ConfigFile {
   [index: string]: any
   plot: Plot
@@ -22,6 +19,25 @@ const emptyConfig: ConfigFile = {
 }
 
 export const appConfig = {
+  async configDir(): Promise<string> {
+    return (await path.configDir()) + appName
+  },
+  async configFullPath(): Promise<string> {
+    return (await path.configDir()) + appName + "/" + appName + ".cfg"
+  },
+  async init(): Promise<void> {
+    try {
+      await this.read()
+    } catch {
+      // means there were no config file
+      await fs.createDir(await this.configDir()).catch((error) => {
+        if (!error.includes("exists")) {
+          console.error(error)
+        }
+      });
+      await this.write(emptyConfig)
+    }
+  },
   validate(config: ConfigFile): boolean {
     const { plot, rewardAddress } = config
     if (
@@ -34,18 +50,22 @@ export const appConfig = {
     return false
   },
   async remove(): Promise<void> {
-    await fs.removeFile(configFullPath).catch(console.error)
+    await fs.removeFile(await this.configFullPath()).catch(console.error)
   },
 
   async read(): Promise<ConfigFile> {
-    const result = await fs.readTextFile(configFullPath)
+    const result = await fs.readTextFile(await this.configFullPath())
     const config: ConfigFile = JSON.parse(result)
     return config
   },
   async write(config: ConfigFile): Promise<void> {
-    await fs.createDir(configDir).catch(console.error)
+    await fs.createDir(await this.configDir()).catch((error) => {
+      if (!error.includes("exists")) {
+        console.error(error)
+      }
+    });
     await fs.writeFile({
-        path: configFullPath,
+        path: await this.configFullPath(),
         contents: JSON.stringify(config, null, 2)
       })
       .catch(console.error)
@@ -62,15 +82,6 @@ export const appConfig = {
     if (rewardAddress) newAppConfig.rewardAddress = rewardAddress
     if (version) newAppConfig.version = version
     this.write(newAppConfig)
-  },
-  async writeEmpty(): Promise<void> {
-    await fs.createDir(configDir).catch(console.error)
-    await fs
-      .writeFile({
-        path: configFullPath,
-        contents: JSON.stringify(emptyConfig, null, 2)
-      })
-      .catch(console.error)
   },
   showErrorModal(): DialogChainObject {
     // TODO: refactor this!

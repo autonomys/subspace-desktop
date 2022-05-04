@@ -49,6 +49,7 @@ module.exports = configure(function (ctx) {
         PUBLIC_API_WS: "wss://aries-farm-rpc-b.subspace.network",
         LOCAL_API_WS: "ws://localhost:9944",
         APP_VERSION: version,
+        APP_NAME: "subspace-desktop"
       },
       vueRouterMode: 'hash', // available values: 'hash', 'history'
       extendWebpack(config) {

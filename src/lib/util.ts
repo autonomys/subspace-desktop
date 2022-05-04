@@ -6,9 +6,8 @@ import {
 import { Component } from "vue"
 import * as process from "process"
 import { appData, appConfig } from "./appData"
-import * as app from "@tauri-apps/api/app"
 
-export const appName = (await app.getName()).toString()
+export const appName:string = process.env.APP_NAME || "subspace-desktop"
 
 export const random = (min: number, max: number): number =>
   Math.floor(Math.random() * (max - min)) + min

@@ -258,7 +258,7 @@ export default defineComponent({
 
         if (files) {
           console.log("FILES ARE: :", files)
-          if (files.length === 0 || !files.some(item=> item.name === "chains" )) {
+          if (files.length === 0 || !files.some(item => item.name === "chains" )) {
             appDataDialog.existingDirectoryConfirm(
               this.plotDirectory,
               this.prepareForPlotting

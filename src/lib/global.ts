@@ -20,7 +20,7 @@ export class Global {
   }
   async init(): Promise<void> {
     oldAppConfig.initAppConfig()
-    appConfig.writeEmpty()
+    await appConfig.init()
     await Promise.all(
       [
         this.autoLauncher.init(),
