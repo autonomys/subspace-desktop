@@ -98,7 +98,7 @@ export default defineComponent({
       })
     },
     async initMenu() {
-      if (this.autoLauncher.enabled != undefined) {
+      if (this.autoLauncher.enabled !== undefined) {
         this.launchOnStart = await this.autoLauncher.enabled
       } else {
         this.launchOnStart = false

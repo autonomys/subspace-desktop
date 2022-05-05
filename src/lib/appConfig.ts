@@ -27,7 +27,7 @@ const emptyConfig: Config = {
   plot: { location: "", sizeGB: 0 },
   rewardAddress: "",
   launchOnBoot: true,
-  version: process.env.APP_VERSION || "?",
+  version: process.env.APP_VERSION as string,
   segmentCache: { networkSegmentCount: 0, blockchainSizeGB: 0 },
 }
 
@@ -85,22 +85,22 @@ export const appConfig = {
   },
   async update(
     {
-      plot = null,
-      launchOnBoot = null,
-      rewardAddress = null,
-      version = null,
-      segmentCache = null,
+      plot,
+      launchOnBoot,
+      rewardAddress,
+      version,
+      segmentCache,
     }: {
-      plot?: Plot | null;
-      launchOnBoot?: boolean | null;
-      rewardAddress?: string | null;
-      version?: string | null;
-      segmentCache?: SegmentCache | null;
+      plot?: Plot;
+      launchOnBoot?: boolean;
+      rewardAddress?: string;
+      version?: string;
+      segmentCache?: SegmentCache;
     }
   ): Promise<void> {
     const newAppConfig = await this.read()
     if (plot) newAppConfig.plot = plot
-    if (launchOnBoot != null) newAppConfig.launchOnBoot = launchOnBoot
+    if (launchOnBoot !== undefined) newAppConfig.launchOnBoot = launchOnBoot
     if (rewardAddress) newAppConfig.rewardAddress = rewardAddress
     if (version) newAppConfig.version = version
     if (segmentCache) newAppConfig.segmentCache = segmentCache
