@@ -14,7 +14,7 @@ q-layout(view="hHh lpr fFf")
               .col
                 p.no-margin(style="font-size: 12px") {{ lang.nonIncentivizedTooltip }}
           .col-auto.q-mr-md.relative-position(
-            v-if="nodeName !== ""
+            v-if="nodeName !== ''"
           )
             q-badge(color="blue-8" text-color="white")
               .q-ma-xs(style="font-size: 14px") {{ "Node Name:" }}
