@@ -36,7 +36,6 @@ export default defineComponent({
   },
   mounted() {
     try {
-      this.checkDev()
       const config = appConfig.getAppConfig()
       if (config) {
         const { plottingStarted } = config
@@ -54,12 +53,6 @@ export default defineComponent({
     }
   },
   methods: {
-    checkDev() {
-      if (util.CONTEXT_MENU === "OFF")
-        document.addEventListener("contextmenu", (event) =>
-          event.preventDefault()
-        )
-    },
     dashboard() {
       this.$router.replace({ name: "dashboard" })
     },
