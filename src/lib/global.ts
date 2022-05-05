@@ -18,7 +18,7 @@ export class Global {
     this.data.loc.text = await getLang(this.data.loc.selected)
   }
   async init(): Promise<void> {
-    appConfig.initAppConfig()
+    await appConfig.init()
     await Promise.all(
       [
         this.autoLauncher.init(),

@@ -150,22 +150,25 @@ export class AutoLauncher {
     if (!this.enabled) {
       console.error("ENABLE DID NOT WORK")
     } else {
-      appConfig.updateAppConfig(null, null, true, null, null)
+      await appConfig.update({ launchOnBoot: true })
     }
     return child
   }
   async disable(): Promise<void | ChildReturnData> {
-    const child = this.autoLauncher.disable(this.appName)
-    this.enabled = await this.isEnabled()
-    if (this.enabled) {
-      console.error("DISABLE DID NOT WORK")
-    } else {
-      appConfig.updateAppConfig(null, null, false, null, null)
-    }
+    let child;
+    let trial = 0
+    // to remove the previous entries for older versions
+    // try at maximum 5 times to prevent infinite loop
+    do {
+      child = this.autoLauncher.disable(this.appName)
+      this.enabled = await this.isEnabled()
+      trial += 1
+    } while (this.enabled && trial < 5);
+    await appConfig.update({launchOnBoot: false})
     return child
   }
   async init(): Promise<void> {
-    this.appName = process.env.DEV ? "subspace-desktop" : (await app.getName()).toString()
+    this.appName = (await app.getName()).toString()
     const osType = await os.type()
     console.log("OS TYPE: " + osType)
     this.appPath = await invoke('get_this_binary') as string
@@ -181,16 +184,14 @@ export class AutoLauncher {
       this.autoLauncher = linAL
     }
 
-    const config = appConfig.getAppConfig()
-    if (config) {
-      if (config.launchOnBoot)
-      {
-        // the app may be initialized before, but then user may have decided to move the app to another directory
-        // in this case, we have to delete the previous autoLaunch entry, and create a new one
-        await this.disable()
-        await this.enable()
-        this.enabled = (await this.isEnabled())
-      }
+    const config = await appConfig.read()
+    if (config.launchOnBoot)
+    {
+      // the app may be initialized before, but then user may have decided to move the app to another directory
+      // in this case, we have to delete the previous autoLaunch entry, and create a new one
+      // below disable is not creating console error, hence use it for this one
+      await this.disable()
+      await this.enable()
     }
     // if launch preference is `false`, we don't need to do anything here, it should stay as it is
     // also, config is created before autoLauncher, so there should be a config always

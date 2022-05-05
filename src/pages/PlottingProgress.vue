@@ -199,14 +199,10 @@ export default defineComponent({
   methods: {
     async getPlotConfig() {
       this.client.setFirstLoad()
-      const config = appConfig.getAppConfig()
-      if (config) {
-        this.plottingData.remainingGB = config.plot.sizeGB
-        this.plottingData.allocatedGB = config.plot.sizeGB
-        this.plotDirectory = config.plot.location
-      } else {
-        console.error("PLOT PROGRESS | ERROR | NO CONFIG LOADED")
-      }
+      const config = await appConfig.read()
+      this.plottingData.remainingGB = config.plot.sizeGB
+      this.plottingData.allocatedGB = config.plot.sizeGB
+      this.plotDirectory = config.plot.location
     },
     async waitNode() {
       await this.client.waitNodeStartApiConnect(this.plotDirectory)
@@ -216,22 +212,22 @@ export default defineComponent({
       clearInterval(farmerTimer)
     },
     async farmingWrapper(): Promise<void> {
-      const config = appConfig.getAppConfig()
-      if (config) {
-        await this.client.startBlockSubscription()
-        const farmerStarted = await this.client.startFarming(this.plotDirectory, config.plot.sizeGB)
-        if (!farmerStarted) {
-          console.error("PLOTTING PROGRESS | Farmer start error!")
-        }
-        const networkSegmentCount = config.segmentCache.networkSegmentCount
-        this.networkSegmentCount = networkSegmentCount
-        this.plottingData.allocatedGB = config.plot.sizeGB
-        this.localSegmentCount = await this.client.getLocalSegmentCount()
-        do {
-          await new Promise((resolve) => setTimeout(resolve, 2000))
-          this.localSegmentCount = await this.client.getLocalSegmentCount()
-        } while (this.localSegmentCount < this.networkSegmentCount)
+      const config = await appConfig.read()
+
+      await this.client.startBlockSubscription()
+      const farmerStarted = await this.client.startFarming(this.plotDirectory, config.plot.sizeGB)
+      if (!farmerStarted) {
+        console.error("PLOTTING PROGRESS | Farmer start error!")
       }
+      const networkSegmentCount = config.segmentCache.networkSegmentCount
+      this.networkSegmentCount = networkSegmentCount
+      this.plottingData.allocatedGB = config.plot.sizeGB
+      this.localSegmentCount = await this.client.getLocalSegmentCount()
+      do {
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+        this.localSegmentCount = await this.client.getLocalSegmentCount()
+      } while (this.localSegmentCount < this.networkSegmentCount)
+
     },
     startTimers() {
       farmerTimer = window.setInterval(() => {

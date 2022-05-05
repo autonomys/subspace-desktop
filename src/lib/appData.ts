@@ -2,19 +2,20 @@ import * as fs from "@tauri-apps/api/fs"
 import { Dialog } from "quasar"
 import { appConfig } from "./appConfig"
 
+
 export const appData = {
-  getDataDirPath(): string | void {
-    const config = appConfig.getAppConfig()
-    if (config) return config.plot.location
+  async getDataDirPath(): Promise<string> {
+    const config = await appConfig.read()
+    return config.plot.location
   },
   async clearDataDir(): Promise<void> {
-    const dataDir = this.getDataDirPath()
-    if (!dataDir) return
+    const dataDir = await this.getDataDirPath()
+    if (dataDir === "") return
     await fs.removeDir(dataDir, { recursive: true }).catch(console.error)
   },
   async createCustomDataDir(location: string): Promise<void> {
     await fs.createDir(location).catch(console.error)
-  }
+  },
 }
 
 export const appDataDialog = {

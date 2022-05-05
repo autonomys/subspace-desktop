@@ -54,8 +54,8 @@ export class Client {
       },
       start: async (): Promise<void> => {
 
-        const farmerAddress: string | undefined = appConfig.getAppConfig()?.rewardAddress
-        if (!farmerAddress) {
+        const rewardAddress: string = (await appConfig.read()).rewardAddress
+        if (rewardAddress === "") {
           console.error("Reward address should not have been null/undefined...")
           return
         }
@@ -69,7 +69,7 @@ export class Client {
               signedBlock.block.header.digest.logs.find((digestItem) => digestItem.isPreRuntime)
             ?.asPreRuntime![1]);
 
-            if (preRuntime.solution.reward_address.toString() === farmerAddress) {
+            if (preRuntime.solution.reward_address.toString() === rewardAddress) {
               console.log("Farmed by me:", blockNum)
               let blockReward = 0
               const allRecords: Vec<any> =
@@ -94,7 +94,7 @@ export class Client {
                 blockNum,
                 blockReward,
                 feeReward: 0,
-                rewardAddr: farmerAddress.toString(),
+                rewardAddr: rewardAddress.toString(),
                 appsLink: appsLink + blockNum.toString()
               }
               this.data.farming.farmed = [block].concat(
@@ -231,14 +231,14 @@ export class Client {
     const keyring = new Keyring()
     const pair = keyring.createFromUri(mnemonic)
     keyring.setSS58Format(2254); // 2254 is the prefix for subspace-testnet
-    appConfig.updateAppConfig(null, null, null, pair.address, null)
+    appConfig.update({ rewardAddress: pair.address })
     this.mnemonic = mnemonic
   }
 
   /* FARMER INTEGRATION */
   public async startFarming(path: string, plotSizeGB: number): Promise<boolean> {
     const plotSize = Math.round(plotSizeGB * 1048576)
-    const rewardAddress: string | undefined = appConfig.getAppConfig()?.rewardAddress
+    const rewardAddress: string = (await appConfig.read()).rewardAddress
     if (!rewardAddress) {
       console.error("Tried to send empty reward address to backend!")
     }

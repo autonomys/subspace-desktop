@@ -89,13 +89,16 @@ export default defineComponent({
         cancel: true
       }).onOk(async () => {
         await util.resetAndClear()
+
+        // TODO: remove this when we get rid of segmentCache
         LocalStorage.clear()
+
         await new Promise((resolve) => setTimeout(resolve, 1000))
         await relaunch()
       })
     },
     async initMenu() {
-      if (this.autoLauncher.enabled != undefined) {
+      if (this.autoLauncher.enabled !== undefined) {
         this.launchOnStart = await this.autoLauncher.enabled
       } else {
         this.launchOnStart = false

@@ -6,8 +6,9 @@ import {
 import { Component } from "vue"
 import * as process from "process"
 import { appData } from "./appData"
+import { appConfig } from "./appConfig"
 
-export const dirName = process.env.DEFAULT_APP_DIR || "subspace-desktop"
+export const appName:string = process.env.APP_NAME || "subspace-desktop"
 
 export const random = (min: number, max: number): number =>
   Math.floor(Math.random() * (max - min)) + min
@@ -37,32 +38,9 @@ export function plotTimeMsEstimate(gb: number): number {
 
 export async function resetAndClear(): Promise<void> {
   await appData.clearDataDir()
-}
-export interface AppConfig {
-  [index: string]: any
-  plot: Plot
-  segmentCache: SegmentCache
-  launchOnBoot: boolean
-  rewardAddress: string
-  plottingStarted: boolean
+  await appConfig.remove()
 }
 
-export interface SegmentCache {
-  networkSegmentCount: number
-  blockchainSizeGB: number
-}
-export interface Plot {
-  location: string
-  sizeGB: number
-}
-
-export const emptyAppConfig: AppConfig = {
-  plot: { location: "", sizeGB: 0 },
-  segmentCache: { networkSegmentCount: 0, blockchainSizeGB: 0 },
-  launchOnBoot: true,
-  rewardAddress: "",
-  plottingStarted: false
-}
 
 export function formatMS(duration: number): string {
   duration /= 1000

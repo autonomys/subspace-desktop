@@ -222,10 +222,10 @@ export default defineComponent({
   },
   async mounted() {
     await this.updateDriveStats()
-    this.defaultPath = (await tauri.path.dataDir()) + util.dirName
+    this.defaultPath = (await tauri.path.dataDir()) + util.appName
     this.plotDirectory = this.defaultPath
     do {
-      this.blockchainSizeGB = appConfig.getAppConfig()?.segmentCache.blockchainSizeGB || 0
+      this.blockchainSizeGB = (await appConfig.read()).segmentCache.blockchainSizeGB || 0
       await new Promise((resolve) => setTimeout(resolve, 1000))
     } while (this.blockchainSizeGB <= 0)
   },
@@ -258,7 +258,7 @@ export default defineComponent({
 
         if (files) {
           console.log("FILES ARE: :", files)
-          if (files.length === 0 || !files.some(item=> item.name === "chains" )) {
+          if (files.length === 0 || !files.some(item => item.name === "chains" )) {
             appDataDialog.existingDirectoryConfirm(
               this.plotDirectory,
               this.prepareForPlotting
@@ -277,10 +277,7 @@ export default defineComponent({
     async prepareForPlotting() {
       if (this.plotDirectory.charAt(this.plotDirectory.length - 1) == "/")
         this.plotDirectory.slice(-1)
-
       await appData.createCustomDataDir(this.plotDirectory)
-      appConfig.updateAppConfig({ location: this.plotDirectory, sizeGB: this.allocatedGB }, null, null, null, null)
-
       await this.checkIdentity()
     },
     async updateDriveStats() {
@@ -295,22 +292,19 @@ export default defineComponent({
       if (result) this.plotDirectory = result
     },
     async checkIdentity() {
-      const config = appConfig.getAppConfig()
-      if (config) {
-        if (!config.rewardAddress) {
-          await this.client.createRewardAddress()
-          await this.viewMnemonic()
-        }
-        else {
-          this.$router.replace({ name: "plottingProgress" })
-        }
+      const config = await appConfig.read()
+      if (config.rewardAddress === "") {
+        await this.client.createRewardAddress()
+        await this.viewMnemonic()
       }
-
+      else {
+        this.$router.replace({ name: "plottingProgress" })
+      }
     },
     async viewMnemonic() {
       const modal = await util.showModal(mnemonicModal)
       modal?.onDismiss(() => {
-        appConfig.updateAppConfig(null, null, null, null, true)
+        appConfig.update({ plot: { location: this.plotDirectory, sizeGB: this.allocatedGB }})
         this.$router.replace({ name: "plottingProgress" })
       })
     }

@@ -34,22 +34,19 @@ export default defineComponent({
   data() {
     return { lang, client: global.client }
   },
-  mounted() {
+  async mounted() {
     try {
       this.checkDev()
-      const config = appConfig.getAppConfig()
-      if (config) {
-        const { plottingStarted } = config
-        if (
-          plottingStarted
-        ) {
-          console.log("INDEX - NOT First Time RUN.")
-          this.dashboard()
-          return
-        }
+      const config = await appConfig.read()
+      if (appConfig.validate(config)) {
+        console.log("INDEX - NOT First Time RUN.")
+        this.dashboard()
+        return
       }
+      // validate returned false, means we are starting from scratch
       this.firstLoad()
     } catch (e) {
+      // config.read() failed, means we are starting from scratch
       this.firstLoad()
     }
   },
@@ -63,11 +60,11 @@ export default defineComponent({
     dashboard() {
       this.$router.replace({ name: "dashboard" })
     },
-    firstLoad() {
+    async firstLoad() {
       console.log("INDEX - First Time RUN.")
       this.loadNetworkData()
-      const config = appConfig.getAppConfig()
-      if (config && config.launchOnBoot) {
+      const config = await appConfig.read()
+      if (config.launchOnBoot) {
         Notify.create({
           message: "Subspace Desktop will be started on boot. You can disable this from settings (the gear icon on top-right).",
           icon: "info"
@@ -81,10 +78,10 @@ export default defineComponent({
         await this.client.disconnectPublicApi()
         const totalSize = networkSegmentCount * 256 * util.PIECE_SIZE
         const blockchainSizeGB = Math.round((totalSize * 100) / util.GB) / 100
-        appConfig.updateAppConfig(null, {
+        appConfig.update({ segmentCache: {
           networkSegmentCount,
           blockchainSizeGB: blockchainSizeGB === 0 ? 0.1 : blockchainSizeGB
-        }, null, null, null)
+        }})
       })
       raceResult.catch(_ => {
         console.error("The server seems to be too congested! Please try again later...")
