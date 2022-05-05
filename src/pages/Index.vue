@@ -25,8 +25,9 @@ import { defineComponent } from "vue"
 import { globalState as global } from "src/lib/global"
 import * as util from "src/lib/util"
 import { appConfig } from "src/lib/appConfig"
-import { Notify } from "quasar"
+import { LocalStorage, Notify } from "quasar"
 import disclaimer from "components/disclaimer.vue"
+import { relaunch } from "@tauri-apps/api/process"
 
 const lang = global.data.loc.text.index
 
@@ -34,11 +35,18 @@ export default defineComponent({
   data() {
     return { lang, client: global.client }
   },
-  mounted() {
+  async mounted() {
     try {
       const config = appConfig.getAppConfig()
       if (config) {
-        const { plottingStarted } = config
+        const { importedRewAddr, plottingStarted } = config
+        if (importedRewAddr === false || importedRewAddr === true) {
+          // means old artifact is there
+          await util.resetAndClear()
+          LocalStorage.clear()
+          await new Promise((resolve) => setTimeout(resolve, 1000))
+          await relaunch()
+        }
         if (
           plottingStarted
         ) {
