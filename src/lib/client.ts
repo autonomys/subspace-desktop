@@ -231,7 +231,7 @@ export class Client {
     const keyring = new Keyring()
     const pair = keyring.createFromUri(mnemonic)
     keyring.setSS58Format(2254); // 2254 is the prefix for subspace-testnet
-    appConfig.update(null, pair.address, null, null, null)
+    appConfig.update({ rewardAddress: pair.address })
     this.mnemonic = mnemonic
   }
 

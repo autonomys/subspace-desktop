@@ -84,11 +84,19 @@ export const appConfig = {
       .catch(console.error)
   },
   async update(
-    plot: Plot | null,
-    rewardAddress: string | null,
-    launchOnBoot: boolean | null,
-    version: string | null,
-    segmentCache: SegmentCache | null,
+    {
+      plot = null,
+      launchOnBoot = null,
+      rewardAddress = null,
+      version = null,
+      segmentCache = null,
+    }: {
+      plot?: Plot | null;
+      launchOnBoot?: boolean | null;
+      rewardAddress?: string | null;
+      version?: string | null;
+      segmentCache?: SegmentCache | null;
+    }
   ): Promise<void> {
     const newAppConfig = await this.read()
     if (plot) newAppConfig.plot = plot

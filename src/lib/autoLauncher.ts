@@ -150,7 +150,7 @@ export class AutoLauncher {
     if (!this.enabled) {
       console.error("ENABLE DID NOT WORK")
     } else {
-      await appConfig.update(null, null, true, null, null)
+      await appConfig.update({ launchOnBoot: true })
     }
     return child
   }
@@ -164,7 +164,7 @@ export class AutoLauncher {
       this.enabled = await this.isEnabled()
       trial += 1
     } while (this.enabled && trial < 5);
-    await appConfig.update(null, null, false, null, null)
+    await appConfig.update({launchOnBoot: false})
     return child
   }
   async init(): Promise<void> {
@@ -192,7 +192,6 @@ export class AutoLauncher {
       // below disable is not creating console error, hence use it for this one
       await this.disable()
       await this.enable()
-      this.enabled = (await this.isEnabled())
     }
     // if launch preference is `false`, we don't need to do anything here, it should stay as it is
     // also, config is created before autoLauncher, so there should be a config always

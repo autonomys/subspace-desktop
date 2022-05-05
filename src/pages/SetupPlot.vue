@@ -304,7 +304,7 @@ export default defineComponent({
     async viewMnemonic() {
       const modal = await util.showModal(mnemonicModal)
       modal?.onDismiss(() => {
-        appConfig.update({ location: this.plotDirectory, sizeGB: this.allocatedGB }, null, null, null, null)
+        appConfig.update({ plot: { location: this.plotDirectory, sizeGB: this.allocatedGB }})
         this.$router.replace({ name: "plottingProgress" })
       })
     }
