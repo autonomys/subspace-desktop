@@ -43,7 +43,7 @@ export interface AppConfig {
   plot: Plot
   segmentCache: SegmentCache
   launchOnBoot: boolean
-  importedRewAddr: boolean
+  rewardAddress: string
   plottingStarted: boolean
 }
 
@@ -60,7 +60,7 @@ export const emptyAppConfig: AppConfig = {
   plot: { location: "", sizeGB: 0 },
   segmentCache: { networkSegmentCount: 0, blockchainSizeGB: 0 },
   launchOnBoot: true,
-  importedRewAddr: false,
+  rewardAddress: "",
   plottingStarted: false
 }
 

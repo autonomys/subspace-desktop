@@ -16,6 +16,7 @@ import {
   SubPreDigest
 } from "src/lib/types"
 import EventEmitter from "events"
+import { appConfig } from "./appConfig"
 
 export const myEmitter = new EventEmitter();
 
@@ -52,13 +53,15 @@ export class Client {
         this.stop()
       },
       start: async (): Promise<void> => {
-
-        const farmerAddress = LocalStorage.getItem("rewardAddress")
-        if (farmerAddress === null) {
-          console.error("Reward address should not have been null...")
+        const config = appConfig.getAppConfig()
+        let farmerAddress = ""
+        if (config && config.rewardAddress !== "") {
+          farmerAddress = config.rewardAddress
+        }
+        if (farmerAddress === "") {
+          console.error("Reward address should not have been empty...")
           return
         }
-
         this.unsubscribe = await this.localApi.rpc.chain.subscribeNewHeads(
           async ({ hash, number }) => {
             const blockNum = number.toNumber()
@@ -234,15 +237,18 @@ export class Client {
     const keyring = new Keyring()
     const pair = keyring.createFromUri(mnemonic)
     keyring.setSS58Format(2254); // 2254 is the prefix for subspace-testnet
-    LocalStorage.set("rewardAddress", pair.address)
+    appConfig.updateAppConfig(null, null, null, pair.address, null)
     this.mnemonic = mnemonic
   }
 
   /* FARMER INTEGRATION */
   public async startFarming(path: string, plotSizeGB: number): Promise<boolean> {
     const plotSize = Math.round(plotSizeGB * 1048576)
-    const rewardAddress: string | null = LocalStorage.getItem("rewardAddress")
-    if (rewardAddress == null) {
+    const config = appConfig.getAppConfig()
+    let rewardAddress = ""
+    if (config && config.rewardAddress !== "") {
+      rewardAddress = config.rewardAddress
+    } else {
       console.error("Tried to send empty reward address to backend!")
     }
     return await tauri.invoke("farming", { path, rewardAddress, plotSize })
