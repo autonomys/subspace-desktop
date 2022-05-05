@@ -3,6 +3,13 @@
 Standalone Desktop application for farming on Subspace Network (includes both node and farmer).
 Download and run this application to be a farmer on Subspace Network (currently on testnet).
 
+# OS Requirements
+Below is not necessarily strict boundaries, but rather what we have tested and confirmed so far.
+
+- Windows 10 and 11
+- Ubuntu 20.04 and 22.04
+- macOS 11 and 12
+
 # How to Install
 
 1. Download the latest [release](https://github.com/subspace/subspace-desktop/releases) for your preferred platform.
