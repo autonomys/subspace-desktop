@@ -6,7 +6,7 @@ q-layout(view="hHh lpr fFf")
       q-toolbar-title
         .row
           .col-auto.q-mr-lg.relative-position
-            p {{ "0.4.6 "}}
+            p {{ "0.4.7 "}}
           .col-auto.q-mr-md.relative-position
             q-badge(color="grey" text-color="white")
               .q-pa-xs(style="font-size: 14px") {{ lang.nonIncentivizedLabel }}
