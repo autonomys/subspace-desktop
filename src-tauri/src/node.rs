@@ -219,6 +219,7 @@ fn create_configuration<CS: ChainSpec + 'static>(
                 "https://127.0.0.1:*".to_string(),
                 "https://polkadot.js.org".to_string(),
                 "tauri://localhost".to_string(),
+                "https://tauri.localhost".to_string(),
             ]),
             rpc_max_payload: None,
             ws_max_out_buffer_capacity: None,
