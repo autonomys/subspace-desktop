@@ -16,10 +16,11 @@ use serde::Serialize;
 use std::path::PathBuf;
 use std::sync::atomic::Ordering;
 use std::time::Duration;
+
 use tauri::SystemTrayEvent;
 use tauri::{
     api::{self},
-    Env, Manager, RunEvent,
+    Env, Manager, RunEvent, WindowEvent,
 };
 
 const BEST_BLOCK_NUMBER_CHECK_INTERVAL: Duration = Duration::from_secs(5);
@@ -137,7 +138,11 @@ async fn main() -> Result<()> {
         .expect("error while running tauri application");
 
     app.run(|app_handle, e| match e {
-        RunEvent::CloseRequested { label, api, .. } => {
+        RunEvent::WindowEvent {
+            label,
+            event: WindowEvent::CloseRequested { api, .. },
+            ..
+        } => {
             let app_handle = app_handle.clone();
             let window = app_handle.get_window(&label).unwrap();
             // use the exposed close api, and prevent the event loop to close
