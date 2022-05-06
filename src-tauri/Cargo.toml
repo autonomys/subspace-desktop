@@ -41,9 +41,7 @@ tokio = { version = "1.11.0", features = ["macros", "rt-multi-thread"] }
 winreg = "0.10.1"
 
 [dependencies.tauri]
-default-features = false
-# `wry` and `objc-exception` features are default, but we disable `compression` feature to avoid `zstd` crate version conflicts
-features = ["api-all", "objc-exception", "system-tray", "wry"]
+features = ["api-all", "system-tray", "ayatana-tray"]
 version = "1.0.0-rc.8"
 
 [features]

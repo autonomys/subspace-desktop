@@ -89,6 +89,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "alloc-no-stdlib"
+version = "2.0.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "35ef4730490ad1c4eae5c4325b2a95f521d023e5c885853ff7aca0a6a1631db3"
+
+[[package]]
+name = "alloc-stdlib"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "697ed7edc0f1711de49ce108c541623a0af97c6c60b2f6e2b65229847ac843c2"
+dependencies = [
+ "alloc-no-stdlib",
+]
+
+[[package]]
 name = "ansi_term"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -621,6 +636,27 @@ dependencies = [
  "fastrand",
  "futures-lite",
  "once_cell",
+]
+
+[[package]]
+name = "brotli"
+version = "3.3.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a1a0b1dbcc8ae29329621f8d4f0d835787c1c38bb1401979b49d13b0b305ff68"
+dependencies = [
+ "alloc-no-stdlib",
+ "alloc-stdlib",
+ "brotli-decompressor",
+]
+
+[[package]]
+name = "brotli-decompressor"
+version = "2.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "59ad2d4653bf5ca36ae797b1f4bb4dbddb60ce49ca4aed8a2ce4829f60425b80"
+dependencies = [
+ "alloc-no-stdlib",
+ "alloc-stdlib",
 ]
 
 [[package]]
@@ -3769,6 +3805,18 @@ name = "lazycell"
 version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "830d08ce1d1d941e6b30645f1a0eb5643013d835ce3779a5fc208261dbe10f55"
+
+[[package]]
+name = "libayatana-appindicator"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0379d22a323947cb27b4dbe3b14fc1dcde07c9e9c3eca52ddf97ca0819c28cc4"
+dependencies = [
+ "glib",
+ "gtk",
+ "gtk-sys",
+ "log",
+]
 
 [[package]]
 name = "libc"
@@ -9718,6 +9766,7 @@ dependencies = [
  "gtk",
  "instant",
  "lazy_static",
+ "libayatana-appindicator",
  "libc",
  "log",
  "ndk",
@@ -9840,6 +9889,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e4c2e553c2ceaf30f1feabc76abebbd5f9eddb99b643de0078e38037e43e3c2f"
 dependencies = [
  "base64",
+ "brotli",
  "ico",
  "png 0.17.5",
  "proc-macro2",
@@ -9909,6 +9959,7 @@ version = "1.0.0-rc.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a485f9fc0f381d3da0818c4260b3a04be86dc1844a12edaff68afb07bc55d735"
 dependencies = [
+ "brotli",
  "ctor",
  "glob",
  "heck 0.4.0",
