@@ -1,6 +1,7 @@
 import * as fs from "@tauri-apps/api/fs"
 import { Dialog } from "quasar"
 import { appConfig } from "./appConfig"
+import { errorLogger } from "./util"
 
 
 export const appData = {
@@ -11,10 +12,14 @@ export const appData = {
   async clearDataDir(): Promise<void> {
     const dataDir = await this.getDataDirPath()
     if (dataDir === "") return
-    await fs.removeDir(dataDir, { recursive: true }).catch(console.error)
+    await fs.removeDir(dataDir, { recursive: true }).catch((error) => {
+      errorLogger(error)
+    })
   },
   async createCustomDataDir(location: string): Promise<void> {
-    await fs.createDir(location).catch(console.error)
+    await fs.createDir(location).catch((error) => {
+      errorLogger(error)
+    })
   },
 }
 

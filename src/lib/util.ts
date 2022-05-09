@@ -7,6 +7,7 @@ import { Component } from "vue"
 import * as process from "process"
 import { appData } from "./appData"
 import { appConfig } from "./appConfig"
+import { invoke } from "@tauri-apps/api/tauri"
 
 export const appName:string = process.env.APP_NAME || "subspace-desktop"
 
@@ -25,6 +26,24 @@ export async function showModal(
       ...props
     }
   })
+}
+
+export async function errorLogger(error: unknown): Promise<void> {
+  if (error instanceof Error) {
+    const message = error.message
+    await invoke("frontend_error_logger", { message })
+  } else if (typeof error === "string") {
+    await invoke("frontend_error_logger", { message: error })
+  }
+}
+
+export async function infoLogger(info: unknown): Promise<void> {
+  if (info instanceof Error) {
+    const message = info.message
+    await invoke("frontend_info_logger", { message })
+  } else if (typeof info === "string") {
+    await invoke("frontend_info_logger", { message: info })
+  }
 }
 
 export function toFixed(num: number, precision: number): number {

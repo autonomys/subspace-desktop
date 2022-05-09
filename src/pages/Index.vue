@@ -39,7 +39,7 @@ export default defineComponent({
       this.checkDev()
       const config = await appConfig.read()
       if (appConfig.validate(config)) {
-        console.log("INDEX - NOT First Time RUN.")
+        util.infoLogger("INDEX | NOT First Time RUN.")
         this.dashboard()
         return
       }
@@ -61,7 +61,7 @@ export default defineComponent({
       this.$router.replace({ name: "dashboard" })
     },
     async firstLoad() {
-      console.log("INDEX - First Time RUN.")
+      util.infoLogger("INDEX | First Time RUN.")
       this.loadNetworkData()
       const config = await appConfig.read()
       if (config.launchOnBoot) {
@@ -84,7 +84,7 @@ export default defineComponent({
         }})
       })
       raceResult.catch(_ => {
-        console.error("The server seems to be too congested! Please try again later...")
+        util.errorLogger("The server seems to be too congested! Please try again later...")
       })
     },
     async viewDisclaimer(destination: string) {

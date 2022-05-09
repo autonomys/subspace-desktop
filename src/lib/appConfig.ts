@@ -1,5 +1,5 @@
 import { Dialog, DialogChainObject } from "quasar"
-import { appName } from "./util"
+import { appName, errorLogger } from "./util"
 import * as path from "@tauri-apps/api/path"
 import * as fs from "@tauri-apps/api/fs"
 
@@ -45,7 +45,7 @@ export const appConfig = {
       // means there were no config file
       await fs.createDir(await this.configDir()).catch((error) => {
         if (!error.includes("exists")) {
-          console.error(error)
+          errorLogger(error)
         }
       });
       await this.write(emptyConfig)
@@ -63,7 +63,9 @@ export const appConfig = {
     return false
   },
   async remove(): Promise<void> {
-    await fs.removeFile(await this.configFullPath()).catch(console.error)
+    await fs.removeFile(await this.configFullPath()).catch((error) => {
+      errorLogger(error)
+    })
   },
 
   async read(): Promise<Config> {
@@ -74,14 +76,16 @@ export const appConfig = {
   async write(config: Config): Promise<void> {
     await fs.createDir(await this.configDir()).catch((error) => {
       if (!error.includes("exists")) {
-        console.error(error)
+        errorLogger(error)
       }
     });
     await fs.writeFile({
         path: await this.configFullPath(),
         contents: JSON.stringify(config, null, 2)
       })
-      .catch(console.error)
+      .catch((error) => {
+        errorLogger(error)
+      })
   },
   async update(
     {

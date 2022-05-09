@@ -56,7 +56,7 @@ export class Client {
 
         const rewardAddress: string = (await appConfig.read()).rewardAddress
         if (rewardAddress === "") {
-          console.error("Reward address should not have been null/undefined...")
+          util.errorLogger("Reward address should not have been empty...")
           return
         }
 
@@ -121,7 +121,7 @@ export class Client {
         )
       },
       stop: (): void => {
-        console.log("block subscription stop triggered")
+        util.infoLogger("block subscription stop triggered")
         this.unsubscribe()
         this.localApi.disconnect()
         this.publicApi.disconnect()
@@ -133,7 +133,7 @@ export class Client {
             this.do.blockSubscription.stopOnReload
           )
         } catch (error) {
-          console.error(error)
+          util.errorLogger(error)
         }
       }
     }
@@ -228,9 +228,8 @@ export class Client {
 
   public createRewardAddress(): string {
     const mnemonic = mnemonicGenerate()
-    const keyring = new Keyring()
+    const keyring = new Keyring({ type: 'sr25519', ss58Format: 2254}) // 2254 is the prefix for subspace-testnet
     const pair = keyring.createFromUri(mnemonic)
-    keyring.setSS58Format(2254); // 2254 is the prefix for subspace-testnet
     this.mnemonic = mnemonic
     return pair.address
   }
@@ -240,7 +239,7 @@ export class Client {
     const plotSize = Math.round(plotSizeGB * 1048576)
     const rewardAddress: string = (await appConfig.read()).rewardAddress
     if (!rewardAddress) {
-      console.error("Tried to send empty reward address to backend!")
+      util.errorLogger("Tried to send empty reward address to backend!")
     }
     return await tauri.invoke("farming", { path, rewardAddress, plotSize })
   }
