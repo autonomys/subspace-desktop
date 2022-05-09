@@ -159,7 +159,8 @@ export default defineComponent({
       driveStats: <native.DriveStats>{ freeBytes: 0, totalBytes: 0 },
       lang,
       chartOptions,
-      client: global.client
+      client: global.client,
+      rewardAddress: ""
     }
   },
   computed: {
@@ -252,19 +253,22 @@ export default defineComponent({
       const dirExists = await native.dirExists(this.plotDirectory)
 
       if (dirExists) {
+        console.log("SETUP PLOT | found the old plotting directory")
         const files = await tauri.fs
           .readDir(this.plotDirectory)
           .catch(console.error)
 
         if (files) {
           console.log("FILES ARE: :", files)
-          if (files.length === 0 || !files.some(item => item.name === "chains" )) {
+          if (files.length === 0 ||  files.length === 1 && files.some(item => item.name === "subspace-desktop.cfg")){
             appDataDialog.existingDirectoryConfirm(
               this.plotDirectory,
               this.prepareForPlotting
             )
-          } else if (files.length > 0) {
-            appDataDialog.emptyDirectoryInfo(this.plotDirectory)
+          // we are in FIRST TIME START, meaning there is are no existing plot
+          // if there are some files in this folder, it's weird
+          } else {
+            appDataDialog.notEmptyDirectoryInfo(this.plotDirectory)
           }
         }
       } else if (!dirExists) {
@@ -278,6 +282,7 @@ export default defineComponent({
       if (this.plotDirectory.charAt(this.plotDirectory.length - 1) == "/")
         this.plotDirectory.slice(-1)
       await appData.createCustomDataDir(this.plotDirectory)
+      console.log("SETUP PLOT | custom directory created")
       await this.checkIdentity()
     },
     async updateDriveStats() {
@@ -294,17 +299,22 @@ export default defineComponent({
     async checkIdentity() {
       const config = await appConfig.read()
       if (config.rewardAddress === "") {
-        await this.client.createRewardAddress()
+        console.log("SETUP PLOT | reward address was empty, creating a new one")
+        this.rewardAddress = await this.client.createRewardAddress()
         await this.viewMnemonic()
       }
       else {
+        console.log("SETUP PLOT | reward address was initialized before, proceeding to plotting")
         this.$router.replace({ name: "plottingProgress" })
       }
     },
     async viewMnemonic() {
       const modal = await util.showModal(mnemonicModal)
       modal?.onDismiss(() => {
-        appConfig.update({ plot: { location: this.plotDirectory, sizeGB: this.allocatedGB }})
+        appConfig.update({
+          plot: { location: this.plotDirectory, sizeGB: this.allocatedGB },
+          rewardAddress: this.rewardAddress
+        })
         this.$router.replace({ name: "plottingProgress" })
       })
     }

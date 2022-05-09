@@ -80,14 +80,14 @@ export default defineComponent({
     const raceResult = util.promiseTimeout(7000, this.client.connectPublicApi())
     raceResult.then(async() => {
       if (this.client.isFirstLoad() === false) {
-        console.log("will start node now ***********")
+        console.log("DASHBOARD | starting node")
         await this.client.waitNodeStartApiConnect(config.plot.location)
-        console.log("will start farmer now ***********")
+        console.log("DASHBOARD | starting farmer")
         const farmerStarted = await this.client.startFarming(config.plot.location, config.plot.sizeGB)
         if (!farmerStarted) {
           console.error("DASHBOARD | Farmer start error!")
         }
-        console.log("will start block subscription now ***********")
+        console.log("DASHBOARD | starting block subscription")
         await this.client.startBlockSubscription()
       }
 

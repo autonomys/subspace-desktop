@@ -19,7 +19,7 @@ export const appData = {
 }
 
 export const appDataDialog = {
-  emptyDirectoryInfo(plotDirectory: string): void {
+  notEmptyDirectoryInfo(plotDirectory: string): void {
     Dialog.create({
       title: `Selected directory is not empty!`,
       message: `
