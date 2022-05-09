@@ -44,6 +44,10 @@ winreg = "0.10.1"
 features = ["api-all", "gtk-tray", "system-tray"]
 version = "1.0.0-rc.8"
 
+[dependencies.tauri-plugin-log]
+git = "https://github.com/tauri-apps/tauri-plugin-log"
+rev = "5184036cbff721f813d1fed8af373fbe8f412140"
+
 [features]
 default = [ "custom-protocol" ]
 custom-protocol = [ "tauri/custom-protocol" ]

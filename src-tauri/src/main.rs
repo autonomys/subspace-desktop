@@ -11,7 +11,7 @@ mod menu;
 mod node;
 
 use anyhow::Result;
-use log::debug;
+use log::{debug, LevelFilter};
 use serde::Serialize;
 use std::path::PathBuf;
 use std::sync::atomic::Ordering;
@@ -21,6 +21,7 @@ use tauri::{
     api::{self},
     Env, Manager, RunEvent, WindowEvent,
 };
+use tauri_plugin_log::LoggerBuilder;
 
 const BEST_BLOCK_NUMBER_CHECK_INTERVAL: Duration = Duration::from_secs(5);
 
@@ -84,6 +85,7 @@ fn get_this_binary() -> PathBuf {
 #[tokio::main]
 async fn main() -> Result<()> {
     let app = tauri::Builder::default()
+        .plugin(LoggerBuilder::new().level(LevelFilter::Info).build())
         .menu(menu::get_menu())
         .system_tray(menu::get_tray_menu())
         .on_system_tray_event(|app, event| {
