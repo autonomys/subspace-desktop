@@ -1,9 +1,9 @@
 {
   "index": {
-    "pageTitle": "Welcome",
-    "quickStart": "Quick Start",
-    "subtitle": "Subspace Farmer is the easiest way to participate as a farmer in the Subspace Network.",
-    "advanced": "Advanced"
+    "pageTitle": "Let's setup your subspace farm!",
+    "quickStart": "This is my first time farming",
+    "subtitle": "Pledge free space on your computer and earn rewards for helping to secure the Subspace Network",
+    "advanced": "I've run a farmer before and still have my keys"
   },
   "saveKeys": {
     "pageTitle": "Backup Private Key",
