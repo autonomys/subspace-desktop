@@ -160,7 +160,8 @@ export default defineComponent({
       driveStats: <native.DriveStats>{ freeBytes: 0, totalBytes: 0 },
       lang,
       chartOptions,
-      client: global.client
+      client: global.client,
+      rewardAddress: ""
     }
   },
   computed: {
@@ -301,7 +302,7 @@ export default defineComponent({
       const config = appConfig.getAppConfig()
       if (config) {
         if (config.rewardAddress === "") {
-          await this.client.createRewardAddress()
+          this.rewardAddress = this.client.createRewardAddress()
           await this.viewMnemonic()
         } else {
           this.$router.replace({ name: "plottingProgress" })
@@ -311,7 +312,7 @@ export default defineComponent({
     async viewMnemonic() {
       const modal = await util.showModal(mnemonicModal)
       modal?.onDismiss(() => {
-        appConfig.updateAppConfig(null, null, null, null, true)
+        appConfig.updateAppConfig(null, null, null, this.rewardAddress, true)
         this.$router.replace({ name: "plottingProgress" })
       })
     }

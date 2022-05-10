@@ -232,13 +232,12 @@ export class Client {
     this.data.farming.farmed = this.farmed
   }
 
-  public async createRewardAddress(): Promise<void> {
+  public createRewardAddress(): string {
     const mnemonic = mnemonicGenerate()
-    const keyring = new Keyring()
+    const keyring = new Keyring({ type: 'sr25519', ss58Format: 2254}) // 2254 is the prefix for subspace-testnet
     const pair = keyring.createFromUri(mnemonic)
-    keyring.setSS58Format(2254); // 2254 is the prefix for subspace-testnet
-    appConfig.updateAppConfig(null, null, null, pair.address, null)
     this.mnemonic = mnemonic
+    return pair.address
   }
 
   /* FARMER INTEGRATION */
