@@ -7,6 +7,13 @@ on:
     paths-ignore:
       - "**.md"
 
+env:
+  # Not needed in CI, should make things a bit faster
+  CARGO_INCREMENTAL: 0
+  CARGO_TERM_COLOR: always
+  # Build smaller artifacts to avoid running out of space in CI
+  RUSTFLAGS: -C strip=debuginfo -C opt-level=s
+
 jobs:
   test-tauri:
     strategy:

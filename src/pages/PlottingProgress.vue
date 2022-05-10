@@ -188,9 +188,12 @@ export default defineComponent({
     }
   },
   async mounted() {
+    util.infoLogger("PLOTTING PROGRESS | getting plot config")
     await this.getPlotConfig()
+    util.infoLogger("PLOTTING PROGRESS | starting node")
     await this.waitNode()
     this.startTimers()
+    util.infoLogger("PLOTTING PROGRESS | starting plotting")
     this.startPlotting()
   },
   unmounted() {
@@ -205,7 +208,7 @@ export default defineComponent({
         this.plottingData.allocatedGB = config.plot.sizeGB
         this.plotDirectory = config.plot.location
       } else {
-        console.error("PLOT PROGRESS | ERROR | NO CONFIG LOADED")
+        util.errorLogger("PLOTTING PROGRESS | ERROR | NO CONFIG LOADED")
       }
     },
     async waitNode() {
@@ -219,10 +222,12 @@ export default defineComponent({
       const config = appConfig.getAppConfig()
       if (config) {
         await this.client.startBlockSubscription()
+        util.infoLogger("PLOTTING PROGRESS | block subscription started")
         const farmerStarted = await this.client.startFarming(this.plotDirectory, config.plot.sizeGB)
         if (!farmerStarted) {
-          console.error("PLOTTING PROGRESS | Farmer start error!")
+          util.errorLogger("PLOTTING PROGRESS | Farmer start error!")
         }
+        util.infoLogger("PLOTTING PROGRESS | farmer started")
         const networkSegmentCount = config.segmentCache.networkSegmentCount
         this.networkSegmentCount = networkSegmentCount
         this.plottingData.allocatedGB = config.plot.sizeGB

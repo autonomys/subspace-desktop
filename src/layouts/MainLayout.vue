@@ -23,24 +23,6 @@ q-layout(view="hHh lpr fFf")
           .col-auto.q-mr-md.relative-position(
             v-if="$route.name == 'dashboard'"
           )
-            q-icon(
-              color="green-5"
-              name="trip_origin"
-              size="28px"
-              style="bottom: 0px; right: 5px"
-              v-if="global.status.state == 'live'"
-            )
-            q-icon(
-              color="yellow-8"
-              name="trip_origin"
-              size="28px"
-              style="bottom: 0px; right: 5px"
-              v-if="global.status.state == 'loading'"
-            )
-            q-tooltip
-              .col
-                p Farmer Status:
-                p <b>{{ global.status.message }}</b>
       div
         q-btn(flat icon="settings" round)
           MainMenu

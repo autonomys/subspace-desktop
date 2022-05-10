@@ -20,7 +20,7 @@
     "@polkadot/api": "^7.2.1",
     "@polkadot/util-crypto": "^9.0.1",
     "@quasar/extras": "^1.0.0",
-    "@tauri-apps/api": "^1.0.0-rc.2",
+    "@tauri-apps/api": "^1.0.0-rc.4",
     "@tsmx/human-readable": "^1.0.6",
     "@vueuse/core": "^6.0.0",
     "apexcharts": "^3.27.3",
@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "@quasar/app": "^3.0.0",
-    "@tauri-apps/cli": "^1.0.0-rc.7",
+    "@tauri-apps/cli": "^1.0.0-rc.9",
     "@types/": "tsmx/human-readable",
     "@types/bcryptjs": "^2.4.2",
     "@types/ms": "^0.7.31",

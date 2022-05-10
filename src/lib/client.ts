@@ -59,7 +59,7 @@ export class Client {
           farmerAddress = config.rewardAddress
         }
         if (farmerAddress === "") {
-          console.error("Reward address should not have been empty...")
+          util.errorLogger("Reward address should not have been empty...")
           return
         }
         this.unsubscribe = await this.localApi.rpc.chain.subscribeNewHeads(
@@ -127,7 +127,7 @@ export class Client {
         )
       },
       stop: (): void => {
-        console.log("block subscription stop triggered")
+        util.infoLogger("block subscription stop triggered")
         this.unsubscribe()
         this.localApi.disconnect()
         this.publicApi.disconnect()
@@ -139,7 +139,7 @@ export class Client {
             this.do.blockSubscription.stopOnReload
           )
         } catch (error) {
-          console.error(error)
+          util.errorLogger(error)
         }
       }
     }
@@ -248,7 +248,7 @@ export class Client {
     if (config && config.rewardAddress !== "") {
       rewardAddress = config.rewardAddress
     } else {
-      console.error("Tried to send empty reward address to backend!")
+      util.errorLogger("Tried to send empty reward address to backend!")
     }
     return await tauri.invoke("farming", { path, rewardAddress, plotSize })
   }

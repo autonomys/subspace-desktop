@@ -256,9 +256,12 @@ export default defineComponent({
       const dirExists = await native.dirExists(this.plotDirectory)
 
       if (dirExists) {
+        util.infoLogger("SETUP PLOT | found the old plotting directory")
         const files = await tauri.fs
           .readDir(this.plotDirectory)
-          .catch(console.error)
+          .catch((error) => {
+            util.errorLogger(error)
+          })
 
         if (files) {
           console.log("FILES ARE: :", files)
@@ -283,6 +286,7 @@ export default defineComponent({
         this.plotDirectory.slice(-1)
 
       await appData.createCustomDataDir(this.plotDirectory)
+      util.infoLogger("SETUP PLOT | custom directory created")
       appConfig.updateAppConfig({ location: this.plotDirectory, sizeGB: this.allocatedGB }, null, null, null, null)
 
       await this.checkIdentity()
@@ -295,16 +299,20 @@ export default defineComponent({
     async selectDir() {
       const result = await native
         .selectDir(this.plotDirectory)
-        .catch(console.error)
+        .catch((error) => {
+          util.errorLogger(error)
+        })
       if (result) this.plotDirectory = result
     },
     async checkIdentity() {
       const config = appConfig.getAppConfig()
       if (config) {
         if (config.rewardAddress === "") {
+          util.infoLogger("SETUP PLOT | reward address was empty, creating a new one")
           this.rewardAddress = this.client.createRewardAddress()
           await this.viewMnemonic()
         } else {
+          util.infoLogger("SETUP PLOT | reward address was initialized before, proceeding to plotting")
           this.$router.replace({ name: "plottingProgress" })
         }
       }

@@ -9,6 +9,7 @@ import * as tProcess from "@tauri-apps/api/process"
 import { invoke } from '@tauri-apps/api/tauri'
 import { ChildReturnData } from "./types";
 import * as applescript from "./applescript"
+import { errorLogger } from "./util"
 
 const tauri = { app, dialog, fs, path, invoke, shell, os, window, process: tProcess }
 export interface DriveStats {
@@ -25,7 +26,7 @@ export async function execString(executable: string, args: string[] | string): P
   command.on('close', data => {
     console.log(`command finished with code ${data.code} and signal ${data.signal}`)
   })
-  command.on('error', error => console.error(`command error: "${error}"`))
+  command.on('error', error => errorLogger(`command error: "${error}"`))
   command.stdout.on('data', line => console.log(`command stdout: "${line}"`))
   command.stderr.on('data', line => console.log(`command stderr: "${line}"`))
 

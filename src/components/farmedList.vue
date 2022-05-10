@@ -101,7 +101,7 @@ export default defineComponent({
       if (config && config.rewardAddress !== "") {
         addr = config.rewardAddress
       } else {
-        console.error("FARMED LIST | could not retrieve reward address from config")
+        util.errorLogger("FARMED LIST | could not retrieve reward address from config")
         addr = "???"
       }
       return addr

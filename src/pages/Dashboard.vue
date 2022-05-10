@@ -81,11 +81,14 @@ export default defineComponent({
       const raceResult = util.promiseTimeout(7000, this.client.connectPublicApi())
       raceResult.then(async() => {
         if (this.client.isFirstLoad() === false) {
+          util.infoLogger("DASHBOARD | starting node")
           await this.client.waitNodeStartApiConnect(config.plot.location)
+          util.infoLogger("DASHBOARD | starting farmer")
           const farmerStarted = await this.client.startFarming(config.plot.location, config.plot.sizeGB)
           if (!farmerStarted) {
-            console.error("DASHBOARD | Farmer start error!")
+            util.errorLogger("DASHBOARD | Farmer start error!")
           }
+          util.infoLogger("DASHBOARD | starting block subscription")
           await this.client.startBlockSubscription()
         }
 
@@ -104,10 +107,10 @@ export default defineComponent({
         await this.client.disconnectPublicApi()
       })
       raceResult.catch(_ => {
-        console.error("The server seems to be too congested! Please try again later...")
+        util.errorLogger("The server seems to be too congested! Please try again later...")
       })
     } else {
-      console.error("DASH MOUNTED | ERROR | NO CONFIG LOADED")
+      util.errorLogger("DASH MOUNTED | ERROR | NO CONFIG LOADED")
     }
   },
   unmounted() {

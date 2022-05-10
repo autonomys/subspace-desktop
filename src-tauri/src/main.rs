@@ -10,7 +10,7 @@ mod menu;
 mod node;
 
 use anyhow::Result;
-use log::{debug, error, info};
+use log::{debug, error, info, LevelFilter};
 use serde::Serialize;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -24,8 +24,9 @@ use subspace_solving::SubspaceCodec;
 use tauri::SystemTrayEvent;
 use tauri::{
     api::{self},
-    Env, Manager, RunEvent,
+    Env, Manager, RunEvent, WindowEvent,
 };
+use tauri_plugin_log::LoggerBuilder;
 use tokio::runtime::Handle;
 
 static PLOTTED_PIECES: AtomicUsize = AtomicUsize::new(0);
@@ -35,6 +36,16 @@ const BEST_BLOCK_NUMBER_CHECK_INTERVAL: Duration = Duration::from_secs(5);
 struct DiskStats {
     free_bytes: u64,
     total_bytes: u64,
+}
+
+#[tauri::command]
+fn frontend_error_logger(message: &str) {
+    error!("Frontend error: {message}");
+}
+
+#[tauri::command]
+fn frontend_info_logger(message: &str) {
+    info!("Frontend info: {message}");
 }
 
 #[tauri::command]
@@ -83,6 +94,7 @@ fn get_this_binary() -> PathBuf {
 #[tokio::main]
 async fn main() -> Result<()> {
     let app = tauri::Builder::default()
+        .plugin(LoggerBuilder::new().level(LevelFilter::Info).build())
         .menu(menu::get_menu())
         .system_tray(menu::get_tray_menu())
         .on_system_tray_event(|app, event| {
@@ -118,7 +130,9 @@ async fn main() -> Result<()> {
                 get_this_binary,
                 farming,
                 plot_progress_tracker,
-                start_node
+                start_node,
+                frontend_error_logger,
+                frontend_info_logger
             ],
             #[cfg(target_os = "windows")]
             tauri::generate_handler![
@@ -129,14 +143,20 @@ async fn main() -> Result<()> {
                 get_disk_stats,
                 farming,
                 plot_progress_tracker,
-                start_node
+                start_node,
+                frontend_error_logger,
+                frontend_info_logger
             ],
         )
         .build(tauri::generate_context!())
         .expect("error while running tauri application");
 
     app.run(|app_handle, e| match e {
-        RunEvent::CloseRequested { label, api, .. } => {
+        RunEvent::WindowEvent {
+            label,
+            event: WindowEvent::CloseRequested { api, .. },
+            ..
+        } => {
             let app_handle = app_handle.clone();
             let window = app_handle.get_window(&label).unwrap();
             // use the exposed close api, and prevent the event loop to close

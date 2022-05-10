@@ -1,6 +1,7 @@
 
 import * as shell from "@tauri-apps/api/shell"
 import { ChildReturnData } from "./types";
+import { errorLogger } from "./util";
 
 export async function execString(command: string): Promise<ChildReturnData> {
   const args = ['-e', command]
@@ -13,7 +14,7 @@ export async function execString(command: string): Promise<ChildReturnData> {
       console.log(`command finished with code ${data.code} and signal ${data.signal}`)
       res(returnData)
     })
-    child.on('error', error => console.error(`command error: "${error}"`))
+    child.on('error', error => errorLogger(`command error: "${error}"`))
     child.stdout.on('data', (line: string) => {
       returnData.stdout.push(line)
       console.log(`command stdout: "${line}"`)

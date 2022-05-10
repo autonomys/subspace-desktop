@@ -13,7 +13,6 @@ use sc_service::{
     BasePath, Configuration, DatabaseSource, KeepBlocks, PruningMode, Role, RpcMethods,
     TracingReceiver,
 };
-use sc_tracing::logging::LoggerBuilder;
 use sp_core::crypto::Ss58AddressFormat;
 use std::env;
 use std::path::{Path, PathBuf};
@@ -67,10 +66,6 @@ pub(crate) async fn create_full_client<CS: ChainSpec + 'static>(
             "https://discord.gg/vhKF9w3x",
             env!("SUBSTRATE_CLI_IMPL_VERSION"),
         );
-
-        LoggerBuilder::new("info")
-            .init()
-            .expect("Logger initialization must not fail");
 
         if let Some(new_limit) = fdlimit::raise_fd_limit() {
             if new_limit < RECOMMENDED_OPEN_FILE_DESCRIPTOR_LIMIT {

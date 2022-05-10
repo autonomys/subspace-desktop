@@ -50,7 +50,7 @@ export default defineComponent({
         if (
           plottingStarted
         ) {
-          console.log("INDEX - NOT First Time RUN.")
+          util.infoLogger("INDEX | NOT First Time RUN.")
           this.dashboard()
           return
         }
@@ -65,7 +65,7 @@ export default defineComponent({
       this.$router.replace({ name: "dashboard" })
     },
     firstLoad() {
-      console.log("INDEX - First Time RUN.")
+      util.infoLogger("INDEX | First Time RUN.")
       this.loadNetworkData()
       const config = appConfig.getAppConfig()
       if (config && config.launchOnBoot == true) {
@@ -88,7 +88,7 @@ export default defineComponent({
         }, null, null, null)
       })
       raceResult.catch(_ => {
-        console.error("The server seems to be too congested! Please try again later...")
+        util.errorLogger("The server seems to be too congested! Please try again later...")
       })
     },
     async viewDisclaimer(destination: string) {
