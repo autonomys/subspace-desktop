@@ -1,22 +1,28 @@
 <template lang="pug">
 q-page(padding)
-  .row.justify-center.q-mt-xl
-    .text-h4 {{ lang.pageTitle }}
-  .row.justify-center.q-mt-lg
-    p {{ lang.subtitle }}
+  .q-ma-xl
+    .row.no-wrap.items-center.q-ma-xl.q-pt-lg
+      .text-h1.q-pr-lg 👩‍🌾
+      .column
+        .text-h5.q-pb-md {{ lang.pageTitle }}
+        p {{ lang.subtitle }}
   .row.justify-center.q-mt-xl
     q-btn(
       :label="lang.quickStart"
       @click="viewDisclaimer('setupPlot')"
       outline
-      size="xl"
+      size="md"
+      no-caps
     )
-  .row.justify-center.q-mt-sm
+  .row.justify-center.q-pt-md.q-pb-sm
+    p — or —
+  .row.justify-center
     q-btn(
       :label="lang.advanced"
       @click="viewDisclaimer('importKey')"
       color="grey"
       flat
+      no-caps
     )
 </template>
 
