@@ -6,6 +6,7 @@ import * as fs from "@tauri-apps/api/fs"
 import * as native from './native'
 import * as path from "@tauri-apps/api/path"
 import { appConfig } from "src/lib/appConfig"
+import { errorLogger, infoLogger } from "./util"
 
 type osAL = typeof macAL | typeof winAL | typeof linAL | typeof nullAL
 
@@ -38,24 +39,30 @@ Comment=${appName} startup script
 Exec=${appPath}${hiddenArg}
 Icon=${appName}
   `
-    await fs.writeFile({ contents, path: autostartAppFile }).catch(console.error)
+    await fs.writeFile({ contents, path: autostartAppFile }).catch((error) => {
+      errorLogger(error)
+    })
     response.stdout.push("success")
     return response
   },
   async disable(appName: string): Promise<ChildReturnData> {
     const autostartAppFile = await this.getAutostartFilePath(appName)
     const response: ChildReturnData = { stderr: [], stdout: [] }
-    await fs.removeFile(autostartAppFile).catch(console.error)
+    await fs.removeFile(autostartAppFile).catch((error) => {
+      errorLogger(error)
+    })
     response.stdout.push("success")
     return response
   },
   async isEnabled(appName: string): Promise<boolean> {
     try {
       const autostartAppFile = await this.getAutostartFilePath(appName)
-      await fs.readTextFile(autostartAppFile).catch(console.error)
+      await fs.readTextFile(autostartAppFile).catch((error) => {
+        errorLogger(error)
+      })
       return true
     } catch (error) {
-      console.error(error)
+      errorLogger(error)
       return false
     }
   },
@@ -66,9 +73,13 @@ Icon=${appName}
   },
   async createAutostartDir(appName: string): Promise<string> {
     const autostartDirectory = (await path.configDir()) + "autostart/"
-    const existDir = await fs.readDir(autostartDirectory).catch(console.error)
+    const existDir = await fs.readDir(autostartDirectory).catch((error) => {
+      errorLogger(error)
+    })
     if (!existDir) {
-      await fs.createDir(autostartDirectory).catch(console.error)
+      await fs.createDir(autostartDirectory).catch((error) => {
+      errorLogger(error)
+    })
     }
     return autostartDirectory + appName + ".desktop"
   }
@@ -82,7 +93,6 @@ const macAL = {
     const path = appPath.split("/Contents")[0]
     const isHiddenValue = minimized ? 'true' : 'false';
     const properties = `{path:"${path}", hidden:${isHiddenValue}, name:"${appName}"}`;
-    console.log('properties', properties);
     return native.execApplescriptCommand(`make login item at end with properties ${properties}`);
   },
   async disable(appName: string): Promise<ChildReturnData> {
@@ -148,7 +158,7 @@ export class AutoLauncher {
     const child = await this.autoLauncher.enable({ appName: this.appName, appPath: this.appPath, minimized: true })
     this.enabled = await this.isEnabled()
     if (!this.enabled) {
-      console.error("ENABLE DID NOT WORK")
+      errorLogger("ENABLE DID NOT WORK")
     } else {
       await appConfig.update({ launchOnBoot: true })
     }
@@ -170,7 +180,7 @@ export class AutoLauncher {
   async init(): Promise<void> {
     this.appName = (await app.getName()).toString()
     const osType = await os.type()
-    console.log("OS TYPE: " + osType)
+    infoLogger("OS TYPE: " + osType)
     this.appPath = await invoke('get_this_binary') as string
     console.log('get_this_binary', this.appPath);
     if (osType == 'Darwin') {

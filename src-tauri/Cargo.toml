@@ -24,7 +24,6 @@ sc-chain-spec = { git = "https://github.com/paritytech/substrate", rev = "c4f3d0
 sc-executor = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "c4f3d028621edb293d2c423516221aa396f76a2d", features = ["wasmtime"] }
 sc-network = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "c4f3d028621edb293d2c423516221aa396f76a2d" }
 sc-service = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "c4f3d028621edb293d2c423516221aa396f76a2d", features = ["wasmtime"] }
-sc-tracing = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate", rev = "c4f3d028621edb293d2c423516221aa396f76a2d" }
 serde_json = "1.0.79"
 serde = { version = "1.0.136", features = [ "derive" ] }
 sp-core = { version = "6.0.0", git = "https://github.com/paritytech/substrate", rev = "c4f3d028621edb293d2c423516221aa396f76a2d" }
@@ -43,6 +42,10 @@ winreg = "0.10.1"
 [dependencies.tauri]
 features = ["api-all", "gtk-tray", "system-tray"]
 version = "1.0.0-rc.8"
+
+[dependencies.tauri-plugin-log]
+git = "https://github.com/tauri-apps/tauri-plugin-log"
+rev = "5184036cbff721f813d1fed8af373fbe8f412140"
 
 [features]
 default = [ "custom-protocol" ]

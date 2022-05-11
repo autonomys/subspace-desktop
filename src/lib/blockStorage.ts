@@ -1,5 +1,6 @@
 import { LocalStorage } from "quasar"
 import { FarmedBlock } from "src/lib/types"
+import { errorLogger } from "./util"
 
 export function getStoredBlocks(): FarmedBlock[] {
   const mined: FarmedBlock[] = []
@@ -11,7 +12,7 @@ export function getStoredBlocks(): FarmedBlock[] {
       mined.push(block as FarmedBlock)
     }
   } catch (error) {
-    console.error(error, "error reading stored blocks")
+    errorLogger(`Error reading stored blocks: ${error}`)
   }
   return mined
 }

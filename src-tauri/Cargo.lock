@@ -702,6 +702,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e3b5ca7a04898ad4bcd41c90c5285445ff5b791899bb1b0abdd2a2aa791211d7"
 
 [[package]]
+name = "byte-unit"
+version = "4.0.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "95ebf10dda65f19ff0f42ea15572a359ed60d7fc74fdc984d90310937be0014b"
+dependencies = [
+ "utf8-width",
+]
+
+[[package]]
 name = "byteorder"
 version = "0.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1997,6 +2006,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2c4c9e43643f5a3be4ca5b67d26b98031ff9db6806c3440ae32e02e3ceac3f1b"
 dependencies = [
  "libc",
+]
+
+[[package]]
+name = "fern"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3bdd7b0849075e79ee9a1836df22c717d1eba30451796fdc631b04565dd11e2a"
+dependencies = [
+ "log",
 ]
 
 [[package]]
@@ -9369,7 +9387,6 @@ dependencies = [
  "sc-executor",
  "sc-network",
  "sc-service",
- "sc-tracing",
  "serde",
  "serde_json",
  "sp-core",
@@ -9383,6 +9400,7 @@ dependencies = [
  "substrate-build-script-utils",
  "tauri",
  "tauri-build",
+ "tauri-plugin-log",
  "tokio",
  "winreg 0.10.1",
 ]
@@ -9927,6 +9945,21 @@ dependencies = [
  "syn",
  "tauri-codegen",
  "tauri-utils",
+]
+
+[[package]]
+name = "tauri-plugin-log"
+version = "0.1.0"
+source = "git+https://github.com/tauri-apps/tauri-plugin-log?rev=5184036cbff721f813d1fed8af373fbe8f412140#5184036cbff721f813d1fed8af373fbe8f412140"
+dependencies = [
+ "byte-unit",
+ "chrono",
+ "fern",
+ "log",
+ "serde",
+ "serde_json",
+ "serde_repr",
+ "tauri",
 ]
 
 [[package]]
@@ -10626,6 +10659,12 @@ name = "utf-8"
 version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "09cc8ee72d2a9becf2f2febe0205bbed8fc6615b7cb429ad062dc7b7ddd036a9"
+
+[[package]]
+name = "utf8-width"
+version = "0.1.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5190c9442dcdaf0ddd50f37420417d219ae5261bbf5db120d0f9bab996c9cba1"
 
 [[package]]
 name = "uuid"

@@ -97,7 +97,7 @@ export default defineComponent({
     async displayRewardAddress() {
       const rewardAddress = (await appConfig.read()).rewardAddress
       if (rewardAddress === "") {
-        console.error("Reward Address was null/undefined!")
+        util.errorLogger("Reward Address was null/undefined!")
         return "???"
       } else {
         return rewardAddress
