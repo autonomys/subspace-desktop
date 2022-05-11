@@ -9387,7 +9387,6 @@ dependencies = [
  "sc-executor",
  "sc-network",
  "sc-service",
- "sc-tracing",
  "serde",
  "serde_json",
  "sp-core",
