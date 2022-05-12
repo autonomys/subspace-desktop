@@ -59,6 +59,7 @@ export default defineComponent({
   mounted() {
     this.nodeNameChanger()
     this.appVersion = (process.env.APP_VERSION as string)
+    util.infoLogger("Version: " + this.appVersion)
 
   },
   methods: {
