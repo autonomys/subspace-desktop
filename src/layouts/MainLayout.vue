@@ -56,6 +56,7 @@ export default defineComponent({
   },
   mounted() {
     this.nodeNameChanger()
+    util.infoLogger("Version: 0.4.9")
   },
   methods: {
     async nodeNameChanger() {
