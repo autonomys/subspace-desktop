@@ -26,13 +26,13 @@ q-page.q-pl-lg.q-pr-lg.q-pt-md
 <script lang="ts">
 import { defineComponent } from "vue"
 import { Notify } from "quasar"
-import { globalState as global } from "src/lib/global"
-import * as util from "src/lib/util"
-import farmedList from "components/farmedList.vue"
-import netCard from "components/netCard.vue"
-import plotCard from "components/plotCard.vue"
-import { emptyClientData, ClientData, FarmedBlock } from "src/lib/types"
-import { appConfig } from "src/lib/appConfig"
+import { globalState as global } from "../lib/global"
+import * as util from "../lib/util"
+import farmedList from "../components/farmedList.vue"
+import netCard from "../components/netCard.vue"
+import plotCard from "../components/plotCard.vue"
+import { emptyClientData, ClientData, FarmedBlock } from "../lib/types"
+import { appConfig } from "../lib/appConfig"
 const lang = global.data.loc.text.dashboard
 
 export default defineComponent({
@@ -68,7 +68,7 @@ export default defineComponent({
   computed: {
     farmedTotalEarned(): number {
       if (!this.client) return 0
-      return this.client.data.farming.farmed.reduce((agg, val) => {
+      return this.client.data.farming.farmed.reduce((agg: any, val: any) => {
         return val.blockReward + val.feeReward + agg
       }, 0)
     }

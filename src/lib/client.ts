@@ -6,7 +6,7 @@ import * as event from "@tauri-apps/api/event"
 import { invoke } from "@tauri-apps/api/tauri"
 import { reactive } from "vue"
 import * as process from "process"
-import * as util from "src/lib/util"
+import * as util from "../lib/util"
 import { appConfig } from "./appConfig"
 import { getStoredBlocks, storeBlocks } from "./blockStorage"
 import {
@@ -14,7 +14,7 @@ import {
   NetStatus,
   FarmedBlock,
   SubPreDigest
-} from "src/lib/types"
+} from "../lib/types"
 import EventEmitter from "events"
 
 export const myEmitter = new EventEmitter();
@@ -26,24 +26,27 @@ const SUNIT = 1000000000000000000n
 const NETWORK_RPC = process.env.PUBLIC_API_WS || "ws://localhost:9944"
 const LOCAL_RPC = process.env.LOCAL_API_WS || "ws://localhost:9944"
 const appsLink = "https://polkadot.js.org/apps/?rpc=" + NETWORK_RPC + "#/explorer/query/"
+
+const publicApi = new ApiPromise({
+  provider: new WsProvider(NETWORK_RPC, false),
+  types: util.apiTypes
+});
+
+const localApi = new ApiPromise({
+  provider: new WsProvider(LOCAL_RPC, false),
+  types: util.apiTypes
+})
+
 export class Client {
   protected firstLoad = false
   protected mnemonic = ""
-  protected publicApi: ApiPromise = new ApiPromise({
-    provider: new WsProvider(NETWORK_RPC, false),
-    types: util.apiTypes
-  })
-  protected localApi: ApiPromise = new ApiPromise({
-    provider: new WsProvider(LOCAL_RPC, false),
-    types: util.apiTypes
-  })
   protected farmed: FarmedBlock[] = []
   protected clearTauriDestroy: event.UnlistenFn = () => {}
   protected unsubscribe: event.UnlistenFn = () => {}
   data = reactive(emptyClientData)
   status = {
     net: async (): Promise<NetStatus> => {
-      const peers = await this.localApi.rpc.system.peers()
+      const peers = await localApi.rpc.system.peers()
       return { peers }
     }
   }
@@ -60,11 +63,11 @@ export class Client {
           return
         }
 
-        this.unsubscribe = await this.localApi.rpc.chain.subscribeNewHeads(
+        this.unsubscribe = await localApi.rpc.chain.subscribeNewHeads(
           async ({ hash, number }) => {
             const blockNum = number.toNumber()
-            const signedBlock = await this.localApi.rpc.chain.getBlock(hash)
-            const preRuntime: SubPreDigest = this.localApi.registry.createType(
+            const signedBlock = await localApi.rpc.chain.getBlock(hash)
+            const preRuntime: SubPreDigest = localApi.registry.createType(
               'SubPreDigest',
               signedBlock.block.header.digest.logs.find((digestItem) => digestItem.isPreRuntime)
             ?.asPreRuntime![1]);
@@ -73,11 +76,11 @@ export class Client {
               console.log("Farmed by me:", blockNum)
               let blockReward = 0
               const allRecords: Vec<any> =
-                await this.localApi.query.system.events.at(hash)
+                await localApi.query.system.events.at(hash)
               allRecords.forEach((record) => {
                 const { section, method, data } = record.event
                 if (section === "rewards" && method === "BlockReward") {
-                  const reward: u128 = this.localApi.registry.createType(
+                  const reward: u128 = localApi.registry.createType(
                     "u128",
                     data[1]
                   )
@@ -123,8 +126,8 @@ export class Client {
       stop: (): void => {
         util.infoLogger("block subscription stop triggered")
         this.unsubscribe()
-        this.localApi.disconnect()
-        this.publicApi.disconnect()
+        localApi.disconnect()
+        publicApi.disconnect()
         try {
           this.clearTauriDestroy()
           storeBlocks(this.data.farming.farmed)
@@ -156,22 +159,22 @@ export class Client {
 
   /* Connect to LOCAL node - localhost:9944 */
   public async connectLocalApi(): Promise<void> {
-    if (!this.localApi.isConnected) {
-      await this.localApi.connect()
+    if (!localApi.isConnected) {
+      await localApi.connect()
     }
-    await this.localApi.isReady
+    await localApi.isReady
   }
   /* Connect to PUBLIC-rpc node - Example: farm-rpc.subspace.network */
   public async connectPublicApi(): Promise<void> {
-    if (!this.publicApi.isConnected) {
-      await this.publicApi.connect()
+    if (!publicApi.isConnected) {
+      await publicApi.connect()
     }
-    await this.publicApi.isReady
+    await publicApi.isReady
   }
 
    /* Disconnects from PUBLIC-rpc node - Example: farm-rpc.subspace.network */
   public async disconnectPublicApi(): Promise<void> {
-    await this.publicApi.disconnect()
+    await publicApi.disconnect()
   }
 
   public async getBlocksData(): Promise<[number, number]> {
@@ -185,12 +188,12 @@ export class Client {
   /* BLOCK NUMBERS */
   // Used to check and display LOCAL node status vs latest network block
   public async getLocalLastBlockNumber(): Promise<number> {
-    const signedBlock = await this.localApi.rpc.chain.getBlock()
+    const signedBlock = await localApi.rpc.chain.getBlock()
     return signedBlock.block.header.number.toNumber()
   }
   // Used to check and display LOCAL node status vs latest network block
   public async getNetworkLastBlockNumber(): Promise<number> {
-    const signedBlock = await this.publicApi.rpc.chain.getBlock()
+    const signedBlock = await publicApi.rpc.chain.getBlock()
     return signedBlock.block.header.number.toNumber()
   }
 
@@ -200,7 +203,7 @@ export class Client {
     return plot_progress_tracker <= 1 ? 1 : plot_progress_tracker - 1
   }
   public async getNetworkSegmentCount(): Promise<number> {
-    const recordsRoot = await this.publicApi.query.subspace.counterForRecordsRoot() as u32
+    const recordsRoot = await publicApi.query.subspace.counterForRecordsRoot() as u32
     return recordsRoot.toNumber()
   }
 

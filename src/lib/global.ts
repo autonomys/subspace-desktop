@@ -1,7 +1,7 @@
 import { reactive } from "vue";
 import { getLang, LangType } from "../loc/lang"
-import { Client } from "src/lib/client"
-import { AutoLauncher } from "src/lib/autoLauncher"
+import { Client } from "../lib/client"
+import { AutoLauncher } from "../lib/autoLauncher"
 import { appConfig } from "./appConfig";
 
 const text: LangType = {}

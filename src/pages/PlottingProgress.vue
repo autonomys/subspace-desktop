@@ -120,10 +120,10 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import { globalState as global } from "src/lib/global"
-import * as util from "src/lib/util"
-import introModal from "components/introModal.vue"
-import { appConfig } from "src/lib/appConfig"
+import { globalState as global } from "../lib/global"
+import * as util from "../lib/util"
+import introModal from "../components/introModal.vue"
+import { appConfig } from "../lib/appConfig"
 
 const lang = global.data.loc.text.plottingProgress
 let farmerTimer: number

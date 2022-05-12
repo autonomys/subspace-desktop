@@ -28,11 +28,11 @@ q-page(padding)
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import { globalState as global } from "src/lib/global"
-import * as util from "src/lib/util"
-import { appConfig } from "src/lib/appConfig"
 import { Notify } from "quasar"
-import disclaimer from "components/disclaimer.vue"
+import { globalState as global } from "../lib/global"
+import * as util from "../lib/util"
+import { appConfig } from "../lib/appConfig"
+import disclaimer from "../components/disclaimer.vue"
 
 const lang = global.data.loc.text.index
 
@@ -90,7 +90,7 @@ export default defineComponent({
           blockchainSizeGB: blockchainSizeGB === 0 ? 0.1 : blockchainSizeGB
         }})
       })
-      raceResult.catch(_ => {
+      raceResult.catch(() => {
         util.errorLogger("The server seems to be too congested! Please try again later...")
       })
     },

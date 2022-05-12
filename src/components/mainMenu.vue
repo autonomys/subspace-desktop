@@ -24,8 +24,9 @@ q-menu(auto-close)
 import { defineComponent } from "vue"
 import { Dialog, LocalStorage, Notify } from "quasar"
 import { relaunch } from "@tauri-apps/api/process"
-import * as util from "src/lib/util"
-import { globalState as global } from "src/lib/global"
+import * as util from "../lib/util"
+import { globalState as global } from "../lib/global"
+
 const lang = global.data.loc.text.mainMenu
 
 export default defineComponent({

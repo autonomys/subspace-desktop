@@ -4,7 +4,7 @@
   "compilerOptions": {
     "target": "ESNext",
     "strict": true,
-    "baseUrl": ".",
+    "baseUrl": "./src",
     "noImplicitAny": true,
     "allowJs": false,
     "strictNullChecks": true,

@@ -1,5 +1,5 @@
 import { LocalStorage } from "quasar"
-import { FarmedBlock } from "src/lib/types"
+import { FarmedBlock } from "../lib/types"
 import { errorLogger } from "./util"
 
 export function getStoredBlocks(): FarmedBlock[] {

@@ -1,6 +1,6 @@
 import { boot } from 'quasar/wrappers'
-import { globalState } from "src/lib/global"
 import VueApexCharts from "vue3-apexcharts";
+import { globalState } from "../lib/global"
 
 export default boot(async ({ app }) => {
   const initActions = [

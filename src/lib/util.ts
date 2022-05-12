@@ -1,13 +1,12 @@
 import {
   Dialog,
   DialogChainObject,
-  LooseDictionary
 } from "quasar"
 import { Component } from "vue"
 import * as process from "process"
+import { invoke } from "@tauri-apps/api/tauri"
 import { appData } from "./appData"
 import { appConfig } from "./appConfig"
-import { invoke } from "@tauri-apps/api/tauri"
 
 export const appName:string = process.env.APP_NAME || "subspace-desktop"
 
@@ -16,7 +15,7 @@ export const random = (min: number, max: number): number =>
 
 export async function showModal(
   component: Component,
-  props: LooseDictionary = {}
+  props: any = {}
 ): Promise<DialogChainObject | null> {
   console.log("Show Modal")
   return Dialog.create({

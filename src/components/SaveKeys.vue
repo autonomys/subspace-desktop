@@ -41,9 +41,10 @@
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import { globalState as global } from "src/lib/global"
-const lang = global.data.loc.text.saveKeys
 import { QInput, Notify } from "quasar"
+import { globalState as global } from "../lib/global"
+
+const lang = global.data.loc.text.saveKeys
 
 // @vue/component
 export default defineComponent({
