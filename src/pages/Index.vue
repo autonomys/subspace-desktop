@@ -65,7 +65,8 @@ export default defineComponent({
       this.$router.replace({ name: "dashboard" })
     },
     firstLoad() {
-      util.infoLogger("INDEX | First Time RUN.")
+      util.infoLogger("INDEX | First Time RUN, resetting reward address")
+      appConfig.updateAppConfig(null, null, null, "", null)
       this.loadNetworkData()
       const config = appConfig.getAppConfig()
       if (config && config.launchOnBoot == true) {
