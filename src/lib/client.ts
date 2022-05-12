@@ -16,9 +16,9 @@ import {
   SubPreDigest
 } from "src/lib/types"
 import EventEmitter from "events"
+import type { SyncState } from '@polkadot/types/interfaces/system';
 
 export const myEmitter = new EventEmitter();
-
 
 const tauri = { event, invoke }
 const SUNIT = 1000000000000000000n
@@ -38,8 +38,8 @@ export class Client {
     types: util.apiTypes
   })
   protected farmed: FarmedBlock[] = []
-  protected clearTauriDestroy: event.UnlistenFn = () => {}
-  protected unsubscribe: event.UnlistenFn = () => {}
+  protected clearTauriDestroy: event.UnlistenFn = () => { }
+  protected unsubscribe: event.UnlistenFn = () => { }
   data = reactive(emptyClientData)
   status = {
     net: async (): Promise<NetStatus> => {
@@ -67,7 +67,7 @@ export class Client {
             const preRuntime: SubPreDigest = this.localApi.registry.createType(
               'SubPreDigest',
               signedBlock.block.header.digest.logs.find((digestItem) => digestItem.isPreRuntime)
-            ?.asPreRuntime![1]);
+                ?.asPreRuntime![1]);
 
             if (preRuntime.solution.reward_address.toString() === rewardAddress) {
               console.log("Farmed by me:", blockNum)
@@ -139,7 +139,7 @@ export class Client {
     }
   }
 
-  constructor() {}
+  constructor() { }
 
   public async startBlockSubscription(): Promise<void> {
     await this.do.blockSubscription.start()
@@ -169,29 +169,13 @@ export class Client {
     await this.publicApi.isReady
   }
 
-   /* Disconnects from PUBLIC-rpc node - Example: farm-rpc.subspace.network */
+  /* Disconnects from PUBLIC-rpc node - Example: farm-rpc.subspace.network */
   public async disconnectPublicApi(): Promise<void> {
     await this.publicApi.disconnect()
   }
 
-  public async getBlocksData(): Promise<[number, number]> {
-    const blocksNumbers = await Promise.all([
-      this.getLocalLastBlockNumber(),
-      this.getNetworkLastBlockNumber()
-    ])
-    return blocksNumbers
-  }
-
-  /* BLOCK NUMBERS */
-  // Used to check and display LOCAL node status vs latest network block
-  public async getLocalLastBlockNumber(): Promise<number> {
-    const signedBlock = await this.localApi.rpc.chain.getBlock()
-    return signedBlock.block.header.number.toNumber()
-  }
-  // Used to check and display LOCAL node status vs latest network block
-  public async getNetworkLastBlockNumber(): Promise<number> {
-    const signedBlock = await this.publicApi.rpc.chain.getBlock()
-    return signedBlock.block.header.number.toNumber()
+  public async getSyncState():Promise<SyncState> {
+    return this.localApi.rpc.system.syncState();
   }
 
   public async getLocalSegmentCount(): Promise<number> {
@@ -228,7 +212,7 @@ export class Client {
 
   public createRewardAddress(): string {
     const mnemonic = mnemonicGenerate()
-    const keyring = new Keyring({ type: 'sr25519', ss58Format: 2254}) // 2254 is the prefix for subspace-testnet
+    const keyring = new Keyring({ type: 'sr25519', ss58Format: 2254 }) // 2254 is the prefix for subspace-testnet
     const pair = keyring.createFromUri(mnemonic)
     this.mnemonic = mnemonic
     return pair.address

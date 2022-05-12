@@ -138,12 +138,12 @@ export default defineComponent({
       this.network.state = "verifying"
       this.network.message = lang.verifyingNet
 
-      let blockNumberData = await this.client.getBlocksData()
+      let syncState = await this.client.getSyncState()
       do {
-        this.network.message = `Syncing node ${blockNumberData[0].toLocaleString()} of ${blockNumberData[1].toLocaleString()} Blocks`
+        this.network.message = `Syncing node ${syncState.currentBlock.toLocaleString()} of ${syncState.highestBlock.toLocaleString()} Blocks`
         await new Promise((resolve) => setTimeout(resolve, 3000))
-        blockNumberData = await this.client.getBlocksData()
-      } while (blockNumberData[0] < blockNumberData[1])
+        syncState = await this.client.getSyncState()
+      } while (syncState.currentBlock.toNumber() < syncState.highestBlock.unwrapOrDefault().toNumber())
 
       this.network.message = lang.synced
       this.network.state = "finished"
