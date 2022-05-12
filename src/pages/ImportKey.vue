@@ -58,7 +58,7 @@ export default defineComponent({
       }
     },
     async importKey() {
-      appConfig.update({ rewardAddress: this.rewardAddress })
+      await appConfig.update({ rewardAddress: this.rewardAddress })
       this.$router.replace({ name: "setupPlot" })
     },
     skip() {

@@ -174,7 +174,7 @@ export class AutoLauncher {
       this.enabled = await this.isEnabled()
       trial += 1
     } while (this.enabled && trial < 5);
-    await appConfig.update({launchOnBoot: false})
+    await appConfig.update({ launchOnBoot: false })
     return child
   }
   async init(): Promise<void> {

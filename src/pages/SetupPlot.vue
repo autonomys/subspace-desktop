@@ -309,13 +309,16 @@ export default defineComponent({
       }
       else {
         util.infoLogger("SETUP PLOT | reward address was initialized before, proceeding to plotting")
+        await appConfig.update({
+          plot: { location: this.plotDirectory, sizeGB: this.allocatedGB },
+        })
         this.$router.replace({ name: "plottingProgress" })
       }
     },
     async viewMnemonic() {
       const modal = await util.showModal(mnemonicModal)
-      modal?.onDismiss(() => {
-        appConfig.update({
+      modal?.onDismiss(async () => {
+        await appConfig.update({
           plot: { location: this.plotDirectory, sizeGB: this.allocatedGB },
           rewardAddress: this.rewardAddress
         })

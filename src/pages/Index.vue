@@ -49,10 +49,10 @@ export default defineComponent({
         this.dashboard()
         return
       }
-      // validate returned false, means we are starting from scratch
+      util.infoLogger("validate failed, we should start from scratch")
       this.firstLoad()
     } catch (e) {
-      // config.read() failed, means we are starting from scratch
+      util.infoLogger("config could not be read, starting from scratch")
       this.firstLoad()
     }
   },
@@ -67,7 +67,8 @@ export default defineComponent({
       this.$router.replace({ name: "dashboard" })
     },
     async firstLoad() {
-      util.infoLogger("INDEX | First Time RUN.")
+      util.infoLogger("INDEX | First Time RUN, resetting reward address")
+      await appConfig.update({ rewardAddress: "" })
       this.loadNetworkData()
       const config = await appConfig.read()
       if (config.launchOnBoot) {
@@ -84,7 +85,7 @@ export default defineComponent({
         await this.client.disconnectPublicApi()
         const totalSize = networkSegmentCount * 256 * util.PIECE_SIZE
         const blockchainSizeGB = Math.round((totalSize * 100) / util.GB) / 100
-        appConfig.update({ segmentCache: {
+        await appConfig.update({ segmentCache: {
           networkSegmentCount,
           blockchainSizeGB: blockchainSizeGB === 0 ? 0.1 : blockchainSizeGB
         }})
