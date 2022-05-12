@@ -313,6 +313,7 @@ export default defineComponent({
           await this.viewMnemonic()
         } else {
           util.infoLogger("SETUP PLOT | reward address was initialized before, proceeding to plotting")
+          appConfig.updateAppConfig(null, null, null, null, true)
           this.$router.replace({ name: "plottingProgress" })
         }
       }
@@ -320,8 +321,8 @@ export default defineComponent({
     async viewMnemonic() {
       const modal = await util.showModal(mnemonicModal)
       modal?.onDismiss(() => {
-        util.infoLogger("SETUP PLOT | set reward address")
-        appConfig.updateAppConfig(null, null, null, this.rewardAddress, null)
+        util.infoLogger("SETUP PLOT | set reward address and plot config")
+        appConfig.updateAppConfig(null, null, null, this.rewardAddress, true)
         this.$router.replace({ name: "plottingProgress" })
       })
     }

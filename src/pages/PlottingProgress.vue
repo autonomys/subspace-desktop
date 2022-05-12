@@ -188,8 +188,6 @@ export default defineComponent({
     }
   },
   async mounted() {
-    util.infoLogger("PLOTTING PROGRESS | setting plottingStarted to true")
-    appConfig.updateAppConfig(null, null, null, null, true)
     util.infoLogger("PLOTTING PROGRESS | getting plot config")
     await this.getPlotConfig()
     util.infoLogger("PLOTTING PROGRESS | starting node")
