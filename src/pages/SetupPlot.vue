@@ -285,6 +285,12 @@ export default defineComponent({
       await appData.createCustomDataDir(this.plotDirectory)
       util.infoLogger("SETUP PLOT | custom directory created")
       await this.checkIdentity()
+      const nodeName = await this.client.generateNodeName()
+      await appConfig.update({
+          plot: { location: this.plotDirectory, sizeGB: this.allocatedGB },
+          nodeName: nodeName
+        })
+      this.$router.replace({ name: "plottingProgress" })
     },
     async updateDriveStats() {
       const stats = await native.driveStats(this.plotDirectory)
@@ -308,20 +314,17 @@ export default defineComponent({
       }
       else {
         util.infoLogger("SETUP PLOT | reward address was initialized before, proceeding to plotting")
-        await appConfig.update({
-          plot: { location: this.plotDirectory, sizeGB: this.allocatedGB },
-        })
-        this.$router.replace({ name: "plottingProgress" })
       }
     },
-    async viewMnemonic() {
-      const modal = await util.showModal(mnemonicModal)
-      modal?.onDismiss(async () => {
-        await appConfig.update({
-          plot: { location: this.plotDirectory, sizeGB: this.allocatedGB },
-          rewardAddress: this.rewardAddress
+    async viewMnemonic(): Promise<void> {
+      const modal = await util.showModal(mnemonicModal);
+      return new Promise((resolve) => {
+        modal?.onDismiss(async () => {
+          await appConfig.update({
+            rewardAddress: this.rewardAddress
+          })
+          resolve()
         })
-        this.$router.replace({ name: "plottingProgress" })
       })
     }
   }

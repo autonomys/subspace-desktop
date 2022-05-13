@@ -43,8 +43,7 @@ export default defineComponent({
   async mounted() {
     try {
       this.checkDev()
-      const config = await appConfig.read()
-      if (appConfig.validate(config)) {
+      if (await appConfig.validate()) {
         util.infoLogger("INDEX | NOT First Time RUN.")
         this.dashboard()
         return
@@ -90,8 +89,9 @@ export default defineComponent({
           blockchainSizeGB: blockchainSizeGB === 0 ? 0.1 : blockchainSizeGB
         }})
       })
-      raceResult.catch(() => {
-        util.errorLogger("The server seems to be too congested! Please try again later...")
+      raceResult.catch((error) => {
+        util.errorLogger(error)
+        util.errorLogger("INDEX | Could not connect to server")
       })
     },
     async viewDisclaimer(destination: string) {

@@ -12,6 +12,7 @@ mod node;
 
 use anyhow::Result;
 use log::{debug, error, info, LevelFilter};
+use node::generate_node_name;
 use serde::Serialize;
 use std::path::PathBuf;
 use std::sync::atomic::Ordering;
@@ -66,12 +67,13 @@ async fn farming(path: String, reward_address: String, plot_size: u64) -> bool {
 }
 
 #[tauri::command]
-async fn start_node(path: String) -> String {
-    let node_name = node::generate_node_name();
-    node::init_node(path.into(), node_name.clone())
-        .await
-        .unwrap();
-    node_name
+fn init_node_name() -> String {
+    generate_node_name()
+}
+
+#[tauri::command]
+async fn start_node(path: String, node_name: String) {
+    node::init_node(path.into(), node_name).await.unwrap();
 }
 
 #[tauri::command]
@@ -133,7 +135,8 @@ async fn main() -> Result<()> {
                 plot_progress_tracker,
                 start_node,
                 frontend_error_logger,
-                frontend_info_logger
+                frontend_info_logger,
+                init_node_name
             ],
             #[cfg(target_os = "windows")]
             tauri::generate_handler![
@@ -146,7 +149,8 @@ async fn main() -> Result<()> {
                 plot_progress_tracker,
                 start_node,
                 frontend_error_logger,
-                frontend_info_logger
+                frontend_info_logger,
+                init_node_name
             ],
         )
         .build(tauri::generate_context!())

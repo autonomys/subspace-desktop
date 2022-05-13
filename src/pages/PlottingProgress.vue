@@ -207,7 +207,13 @@ export default defineComponent({
       this.plotDirectory = config.plot.location
     },
     async waitNode() {
-      await this.$client.waitNodeStartApiConnect(this.plotDirectory)
+      const nodeName = (await appConfig.read()).nodeName
+      if (nodeName !== "") {
+        await this.$client.waitNodeStartApiConnect(this.plotDirectory, nodeName)
+      } else {
+        util.errorLogger("PLOTTING PROGRESS | node name was empty when tried to start node")
+      }
+
     },
     pausePlotting() {
       this.plotFinished = true

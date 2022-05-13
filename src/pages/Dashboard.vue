@@ -80,7 +80,11 @@ export default defineComponent({
     raceResult.then(async() => {
       if (this.$client.isFirstLoad() === false) {
         util.infoLogger("DASHBOARD | starting node")
-        await this.$client.waitNodeStartApiConnect(config.plot.location)
+        if (config.nodeName !== "") {
+          await this.$client.waitNodeStartApiConnect(config.plot.location, config.nodeName)
+        } else {
+          util.errorLogger("DASHBOARD | node name was empty when tried to start node")
+        }
         util.infoLogger("DASHBOARD | starting farmer")
         const farmerStarted = await this.$client.startFarming(config.plot.location, config.plot.sizeGB)
         if (!farmerStarted) {
@@ -104,8 +108,9 @@ export default defineComponent({
       await this.checkFarmerAndPlot()
       await this.$client.disconnectPublicApi()
     })
-    raceResult.catch(_ => {
-      util.errorLogger("The server seems to be too congested! Please try again later...")
+    raceResult.catch((error) => {
+      util.errorLogger(error)
+      util.errorLogger("DASHBOARD | could not connect to server")
     })
   },
   unmounted() {
