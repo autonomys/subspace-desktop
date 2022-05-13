@@ -159,7 +159,6 @@ export default defineComponent({
       driveStats: <native.DriveStats>{ freeBytes: 0, totalBytes: 0 },
       lang,
       chartOptions,
-      client: global.client,
       rewardAddress: ""
     }
   },
@@ -304,7 +303,7 @@ export default defineComponent({
       const config = await appConfig.read()
       if (config.rewardAddress === "") {
         util.infoLogger("SETUP PLOT | reward address was empty, creating a new one")
-        this.rewardAddress = this.client.createRewardAddress()
+        this.rewardAddress = this.$client.createRewardAddress()
         await this.viewMnemonic()
       }
       else {

@@ -52,7 +52,6 @@ export default defineComponent({
         plotSizeGB: 0
       },
       global: global.data,
-      client: global.client,
       globalState: {
         state: "starting",
         message: lang.initializing
@@ -67,8 +66,8 @@ export default defineComponent({
   },
   computed: {
     farmedTotalEarned(): number {
-      if (!this.client) return 0
-      return this.client.data.farming.farmed.reduce((agg: any, val: any) => {
+      if (!this.$client) return 0
+      return this.$client.data.farming.farmed.reduce((agg: any, val: any) => {
         return val.blockReward + val.feeReward + agg
       }, 0)
     }
@@ -77,33 +76,33 @@ export default defineComponent({
     const config = await appConfig.read()
     this.plot.plotSizeGB = config.plot.sizeGB
 
-    const raceResult = util.promiseTimeout(7000, this.client.connectPublicApi())
+    const raceResult = util.promiseTimeout(7000, this.$client.connectPublicApi())
     raceResult.then(async() => {
-      if (this.client.isFirstLoad() === false) {
+      if (this.$client.isFirstLoad() === false) {
         util.infoLogger("DASHBOARD | starting node")
-        await this.client.waitNodeStartApiConnect(config.plot.location)
+        await this.$client.waitNodeStartApiConnect(config.plot.location)
         util.infoLogger("DASHBOARD | starting farmer")
-        const farmerStarted = await this.client.startFarming(config.plot.location, config.plot.sizeGB)
+        const farmerStarted = await this.$client.startFarming(config.plot.location, config.plot.sizeGB)
         if (!farmerStarted) {
           util.errorLogger("DASHBOARD | Farmer start error!")
         }
         util.infoLogger("DASHBOARD | starting block subscription")
-        await this.client.startBlockSubscription()
+        await this.$client.startBlockSubscription()
       }
 
       this.global.status.state = "loading"
       this.global.status.message = "loading..."
 
-      this.clientData = global.client.data
+      this.clientData = this.$client.data
       this.loading = false
       this.peerInterval = window.setInterval(this.getNetInfo, 10000)
-      this.client.data.farming.events.on("newBlock", this.newBlock)
-      this.client.data.farming.events.on("farmedBlock", this.farmBlock)
+      this.$client.data.farming.events.on("newBlock", this.newBlock)
+      this.$client.data.farming.events.on("farmedBlock", this.farmBlock)
       this.global.status.state = "live"
       this.global.status.message = lang.syncedMsg
       await this.checkNodeAndNetwork()
       await this.checkFarmerAndPlot()
-      await this.client.disconnectPublicApi()
+      await this.$client.disconnectPublicApi()
     })
     raceResult.catch(_ => {
       util.errorLogger("The server seems to be too congested! Please try again later...")
@@ -112,13 +111,13 @@ export default defineComponent({
   unmounted() {
     this.unsubscribe()
     clearInterval(this.peerInterval)
-    this.client.do.blockSubscription.stop()
-    this.client.data.farming.events.off("newBlock", this.newBlock)
-    this.client.data.farming.events.off("farmedBlock", this.farmBlock)
+    this.$client.do.blockSubscription.stop()
+    this.$client.data.farming.events.off("newBlock", this.newBlock)
+    this.$client.data.farming.events.off("farmedBlock", this.farmBlock)
   },
   methods: {
     async getNetInfo() {
-      const netData = await global.client.status.net()
+      const netData = await this.$client.status.net()
       this.network.peers = netData.peers.length
     },
     expand(val: boolean) {
@@ -138,11 +137,11 @@ export default defineComponent({
       this.network.state = "verifying"
       this.network.message = lang.verifyingNet
 
-      let blockNumberData = await this.client.getBlocksData()
+      let blockNumberData = await this.$client.getBlocksData()
       do {
         this.network.message = `Syncing node ${blockNumberData[0].toLocaleString()} of ${blockNumberData[1].toLocaleString()} Blocks`
         await new Promise((resolve) => setTimeout(resolve, 3000))
-        blockNumberData = await this.client.getBlocksData()
+        blockNumberData = await this.$client.getBlocksData()
       } while (blockNumberData[0] < blockNumberData[1])
 
       this.network.message = lang.synced

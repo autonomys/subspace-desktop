@@ -52,7 +52,7 @@ export default defineComponent({
   emits: ["userConfirm"],
   data() {
     const userConfirm = false
-    const mnemonic = global.client.getMnemonic()
+    const mnemonic = this.$client.getMnemonic()
     const revealKey = false
     return { revealKey, userConfirm, lang, mnemonic }
   },
@@ -62,7 +62,7 @@ export default defineComponent({
     }
   },
   unmounted() {
-    global.client.clearMnemonic()
+    this.$client.clearMnemonic()
   },
   methods: {
     copyMnemonic() {

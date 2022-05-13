@@ -1,4 +1,4 @@
-import { ApiPromise, Keyring, WsProvider } from "@polkadot/api"
+import { ApiPromise, Keyring } from "@polkadot/api"
 import type { Vec } from "@polkadot/types/codec"
 import type { u128, u32 } from "@polkadot/types"
 import { mnemonicGenerate } from "@polkadot/util-crypto"
@@ -7,7 +7,7 @@ import { invoke } from "@tauri-apps/api/tauri"
 import { reactive } from "vue"
 import * as process from "process"
 import * as util from "../lib/util"
-import { appConfig } from "./appConfig"
+import { appConfig, NETWORK_RPC } from "./appConfig"
 import { getStoredBlocks, storeBlocks } from "./blockStorage"
 import {
   emptyClientData,
@@ -19,23 +19,10 @@ import EventEmitter from "events"
 
 export const myEmitter = new EventEmitter();
 
-
 const tauri = { event, invoke }
 const SUNIT = 1000000000000000000n
 
-const NETWORK_RPC = process.env.PUBLIC_API_WS || "ws://localhost:9944"
-const LOCAL_RPC = process.env.LOCAL_API_WS || "ws://localhost:9944"
 const appsLink = "https://polkadot.js.org/apps/?rpc=" + NETWORK_RPC + "#/explorer/query/"
-
-const publicApi = new ApiPromise({
-  provider: new WsProvider(NETWORK_RPC, false),
-  types: util.apiTypes
-});
-
-const localApi = new ApiPromise({
-  provider: new WsProvider(LOCAL_RPC, false),
-  types: util.apiTypes
-})
 
 export class Client {
   protected firstLoad = false
@@ -43,10 +30,19 @@ export class Client {
   protected farmed: FarmedBlock[] = []
   protected clearTauriDestroy: event.UnlistenFn = () => {}
   protected unsubscribe: event.UnlistenFn = () => {}
+
+  localApi: ApiPromise;
+  publicApi: ApiPromise;
+
+  constructor (localApi: ApiPromise, publicApi: ApiPromise) {
+    this.localApi = localApi;
+    this.publicApi = publicApi;
+  }
+
   data = reactive(emptyClientData)
   status = {
     net: async (): Promise<NetStatus> => {
-      const peers = await localApi.rpc.system.peers()
+      const peers = await this.localApi.rpc.system.peers()
       return { peers }
     }
   }
@@ -63,11 +59,11 @@ export class Client {
           return
         }
 
-        this.unsubscribe = await localApi.rpc.chain.subscribeNewHeads(
+        this.unsubscribe = await this.localApi.rpc.chain.subscribeNewHeads(
           async ({ hash, number }) => {
             const blockNum = number.toNumber()
-            const signedBlock = await localApi.rpc.chain.getBlock(hash)
-            const preRuntime: SubPreDigest = localApi.registry.createType(
+            const signedBlock = await this.localApi.rpc.chain.getBlock(hash)
+            const preRuntime: SubPreDigest = this.localApi.registry.createType(
               'SubPreDigest',
               signedBlock.block.header.digest.logs.find((digestItem) => digestItem.isPreRuntime)
             ?.asPreRuntime![1]);
@@ -76,11 +72,11 @@ export class Client {
               console.log("Farmed by me:", blockNum)
               let blockReward = 0
               const allRecords: Vec<any> =
-                await localApi.query.system.events.at(hash)
+                await this.localApi.query.system.events.at(hash)
               allRecords.forEach((record) => {
                 const { section, method, data } = record.event
                 if (section === "rewards" && method === "BlockReward") {
-                  const reward: u128 = localApi.registry.createType(
+                  const reward: u128 = this.localApi.registry.createType(
                     "u128",
                     data[1]
                   )
@@ -126,8 +122,8 @@ export class Client {
       stop: (): void => {
         util.infoLogger("block subscription stop triggered")
         this.unsubscribe()
-        localApi.disconnect()
-        publicApi.disconnect()
+        this.localApi.disconnect()
+        this.publicApi.disconnect()
         try {
           this.clearTauriDestroy()
           storeBlocks(this.data.farming.farmed)
@@ -141,8 +137,6 @@ export class Client {
       }
     }
   }
-
-  constructor() {}
 
   public async startBlockSubscription(): Promise<void> {
     await this.do.blockSubscription.start()
@@ -159,22 +153,22 @@ export class Client {
 
   /* Connect to LOCAL node - localhost:9944 */
   public async connectLocalApi(): Promise<void> {
-    if (!localApi.isConnected) {
-      await localApi.connect()
+    if (!this.localApi.isConnected) {
+      await this.localApi.connect()
     }
-    await localApi.isReady
+    await this.localApi.isReady
   }
   /* Connect to PUBLIC-rpc node - Example: farm-rpc.subspace.network */
   public async connectPublicApi(): Promise<void> {
-    if (!publicApi.isConnected) {
-      await publicApi.connect()
+    if (!this.publicApi.isConnected) {
+      await this.publicApi.connect()
     }
-    await publicApi.isReady
+    await this.publicApi.isReady
   }
 
    /* Disconnects from PUBLIC-rpc node - Example: farm-rpc.subspace.network */
   public async disconnectPublicApi(): Promise<void> {
-    await publicApi.disconnect()
+    await this.publicApi.disconnect()
   }
 
   public async getBlocksData(): Promise<[number, number]> {
@@ -188,12 +182,12 @@ export class Client {
   /* BLOCK NUMBERS */
   // Used to check and display LOCAL node status vs latest network block
   public async getLocalLastBlockNumber(): Promise<number> {
-    const signedBlock = await localApi.rpc.chain.getBlock()
+    const signedBlock = await this.localApi.rpc.chain.getBlock()
     return signedBlock.block.header.number.toNumber()
   }
   // Used to check and display LOCAL node status vs latest network block
   public async getNetworkLastBlockNumber(): Promise<number> {
-    const signedBlock = await publicApi.rpc.chain.getBlock()
+    const signedBlock = await this.publicApi.rpc.chain.getBlock()
     return signedBlock.block.header.number.toNumber()
   }
 
@@ -203,7 +197,7 @@ export class Client {
     return plot_progress_tracker <= 1 ? 1 : plot_progress_tracker - 1
   }
   public async getNetworkSegmentCount(): Promise<number> {
-    const recordsRoot = await publicApi.query.subspace.counterForRecordsRoot() as u32
+    const recordsRoot = await this.publicApi.query.subspace.counterForRecordsRoot() as u32
     return recordsRoot.toNumber()
   }
 
@@ -230,10 +224,12 @@ export class Client {
   }
 
   public createRewardAddress(): string {
+    console.log('createRewardAddress')
     const mnemonic = mnemonicGenerate()
     const keyring = new Keyring({ type: 'sr25519', ss58Format: 2254}) // 2254 is the prefix for subspace-testnet
     const pair = keyring.createFromUri(mnemonic)
     this.mnemonic = mnemonic
+    console.log('mnemonic', mnemonic)
     return pair.address
   }
 

@@ -115,3 +115,6 @@ export const appConfig = {
     return Dialog.create({ message: "Config file is corrupted, resetting..." })
   }
 }
+
+export const NETWORK_RPC = process.env.PUBLIC_API_WS || "ws://localhost:9944"
+export const LOCAL_RPC = process.env.LOCAL_API_WS || "ws://localhost:9944"

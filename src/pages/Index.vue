@@ -38,7 +38,7 @@ const lang = global.data.loc.text.index
 
 export default defineComponent({
   data() {
-    return { lang, client: global.client }
+    return { lang }
   },
   async mounted() {
     try {
@@ -79,10 +79,10 @@ export default defineComponent({
       }
     },
     async loadNetworkData() {
-      const raceResult = util.promiseTimeout(7000, this.client.connectPublicApi())
+      const raceResult = util.promiseTimeout(7000, this.$client.connectPublicApi())
       raceResult.then(async() => {
-        const networkSegmentCount = await this.client.getNetworkSegmentCount()
-        await this.client.disconnectPublicApi()
+        const networkSegmentCount = await this.$client.getNetworkSegmentCount()
+        await this.$client.disconnectPublicApi()
         const totalSize = networkSegmentCount * 256 * util.PIECE_SIZE
         const blockchainSizeGB = Math.round((totalSize * 100) / util.GB) / 100
         await appConfig.update({ segmentCache: {

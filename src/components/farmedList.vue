@@ -77,14 +77,14 @@ export default defineComponent({
   },
   emits: ["expand"],
   data() {
-    return { lang, util, global: global.data, client: global.client, rewardAddress: "", }
+    return { lang, util, global: global.data, rewardAddress: "", }
   },
   async mounted() {
     this.rewardAddress = await this.displayRewardAddress()
   },
   computed: {
     farmedBlocksList(): FarmedBlock[] {
-      return this.client?.data?.farming.farmed || []
+      return this.$client?.data?.farming.farmed || []
     },
     blocksListStyle(): { [index: string]: string } {
       return this.expanded ? { height: "370px" } : { height: "185px" }
