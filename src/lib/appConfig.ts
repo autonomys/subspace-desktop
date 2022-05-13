@@ -20,10 +20,10 @@ export const appConfig = {
     const appConfig = this.getAppConfig()
     if (appConfig) {
       const newAppConfig = appConfig
-      if (plot) newAppConfig.plot = plot
-      if (segmentCache) newAppConfig.segmentCache = segmentCache
+      if (plot != null) newAppConfig.plot = plot
+      if (segmentCache != null) newAppConfig.segmentCache = segmentCache
       if (launchOnBoot != null) newAppConfig.launchOnBoot = launchOnBoot
-      if (rewardAddress) newAppConfig.rewardAddress = rewardAddress
+      if (rewardAddress != null) newAppConfig.rewardAddress = rewardAddress
       if (plottingStarted != null) newAppConfig.plottingStarted = plottingStarted
       LocalStorage.set("appConfig", newAppConfig)
     }

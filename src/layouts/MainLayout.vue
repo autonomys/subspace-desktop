@@ -6,7 +6,7 @@ q-layout(view="hHh lpr fFf")
       q-toolbar-title
         .row
           .col-auto.q-mr-lg.relative-position
-            p {{ "0.4.9 "}}
+            p {{ "0.4.10 "}}
           .col-auto.q-mr-md.relative-position
             q-badge(color="grey" text-color="white")
               .q-pa-xs(style="font-size: 14px") {{ lang.nonIncentivizedLabel }}
@@ -56,7 +56,7 @@ export default defineComponent({
   },
   mounted() {
     this.nodeNameChanger()
-    util.infoLogger("Version: 0.4.9")
+    util.infoLogger("Version: 0.4.10")
   },
   methods: {
     async nodeNameChanger() {
