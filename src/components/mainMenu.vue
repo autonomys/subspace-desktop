@@ -35,7 +35,6 @@ export default defineComponent({
       lang,
       util,
       launchOnStart: false,
-      autoLauncher: global.autoLauncher,
       disableAutoLaunch: false
     }
   },
@@ -68,9 +67,9 @@ export default defineComponent({
         })
       }
       if (this.launchOnStart) {
-        await this.autoLauncher.enable()
+        await this.$autoLauncher.enable()
       } else {
-        await this.autoLauncher.disable()
+        await this.$autoLauncher.disable()
       }
     },
     reset() {
@@ -99,8 +98,8 @@ export default defineComponent({
       })
     },
     async initMenu() {
-      if (this.autoLauncher.enabled !== undefined) {
-        this.launchOnStart = await this.autoLauncher.enabled
+      if (this.$autoLauncher.enabled !== undefined) {
+        this.launchOnStart = await this.$autoLauncher.enabled
       } else {
         this.launchOnStart = false
         this.disableAutoLaunch = true
