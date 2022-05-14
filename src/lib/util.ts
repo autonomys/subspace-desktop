@@ -122,12 +122,11 @@ export function createApi(url: string | string[], types?: RegistryTypes): ApiPro
 }
 
 export function generateNodeName(): string {
-  while (true) {
+  let nodeName = ""
+  do {
     const slug = generateSlug(2)
     const num = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
-    const nodeName = slug + "-" + num.toString()
-    if (nodeName.length < 64) {
-      return nodeName
-    }
-  }
+    nodeName = slug + "-" + num.toString()
+  } while (nodeName.length > nodeNameMaxLength)
+  return nodeName
 }
