@@ -28,17 +28,17 @@ q-page(padding)
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import { globalState as global } from "src/lib/global"
-import * as util from "src/lib/util"
-import { appConfig } from "src/lib/appConfig"
 import { Notify } from "quasar"
-import disclaimer from "components/disclaimer.vue"
+import { globalState as global } from "../lib/global"
+import * as util from "../lib/util"
+import { appConfig } from "../lib/appConfig"
+import disclaimer from "../components/disclaimer.vue"
 
 const lang = global.data.loc.text.index
 
 export default defineComponent({
   data() {
-    return { lang, client: global.client }
+    return { lang }
   },
   async mounted() {
     try {
@@ -79,10 +79,10 @@ export default defineComponent({
       }
     },
     async loadNetworkData() {
-      const raceResult = util.promiseTimeout(7000, this.client.connectPublicApi())
+      const raceResult = util.promiseTimeout(7000, this.$client.connectPublicApi())
       raceResult.then(async() => {
-        const networkSegmentCount = await this.client.getNetworkSegmentCount()
-        await this.client.disconnectPublicApi()
+        const networkSegmentCount = await this.$client.getNetworkSegmentCount()
+        await this.$client.disconnectPublicApi()
         const totalSize = networkSegmentCount * 256 * util.PIECE_SIZE
         const blockchainSizeGB = Math.round((totalSize * 100) / util.GB) / 100
         await appConfig.update({ segmentCache: {
@@ -90,7 +90,7 @@ export default defineComponent({
           blockchainSizeGB: blockchainSizeGB === 0 ? 0.1 : blockchainSizeGB
         }})
       })
-      raceResult.catch(_ => {
+      raceResult.catch(() => {
         util.errorLogger("The server seems to be too congested! Please try again later...")
       })
     },

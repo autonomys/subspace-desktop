@@ -41,9 +41,10 @@
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import { globalState as global } from "src/lib/global"
-const lang = global.data.loc.text.saveKeys
 import { QInput, Notify } from "quasar"
+import { globalState as global } from "../lib/global"
+
+const lang = global.data.loc.text.saveKeys
 
 // @vue/component
 export default defineComponent({
@@ -51,7 +52,7 @@ export default defineComponent({
   emits: ["userConfirm"],
   data() {
     const userConfirm = false
-    const mnemonic = global.client.getMnemonic()
+    const mnemonic = this.$client.getMnemonic()
     const revealKey = false
     return { revealKey, userConfirm, lang, mnemonic }
   },
@@ -61,7 +62,7 @@ export default defineComponent({
     }
   },
   unmounted() {
-    global.client.clearMnemonic()
+    this.$client.clearMnemonic()
   },
   methods: {
     copyMnemonic() {

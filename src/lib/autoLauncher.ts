@@ -1,11 +1,11 @@
 import * as app from "@tauri-apps/api/app"
 import * as os from "@tauri-apps/api/os"
 import { invoke } from '@tauri-apps/api/tauri'
-import { AutoLaunchParams, ChildReturnData } from './types'
 import * as fs from "@tauri-apps/api/fs"
-import * as native from './native'
 import * as path from "@tauri-apps/api/path"
-import { appConfig } from "src/lib/appConfig"
+import { AutoLaunchParams, ChildReturnData } from './types'
+import * as native from './native'
+import { appConfig } from "../lib/appConfig"
 import { errorLogger, infoLogger } from "./util"
 
 type osAL = typeof macAL | typeof winAL | typeof linAL | typeof nullAL

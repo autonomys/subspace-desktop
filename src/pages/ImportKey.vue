@@ -34,10 +34,10 @@ q-page(padding)
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import { globalState as global } from "src/lib/global"
-import { appConfig } from "src/lib/appConfig"
 import { decodeAddress, encodeAddress } from "@polkadot/keyring"
 import { hexToU8a, isHex } from "@polkadot/util"
+import { globalState as global } from "../lib/global"
+import { appConfig } from "../lib/appConfig"
 const lang = global.data.loc.text.importKey
 
 export default defineComponent({

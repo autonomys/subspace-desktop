@@ -120,10 +120,10 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import { globalState as global } from "src/lib/global"
-import * as util from "src/lib/util"
-import introModal from "components/introModal.vue"
-import { appConfig } from "src/lib/appConfig"
+import { globalState as global } from "../lib/global"
+import * as util from "../lib/util"
+import introModal from "../components/introModal.vue"
+import { appConfig } from "../lib/appConfig"
 
 const lang = global.data.loc.text.plottingProgress
 let farmerTimer: number
@@ -140,7 +140,6 @@ export default defineComponent({
         allocatedGB: 0,
         status: lang.fetchingPlot
       },
-      client: global.client,
       plotFinished: false,
       localSegmentCount: 0,
       networkSegmentCount: 0,
@@ -201,14 +200,14 @@ export default defineComponent({
   },
   methods: {
     async getPlotConfig() {
-      this.client.setFirstLoad()
+      this.$client.setFirstLoad()
       const config = await appConfig.read()
       this.plottingData.remainingGB = config.plot.sizeGB
       this.plottingData.allocatedGB = config.plot.sizeGB
       this.plotDirectory = config.plot.location
     },
     async waitNode() {
-      await this.client.waitNodeStartApiConnect(this.plotDirectory)
+      await this.$client.waitNodeStartApiConnect(this.plotDirectory)
     },
     pausePlotting() {
       this.plotFinished = true
@@ -217,9 +216,9 @@ export default defineComponent({
     async farmingWrapper(): Promise<void> {
       const config = await appConfig.read()
 
-      await this.client.startBlockSubscription()
+      await this.$client.startBlockSubscription()
       util.infoLogger("PLOTTING PROGRESS | block subscription started")
-      const farmerStarted = await this.client.startFarming(this.plotDirectory, config.plot.sizeGB)
+      const farmerStarted = await this.$client.startFarming(this.plotDirectory, config.plot.sizeGB)
       if (!farmerStarted) {
         util.errorLogger("PLOTTING PROGRESS | Farmer start error!")
       }
@@ -227,10 +226,10 @@ export default defineComponent({
       const networkSegmentCount = config.segmentCache.networkSegmentCount
       this.networkSegmentCount = networkSegmentCount
       this.plottingData.allocatedGB = config.plot.sizeGB
-      this.localSegmentCount = await this.client.getLocalSegmentCount()
+      this.localSegmentCount = await this.$client.getLocalSegmentCount()
       do {
         await new Promise((resolve) => setTimeout(resolve, 2000))
-        this.localSegmentCount = await this.client.getLocalSegmentCount()
+        this.localSegmentCount = await this.$client.getLocalSegmentCount()
       } while (this.localSegmentCount < this.networkSegmentCount)
 
     },

@@ -17,7 +17,7 @@
     "build:debug": "quasar build -m pwa && tauri build -v --debug"
   },
   "dependencies": {
-    "@polkadot/api": "^7.2.1",
+    "@polkadot/api": "^8.3.2",
     "@polkadot/util-crypto": "^9.0.1",
     "@quasar/extras": "^1.0.0",
     "@tauri-apps/api": "^1.0.0-rc.4",
@@ -30,6 +30,7 @@
     "mitt": "^3.0.0",
     "process": "^0.11.10",
     "quasar": "^2.0.0",
+    "vue-router": "^4.0.0",
     "vue3-apexcharts": "^1.4.1"
   },
   "devDependencies": {
@@ -40,10 +41,10 @@
     "@types/ms": "^0.7.31",
     "@types/node": "^16.3.3",
     "@types/vue": "^2.0.0",
-    "@typescript-eslint/eslint-plugin": "^4.32.0",
-    "@typescript-eslint/parser": "^4.32.0",
+    "@typescript-eslint/eslint-plugin": "^5.23.0",
+    "@typescript-eslint/parser": "^5.23.0",
     "dotenv": "^16.0.0",
-    "eslint": "^7.32.0",
+    "eslint": "^8.15.0",
     "eslint-plugin-vue": "^7.18.0",
     "pug": "^3.0.2",
     "pug-plain-loader": "^1.1.0",
