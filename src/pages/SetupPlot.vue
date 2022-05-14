@@ -285,7 +285,7 @@ export default defineComponent({
       await appData.createCustomDataDir(this.plotDirectory)
       util.infoLogger("SETUP PLOT | custom directory created")
       await this.checkIdentity()
-      const nodeName = await this.client.generateNodeName()
+      const nodeName = util.generateNodeName()
       await appConfig.update({
           plot: { location: this.plotDirectory, sizeGB: this.allocatedGB },
           nodeName: nodeName

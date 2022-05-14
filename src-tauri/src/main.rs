@@ -12,7 +12,6 @@ mod node;
 
 use anyhow::Result;
 use log::{debug, error, info, LevelFilter};
-use node::generate_node_name;
 use serde::Serialize;
 use std::path::PathBuf;
 use std::sync::atomic::Ordering;
@@ -64,11 +63,6 @@ async fn farming(path: String, reward_address: String, plot_size: u64) -> bool {
         // reward address could not be parsed, and farmer did not start
         false
     }
-}
-
-#[tauri::command]
-fn init_node_name() -> String {
-    generate_node_name()
 }
 
 #[tauri::command]
@@ -135,8 +129,7 @@ async fn main() -> Result<()> {
                 plot_progress_tracker,
                 start_node,
                 frontend_error_logger,
-                frontend_info_logger,
-                init_node_name
+                frontend_info_logger
             ],
             #[cfg(target_os = "windows")]
             tauri::generate_handler![
@@ -149,8 +142,7 @@ async fn main() -> Result<()> {
                 plot_progress_tracker,
                 start_node,
                 frontend_error_logger,
-                frontend_info_logger,
-                init_node_name
+                frontend_info_logger
             ],
         )
         .build(tauri::generate_context!())

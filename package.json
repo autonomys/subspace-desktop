@@ -30,6 +30,7 @@
     "mitt": "^3.0.0",
     "process": "^0.11.10",
     "quasar": "^2.0.0",
+    "random-word-slugs": "^0.1.6",
     "vue-router": "^4.0.0",
     "vue3-apexcharts": "^1.4.1"
   },

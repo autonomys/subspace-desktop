@@ -218,10 +218,6 @@ export class Client {
     }
   }
 
-  public async generateNodeName(): Promise<string> {
-    return await tauri.invoke("init_node_name")
-  }
-
   private loadStoredBlocks(): void {
     this.farmed = getStoredBlocks()
     this.data.farming.farmed = this.farmed

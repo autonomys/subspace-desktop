@@ -9,7 +9,9 @@ import { ApiPromise, WsProvider } from "@polkadot/api"
 import { RegistryTypes } from "@polkadot/types-codec/types"
 import { appData } from "./appData"
 import { appConfig } from "./appConfig"
+import { generateSlug } from "random-word-slugs"
 
+const nodeNameMaxLength = 64
 export const appName: string = process.env.APP_NAME || "subspace-desktop"
 
 export const random = (min: number, max: number): number =>
@@ -117,4 +119,15 @@ export function createApi(url: string | string[], types?: RegistryTypes): ApiPro
     provider: new WsProvider(url, false),
     types
   });
+}
+
+export function generateNodeName(): string {
+  while (true) {
+    const slug = generateSlug(2)
+    const num = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
+    const nodeName = slug + "-" + num.toString()
+    if (nodeName.length < 64) {
+      return nodeName
+    }
+  }
 }
