@@ -96,7 +96,7 @@ export function promiseTimeout<T>(ms: number, promise: Promise<T>): Promise<T> {
   ]);
 }
 
-export const apiTypes = {
+const apiTypes = {
   Solution: {
     public_key: "AccountId32",
     reward_address: "AccountId32"
