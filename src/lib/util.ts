@@ -6,7 +6,6 @@ import { Component } from "vue"
 import * as process from "process"
 import { invoke } from "@tauri-apps/api/tauri"
 import { ApiPromise, WsProvider } from "@polkadot/api"
-import { RegistryTypes } from "@polkadot/types-codec/types"
 import { appData } from "./appData"
 import { appConfig } from "./appConfig"
 import { generateSlug } from "random-word-slugs"
@@ -99,7 +98,7 @@ export function promiseTimeout<T>(ms: number, promise: Promise<T>): Promise<T> {
   ]);
 }
 
-export const apiTypes = {
+const apiTypes = {
   Solution: {
     public_key: "AccountId32",
     reward_address: "AccountId32"
@@ -114,10 +113,10 @@ export const PIECE_SIZE = 4096
 export const GB = 1024 * 1024 * 1024
 export const CONTEXT_MENU = process.env.DEV || "OFF" // enables context menu only if DEV mode is on
 
-export function createApi(url: string | string[], types?: RegistryTypes): ApiPromise {
+export function createApi(url: string | string[]): ApiPromise {
   return new ApiPromise({
     provider: new WsProvider(url, false),
-    types
+    types: apiTypes,
   });
 }
 
