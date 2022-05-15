@@ -8,7 +8,9 @@ import { invoke } from "@tauri-apps/api/tauri"
 import { ApiPromise, WsProvider } from "@polkadot/api"
 import { appData } from "./appData"
 import { appConfig } from "./appConfig"
+import { generateSlug } from "random-word-slugs"
 
+const nodeNameMaxLength = 64
 export const appName: string = process.env.APP_NAME || "subspace-desktop"
 
 export const random = (min: number, max: number): number =>
@@ -116,4 +118,14 @@ export function createApi(url: string | string[]): ApiPromise {
     provider: new WsProvider(url, false),
     types: apiTypes,
   });
+}
+
+export function generateNodeName(): string {
+  let nodeName = ""
+  do {
+    const slug = generateSlug(2)
+    const num = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
+    nodeName = slug + "-" + num.toString()
+  } while (nodeName.length > nodeNameMaxLength)
+  return nodeName
 }

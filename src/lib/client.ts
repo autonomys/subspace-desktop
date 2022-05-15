@@ -202,16 +202,16 @@ export class Client {
   }
 
   /* NODE INTEGRATION */
-  public async waitNodeStartApiConnect(path: string): Promise<void> {
-    await this.startNode(path)
+  public async waitNodeStartApiConnect(path: string, nodeName: string): Promise<void> {
+    await this.startNode(path, nodeName)
     // TODO: workaround in case node takes some time to fully start.
     await new Promise((resolve) => setTimeout(resolve, 7000))
     await this.connectLocalApi()
   }
 
   // TODO: Disable mnemonic return from tauri commmand instead of this validation.
-  private async startNode(path: string): Promise<void> {
-    const nodeName: string = await tauri.invoke("start_node", { path })
+  private async startNode(path: string, nodeName: string): Promise<void> {
+    await tauri.invoke("start_node", { path, nodeName })
     myEmitter.emit("nodeName", nodeName)
     if (!this.firstLoad) {
       this.loadStoredBlocks()
@@ -237,7 +237,7 @@ export class Client {
   public async startFarming(path: string, plotSizeGB: number): Promise<boolean> {
     const plotSize = Math.round(plotSizeGB * 1048576)
     const rewardAddress: string = (await appConfig.read()).rewardAddress
-    if (!rewardAddress) {
+    if (rewardAddress === "") {
       util.errorLogger("Tried to send empty reward address to backend!")
     }
     return await tauri.invoke("farming", { path, rewardAddress, plotSize })
