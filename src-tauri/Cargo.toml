@@ -34,6 +34,7 @@ subspace-runtime = { git = "https://github.com/subspace/subspace", rev = "72b2c4
 subspace-service = { git = "https://github.com/subspace/subspace", rev = "72b2c44971a2db1266995a8c0fe1223ef09be784" }
 subspace-solving = { git = "https://github.com/subspace/subspace", rev = "72b2c44971a2db1266995a8c0fe1223ef09be784" }
 tokio = { version = "1.11.0", features = ["macros", "rt-multi-thread"] }
+dirs-next = "2.0.0"
 
 [target.'cfg(windows)'.dependencies]
 winreg = "0.10.1"

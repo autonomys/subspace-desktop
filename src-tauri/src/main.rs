@@ -21,7 +21,7 @@ use tauri::{
     api::{self},
     Env, Manager, RunEvent, WindowEvent,
 };
-use tauri_plugin_log::LoggerBuilder;
+use tauri_plugin_log::{LogTarget, LoggerBuilder};
 
 const BEST_BLOCK_NUMBER_CHECK_INTERVAL: Duration = Duration::from_secs(5);
 
@@ -90,8 +90,15 @@ fn get_this_binary() -> PathBuf {
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    let ctx = tauri::generate_context!();
+    let id = &ctx.config().tauri.bundle.identifier;
     let app = tauri::Builder::default()
-        .plugin(LoggerBuilder::new().level(LevelFilter::Info).build())
+        .plugin(
+            LoggerBuilder::new()
+                .targets(vec![LogTarget::Folder(custom_log_dir(id).unwrap())])
+                .level(LevelFilter::Info)
+                .build(),
+        )
         .menu(menu::get_menu())
         .system_tray(menu::get_tray_menu())
         .on_system_tray_event(|app, event| {
@@ -145,7 +152,7 @@ async fn main() -> Result<()> {
                 frontend_info_logger
             ],
         )
-        .build(tauri::generate_context!())
+        .build(ctx)
         .expect("error while running tauri application");
 
     app.run(|app_handle, e| match e {
@@ -174,4 +181,22 @@ async fn main() -> Result<()> {
     });
 
     Ok(())
+}
+
+pub fn custom_log_dir(id: &str) -> Option<PathBuf> {
+    #[cfg(target_os = "macos")]
+    let path = dirs_next::home_dir().map(|dir| {
+        dir.join("Library/Logs").join(id)
+        //.join(&config.tauri.bundle.identifier)
+    });
+
+    #[cfg(target_os = "linux")]
+    let path = dirs_next::data_dir().map(|dir| dir.join(id).join("logs"));
+    //dir.join(&config.tauri.bundle.identifier).join("logs"));
+
+    #[cfg(target_os = "windows")]
+    let path = dirs_next::data_local_dir().map(|dir| dir.join(id).join("logs"));
+    //dir.join(&config.tauri.bundle.identifier).join("logs"));
+
+    path
 }
