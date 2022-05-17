@@ -67,7 +67,7 @@ export default defineComponent({
   computed: {
     farmedTotalEarned(): number {
       if (!this.$client) return 0
-      return this.$client.data.farming.farmed.reduce((agg: number, val: number) => {
+      return this.$client.data.farming.farmed.reduce((agg: number, val: { blockReward: number, feeReward: number }) => {
         return val.blockReward + val.feeReward + agg
       }, 0)
     }
