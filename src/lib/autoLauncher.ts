@@ -96,7 +96,7 @@ const macAL = {
     return native.execApplescriptCommand(`make login item at end with properties ${properties}`);
   },
   async disable(appName: string): Promise<ChildReturnData> {
-    return native.execApplescriptCommand(`delete login item \"${appName}\"`);
+    return native.execApplescriptCommand(`delete login item "${appName}"`);
   },
   async isEnabled(appName: string): Promise<boolean> {
     const response: ChildReturnData = await native.execApplescriptCommand('get the name of every login item');

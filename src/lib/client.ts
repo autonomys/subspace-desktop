@@ -28,8 +28,8 @@ export class Client {
   protected firstLoad = false
   protected mnemonic = ""
   protected farmed: FarmedBlock[] = []
-  protected clearTauriDestroy: event.UnlistenFn = () => {}
-  protected unsubscribe: event.UnlistenFn = () => {}
+  protected clearTauriDestroy: event.UnlistenFn = () => null;
+  protected unsubscribe: event.UnlistenFn = () => null;
 
   localApi: ApiPromise;
   publicApi: ApiPromise;

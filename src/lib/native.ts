@@ -35,7 +35,7 @@ export async function execString(executable: string, args: string[] | string): P
   console.log('pid:', child.pid)
 }
 export async function selectDir(defaultPath: undefined | string): Promise<string | null> {
-  let exists: boolean = false
+  let exists = false
   if (defaultPath) exists = await dirExists(defaultPath)
   if (!exists) defaultPath = undefined
   const result = (await tauri.dialog.open({ directory: true, defaultPath })) as null | string
