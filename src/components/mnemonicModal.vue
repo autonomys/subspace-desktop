@@ -1,12 +1,4 @@
 <template lang="pug">
-mixin page1
-  .row.justify-center.q-mb-md
-    .col-auto
-    //- q-icon(color="blue-3" name="vpn_key" size="80px")
-    .col
-      .row.q-mb-md
-        saveKeys(@userConfirm="userConfirm")
-
 q-dialog(@hide="onDialogHide" persistent ref="dialog")
   q-card.q-dialog-plugin.relative-position(
     bordered
@@ -15,16 +7,12 @@ q-dialog(@hide="onDialogHide" persistent ref="dialog")
   )
     div
       .q-ma-md
-        div(v-if="currentPage == 1")
-          +page1
+        div
+          .row.justify-center.q-mb-md
+            .col
+              .row.q-mb-md
+                saveKeys(@userConfirm="userConfirm")
         .absolute-bottom.q-pa-md
-          .row.justify-center.absolute-bottom
-            q-icon.q-mr-xs(
-              :name="currentPage == page ? 'radio_button_checked' : 'radio_button_unchecked'"
-              size="20px"
-              style="margin-bottom: 32px"
-              v-for="page of totalPages"
-            )
           .row.justify-end
             q-btn(
               :disabled="!userConfirmed"
@@ -33,7 +21,6 @@ q-dialog(@hide="onDialogHide" persistent ref="dialog")
               outline
               size="lg"
               stretch
-              v-if="currentPage == 1"
             )
 </template>
 
@@ -42,10 +29,6 @@ import { defineComponent } from "vue"
 import saveKeys from "components/SaveKeys.vue"
 const component = defineComponent({
   components: { saveKeys },
-  props: {
-    // ...your custom props
-  },
-
   emits: [
     // REQUIRED
     "ok",
@@ -53,14 +36,7 @@ const component = defineComponent({
   ],
   data() {
     return {
-      totalPages: 1,
-      currentPage: 1,
       userConfirmed: false
-    }
-  },
-  watch: {
-    currentPage(val) {
-      if (val > this.totalPages) this.hide()
     }
   },
   methods: {
