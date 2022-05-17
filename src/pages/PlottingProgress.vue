@@ -124,6 +124,7 @@ import { globalState as global } from "../lib/global"
 import * as util from "../lib/util"
 import introModal from "../components/introModal.vue"
 import { appConfig } from "../lib/appConfig"
+import { SyncState } from "../lib/types";
 
 const lang = global.data.loc.text.plottingProgress
 let farmerTimer: number
@@ -141,15 +142,18 @@ export default defineComponent({
         status: lang.fetchingPlot
       },
       plotFinished: false,
-      localSegmentCount: 0,
-      networkSegmentCount: 0,
-      plotDirectory: ""
+      plotDirectory: "",
+      syncState: {
+        currentBlock: 0,
+        highestBlock: 0,
+        startingBlock: 0,
+      }
     }
   },
   computed: {
     progresspct(): number {
       const progress = parseFloat(
-        ((this.localSegmentCount * 100) / this.networkSegmentCount).toFixed(2)
+        ((this.syncState.currentBlock * 100) / this.syncState.highestBlock).toFixed(2)
       )
       return isNaN(progress) ? 0 : progress <= 100 ? progress : 100
     },
@@ -175,16 +179,6 @@ export default defineComponent({
       if (this.plottingData.finishedGB >= this.plottingData.allocatedGB)
         this.plottingData.finishedGB = this.plottingData.allocatedGB
     },
-    localSegmentCount(localCount) {
-      if (localCount >= this.networkSegmentCount) {
-        this.plottingData.status = `Archived ${localCount.toLocaleString()} Segments`
-      } else {
-        this.plottingData.status = `Archived ${localCount.toLocaleString()} of ${this.networkSegmentCount.toLocaleString()} Segments`
-      }
-
-      this.plottingData.finishedGB =
-        (localCount * this.plottingData.allocatedGB) / this.networkSegmentCount
-    }
   },
   async mounted() {
     util.infoLogger("PLOTTING PROGRESS | getting plot config")
@@ -229,23 +223,23 @@ export default defineComponent({
         util.errorLogger("PLOTTING PROGRESS | Farmer start error!")
       }
       util.infoLogger("PLOTTING PROGRESS | farmer started")
-      const networkSegmentCount = config.segmentCache.networkSegmentCount
-      this.networkSegmentCount = networkSegmentCount
-      this.plottingData.allocatedGB = config.plot.sizeGB
-      this.localSegmentCount = await this.$client.getLocalSegmentCount()
-      do {
-        await new Promise((resolve) => setTimeout(resolve, 2000))
-        this.localSegmentCount = await this.$client.getLocalSegmentCount()
-      } while (this.localSegmentCount < this.networkSegmentCount)
 
+      this.plottingData.allocatedGB = config.plot.sizeGB
+
+      this.syncState = (await this.$client.getSyncState()).toJSON() as unknown as SyncState;
+
+      do {
+        await new Promise((resolve) => setTimeout(resolve, 3000))
+        this.syncState = (await this.$client.getSyncState()).toJSON() as unknown as SyncState;
+        this.plottingData.status = `Syncing ${this.syncState.currentBlock} of ${this.syncState.highestBlock} blocks`
+        this.plottingData.finishedGB = (this.syncState.currentBlock * this.plottingData.allocatedGB) / this.syncState.highestBlock; 
+      } while (this.syncState.currentBlock < this.syncState.highestBlock)
     },
     startTimers() {
       farmerTimer = window.setInterval(() => {
-        this.elapsedms += 1000
-        const ms =
-          (this.elapsedms * this.networkSegmentCount) / this.localSegmentCount -
-          this.elapsedms
-        this.remainingms = util.toFixed(ms, 2)
+        this.elapsedms += 1000;
+        const ms = (this.elapsedms * this.syncState.highestBlock) / this.syncState.currentBlock - this.elapsedms;
+        this.remainingms = util.toFixed(ms, 2);
       }, 1000)
     },
     async startPlotting() {

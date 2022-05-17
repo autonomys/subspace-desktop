@@ -68,7 +68,6 @@ export default defineComponent({
     async firstLoad() {
       util.infoLogger("INDEX | First Time RUN, resetting reward address")
       await appConfig.update({ rewardAddress: "" })
-      this.loadNetworkData()
       const config = await appConfig.read()
       if (config.launchOnBoot) {
         Notify.create({
@@ -76,23 +75,6 @@ export default defineComponent({
           icon: "info"
         })
       }
-    },
-    async loadNetworkData() {
-      const raceResult = util.promiseTimeout(7000, this.$client.connectPublicApi())
-      raceResult.then(async() => {
-        const networkSegmentCount = await this.$client.getNetworkSegmentCount()
-        await this.$client.disconnectPublicApi()
-        const totalSize = networkSegmentCount * 256 * util.PIECE_SIZE
-        const blockchainSizeGB = Math.round((totalSize * 100) / util.GB) / 100
-        await appConfig.update({ segmentCache: {
-          networkSegmentCount,
-          blockchainSizeGB: blockchainSizeGB === 0 ? 0.1 : blockchainSizeGB
-        }})
-      })
-      raceResult.catch((error) => {
-        util.errorLogger(error)
-        util.errorLogger("INDEX | Could not connect to server")
-      })
     },
     async viewDisclaimer(destination: string) {
       const modal = await util.showModal(disclaimer)
