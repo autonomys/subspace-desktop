@@ -32,14 +32,5 @@
     "@typescript-eslint"
   ],
   "rules": {
-    "no-unused-vars": "off",
-    "no-useless-escape": "off",
-    "@typescript-eslint/no-unused-vars": "warn",
-    "@typescript-eslint/explicit-function-return-type": "error",
-    "@typescript-eslint/no-empty-function": "off",
-    "prefer-const": "warn",
-    "@typescript-eslint/no-inferrable-types": "off",
-    "@typescript-eslint/no-explicit-any": "off",
-    "@typescript-eslint/no-empty-interface": "off"
   }
 }
