@@ -142,11 +142,12 @@ export default defineComponent({
       this.network.state = "verifying"
       this.network.message = lang.verifyingNet
 
-      let syncState = await this.client.getSyncState()
+      // TODO: throttle request 
+      let syncState = await this.$client.getSyncState()
       do {
         this.network.message = `Syncing node ${syncState.currentBlock.toLocaleString()} of ${syncState.highestBlock.toLocaleString()} Blocks`
         await new Promise((resolve) => setTimeout(resolve, 3000))
-        syncState = await this.client.getSyncState()
+        syncState = await this.$client.getSyncState()
       } while (syncState.currentBlock.toNumber() < syncState.highestBlock.unwrapOrDefault().toNumber())
 
       this.network.message = lang.synced
