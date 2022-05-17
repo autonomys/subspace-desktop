@@ -132,17 +132,17 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
 </template>
 
 <script lang="ts">
-import * as path from "@tauri-apps/api/path"
 import { defineComponent } from "vue"
-import * as util from "src/lib/util"
-import { chartOptions, ChartDataType, StatsType } from "src/lib/types"
-import * as native from "src/lib/native"
 import { debounce } from "quasar"
-import { globalState as global } from "src/lib/global"
+import * as path from "@tauri-apps/api/path"
 import * as fs from "@tauri-apps/api/fs"
-import { appConfig } from "src/lib/appConfig"
-import { appData, appDataDialog } from "src/lib/appData"
-import mnemonicModal from "components/mnemonicModal.vue"
+import * as util from "../lib/util"
+import { chartOptions, ChartDataType, StatsType } from "../lib/types"
+import * as native from "../lib/native"
+import { globalState as global } from "../lib/global"
+import { appConfig } from "../lib/appConfig"
+import { appData, appDataDialog } from "../lib/appData"
+import mnemonicModal from "../components/mnemonicModal.vue"
 
 const tauri = { path, fs }
 const lang = global.data.loc.text.setupPlot
@@ -159,7 +159,6 @@ export default defineComponent({
       driveStats: <native.DriveStats>{ freeBytes: 0, totalBytes: 0 },
       lang,
       chartOptions,
-      client: global.client,
       rewardAddress: ""
     }
   },
@@ -286,6 +285,12 @@ export default defineComponent({
       await appData.createCustomDataDir(this.plotDirectory)
       util.infoLogger("SETUP PLOT | custom directory created")
       await this.checkIdentity()
+      const nodeName = util.generateNodeName()
+      await appConfig.update({
+          plot: { location: this.plotDirectory, sizeGB: this.allocatedGB },
+          nodeName: nodeName
+        })
+      this.$router.replace({ name: "plottingProgress" })
     },
     async updateDriveStats() {
       const stats = await native.driveStats(this.plotDirectory)
@@ -295,7 +300,7 @@ export default defineComponent({
     async selectDir() {
       const result = await native
         .selectDir(this.plotDirectory)
-        .catch((error) => {
+        .catch((error: unknown) => {
           util.errorLogger(error)
         })
       if (result) this.plotDirectory = result
@@ -304,22 +309,22 @@ export default defineComponent({
       const config = await appConfig.read()
       if (config.rewardAddress === "") {
         util.infoLogger("SETUP PLOT | reward address was empty, creating a new one")
-        this.rewardAddress = this.client.createRewardAddress()
+        this.rewardAddress = this.$client.createRewardAddress()
         await this.viewMnemonic()
       }
       else {
         util.infoLogger("SETUP PLOT | reward address was initialized before, proceeding to plotting")
-        this.$router.replace({ name: "plottingProgress" })
       }
     },
-    async viewMnemonic() {
-      const modal = await util.showModal(mnemonicModal)
-      modal?.onDismiss(() => {
-        appConfig.update({
-          plot: { location: this.plotDirectory, sizeGB: this.allocatedGB },
-          rewardAddress: this.rewardAddress
+    async viewMnemonic(): Promise<void> {
+      const modal = await util.showModal(mnemonicModal);
+      return new Promise((resolve) => {
+        modal?.onDismiss(async () => {
+          await appConfig.update({
+            rewardAddress: this.rewardAddress
+          })
+          resolve()
         })
-        this.$router.replace({ name: "plottingProgress" })
       })
     }
   }

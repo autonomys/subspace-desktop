@@ -1,6 +1,5 @@
 use anyhow::Result;
 use log::{error, warn};
-use names::{Generator, Name};
 use sc_chain_spec::ChainSpec;
 use sc_executor::NativeExecutionDispatch;
 use sc_executor::WasmExecutionMethod;
@@ -24,7 +23,6 @@ use tokio::runtime::Handle;
 static INITIALIZE_SUBSTRATE: Once = Once::new();
 
 /// The maximum number of characters for a node name.
-const NODE_NAME_MAX_LENGTH: usize = 64;
 
 /// Default sub directory to store network config.
 const DEFAULT_NETWORK_CONFIG_PATH: &str = "network";
@@ -253,19 +251,5 @@ fn database_config(base_path: &Path, cache_size: usize, role: &Role) -> Database
         paritydb_path,
         rocksdb_path,
         cache_size,
-    }
-}
-
-/// Generate a valid random name for the node
-pub fn generate_node_name() -> String {
-    loop {
-        let node_name = Generator::with_naming(Name::Numbered)
-            .next()
-            .expect("RNG is available on all supported platforms; qed");
-        let count = node_name.chars().count();
-
-        if count < NODE_NAME_MAX_LENGTH {
-            return node_name;
-        }
     }
 }

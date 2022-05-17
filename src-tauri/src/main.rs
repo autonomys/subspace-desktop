@@ -66,12 +66,8 @@ async fn farming(path: String, reward_address: String, plot_size: u64) -> bool {
 }
 
 #[tauri::command]
-async fn start_node(path: String) -> String {
-    let node_name = node::generate_node_name();
-    node::init_node(path.into(), node_name.clone())
-        .await
-        .unwrap();
-    node_name
+async fn start_node(path: String, node_name: String) {
+    node::init_node(path.into(), node_name).await.unwrap();
 }
 
 #[tauri::command]

@@ -1,22 +1,24 @@
 import {
   Dialog,
   DialogChainObject,
-  LooseDictionary
 } from "quasar"
 import { Component } from "vue"
 import * as process from "process"
+import { invoke } from "@tauri-apps/api/tauri"
+import { ApiPromise, WsProvider } from "@polkadot/api"
 import { appData } from "./appData"
 import { appConfig } from "./appConfig"
-import { invoke } from "@tauri-apps/api/tauri"
+import { generateSlug } from "random-word-slugs"
 
-export const appName:string = process.env.APP_NAME || "subspace-desktop"
+const nodeNameMaxLength = 64
+export const appName: string = process.env.APP_NAME || "subspace-desktop"
 
 export const random = (min: number, max: number): number =>
   Math.floor(Math.random() * (max - min)) + min
 
 export async function showModal(
   component: Component,
-  props: LooseDictionary = {}
+  props: any = {}
 ): Promise<DialogChainObject | null> {
   console.log("Show Modal")
   return Dialog.create({
@@ -84,7 +86,7 @@ export function promiseTimeout<T>(ms: number, promise: Promise<T>): Promise<T> {
   // Create a promise that rejects in <ms> milliseconds
   const timeout = new Promise<never>((_, reject) => {
     setTimeout(() => {
-      reject('Timed out in '+ ms + 'ms.')
+      reject('Timed out in ' + ms + 'ms.')
     }, ms);
 
   });
@@ -96,7 +98,7 @@ export function promiseTimeout<T>(ms: number, promise: Promise<T>): Promise<T> {
   ]);
 }
 
-export const apiTypes = {
+const apiTypes = {
   Solution: {
     public_key: "AccountId32",
     reward_address: "AccountId32"
@@ -110,3 +112,20 @@ export const apiTypes = {
 export const PIECE_SIZE = 4096
 export const GB = 1024 * 1024 * 1024
 export const CONTEXT_MENU = process.env.DEV || "OFF" // enables context menu only if DEV mode is on
+
+export function createApi(url: string | string[]): ApiPromise {
+  return new ApiPromise({
+    provider: new WsProvider(url, false),
+    types: apiTypes,
+  });
+}
+
+export function generateNodeName(): string {
+  let nodeName = ""
+  do {
+    const slug = generateSlug(2)
+    const num = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
+    nodeName = slug + "-" + num.toString()
+  } while (nodeName.length > nodeNameMaxLength)
+  return nodeName
+}

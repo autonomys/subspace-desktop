@@ -24,8 +24,9 @@ q-menu(auto-close)
 import { defineComponent } from "vue"
 import { Dialog, LocalStorage, Notify } from "quasar"
 import { relaunch } from "@tauri-apps/api/process"
-import * as util from "src/lib/util"
-import { globalState as global } from "src/lib/global"
+import * as util from "../lib/util"
+import { globalState as global } from "../lib/global"
+
 const lang = global.data.loc.text.mainMenu
 
 export default defineComponent({
@@ -34,7 +35,6 @@ export default defineComponent({
       lang,
       util,
       launchOnStart: false,
-      autoLauncher: global.autoLauncher,
       disableAutoLaunch: false
     }
   },
@@ -67,9 +67,9 @@ export default defineComponent({
         })
       }
       if (this.launchOnStart) {
-        await this.autoLauncher.enable()
+        await this.$autoLauncher.enable()
       } else {
-        await this.autoLauncher.disable()
+        await this.$autoLauncher.disable()
       }
     },
     reset() {
@@ -98,8 +98,8 @@ export default defineComponent({
       })
     },
     async initMenu() {
-      if (this.autoLauncher.enabled !== undefined) {
-        this.launchOnStart = await this.autoLauncher.enabled
+      if (this.$autoLauncher.enabled !== undefined) {
+        this.launchOnStart = await this.$autoLauncher.enabled
       } else {
         this.launchOnStart = false
         this.disableAutoLaunch = true

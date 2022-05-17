@@ -1,11 +1,11 @@
 import * as app from "@tauri-apps/api/app"
 import * as os from "@tauri-apps/api/os"
 import { invoke } from '@tauri-apps/api/tauri'
-import { AutoLaunchParams, ChildReturnData } from './types'
 import * as fs from "@tauri-apps/api/fs"
-import * as native from './native'
 import * as path from "@tauri-apps/api/path"
-import { appConfig } from "src/lib/appConfig"
+import { AutoLaunchParams, ChildReturnData } from './types'
+import * as native from './native'
+import { appConfig } from "../lib/appConfig"
 import { errorLogger, infoLogger } from "./util"
 
 type osAL = typeof macAL | typeof winAL | typeof linAL | typeof nullAL
@@ -96,7 +96,7 @@ const macAL = {
     return native.execApplescriptCommand(`make login item at end with properties ${properties}`);
   },
   async disable(appName: string): Promise<ChildReturnData> {
-    return native.execApplescriptCommand(`delete login item \"${appName}\"`);
+    return native.execApplescriptCommand(`delete login item "${appName}"`);
   },
   async isEnabled(appName: string): Promise<boolean> {
     const response: ChildReturnData = await native.execApplescriptCommand('get the name of every login item');
@@ -174,7 +174,7 @@ export class AutoLauncher {
       this.enabled = await this.isEnabled()
       trial += 1
     } while (this.enabled && trial < 5);
-    await appConfig.update({launchOnBoot: false})
+    await appConfig.update({ launchOnBoot: false })
     return child
   }
   async init(): Promise<void> {

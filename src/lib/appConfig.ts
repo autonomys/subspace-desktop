@@ -18,6 +18,7 @@ interface Config {
   rewardAddress: string,
   launchOnBoot: boolean,
   version: string,
+  nodeName: string,
 
   // TODO: remove this after PlottingProgress refactoring
   segmentCache: SegmentCache,
@@ -28,6 +29,7 @@ const emptyConfig: Config = {
   rewardAddress: "",
   launchOnBoot: true,
   version: process.env.APP_VERSION as string,
+  nodeName: "",
   segmentCache: { networkSegmentCount: 0, blockchainSizeGB: 0 },
 }
 
@@ -51,12 +53,14 @@ export const appConfig = {
       await this.write(emptyConfig)
     }
   },
-  validate(config: Config): boolean {
-    const { plot, rewardAddress } = config
+  async validate(): Promise<boolean> {
+    const config = await this.read()
+    const { plot, rewardAddress, nodeName } = config
     if (
       plot.location.length > 0 &&
       plot.sizeGB > 0 &&
-      rewardAddress.length > 0
+      rewardAddress.length > 0 &&
+      nodeName.length > 0
     ) {
       return true
     }
@@ -93,25 +97,30 @@ export const appConfig = {
       launchOnBoot,
       rewardAddress,
       version,
+      nodeName,
       segmentCache,
     }: {
       plot?: Plot;
       launchOnBoot?: boolean;
       rewardAddress?: string;
       version?: string;
+      nodeName?: string;
       segmentCache?: SegmentCache;
     }
   ): Promise<void> {
     const newAppConfig = await this.read()
-    if (plot) newAppConfig.plot = plot
+    if (plot !== undefined) newAppConfig.plot = plot
     if (launchOnBoot !== undefined) newAppConfig.launchOnBoot = launchOnBoot
-    if (rewardAddress) newAppConfig.rewardAddress = rewardAddress
-    if (version) newAppConfig.version = version
-    if (segmentCache) newAppConfig.segmentCache = segmentCache
-    this.write(newAppConfig)
+    if (rewardAddress !== undefined) newAppConfig.rewardAddress = rewardAddress
+    if (version !== undefined) newAppConfig.version = version
+    if (nodeName !== undefined) newAppConfig.nodeName = nodeName
+    if (segmentCache !== undefined) newAppConfig.segmentCache = segmentCache
+    await this.write(newAppConfig)
   },
   showErrorModal(): DialogChainObject {
-    // TODO: refactor this!
     return Dialog.create({ message: "Config file is corrupted, resetting..." })
   }
 }
+
+export const NETWORK_RPC = process.env.PUBLIC_API_WS || "ws://localhost:9944"
+export const LOCAL_RPC = process.env.LOCAL_API_WS || "ws://localhost:9944"

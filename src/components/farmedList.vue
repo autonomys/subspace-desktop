@@ -62,11 +62,11 @@ q-card(bordered flat)
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import * as util from "src/lib/util"
-import { globalState as global } from "src/lib/global"
-import { FarmedBlock } from "src/lib/types"
 import { formatDistanceToNowStrict } from "date-fns"
-import { appConfig } from "src/lib/appConfig"
+import * as util from "../lib/util"
+import { globalState as global } from "../lib/global"
+import { FarmedBlock } from "../lib/types"
+import { appConfig } from "../lib/appConfig"
 
 const lang = global.data.loc.text.dashboard
 
@@ -77,14 +77,14 @@ export default defineComponent({
   },
   emits: ["expand"],
   data() {
-    return { lang, util, global: global.data, client: global.client, rewardAddress: "", }
+    return { lang, util, global: global.data, rewardAddress: "", }
   },
   async mounted() {
     this.rewardAddress = await this.displayRewardAddress()
   },
   computed: {
     farmedBlocksList(): FarmedBlock[] {
-      return this.client?.data?.farming.farmed || []
+      return this.$client?.data?.farming.farmed || []
     },
     blocksListStyle(): { [index: string]: string } {
       return this.expanded ? { height: "370px" } : { height: "185px" }

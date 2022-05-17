@@ -33,11 +33,11 @@ q-layout(view="hHh lpr fFf")
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import { globalState as global } from "src/lib/global"
-import * as util from "src/lib/util"
-import MainMenu from "components/mainMenu.vue"
-import { myEmitter } from "src/lib/client"
 import * as process from 'process'
+import * as util from "../lib/util"
+import MainMenu from "../components/mainMenu.vue"
+import { globalState as global } from "../lib/global"
+import { myEmitter } from "../lib/client"
 
 const lang = global.data.loc.text.mainMenu
 
@@ -59,6 +59,7 @@ export default defineComponent({
   mounted() {
     this.nodeNameChanger()
     this.appVersion = (process.env.APP_VERSION as string)
+    util.infoLogger("Version: " + this.appVersion)
 
   },
   methods: {

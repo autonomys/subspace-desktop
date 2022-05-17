@@ -28,31 +28,30 @@ q-page(padding)
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import { globalState as global } from "src/lib/global"
-import * as util from "src/lib/util"
-import { appConfig } from "src/lib/appConfig"
 import { Notify } from "quasar"
-import disclaimer from "components/disclaimer.vue"
+import { globalState as global } from "../lib/global"
+import * as util from "../lib/util"
+import { appConfig } from "../lib/appConfig"
+import disclaimer from "../components/disclaimer.vue"
 
 const lang = global.data.loc.text.index
 
 export default defineComponent({
   data() {
-    return { lang, client: global.client }
+    return { lang }
   },
   async mounted() {
     try {
       this.checkDev()
-      const config = await appConfig.read()
-      if (appConfig.validate(config)) {
+      if (await appConfig.validate()) {
         util.infoLogger("INDEX | NOT First Time RUN.")
         this.dashboard()
         return
       }
-      // validate returned false, means we are starting from scratch
+      util.infoLogger("validate failed, we should start from scratch")
       this.firstLoad()
     } catch (e) {
-      // config.read() failed, means we are starting from scratch
+      util.infoLogger("config could not be read, starting from scratch")
       this.firstLoad()
     }
   },
@@ -67,7 +66,8 @@ export default defineComponent({
       this.$router.replace({ name: "dashboard" })
     },
     async firstLoad() {
-      util.infoLogger("INDEX | First Time RUN.")
+      util.infoLogger("INDEX | First Time RUN, resetting reward address")
+      await appConfig.update({ rewardAddress: "" })
       this.loadNetworkData()
       const config = await appConfig.read()
       if (config.launchOnBoot) {
@@ -78,19 +78,20 @@ export default defineComponent({
       }
     },
     async loadNetworkData() {
-      const raceResult = util.promiseTimeout(7000, this.client.connectPublicApi())
+      const raceResult = util.promiseTimeout(7000, this.$client.connectPublicApi())
       raceResult.then(async() => {
-        const networkSegmentCount = await this.client.getNetworkSegmentCount()
-        await this.client.disconnectPublicApi()
+        const networkSegmentCount = await this.$client.getNetworkSegmentCount()
+        await this.$client.disconnectPublicApi()
         const totalSize = networkSegmentCount * 256 * util.PIECE_SIZE
         const blockchainSizeGB = Math.round((totalSize * 100) / util.GB) / 100
-        appConfig.update({ segmentCache: {
+        await appConfig.update({ segmentCache: {
           networkSegmentCount,
           blockchainSizeGB: blockchainSizeGB === 0 ? 0.1 : blockchainSizeGB
         }})
       })
-      raceResult.catch(_ => {
-        util.errorLogger("The server seems to be too congested! Please try again later...")
+      raceResult.catch((error) => {
+        util.errorLogger(error)
+        util.errorLogger("INDEX | Could not connect to server")
       })
     },
     async viewDisclaimer(destination: string) {
