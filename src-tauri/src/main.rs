@@ -187,16 +187,16 @@ pub fn custom_log_dir(id: &str) -> Option<PathBuf> {
     #[cfg(target_os = "macos")]
     let path = dirs_next::home_dir().map(|dir| {
         dir.join("Library/Logs").join(id)
-        //.join(&config.tauri.bundle.identifier)
+        // evaluates to: `~/Library/Logs/${bundle_name}
     });
 
     #[cfg(target_os = "linux")]
     let path = dirs_next::data_dir().map(|dir| dir.join(id).join("logs"));
-    //dir.join(&config.tauri.bundle.identifier).join("logs"));
+    // evaluates to: `~/.local/share/${bundle_name}/logs
 
     #[cfg(target_os = "windows")]
     let path = dirs_next::data_local_dir().map(|dir| dir.join(id).join("logs"));
-    //dir.join(&config.tauri.bundle.identifier).join("logs"));
+    // evaluates to: `C:/Users/Username/AppData/Local/${bundle_name}/logs
 
     path
 }
