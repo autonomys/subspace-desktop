@@ -232,6 +232,7 @@ export default defineComponent({
         await new Promise((resolve) => setTimeout(resolve, 3000))
         this.syncState = (await this.$client.getSyncState()).toJSON() as unknown as SyncState;
         this.plottingData.status = `Syncing ${this.syncState.currentBlock} of ${this.syncState.highestBlock} blocks`
+        this.plottingData.finishedGB = (this.syncState.currentBlock * this.plottingData.allocatedGB) / this.syncState.highestBlock; 
       } while (this.syncState.currentBlock < this.syncState.highestBlock)
     },
     startTimers() {

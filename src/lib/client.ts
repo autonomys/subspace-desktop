@@ -150,8 +150,7 @@ export class Client {
     return this.firstLoad
   }
 
-  /* Connect to LOCAL node - localhost:9944 */
-  public async connectapi(): Promise<void> {
+  public async connectApi(): Promise<void> {
     if (!this.api.isConnected) {
       await this.api.connect()
     }
@@ -167,7 +166,7 @@ export class Client {
     await this.startNode(path, nodeName)
     // TODO: workaround in case node takes some time to fully start.
     await new Promise((resolve) => setTimeout(resolve, 7000))
-    await this.connectapi()
+    await this.connectApi()
   }
 
   // TODO: Disable mnemonic return from tauri commmand instead of this validation.

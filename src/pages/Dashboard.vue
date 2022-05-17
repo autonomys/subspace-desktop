@@ -136,7 +136,7 @@ export default defineComponent({
 
       let syncState = await this.$client.getSyncState()
       do {
-        this.network.message = `Syncing node ${syncState.currentBlock.toLocaleString()} of ${syncState.highestBlock.toLocaleString()} Blocks`
+        this.network.message = `Syncing node ${syncState.currentBlock} of ${syncState.highestBlock} Blocks`
         await new Promise((resolve) => setTimeout(resolve, 3000))
         syncState = await this.$client.getSyncState()
       } while (syncState.currentBlock.toNumber() < syncState.highestBlock.unwrapOrDefault().toNumber())
