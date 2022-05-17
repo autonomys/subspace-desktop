@@ -3,10 +3,6 @@ import { appName, errorLogger } from "./util"
 import * as path from "@tauri-apps/api/path"
 import * as fs from "@tauri-apps/api/fs"
 
-export interface SegmentCache {
-  networkSegmentCount: number
-  blockchainSizeGB: number
-}
 export interface Plot {
   location: string
   sizeGB: number
@@ -19,9 +15,6 @@ interface Config {
   launchOnBoot: boolean,
   version: string,
   nodeName: string,
-
-  // TODO: remove this after PlottingProgress refactoring
-  segmentCache: SegmentCache,
 }
 
 const emptyConfig: Config = {
@@ -30,7 +23,6 @@ const emptyConfig: Config = {
   launchOnBoot: true,
   version: process.env.APP_VERSION as string,
   nodeName: "",
-  segmentCache: { networkSegmentCount: 0, blockchainSizeGB: 0 },
 }
 
 export const appConfig = {
@@ -98,14 +90,12 @@ export const appConfig = {
       rewardAddress,
       version,
       nodeName,
-      segmentCache,
     }: {
       plot?: Plot;
       launchOnBoot?: boolean;
       rewardAddress?: string;
       version?: string;
       nodeName?: string;
-      segmentCache?: SegmentCache;
     }
   ): Promise<void> {
     const newAppConfig = await this.read()
@@ -114,13 +104,9 @@ export const appConfig = {
     if (rewardAddress !== undefined) newAppConfig.rewardAddress = rewardAddress
     if (version !== undefined) newAppConfig.version = version
     if (nodeName !== undefined) newAppConfig.nodeName = nodeName
-    if (segmentCache !== undefined) newAppConfig.segmentCache = segmentCache
     await this.write(newAppConfig)
   },
   showErrorModal(): DialogChainObject {
     return Dialog.create({ message: "Config file is corrupted, resetting..." })
   }
 }
-
-export const NETWORK_RPC = process.env.PUBLIC_API_WS || "ws://localhost:9944"
-export const LOCAL_RPC = process.env.LOCAL_API_WS || "ws://localhost:9944"

@@ -55,12 +55,6 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
                 q-tooltip.q-pa-sm
                   p {{ lang.availableSpace }}
               .q-mt-sm {{ lang.allocated }}
-                q-spinner-orbit(
-                  style="margin-left: 6px"
-                  color="black"
-                  size="12px"
-                  v-if="blockchainSizeGB === 0"
-                )
               q-input(
                 bg-color="blue-2"
                 dense
@@ -68,26 +62,13 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
                 outlined
                 suffix="GB"
                 v-model="allocatedGB"
-                v-if="blockchainSizeGB > 0"
               )
                 q-tooltip.q-pa-sm
                   p {{ lang.allocatedSpace }}
-              q-input(
-                color="blue"
-                dense
-                input-class="setupPlotInput"
-                outlined
-                readonly
-                prefix="Estimating blockchain size ..."
-                v-if="blockchainSizeGB === 0"
-              )
-                q-tooltip.q-pa-sm
-                  p {{ lang.estimatingSpace }}
 
         .col.q-pr-md
           .row.justify-center(
             style="transform: scale(-1, 1)"
-            v-if="blockchainSizeGB > 0"
           )
             apexchart(
               :options="chartOptions"
@@ -95,8 +76,6 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
               type="donut"
               width="200px"
             )
-          .row.justify-center(v-else)
-            q-spinner-pie(color="grey" size="120px" thickness="1")
           .row.q-mt-md
             .col-1
             .col
@@ -108,7 +87,6 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
                 snap
                 style="height: 25px"
                 v-model="allocatedGB"
-                v-if="blockchainSizeGB > 0"
               )
             .col-1
   .row.justify-end.q-mt-sm.absolute-bottom.q-pb-md
@@ -119,7 +97,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
     .col-expand
     .col-auto
       q-btn(
-        :disable="!canContinue"
+        :disable="!validPath"
         @click="confirmCreateDir()"
         color="blue-8"
         icon-right="downloading"
@@ -127,7 +105,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
         outline
         size="lg"
       )
-      q-tooltip.q-pa-md(v-if="!canContinue")
+      q-tooltip.q-pa-md(v-if="!validPath")
         p.q-mb-lg {{ lang.tooltip }}
 </template>
 
@@ -153,7 +131,6 @@ export default defineComponent({
       revealKey: false,
       plotDirectory: "/",
       allocatedGB: 1,
-      blockchainSizeGB: 0,
       validPath: true,
       defaultPath: "/",
       driveStats: <native.DriveStats>{ freeBytes: 0, totalBytes: 0 },
@@ -191,9 +168,6 @@ export default defineComponent({
         freeGB
       }
     },
-    canContinue(): boolean {
-      return this.blockchainSizeGB > 0 && this.validPath
-    },
     unsafeFree(): boolean {
       return this.stats.freeGB < 20
     }
@@ -224,10 +198,6 @@ export default defineComponent({
     await this.updateDriveStats()
     this.defaultPath = (await tauri.path.dataDir()) + util.appName
     this.plotDirectory = this.defaultPath
-    do {
-      this.blockchainSizeGB = (await appConfig.read()).segmentCache.blockchainSizeGB || 0
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-    } while (this.blockchainSizeGB <= 0)
   },
   async created() {
     this.$watch(
@@ -309,7 +279,7 @@ export default defineComponent({
       const config = await appConfig.read()
       if (config.rewardAddress === "") {
         util.infoLogger("SETUP PLOT | reward address was empty, creating a new one")
-        this.rewardAddress = this.$client.createRewardAddress()
+        this.rewardAddress = await this.$client.createRewardAddress()
         await this.viewMnemonic()
       }
       else {
