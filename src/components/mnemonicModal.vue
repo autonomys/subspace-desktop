@@ -16,7 +16,7 @@ q-dialog(@hide="onDialogHide" persistent ref="dialog")
           .row.justify-end
             q-btn(
               :disabled="!userConfirmed"
-              @click="currentPage++"
+              @click="hide"
               label="next"
               outline
               size="lg"
