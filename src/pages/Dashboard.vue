@@ -76,42 +76,34 @@ export default defineComponent({
     const config = await appConfig.read()
     this.plot.plotSizeGB = config.plot.sizeGB
 
-    const raceResult = util.promiseTimeout(7000, this.$client.connectPublicApi())
-    raceResult.then(async() => {
-      if (this.$client.isFirstLoad() === false) {
-        util.infoLogger("DASHBOARD | starting node")
-        if (config.nodeName !== "") {
-          await this.$client.waitNodeStartApiConnect(config.plot.location, config.nodeName)
-        } else {
-          util.errorLogger("DASHBOARD | node name was empty when tried to start node")
-        }
-        util.infoLogger("DASHBOARD | starting farmer")
-        const farmerStarted = await this.$client.startFarming(config.plot.location, config.plot.sizeGB)
-        if (!farmerStarted) {
-          util.errorLogger("DASHBOARD | Farmer start error!")
-        }
-        util.infoLogger("DASHBOARD | starting block subscription")
-        await this.$client.startBlockSubscription()
+    if (this.$client.isFirstLoad() === false) {
+      util.infoLogger("DASHBOARD | starting node")
+      if (config.nodeName !== "") {
+        await this.$client.waitNodeStartApiConnect(config.plot.location, config.nodeName)
+      } else {
+        util.errorLogger("DASHBOARD | node name was empty when tried to start node")
       }
+      util.infoLogger("DASHBOARD | starting farmer")
+      const farmerStarted = await this.$client.startFarming(config.plot.location, config.plot.sizeGB)
+      if (!farmerStarted) {
+        util.errorLogger("DASHBOARD | Farmer start error!")
+      }
+      util.infoLogger("DASHBOARD | starting block subscription")
+      await this.$client.startBlockSubscription()
+    }
 
-      this.global.status.state = "loading"
-      this.global.status.message = "loading..."
+    this.global.status.state = "loading"
+    this.global.status.message = "loading..."
 
-      this.clientData = this.$client.data
-      this.loading = false
-      this.peerInterval = window.setInterval(this.getNetInfo, 10000)
-      this.$client.data.farming.events.on("newBlock", this.newBlock)
-      this.$client.data.farming.events.on("farmedBlock", this.farmBlock)
-      this.global.status.state = "live"
-      this.global.status.message = lang.syncedMsg
-      await this.checkNodeAndNetwork()
-      await this.checkFarmerAndPlot()
-      await this.$client.disconnectPublicApi()
-    })
-    raceResult.catch((error) => {
-      util.errorLogger(error)
-      util.errorLogger("DASHBOARD | could not connect to server")
-    })
+    this.clientData = this.$client.data
+    this.loading = false
+    this.peerInterval = window.setInterval(this.getNetInfo, 10000)
+    this.$client.data.farming.events.on("newBlock", this.newBlock)
+    this.$client.data.farming.events.on("farmedBlock", this.farmBlock)
+    this.global.status.state = "live"
+    this.global.status.message = lang.syncedMsg
+    await this.checkNodeAndNetwork()
+    await this.checkFarmerAndPlot()
   },
   unmounted() {
     this.unsubscribe()
@@ -142,7 +134,6 @@ export default defineComponent({
       this.network.state = "verifying"
       this.network.message = lang.verifyingNet
 
-      // TODO: throttle request 
       let syncState = await this.$client.getSyncState()
       do {
         this.network.message = `Syncing node ${syncState.currentBlock.toLocaleString()} of ${syncState.highestBlock.toLocaleString()} Blocks`

@@ -1,13 +1,13 @@
 import { ApiPromise, Keyring } from "@polkadot/api"
 import type { Vec } from "@polkadot/types/codec"
-import type { u128, u32 } from "@polkadot/types"
-import { mnemonicGenerate } from "@polkadot/util-crypto"
+import type { u128 } from "@polkadot/types"
+import { mnemonicGenerate, cryptoWaitReady } from "@polkadot/util-crypto"
 import * as event from "@tauri-apps/api/event"
 import { invoke } from "@tauri-apps/api/tauri"
 import { reactive } from "vue"
 import * as process from "process"
 import * as util from "../lib/util"
-import { appConfig, NETWORK_RPC } from "./appConfig"
+import { appConfig } from "./appConfig"
 import { getStoredBlocks, storeBlocks } from "./blockStorage"
 import {
   emptyClientData,
@@ -23,6 +23,7 @@ export const myEmitter = new EventEmitter();
 const tauri = { event, invoke }
 const SUNIT = 1000000000000000000n
 
+const NETWORK_RPC = process.env.PUBLIC_API_WS || "ws://localhost:9944";
 const appsLink = "https://polkadot.js.org/apps/?rpc=" + NETWORK_RPC + "#/explorer/query/"
 
 export class Client {
@@ -32,18 +33,16 @@ export class Client {
   protected clearTauriDestroy: event.UnlistenFn = () => null;
   protected unsubscribe: event.UnlistenFn = () => null;
 
-  localApi: ApiPromise;
-  publicApi: ApiPromise;
+  private api: ApiPromise;
 
-  constructor (localApi: ApiPromise, publicApi: ApiPromise) {
-    this.localApi = localApi;
-    this.publicApi = publicApi;
+  constructor (api: ApiPromise) {
+    this.api = api;
   }
 
   data = reactive(emptyClientData)
   status = {
     net: async (): Promise<NetStatus> => {
-      const peers = await this.localApi.rpc.system.peers()
+      const peers = await this.api.rpc.system.peers()
       return { peers }
     }
   }
@@ -60,11 +59,11 @@ export class Client {
           return
         }
 
-        this.unsubscribe = await this.localApi.rpc.chain.subscribeNewHeads(
+        this.unsubscribe = await this.api.rpc.chain.subscribeNewHeads(
           async ({ hash, number }) => {
             const blockNum = number.toNumber()
-            const signedBlock = await this.localApi.rpc.chain.getBlock(hash)
-            const preRuntime: SubPreDigest = this.localApi.registry.createType(
+            const signedBlock = await this.api.rpc.chain.getBlock(hash)
+            const preRuntime: SubPreDigest = this.api.registry.createType(
               'SubPreDigest',
               signedBlock.block.header.digest.logs.find((digestItem) => digestItem.isPreRuntime)
                 ?.asPreRuntime![1]);
@@ -73,11 +72,11 @@ export class Client {
               console.log("Farmed by me:", blockNum)
               let blockReward = 0
               const allRecords: Vec<any> =
-                await this.localApi.query.system.events.at(hash)
+                await this.api.query.system.events.at(hash)
               allRecords.forEach((record) => {
                 const { section, method, data } = record.event
                 if (section === "rewards" && method === "BlockReward") {
-                  const reward: u128 = this.localApi.registry.createType(
+                  const reward: u128 = this.api.registry.createType(
                     "u128",
                     data[1]
                   )
@@ -123,8 +122,7 @@ export class Client {
       stop: (): void => {
         util.infoLogger("block subscription stop triggered")
         this.unsubscribe()
-        this.localApi.disconnect()
-        this.publicApi.disconnect()
+        this.api.disconnect()
         try {
           this.clearTauriDestroy()
           storeBlocks(this.data.farming.farmed)
@@ -153,37 +151,15 @@ export class Client {
   }
 
   /* Connect to LOCAL node - localhost:9944 */
-  public async connectLocalApi(): Promise<void> {
-    if (!this.localApi.isConnected) {
-      await this.localApi.connect()
+  public async connectapi(): Promise<void> {
+    if (!this.api.isConnected) {
+      await this.api.connect()
     }
-    await this.localApi.isReady
-  }
-  /* Connect to PUBLIC-rpc node - Example: farm-rpc.subspace.network */
-  public async connectPublicApi(): Promise<void> {
-    if (!this.publicApi.isConnected) {
-      await this.publicApi.connect()
-    }
-    await this.publicApi.isReady
-  }
-
-  /* Disconnects from PUBLIC-rpc node - Example: farm-rpc.subspace.network */
-  public async disconnectPublicApi(): Promise<void> {
-    await this.publicApi.disconnect()
+    await this.api.isReady
   }
 
   public async getSyncState():Promise<SyncState> {
-    return this.localApi.rpc.system.syncState();
-  }
-
-  public async getLocalSegmentCount(): Promise<number> {
-    const plot_progress_tracker =
-      ((await invoke("plot_progress_tracker")) as number) / 256
-    return plot_progress_tracker <= 1 ? 1 : plot_progress_tracker - 1
-  }
-  public async getNetworkSegmentCount(): Promise<number> {
-    const recordsRoot = await this.publicApi.query.subspace.counterForRecordsRoot() as u32
-    return recordsRoot.toNumber()
+    return this.api.rpc.system.syncState();
   }
 
   /* NODE INTEGRATION */
@@ -191,7 +167,7 @@ export class Client {
     await this.startNode(path, nodeName)
     // TODO: workaround in case node takes some time to fully start.
     await new Promise((resolve) => setTimeout(resolve, 7000))
-    await this.connectLocalApi()
+    await this.connectapi()
   }
 
   // TODO: Disable mnemonic return from tauri commmand instead of this validation.
@@ -208,13 +184,12 @@ export class Client {
     this.data.farming.farmed = this.farmed
   }
 
-  public createRewardAddress(): string {
-    console.log('createRewardAddress')
+  public async createRewardAddress(): Promise<string> {
     const mnemonic = mnemonicGenerate()
     const keyring = new Keyring({ type: 'sr25519', ss58Format: 2254 }) // 2254 is the prefix for subspace-testnet
+    await cryptoWaitReady();
     const pair = keyring.createFromUri(mnemonic)
     this.mnemonic = mnemonic
-    console.log('mnemonic', mnemonic)
     return pair.address
   }
 
