@@ -9367,7 +9367,7 @@ name = "subspace-desktop"
 version = "0.5.0"
 dependencies = [
  "anyhow",
- "dirs-next",
+ "dirs 4.0.0",
  "dotenv",
  "event-listener-primitives",
  "fdlimit",
