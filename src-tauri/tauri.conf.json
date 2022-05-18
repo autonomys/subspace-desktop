@@ -75,7 +75,7 @@
       }
     ],
     "security": {
-      "csp": "default-src https tauri 'self'; style-src 'unsafe-inline' 'self'; img-src 'self'; object-src 'none'; script-src 'wasm-unsafe-eval' 'unsafe-eval' 'self'"
+      "csp": "default-src https tauri 'self'; img-src 'self'; object-src 'none'; script-src 'wasm-unsafe-eval' 'unsafe-eval' 'self'"
     }
   }
 }
