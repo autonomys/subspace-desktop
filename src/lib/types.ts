@@ -122,3 +122,9 @@ export interface SubPreDigest extends Struct {
   readonly slot: u64
   readonly solution: Solution
 }
+
+export interface SyncState {
+  startingBlock: number;
+  currentBlock: number;
+  highestBlock: number;
+}
