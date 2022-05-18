@@ -193,7 +193,7 @@ export class Client {
       return pair.address
     } catch (error) {
       util.errorLogger(error)
-      return "???"
+      return ""
     }
   }
 
