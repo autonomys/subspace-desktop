@@ -67,6 +67,7 @@ async fn farming(path: String, reward_address: String, plot_size: u64) -> bool {
             loop {
                 let result = error_receiver.recv().await;
                 match result {
+                    // we have received an error, let's restart the farmer
                     Some(_) => farmer::farm(
                         path.clone().into(),
                         "ws://127.0.0.1:9944",
@@ -75,7 +76,7 @@ async fn farming(path: String, reward_address: String, plot_size: u64) -> bool {
                         error_sender.clone(),
                     )
                     .await
-                    .unwrap(), // this send should always be successful
+                    .unwrap(),
                     None => unreachable!(
                         "sender should not have been dropped before sending an error message"
                     ),
