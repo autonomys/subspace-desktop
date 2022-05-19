@@ -1,13 +1,11 @@
 use anyhow::{anyhow, Result};
-use log::{info, warn};
+use log::info;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::time::Duration;
 use subspace_core_primitives::{PublicKey, PIECE_SIZE};
 use subspace_farmer::multi_farming::{MultiFarming, Options as MultiFarmingOptions};
 use subspace_farmer::{Identity, NodeRpcClient, ObjectMappings, Plot, RpcClient};
-use subspace_rpc_primitives::FarmerMetadata;
 
 pub(crate) static PLOTTED_PIECES: AtomicUsize = AtomicUsize::new(0);
 
@@ -18,7 +16,6 @@ pub(crate) async fn farm(
     node_rpc_url: &str,
     reward_address: Option<PublicKey>,
     plot_size: u64,
-    best_block_number_check_interval: Duration,
 ) -> Result<(), anyhow::Error> {
     raise_fd_limit();
     let reward_address = if let Some(reward_address) = reward_address {
@@ -29,7 +26,7 @@ pub(crate) async fn farm(
     };
 
     info!("Connecting to node at {}", node_rpc_url);
-    let client = NodeRpcClient::new(&node_rpc_url).await?;
+    let client = NodeRpcClient::new(node_rpc_url).await?;
 
     let metadata = client
         .farmer_metadata()
@@ -37,12 +34,6 @@ pub(crate) async fn farm(
         .map_err(|error| anyhow!(error))?;
 
     let max_plot_size = metadata.max_plot_size;
-
-    let FarmerMetadata {
-        record_size,
-        recorded_history_segment_size,
-        ..
-    } = metadata;
 
     info!("Opening object mapping");
     let object_mappings = tokio::task::spawn_blocking({

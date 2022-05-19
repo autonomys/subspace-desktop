@@ -15,7 +15,6 @@ use sc_service::{
 use sp_core::crypto::Ss58AddressFormat;
 use std::env;
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
 use std::sync::Once;
 use subspace_service::{FullClient, NewFull, SubspaceConfiguration};
 use tokio::runtime::Handle;
@@ -79,7 +78,7 @@ pub(crate) async fn create_full_client<CS: ChainSpec + 'static>(
     chain_spec: CS,
     base_path: PathBuf,
     node_name: String,
-) -> Result<NewFull<Arc<FullClient<subspace_runtime::RuntimeApi, ExecutorDispatch>>>> {
+) -> Result<NewFull<FullClient<subspace_runtime::RuntimeApi, ExecutorDispatch>>> {
     // This must only be initialized once
     INITIALIZE_SUBSTRATE.call_once(|| {
         dotenv::dotenv().ok();
@@ -215,6 +214,9 @@ fn create_configuration<CS: ChainSpec + 'static>(
                 "https://tauri.localhost".to_string(),
             ]),
             rpc_max_payload: None,
+            rpc_max_request_size: None,
+            rpc_max_response_size: None,
+            rpc_id_provider: None,
             ws_max_out_buffer_capacity: None,
             prometheus_config: None,
             telemetry_endpoints,
@@ -234,6 +236,7 @@ fn create_configuration<CS: ChainSpec + 'static>(
             base_path: Some(base_path),
             informant_output_format: Default::default(),
             runtime_cache_size: 2,
+            rpc_max_subs_per_conn: None,
         },
         force_new_slot_notifications: false,
     })
