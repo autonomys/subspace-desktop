@@ -27,6 +27,7 @@ export const appDataDialog = {
   notEmptyDirectoryInfo(plotDirectory: string): void {
     Dialog.create({
       title: `Selected directory is not empty!`,
+      // TODO: the styling below is not applied due to CSP. Make it NOT inline, or abandon it
       message: `
         <p style="font-size:12px;">
           Plots Directory must be empty.</br>
@@ -46,6 +47,7 @@ export const appDataDialog = {
   ): void {
     Dialog.create({
       title: `Do you want to create a new directory?`,
+      // TODO: the styling below is not applied due to CSP. Make it NOT inline, or abandon it
       message: `
       <p style="font-size:12px;">
         A new directory will be created.</br>
@@ -68,6 +70,7 @@ export const appDataDialog = {
   ): void {
     Dialog.create({
       title: `Confirm selected directory.`,
+      // TODO: the styling below is not applied due to CSP. Make it NOT inline, or abandon it
       message: `
     <p style="font-size:12px;">
       Seleted plot directory.</br>

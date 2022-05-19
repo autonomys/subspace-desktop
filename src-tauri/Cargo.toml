@@ -9,7 +9,7 @@ edition = "2021"
 
 [build-dependencies]
 substrate-build-script-utils = { version = "3.0.0", git = "https://github.com/paritytech/substrate", rev = "c364008a6c7da8456e17967f55edf51e45146998" }
-tauri-build = { version = "1.0.0-rc.7", features = [] }
+tauri-build = { version = "1.0.0-rc.9", features = [] }
 
 [dependencies]
 anyhow = "1.0.44"
@@ -42,7 +42,7 @@ winreg = "0.10.1"
 
 [dependencies.tauri]
 features = ["api-all", "gtk-tray", "system-tray"]
-version = "1.0.0-rc.8"
+version = "1.0.0-rc.11"
 
 [dependencies.tauri-plugin-log]
 git = "https://github.com/tauri-apps/tauri-plugin-log"

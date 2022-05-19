@@ -184,12 +184,17 @@ export class Client {
   }
 
   public async createRewardAddress(): Promise<string> {
-    const mnemonic = mnemonicGenerate()
-    const keyring = new Keyring({ type: 'sr25519', ss58Format: 2254 }) // 2254 is the prefix for subspace-testnet
-    await cryptoWaitReady();
-    const pair = keyring.createFromUri(mnemonic)
-    this.mnemonic = mnemonic
-    return pair.address
+    try {
+      const mnemonic = mnemonicGenerate()
+      const keyring = new Keyring({ type: 'sr25519', ss58Format: 2254 }) // 2254 is the prefix for subspace-testnet
+      await cryptoWaitReady();
+      const pair = keyring.createFromUri(mnemonic)
+      this.mnemonic = mnemonic
+      return pair.address
+    } catch (error) {
+      util.errorLogger(error)
+      return ""
+    }
   }
 
   /* FARMER INTEGRATION */
