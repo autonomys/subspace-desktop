@@ -179,7 +179,7 @@ fn create_configuration<CS: ChainSpec + 'static>(
             state_cache_size: 67_108_864,
             state_cache_child_ratio: None,
             // TODO: Change to constrained eventually (need DSN for this)
-            state_pruning: PruningMode::keep_blocks(1024),
+            state_pruning: Some(PruningMode::keep_blocks(1024)),
             keep_blocks: KeepBlocks::Some(1024),
             wasm_method: WasmExecutionMethod::Compiled,
             wasm_runtime_overrides: None,

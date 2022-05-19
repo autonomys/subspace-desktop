@@ -1,12 +1,12 @@
 use anyhow::{anyhow, Result};
-use log::info;
+use log::{info, warn};
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 use subspace_core_primitives::{PublicKey, PIECE_SIZE};
-use subspace_farmer::multi_farming::MultiFarming;
-use subspace_farmer::{Identity, NodeRpcClient, ObjectMappings, RpcClient};
+use subspace_farmer::multi_farming::{MultiFarming, Options as MultiFarmingOptions};
+use subspace_farmer::{Identity, NodeRpcClient, ObjectMappings, Plot, RpcClient};
 use subspace_rpc_primitives::FarmerMetadata;
 
 pub(crate) static PLOTTED_PIECES: AtomicUsize = AtomicUsize::new(0);
@@ -20,6 +20,7 @@ pub(crate) async fn farm(
     plot_size: u64,
     best_block_number_check_interval: Duration,
 ) -> Result<(), anyhow::Error> {
+    raise_fd_limit();
     let reward_address = if let Some(reward_address) = reward_address {
         reward_address
     } else {
@@ -28,12 +29,20 @@ pub(crate) async fn farm(
     };
 
     info!("Connecting to node at {}", node_rpc_url);
-    let client = NodeRpcClient::new(node_rpc_url).await?;
+    let client = NodeRpcClient::new(&node_rpc_url).await?;
 
-    let FarmerMetadata { max_plot_size, .. } = client
+    let metadata = client
         .farmer_metadata()
         .await
         .map_err(|error| anyhow!(error))?;
+
+    let max_plot_size = metadata.max_plot_size;
+
+    let FarmerMetadata {
+        record_size,
+        recorded_history_segment_size,
+        ..
+    } = metadata;
 
     info!("Opening object mapping");
     let object_mappings = tokio::task::spawn_blocking({
@@ -43,28 +52,23 @@ pub(crate) async fn farm(
     })
     .await??;
 
-    // TODO: we need to remember plot size in order to prune unused plots in future if plot size is
-    // less than it was specified before.
-    // TODO: Piece count should account for database overhead of various additional databases
-    // For now assume 80% will go for plot itself
-    let plot_size = plot_size * 4 / 5 / PIECE_SIZE as u64;
-
-    let plot_sizes = std::iter::repeat(max_plot_size).take((plot_size / max_plot_size) as usize);
-    let plot_sizes = if plot_size % max_plot_size > 0 {
-        plot_sizes
-            .chain(std::iter::once(plot_size % max_plot_size))
-            .collect::<Vec<_>>()
-    } else {
-        plot_sizes.collect()
-    };
-
     let multi_farming = MultiFarming::new(
-        base_directory,
-        client,
-        object_mappings.clone(),
-        plot_sizes,
-        reward_address,
-        best_block_number_check_interval,
+        MultiFarmingOptions {
+            base_directory: base_directory.clone(),
+            client,
+            object_mappings: object_mappings.clone(),
+            reward_address,
+        },
+        plot_size,
+        max_plot_size,
+        move |plot_index, public_key, max_piece_count| {
+            Plot::open_or_create(
+                base_directory.join(format!("plot{plot_index}")),
+                public_key,
+                max_piece_count,
+            )
+        },
+        true,
     )
     .await?;
 
@@ -87,4 +91,23 @@ pub(crate) async fn farm(
 pub(crate) fn parse_reward_address(s: &str) -> Result<PublicKey, sp_core::crypto::PublicError> {
     s.parse::<sp_core::sr25519::Public>()
         .map(|key| PublicKey::from(key.0))
+}
+
+pub(crate) fn raise_fd_limit() {
+    match std::panic::catch_unwind(fdlimit::raise_fd_limit) {
+        Ok(Some(limit)) => {
+            log::info!("Increase file limit from soft to hard (limit is {limit})")
+        }
+        Ok(None) => log::debug!("Failed to increase file limit"),
+        Err(err) => {
+            let err = if let Some(err) = err.downcast_ref::<&str>() {
+                *err
+            } else if let Some(err) = err.downcast_ref::<String>() {
+                err
+            } else {
+                unreachable!("Should be unreachable as `fdlimit` uses panic macro, which should return either `&str` or `String`.")
+            };
+            log::warn!("Failed to increase file limit: {err}")
+        }
+    }
 }
