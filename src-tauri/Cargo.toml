@@ -8,7 +8,7 @@ repository = "https://github.com/subspace/subspace-desktop"
 edition = "2021"
 
 [build-dependencies]
-substrate-build-script-utils = { version = "3.0.0", git = "https://github.com/paritytech/substrate", rev = "c364008a6c7da8456e17967f55edf51e45146998" }
+substrate-build-script-utils = { version = "3.0.0", git = "https://github.com/paritytech/substrate", rev = "5d3e7c4ee9f5c8e370022d5f3fa9723185710831" }
 tauri-build = { version = "1.0.0-rc.9", features = [] }
 
 [dependencies]
@@ -20,20 +20,20 @@ fdlimit = "0.2.1"
 fs2 = "0.4.3"
 hex = "0.4.3"
 log = "0.4.14"
-sc-chain-spec = { git = "https://github.com/paritytech/substrate", rev = "c4f3d028621edb293d2c423516221aa396f76a2d" }
-sc-executor = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "c4f3d028621edb293d2c423516221aa396f76a2d", features = ["wasmtime"] }
-sc-network = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "c4f3d028621edb293d2c423516221aa396f76a2d" }
-sc-service = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "c4f3d028621edb293d2c423516221aa396f76a2d", features = ["wasmtime"] }
-serde_json = "1.0.79"
-serde = { version = "1.0.136", features = [ "derive" ] }
-sp-core = { version = "6.0.0", git = "https://github.com/paritytech/substrate", rev = "c4f3d028621edb293d2c423516221aa396f76a2d" }
-sp-panic-handler = { version = "4.0.0", git = "https://github.com/paritytech/substrate", rev = "c4f3d028621edb293d2c423516221aa396f76a2d" }
-subspace-core-primitives = { git = "https://github.com/subspace/subspace", rev = "72b2c44971a2db1266995a8c0fe1223ef09be784" }
-subspace-farmer = { git = "https://github.com/subspace/subspace", rev = "72b2c44971a2db1266995a8c0fe1223ef09be784" }
-subspace-rpc-primitives = { git = "https://github.com/subspace/subspace", rev = "72b2c44971a2db1266995a8c0fe1223ef09be784" }
-subspace-runtime = { git = "https://github.com/subspace/subspace", rev = "72b2c44971a2db1266995a8c0fe1223ef09be784" }
-subspace-service = { git = "https://github.com/subspace/subspace", rev = "72b2c44971a2db1266995a8c0fe1223ef09be784" }
-subspace-solving = { git = "https://github.com/subspace/subspace", rev = "72b2c44971a2db1266995a8c0fe1223ef09be784" }
+sc-chain-spec = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate", rev = "5d3e7c4ee9f5c8e370022d5f3fa9723185710831" }
+sc-executor = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "5d3e7c4ee9f5c8e370022d5f3fa9723185710831", features = ["wasmtime"] }
+sc-network = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "5d3e7c4ee9f5c8e370022d5f3fa9723185710831" }
+sc-service = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "5d3e7c4ee9f5c8e370022d5f3fa9723185710831", features = ["wasmtime"] }
+serde_json = "1.0.81"
+serde = { version = "1.0.137", features = [ "derive" ] }
+sp-core = { version = "6.0.0", git = "https://github.com/paritytech/substrate", rev = "5d3e7c4ee9f5c8e370022d5f3fa9723185710831" }
+sp-panic-handler = { version = "4.0.0", git = "https://github.com/paritytech/substrate", rev = "5d3e7c4ee9f5c8e370022d5f3fa9723185710831" }
+subspace-core-primitives = { git = "https://github.com/subspace/subspace", rev = "3f4c8367c86f9851ef2ebb8b12b098d31a0df5b3" }
+subspace-farmer = { git = "https://github.com/subspace/subspace", rev = "3f4c8367c86f9851ef2ebb8b12b098d31a0df5b3" }
+subspace-rpc-primitives = { git = "https://github.com/subspace/subspace", rev = "3f4c8367c86f9851ef2ebb8b12b098d31a0df5b3" }
+subspace-runtime = { git = "https://github.com/subspace/subspace", rev = "3f4c8367c86f9851ef2ebb8b12b098d31a0df5b3" }
+subspace-service = { git = "https://github.com/subspace/subspace", rev = "3f4c8367c86f9851ef2ebb8b12b098d31a0df5b3" }
+subspace-solving = { git = "https://github.com/subspace/subspace", rev = "3f4c8367c86f9851ef2ebb8b12b098d31a0df5b3" }
 tokio = { version = "1.11.0", features = ["macros", "rt-multi-thread"] }
 
 
@@ -58,5 +58,5 @@ opt-level = 3
 [patch.crates-io]
 # TODO: Remove once chacha20poly1305 0.10 appears in libp2p's dependencies
 chacha20poly1305 = { git = "https://github.com/RustCrypto/AEADs", rev = "06dbfb5571687fd1bbe9d3c9b2193a1ba17f8e99" }
-# TODO: Remove once https://github.com/rust-rse/reed-solomon-erasure/pull/98 is released
-reed-solomon-erasure = { git = "https://github.com/nazar-pc/reed-solomon-erasure", rev = "b6596ee10904faff3b68bbb3a82faa1d8ab05a7b" }
+# TODO: Remove once https://github.com/sitano/merkle_light/pull/8 is released
+merkle_light = { git = "https://github.com/sitano/merkle_light", rev = "fe31d4ef27a1fbe54e82ab589b610ae4bfd2008e" }
