@@ -6,6 +6,7 @@ use std::sync::Arc;
 use subspace_core_primitives::{PublicKey, PIECE_SIZE};
 use subspace_farmer::multi_farming::{MultiFarming, Options as MultiFarmingOptions};
 use subspace_farmer::{Identity, NodeRpcClient, ObjectMappings, Plot, RpcClient};
+use tokio::sync::mpsc::Sender;
 
 pub(crate) static PLOTTED_PIECES: AtomicUsize = AtomicUsize::new(0);
 
@@ -16,6 +17,7 @@ pub(crate) async fn farm(
     node_rpc_url: &str,
     reward_address: Option<PublicKey>,
     plot_size: u64,
+    error_sender: Sender<()>,
 ) -> Result<(), anyhow::Error> {
     raise_fd_limit();
     let reward_address = if let Some(reward_address) = reward_address {
@@ -74,7 +76,16 @@ pub(crate) async fn farm(
         }))
         .detach();
 
-    tokio::spawn(async { multi_farming.wait().await });
+    tokio::spawn(async move {
+        let result = multi_farming.wait().await;
+        match result {
+            Err(error) => {
+                log::error!("{error}");
+                error_sender.send(()).await.unwrap() // this send should always be successful
+            }
+            Ok(_) => unreachable!("wait function should not return Ok()"),
+        }
+    });
 
     Ok(())
 }
