@@ -8845,7 +8845,6 @@ dependencies = [
  "sp-panic-handler",
  "subspace-core-primitives",
  "subspace-farmer",
- "subspace-rpc-primitives",
  "subspace-runtime",
  "subspace-service",
  "subspace-solving",
