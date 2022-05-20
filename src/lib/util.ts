@@ -117,6 +117,7 @@ export function createApi(url: string | string[]): ApiPromise {
   return new ApiPromise({
     provider: new WsProvider(url, false),
     types: apiTypes,
+    throwOnConnect: true,
   });
 }
 

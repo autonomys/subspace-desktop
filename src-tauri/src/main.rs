@@ -15,15 +15,12 @@ use log::{debug, error, info, LevelFilter};
 use serde::Serialize;
 use std::path::PathBuf;
 use std::sync::atomic::Ordering;
-use std::time::Duration;
 use tauri::SystemTrayEvent;
 use tauri::{
     api::{self},
     Env, Manager, RunEvent, WindowEvent,
 };
 use tauri_plugin_log::{LogTarget, LoggerBuilder};
-
-const BEST_BLOCK_NUMBER_CHECK_INTERVAL: Duration = Duration::from_secs(5);
 
 #[derive(Serialize)]
 struct DiskStats {
@@ -49,15 +46,9 @@ fn plot_progress_tracker() -> usize {
 #[tauri::command]
 async fn farming(path: String, reward_address: String, plot_size: u64) -> bool {
     if let Ok(address) = farmer::parse_reward_address(&reward_address) {
-        farmer::farm(
-            path.into(),
-            "ws://127.0.0.1:9944",
-            Some(address),
-            plot_size,
-            BEST_BLOCK_NUMBER_CHECK_INTERVAL,
-        )
-        .await
-        .unwrap();
+        farmer::farm(path.into(), "ws://127.0.0.1:9944", Some(address), plot_size)
+            .await
+            .unwrap();
         true
     } else {
         // reward address could not be parsed, and farmer did not start
@@ -95,7 +86,10 @@ async fn main() -> Result<()> {
     let app = tauri::Builder::default()
         .plugin(
             LoggerBuilder::new()
-                .targets(vec![LogTarget::Folder(custom_log_dir(id).unwrap())])
+                .targets(vec![
+                    LogTarget::Folder(custom_log_dir(id).unwrap()),
+                    LogTarget::Stdout,
+                ])
                 .level(LevelFilter::Info)
                 .build(),
         )

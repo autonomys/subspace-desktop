@@ -15,7 +15,6 @@ use sc_service::{
 use sp_core::crypto::Ss58AddressFormat;
 use std::env;
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
 use std::sync::Once;
 use subspace_service::{FullClient, NewFull, SubspaceConfiguration};
 use tokio::runtime::Handle;
@@ -79,7 +78,7 @@ pub(crate) async fn create_full_client<CS: ChainSpec + 'static>(
     chain_spec: CS,
     base_path: PathBuf,
     node_name: String,
-) -> Result<NewFull<Arc<FullClient<subspace_runtime::RuntimeApi, ExecutorDispatch>>>> {
+) -> Result<NewFull<FullClient<subspace_runtime::RuntimeApi, ExecutorDispatch>>> {
     // This must only be initialized once
     INITIALIZE_SUBSTRATE.call_once(|| {
         dotenv::dotenv().ok();
@@ -179,7 +178,7 @@ fn create_configuration<CS: ChainSpec + 'static>(
             state_cache_size: 67_108_864,
             state_cache_child_ratio: None,
             // TODO: Change to constrained eventually (need DSN for this)
-            state_pruning: PruningMode::keep_blocks(1024),
+            state_pruning: Some(PruningMode::keep_blocks(1024)),
             keep_blocks: KeepBlocks::Some(1024),
             wasm_method: WasmExecutionMethod::Compiled,
             wasm_runtime_overrides: None,
@@ -199,11 +198,11 @@ fn create_configuration<CS: ChainSpec + 'static>(
                 offchain_worker: ExecutionStrategy::NativeElseWasm,
                 other: ExecutionStrategy::NativeElseWasm,
             },
-            rpc_http: None,
+            rpc_http: Some("127.0.0.1:9933".parse().expect("http endpoint is valid")),
             rpc_ws: Some("127.0.0.1:9944".parse().expect("IP and port are valid")),
             rpc_ipc: None,
             rpc_methods: RpcMethods::Safe,
-            rpc_ws_max_connections: None,
+            rpc_ws_max_connections: Default::default(),
             // Below CORS are default from Substrate
             rpc_cors: Some(vec![
                 "http://localhost:*".to_string(),
@@ -213,8 +212,12 @@ fn create_configuration<CS: ChainSpec + 'static>(
                 "https://polkadot.js.org".to_string(),
                 "tauri://localhost".to_string(),
                 "https://tauri.localhost".to_string(),
+                "http://localhost:8080".to_string(),
             ]),
             rpc_max_payload: None,
+            rpc_max_request_size: None,
+            rpc_max_response_size: None,
+            rpc_id_provider: None,
             ws_max_out_buffer_capacity: None,
             prometheus_config: None,
             telemetry_endpoints,
@@ -234,6 +237,7 @@ fn create_configuration<CS: ChainSpec + 'static>(
             base_path: Some(base_path),
             informant_output_format: Default::default(),
             runtime_cache_size: 2,
+            rpc_max_subs_per_conn: None,
         },
         force_new_slot_notifications: false,
     })
