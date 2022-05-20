@@ -13,7 +13,7 @@ q-layout(view="hHh lpr fFf")
             q-tooltip
               .col
                 p.no-margin(style="font-size: 12px") {{ lang.nonIncentivizedTooltip }}
-          .col-auto.q-mr-md.relative-position
+          .col-auto.q-mr-md.relative-position(v-if="global.nodeName || oldNodeName")
             q-badge.cursor-pointer(
               v-if="!isEditName" 
               color="blue-8" 
@@ -24,7 +24,7 @@ q-layout(view="hHh lpr fFf")
               .q-mr-xs(
                 class="text-italic" 
                 style="font-size: 14px"
-              ) {{ readableName }}
+              ) {{ trimmedName }}
             q-input.name-input(
               ref="nameInput"
               v-else 
@@ -72,7 +72,7 @@ export default defineComponent({
     }
   },
   computed: {
-    readableName() {
+    trimmedName() {
       const { nodeName } = global.data;
       return nodeName.length > 20 
         ? `${nodeName.slice(0, 20)}...` 
