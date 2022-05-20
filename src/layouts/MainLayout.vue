@@ -29,8 +29,8 @@ q-layout(view="hHh lpr fFf")
               ref="nameInput"
               v-else 
               v-model="global.nodeName" 
-              @blur="confirmName"
-              @keyup.enter="confirmName"
+              @blur="saveName"
+              @keyup.enter="saveName"
               dense="dense"
               outlined
               autofocus
@@ -53,6 +53,7 @@ import * as process from 'process'
 import * as util from "../lib/util"
 import MainMenu from "../components/mainMenu.vue"
 import { globalState as global } from "../lib/global"
+import { appConfig } from "../lib/appConfig"
 
 const lang = global.data.loc.text.mainMenu
 
@@ -88,13 +89,15 @@ export default defineComponent({
       this.setEditName(true);
       this.oldNodeName = global.data.nodeName;
     },
-    confirmName() {
+    async saveName() {
       // if user left input empty - use prev name
-      const newName = !global.data.nodeName 
-        ? this.oldNodeName 
-        : global.data.nodeName;
+      if (!global.data.nodeName) {
+        global.setNodeName(this.oldNodeName)
+      } else {
+        global.setNodeName(global.data.nodeName)
+        await appConfig.update({ nodeName: global.data.nodeName })
+      }
 
-      global.setNodeName(newName)
       this.setEditName(false);
     },
     setEditName(value: boolean) {
