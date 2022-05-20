@@ -14,11 +14,12 @@ q-layout(view="hHh lpr fFf")
               .col
                 p.no-margin(style="font-size: 12px") {{ lang.nonIncentivizedTooltip }}
           .col-auto.q-mr-md.relative-position(
-            v-if="nodeName !== ''"
+            v-if="global.nodeName !== ''"
           )
             q-badge(color="blue-8" text-color="white")
               .q-ma-xs(style="font-size: 14px") {{ "Node Name:" }}
-              .q-mr-xs(class="text-italic" style="font-size: 14px") {{ nodeName }}
+              .q-mr-xs(class="text-italic" style="font-size: 14px") {{ global.nodeName }}
+          // q-input(value="global.nodeName" @input="onInput" dense="dense")
           // Show the dashboard status indicator when on the dashboard page.
           .col-auto.q-mr-md.relative-position(
             v-if="$route.name == 'dashboard'"
@@ -37,7 +38,6 @@ import * as process from 'process'
 import * as util from "../lib/util"
 import MainMenu from "../components/mainMenu.vue"
 import { globalState as global } from "../lib/global"
-import { myEmitter } from "../lib/client"
 
 const lang = global.data.loc.text.mainMenu
 
@@ -53,21 +53,17 @@ export default defineComponent({
       appVersion: "",
       util,
       autoLaunch: false,
-      nodeName: ''
     }
   },
   mounted() {
-    this.nodeNameChanger()
     this.appVersion = (process.env.APP_VERSION as string)
     util.infoLogger("Version: " + this.appVersion)
 
   },
   methods: {
-    async nodeNameChanger() {
-      myEmitter.on("nodeName", (arg1: string) => {
-        this.nodeName = arg1
-      });
-    },
+    onInput(e: InputEvent) {
+      global.setNodeName((e.target as HTMLInputElement).value)
+    }
   }
 })
 </script>
