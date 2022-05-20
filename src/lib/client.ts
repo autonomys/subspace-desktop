@@ -151,7 +151,7 @@ export class Client {
     if (!this.api.isConnected) {
       await this.api.connect()
     }
-    await this.api.isReady
+    await this.api.isReadyOrError
   }
 
   public async getSyncState():Promise<SyncState> {
