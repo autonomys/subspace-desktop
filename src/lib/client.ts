@@ -15,10 +15,7 @@ import {
   FarmedBlock,
   SubPreDigest
 } from "../lib/types"
-import EventEmitter from "events"
 import type { SyncState } from '@polkadot/types/interfaces/system';
-
-export const myEmitter = new EventEmitter();
 
 const tauri = { event, invoke }
 const SUNIT = 1000000000000000000n
@@ -161,21 +158,15 @@ export class Client {
     return this.api.rpc.system.syncState();
   }
 
-  /* NODE INTEGRATION */
+  // TODO: better method name
   public async waitNodeStartApiConnect(path: string, nodeName: string): Promise<void> {
-    await this.startNode(path, nodeName)
-    // TODO: workaround in case node takes some time to fully start.
-    await new Promise((resolve) => setTimeout(resolve, 7000))
-    await this.connectApi()
-  }
-
-  // TODO: Disable mnemonic return from tauri commmand instead of this validation.
-  private async startNode(path: string, nodeName: string): Promise<void> {
     await tauri.invoke("start_node", { path, nodeName })
-    myEmitter.emit("nodeName", nodeName)
     if (!this.firstLoad) {
       this.loadStoredBlocks()
     }
+    // TODO: workaround in case node takes some time to fully start.
+    await new Promise((resolve) => setTimeout(resolve, 7000))
+    await this.connectApi()
   }
 
   private loadStoredBlocks(): void {
