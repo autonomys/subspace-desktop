@@ -215,24 +215,21 @@ export default defineComponent({
     },
     async farmingWrapper(): Promise<void> {
       const config = await appConfig.read()
-
-      await this.$client.startBlockSubscription()
-      util.infoLogger("PLOTTING PROGRESS | block subscription started")
       const farmerStarted = await this.$client.startFarming(this.plotDirectory, config.plot.sizeGB)
       if (!farmerStarted) {
         util.errorLogger("PLOTTING PROGRESS | Farmer start error!")
       }
       util.infoLogger("PLOTTING PROGRESS | farmer started")
-
       this.plottingData.allocatedGB = config.plot.sizeGB
-
+      await this.$client.startBlockSubscription()
+      util.infoLogger("PLOTTING PROGRESS | block subscription started")
       this.syncState = (await this.$client.getSyncState()).toJSON() as unknown as SyncState;
 
       do {
         await new Promise((resolve) => setTimeout(resolve, 3000))
         this.syncState = (await this.$client.getSyncState()).toJSON() as unknown as SyncState;
         this.plottingData.status = `Syncing ${this.syncState.currentBlock} of ${this.syncState.highestBlock} blocks`
-        this.plottingData.finishedGB = (this.syncState.currentBlock * this.plottingData.allocatedGB) / this.syncState.highestBlock; 
+        this.plottingData.finishedGB = (this.syncState.currentBlock * this.plottingData.allocatedGB) / this.syncState.highestBlock;
       } while (this.syncState.currentBlock < this.syncState.highestBlock)
     },
     startTimers() {

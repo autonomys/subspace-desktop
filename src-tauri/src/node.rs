@@ -198,11 +198,11 @@ fn create_configuration<CS: ChainSpec + 'static>(
                 offchain_worker: ExecutionStrategy::NativeElseWasm,
                 other: ExecutionStrategy::NativeElseWasm,
             },
-            rpc_http: None,
+            rpc_http: Some("127.0.0.1:9933".parse().expect("http endpoint is valid")),
             rpc_ws: Some("127.0.0.1:9944".parse().expect("IP and port are valid")),
             rpc_ipc: None,
             rpc_methods: RpcMethods::Safe,
-            rpc_ws_max_connections: None,
+            rpc_ws_max_connections: Default::default(),
             // Below CORS are default from Substrate
             rpc_cors: Some(vec![
                 "http://localhost:*".to_string(),
@@ -212,6 +212,7 @@ fn create_configuration<CS: ChainSpec + 'static>(
                 "https://polkadot.js.org".to_string(),
                 "tauri://localhost".to_string(),
                 "https://tauri.localhost".to_string(),
+                "http://localhost:8080".to_string(),
             ]),
             rpc_max_payload: None,
             rpc_max_request_size: None,
