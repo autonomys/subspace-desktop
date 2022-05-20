@@ -158,8 +158,7 @@ export class Client {
     return this.api.rpc.system.syncState();
   }
 
-  // TODO: better method name
-  public async waitNodeStartApiConnect(path: string, nodeName: string): Promise<void> {
+  public async startNode(path: string, nodeName: string): Promise<void> {
     await tauri.invoke("start_node", { path, nodeName })
     if (!this.firstLoad) {
       this.loadStoredBlocks()
