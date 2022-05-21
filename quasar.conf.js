@@ -47,7 +47,7 @@ module.exports = configure(function (ctx) {
     build: {
       env: {
         PUBLIC_API_WS: "wss://aries-farm-rpc-b.subspace.network",
-        LOCAL_API_WS: "ws://localhost:9944",
+        LOCAL_API_WS: "ws://localhost:9947",
         APP_VERSION: version,
         APP_NAME: "subspace-desktop"
       },
@@ -84,7 +84,7 @@ module.exports = configure(function (ctx) {
     // Full list of options: https://v2.quasar.dev/quasar-cli/quasar-conf-js#Property%3A-devServer
     devServer: {
       https: false,
-      port: 8080,
+      port: 3009,
       open: false // opens browser window automatically
     },
 
@@ -117,7 +117,7 @@ module.exports = configure(function (ctx) {
       // manualStoreHydration: true,
       // manualPostHydrationTrigger: true,
 
-      prodPort: 3000, // The default port that the production server should use
+      prodPort: 3009, // The default port that the production server should use
       // (gets superseded if process.env.PORT is specified at runtime)
 
       maxAge: 1000 * 60 * 60 * 24 * 30,

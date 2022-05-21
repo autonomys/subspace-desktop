@@ -53,7 +53,7 @@ async fn farming(path: String, reward_address: String, plot_size: u64) -> bool {
     if let Ok(address) = farmer::parse_reward_address(&reward_address) {
         farmer::farm(
             path.clone().into(),
-            "ws://127.0.0.1:9944",
+            "ws://127.0.0.1:9947",
             Some(address),
             plot_size,
             error_sender.clone(),
@@ -70,7 +70,7 @@ async fn farming(path: String, reward_address: String, plot_size: u64) -> bool {
                     // we have received an error, let's restart the farmer
                     Some(_) => farmer::farm(
                         path.clone().into(),
-                        "ws://127.0.0.1:9944",
+                        "ws://127.0.0.1:9947",
                         Some(address),
                         plot_size,
                         error_sender.clone(),
