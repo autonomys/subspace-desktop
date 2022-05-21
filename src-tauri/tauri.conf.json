@@ -13,7 +13,7 @@
     "bundle": {
       "active": true,
       "targets": "all",
-      "identifier": "com.subspace.desktop",
+      "identifier": "subspace-desktop",
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
@@ -75,7 +75,7 @@
       }
     ],
     "security": {
-      "csp": "default-src https tauri 'self'; img-src 'self'; object-src 'none'; script-src 'wasm-unsafe-eval' 'unsafe-eval' 'self'"
+      "csp": "default-src https tauri 'self'; img-src 'self'; object-src 'none'; connect-src ws://localhost:9944/; script-src 'wasm-unsafe-eval' 'unsafe-eval' 'self'"
     }
   }
 }

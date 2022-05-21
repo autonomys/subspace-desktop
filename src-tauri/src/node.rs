@@ -213,6 +213,7 @@ fn create_configuration<CS: ChainSpec + 'static>(
                 "tauri://localhost".to_string(),
                 "https://tauri.localhost".to_string(),
                 "http://localhost:8080".to_string(),
+                "http://localhost:3000".to_string(),
             ]),
             rpc_max_payload: None,
             rpc_max_request_size: None,
