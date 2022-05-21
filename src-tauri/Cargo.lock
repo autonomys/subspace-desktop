@@ -8825,7 +8825,7 @@ dependencies = [
 
 [[package]]
 name = "subspace-desktop"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "anyhow",
  "dirs 4.0.0",
