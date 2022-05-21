@@ -47,7 +47,7 @@ module.exports = configure(function (ctx) {
     build: {
       env: {
         PUBLIC_API_WS: "wss://aries-farm-rpc-b.subspace.network",
-        LOCAL_API_WS: "ws://localhost:9944",
+        LOCAL_API_WS: "ws://localhost:9947",
         APP_VERSION: version,
         APP_NAME: "subspace-desktop"
       },

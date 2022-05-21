@@ -75,7 +75,7 @@
       }
     ],
     "security": {
-      "csp": "default-src https tauri 'self'; img-src 'self'; object-src 'none'; connect-src ws://localhost:9944/; script-src 'wasm-unsafe-eval' 'unsafe-eval' 'self'"
+      "csp": "default-src https tauri 'self'; img-src 'self'; object-src 'none'; connect-src ws://localhost:9947/; script-src 'wasm-unsafe-eval' 'unsafe-eval' 'self'"
     }
   }
 }

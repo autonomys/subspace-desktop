@@ -199,7 +199,7 @@ fn create_configuration<CS: ChainSpec + 'static>(
                 other: ExecutionStrategy::NativeElseWasm,
             },
             rpc_http: Some("127.0.0.1:9933".parse().expect("http endpoint is valid")),
-            rpc_ws: Some("127.0.0.1:9944".parse().expect("IP and port are valid")),
+            rpc_ws: Some("127.0.0.1:9947".parse().expect("IP and port are valid")),
             rpc_ipc: None,
             rpc_methods: RpcMethods::Safe,
             rpc_ws_max_connections: Default::default(),
