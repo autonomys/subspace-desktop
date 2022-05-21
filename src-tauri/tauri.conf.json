@@ -1,7 +1,7 @@
 {
   "build": {
     "distDir": "../dist/pwa",
-    "devPath": "http://localhost:8080",
+    "devPath": "http://localhost:3009",
     "beforeDevCommand": "",
     "beforeBuildCommand": ""
   },
