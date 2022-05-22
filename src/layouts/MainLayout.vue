@@ -15,7 +15,7 @@ q-layout(view="hHh lpr fFf")
                 p.no-margin(style="font-size: 12px") {{ lang.nonIncentivizedTooltip }}
           .col-auto.q-mr-md.relative-position(v-if="global.nodeName || oldNodeName")
             q-badge.cursor-pointer(
-              v-if="!isEditName" 
+              v-if="!isEdittingName" 
               color="blue-8" 
               text-color="white"
               @click="onNameClick"
@@ -67,7 +67,7 @@ export default defineComponent({
       appVersion: "",
       util,
       autoLaunch: false,
-      isEditName: false,
+      isEdittingName: false,
       oldNodeName: "",
     }
   },
@@ -101,7 +101,7 @@ export default defineComponent({
       this.setEditName(false);
     },
     setEditName(value: boolean) {
-      this.isEditName = value;
+      this.isEdittingName = value;
     }
   }
 })
