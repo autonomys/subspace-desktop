@@ -201,7 +201,8 @@ fn create_configuration<CS: ChainSpec + 'static>(
             rpc_http: None,
             rpc_ws: Some("127.0.0.1:9947".parse().expect("IP and port are valid")),
             rpc_ipc: None,
-            rpc_methods: RpcMethods::Safe,
+            // necessary in order to use `peers` method to show number of node peers during sync
+            rpc_methods: RpcMethods::Unsafe,
             rpc_ws_max_connections: Default::default(),
             // Below CORS are default from Substrate
             rpc_cors: Some(vec![
