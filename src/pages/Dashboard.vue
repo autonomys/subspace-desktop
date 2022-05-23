@@ -79,7 +79,7 @@ export default defineComponent({
     if (this.$client.isFirstLoad() === false) {
       util.infoLogger("DASHBOARD | starting node")
       if (config.nodeName !== "") {
-        await this.$client.waitNodeStartApiConnect(config.plot.location, config.nodeName)
+        await this.$client.startNode(config.plot.location, config.nodeName)
       } else {
         util.errorLogger("DASHBOARD | node name was empty when tried to start node")
       }

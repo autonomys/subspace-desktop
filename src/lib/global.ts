@@ -1,11 +1,21 @@
 import { reactive } from "vue";
 import { getLang, LangType } from "../loc/lang"
-import { appConfig } from "./appConfig";
 
 const text: LangType = {}
 // TODO use dependency injection to ensure methods and properties can't be accessed unless they are initialized and valid
+// TODO: refactor according to https://vuejs.org/guide/scaling-up/state-management.html#simple-state-management-with-reactivity-api
 export class Global {
-  data = reactive({ status: { state: "loading", message: "loading" }, loc: { selected: 'en', text } })
+  data = reactive({ 
+    status: { 
+      state: "loading", 
+      message: "loading" 
+    }, 
+    loc: { 
+      selected: 'en', 
+      text 
+    },
+    nodeName: '',
+  })
   async changeLang(newLang: string): Promise<void> {
     this.data.loc.selected = newLang
     await this.loadLangData()
@@ -13,9 +23,8 @@ export class Global {
   async loadLangData(): Promise<void> {
     this.data.loc.text = await getLang(this.data.loc.selected)
   }
-  async init(): Promise<void> {
-    await appConfig.init()
-    await this.loadLangData()
+  setNodeName(name: string) {
+    this.data.nodeName = name;
   }
 }
 

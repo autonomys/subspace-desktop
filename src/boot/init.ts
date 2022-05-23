@@ -4,6 +4,7 @@ import { globalState } from "../lib/global"
 import { Client } from "../lib/client"
 import { createApi } from '../lib/util';
 import { AutoLauncher } from "../lib/autoLauncher"
+import { appConfig } from "../lib/appConfig";
 
 const LOCAL_RPC = process.env.LOCAL_API_WS || "ws://localhost:9947"
 
@@ -15,10 +16,10 @@ declare module "@vue/runtime-core" {
 }
 
 export default boot(async ({ app }) => {
-  const initActions = [
-    globalState.init()
-  ]
-  await Promise.all(initActions)
+  await appConfig.init()
+  const { nodeName } = (await appConfig.read());
+  globalState.setNodeName(nodeName);
+  await globalState.loadLangData()
   const api = createApi(LOCAL_RPC);
   const client = new Client(api);
   const autoLauncher = new AutoLauncher();

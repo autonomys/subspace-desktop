@@ -89,10 +89,6 @@ export default defineComponent({
         cancel: true
       }).onOk(async () => {
         await util.resetAndClear()
-
-        // TODO: remove this when we get rid of segmentCache
-        LocalStorage.clear()
-
         await new Promise((resolve) => setTimeout(resolve, 1000))
         await relaunch()
       })
