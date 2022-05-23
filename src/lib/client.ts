@@ -20,7 +20,7 @@ import type { SyncState } from '@polkadot/types/interfaces/system';
 const tauri = { event, invoke }
 const SUNIT = 1000000000000000000n
 
-const NETWORK_RPC = process.env.PUBLIC_API_WS || "ws://localhost:9944";
+const NETWORK_RPC = process.env.PUBLIC_API_WS || "ws://localhost:9947";
 const appsLink = "https://polkadot.js.org/apps/?rpc=" + NETWORK_RPC + "#/explorer/query/"
 
 export class Client {

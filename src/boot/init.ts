@@ -6,7 +6,7 @@ import { createApi } from '../lib/util';
 import { AutoLauncher } from "../lib/autoLauncher"
 import { appConfig } from "../lib/appConfig";
 
-const LOCAL_RPC = process.env.LOCAL_API_WS || "ws://localhost:9944"
+const LOCAL_RPC = process.env.LOCAL_API_WS || "ws://localhost:9947"
 
 declare module "@vue/runtime-core" {
   export interface ComponentCustomProperties {
