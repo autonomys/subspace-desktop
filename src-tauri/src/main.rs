@@ -14,7 +14,6 @@ use anyhow::Result;
 use log::{debug, error, info, LevelFilter};
 use serde::Serialize;
 use std::path::PathBuf;
-use std::sync::atomic::Ordering;
 use tauri::SystemTrayEvent;
 use tauri::{
     api::{self},
@@ -38,11 +37,6 @@ fn frontend_error_logger(message: &str) {
 #[tauri::command]
 fn frontend_info_logger(message: &str) {
     info!("Frontend info: {message}");
-}
-
-#[tauri::command]
-fn plot_progress_tracker() -> usize {
-    farmer::PLOTTED_PIECES.load(Ordering::Relaxed)
 }
 
 #[tauri::command]
@@ -161,7 +155,6 @@ async fn main() -> Result<()> {
                 get_disk_stats,
                 get_this_binary,
                 farming,
-                plot_progress_tracker,
                 start_node,
                 frontend_error_logger,
                 frontend_info_logger
@@ -174,7 +167,6 @@ async fn main() -> Result<()> {
                 get_this_binary,
                 get_disk_stats,
                 farming,
-                plot_progress_tracker,
                 start_node,
                 frontend_error_logger,
                 frontend_info_logger

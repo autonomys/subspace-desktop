@@ -1,14 +1,10 @@
 use anyhow::{anyhow, Result};
 use log::info;
 use std::path::PathBuf;
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::Arc;
-use subspace_core_primitives::{PublicKey, PIECE_SIZE};
+use subspace_core_primitives::PublicKey;
 use subspace_farmer::multi_farming::{MultiFarming, Options as MultiFarmingOptions};
 use subspace_farmer::{Identity, NodeRpcClient, ObjectMappings, Plot, RpcClient};
 use tokio::sync::mpsc::Sender;
-
-pub(crate) static PLOTTED_PIECES: AtomicUsize = AtomicUsize::new(0);
 
 /// Start farming by using plot in specified path and connecting to WebSocket server at specified
 /// address.
@@ -64,17 +60,6 @@ pub(crate) async fn farm(
         true,
     )
     .await?;
-
-    let plots = multi_farming.plots.clone();
-    let first_plot = plots.iter().next().unwrap();
-    first_plot
-        .on_progress_change(Arc::new(|plotted_pieces| {
-            PLOTTED_PIECES.fetch_add(
-                plotted_pieces.plotted_piece_count / PIECE_SIZE,
-                Ordering::SeqCst,
-            );
-        }))
-        .detach();
 
     tokio::spawn(async move {
         let result = multi_farming.wait().await;
