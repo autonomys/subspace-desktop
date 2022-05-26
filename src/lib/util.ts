@@ -50,8 +50,7 @@ export async function infoLogger(info: unknown): Promise<void> {
 
 export function toFixed(num: number, precision: number): number {
   if (!num) return 0
-  // don't remove `Number` cast, it is required. Thanks TypeScript!
-  return parseFloat(Number(num).toFixed(precision))
+  return parseFloat(num.toFixed(precision))
 }
 
 export function plotTimeMsEstimate(gb: number): number {
