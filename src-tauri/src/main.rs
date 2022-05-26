@@ -41,11 +41,6 @@ fn frontend_info_logger(message: &str) {
 }
 
 #[tauri::command]
-fn plot_progress_tracker() -> usize {
-    farmer::PLOTTED_PIECES.load(Ordering::Relaxed)
-}
-
-#[tauri::command]
 async fn farming(path: String, reward_address: String, plot_size: u64) -> bool {
     // create a channel to listen for farmer errors, and restart another farmer instance in case any error
     let (error_sender, mut error_receiver): (Sender<()>, Receiver<()>) = mpsc::channel(1);
@@ -161,7 +156,6 @@ async fn main() -> Result<()> {
                 get_disk_stats,
                 get_this_binary,
                 farming,
-                plot_progress_tracker,
                 start_node,
                 frontend_error_logger,
                 frontend_info_logger
@@ -174,7 +168,6 @@ async fn main() -> Result<()> {
                 get_this_binary,
                 get_disk_stats,
                 farming,
-                plot_progress_tracker,
                 start_node,
                 frontend_error_logger,
                 frontend_info_logger
