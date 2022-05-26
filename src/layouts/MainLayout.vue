@@ -14,11 +14,11 @@ q-layout(view="hHh lpr fFf")
               .col
                 p.no-margin(style="font-size: 12px") {{ lang.nonIncentivizedTooltip }}
           .col-auto.q-mr-md.relative-position(v-if="global.nodeName || oldNodeName")
-            q-badge.cursor-pointer(
+            // TODO: add .cursor-pointer and @click="onNameClick" after node restarting is implemented on the backend
+            q-badge(
               v-if="!isEdittingName" 
               color="blue-8" 
               text-color="white"
-              @click="onNameClick"
             )
               .q-ma-xs(style="font-size: 14px") {{ "Node Name:" }}
               .q-mr-xs(
