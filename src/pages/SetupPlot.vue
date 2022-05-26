@@ -256,7 +256,6 @@ export default defineComponent({
       util.infoLogger("SETUP PLOT | custom directory created")
       await this.checkIdentity()
       const nodeName = util.generateNodeName()
-      
       global.setNodeName(nodeName);
 
       await appConfig.update({

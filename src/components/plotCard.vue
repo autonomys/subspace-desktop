@@ -20,7 +20,7 @@ q-card(bordered flat)
         q-icon(color="black" name="storage" size="40px")
       .col
         .text-weight-light {{ lang.allocated }}
-        p {{ util.toFixed(plot.plotSizeGB, 2) }} GB
+        p {{ plot.plotSizeGB }} GB
 </template>
 
 <script lang="ts" >
