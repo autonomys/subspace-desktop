@@ -189,7 +189,8 @@ export class Client {
 
   /* FARMER INTEGRATION */
   public async startFarming(path: string, plotSizeGB: number): Promise<boolean> {
-    const plotSize = Math.round(plotSizeGB * 1048576)
+    // convert GB to Bytes
+    const plotSize = Math.round(plotSizeGB * 1024 * 1024 * 1024)
     const rewardAddress: string = (await appConfig.read()).rewardAddress
     if (rewardAddress === "") {
       util.errorLogger("Tried to send empty reward address to backend!")
