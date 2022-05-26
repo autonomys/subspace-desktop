@@ -1,5 +1,5 @@
 import { Dialog, DialogChainObject } from "quasar"
-import { appName, errorLogger } from "./util"
+import { appName, errorLogger, toFixed } from "./util"
 import * as path from "@tauri-apps/api/path"
 import * as fs from "@tauri-apps/api/fs"
 
@@ -67,6 +67,8 @@ export const appConfig = {
   async read(): Promise<Config> {
     const result = await fs.readTextFile(await this.configFullPath())
     const config: Config = JSON.parse(result)
+    // TODO: there maybe a better solution, or `sizeGB` should be string in the first place
+    config.plot.sizeGB = toFixed(Number(config.plot.sizeGB), 2)
     return config
   },
   async write(config: Config): Promise<void> {
