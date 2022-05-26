@@ -67,7 +67,7 @@ export const appConfig = {
   async read(): Promise<Config> {
     const result = await fs.readTextFile(await this.configFullPath())
     const config: Config = JSON.parse(result)
-    config.plot.sizeGB = toFixed(config.plot.sizeGB, 2)
+    config.plot.sizeGB = toFixed(Number(config.plot.sizeGB), 2)
     return config
   },
   async write(config: Config): Promise<void> {
