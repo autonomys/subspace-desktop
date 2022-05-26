@@ -14,7 +14,6 @@ use anyhow::Result;
 use log::{debug, error, info, LevelFilter};
 use serde::Serialize;
 use std::path::PathBuf;
-use std::sync::atomic::Ordering;
 use tauri::SystemTrayEvent;
 use tauri::{
     api::{self},
