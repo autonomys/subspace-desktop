@@ -174,7 +174,9 @@ fn create_configuration<CS: ChainSpec + 'static>(
             network,
             keystore_remote,
             keystore,
-            database: database_config(&config_dir, database_cache_size, &role),
+            database: DatabaseSource::ParityDb {
+                path: config_dir.join("paritydb").join("full"),
+            },
             state_cache_size: 67_108_864,
             state_cache_child_ratio: None,
             // TODO: Change to constrained eventually (need DSN for this)
@@ -242,19 +244,4 @@ fn create_configuration<CS: ChainSpec + 'static>(
         },
         force_new_slot_notifications: false,
     })
-}
-
-/// Get the database configuration object for the parameters provided
-fn database_config(base_path: &Path, cache_size: usize, role: &Role) -> DatabaseSource {
-    let role_dir = match role {
-        Role::Light => "light",
-        Role::Full | Role::Authority => "full",
-    };
-    let rocksdb_path = base_path.join("db").join(role_dir);
-    let paritydb_path = base_path.join("paritydb").join(role_dir);
-    DatabaseSource::Auto {
-        paritydb_path,
-        rocksdb_path,
-        cache_size,
-    }
 }
