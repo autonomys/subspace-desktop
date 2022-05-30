@@ -28,12 +28,30 @@ serde_json = "1.0.81"
 serde = { version = "1.0.137", features = [ "derive" ] }
 sp-core = { version = "6.0.0", git = "https://github.com/paritytech/substrate", rev = "5d3e7c4ee9f5c8e370022d5f3fa9723185710831" }
 sp-panic-handler = { version = "4.0.0", git = "https://github.com/paritytech/substrate", rev = "5d3e7c4ee9f5c8e370022d5f3fa9723185710831" }
-subspace-core-primitives = { git = "https://github.com/subspace/subspace", rev = "3f4c8367c86f9851ef2ebb8b12b098d31a0df5b3" }
-subspace-farmer = { git = "https://github.com/subspace/subspace", rev = "3f4c8367c86f9851ef2ebb8b12b098d31a0df5b3" }
-subspace-runtime = { git = "https://github.com/subspace/subspace", rev = "3f4c8367c86f9851ef2ebb8b12b098d31a0df5b3" }
-subspace-service = { git = "https://github.com/subspace/subspace", rev = "3f4c8367c86f9851ef2ebb8b12b098d31a0df5b3" }
-subspace-solving = { git = "https://github.com/subspace/subspace", rev = "3f4c8367c86f9851ef2ebb8b12b098d31a0df5b3" }
+subspace-core-primitives = { git = "https://github.com/subspace/subspace", rev = "2729d61f4a0c48421191df241bf0c03c2ab96844" }
+subspace-farmer = { git = "https://github.com/subspace/subspace", rev = "2729d61f4a0c48421191df241bf0c03c2ab96844" }
+subspace-runtime = { git = "https://github.com/subspace/subspace", rev = "2729d61f4a0c48421191df241bf0c03c2ab96844" }
+subspace-service = { git = "https://github.com/subspace/subspace", rev = "2729d61f4a0c48421191df241bf0c03c2ab96844" }
+subspace-solving = { git = "https://github.com/subspace/subspace", rev = "2729d61f4a0c48421191df241bf0c03c2ab96844" }
 tokio = { version = "1.11.0", features = ["macros", "rt-multi-thread"] }
+tracing = "0.1.31"
+tracing-subscriber = "0.3.11"
+
+[dependencies.libp2p]
+version = "0.44.0"
+default-features = false
+features = [
+    "dns-tokio",
+    "gossipsub",
+    "identify",
+    "kad",
+    "noise",
+    "ping",
+    "sr25519",
+    "tcp-tokio",
+    "websocket",
+    "yamux"
+]
 
 
 [target.'cfg(windows)'.dependencies]
@@ -59,3 +77,4 @@ opt-level = 3
 chacha20poly1305 = { git = "https://github.com/RustCrypto/AEADs", rev = "06dbfb5571687fd1bbe9d3c9b2193a1ba17f8e99" }
 # TODO: Remove once https://github.com/sitano/merkle_light/pull/8 is released
 merkle_light = { git = "https://github.com/sitano/merkle_light", rev = "fe31d4ef27a1fbe54e82ab589b610ae4bfd2008e" }
+libp2p = { git = "https://github.com/subspace/rust-libp2p", branch = "add-sr25519-keys-v44" }

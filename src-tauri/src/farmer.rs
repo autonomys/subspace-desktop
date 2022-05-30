@@ -47,6 +47,8 @@ pub(crate) async fn farm(
             client,
             object_mappings: object_mappings.clone(),
             reward_address,
+            bootstrap_nodes: vec![],
+            listen_on: vec![],
         },
         plot_size,
         max_plot_size,

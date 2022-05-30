@@ -22,6 +22,10 @@ use tauri::{
 use tauri_plugin_log::{LogTarget, LoggerBuilder};
 use tokio::sync::mpsc;
 use tokio::sync::mpsc::{Receiver, Sender};
+use tracing::level_filters::LevelFilter as t_LevelFilter;
+use tracing_subscriber::prelude::*;
+use tracing_subscriber::Layer;
+use tracing_subscriber::{fmt, fmt::format::FmtSpan, EnvFilter};
 
 #[derive(Serialize)]
 struct DiskStats {
@@ -109,18 +113,28 @@ fn get_this_binary() -> PathBuf {
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    tracing_subscriber::registry()
+        .with(
+            fmt::layer().with_span_events(FmtSpan::CLOSE).with_filter(
+                EnvFilter::builder()
+                    .with_default_directive(t_LevelFilter::INFO.into())
+                    .from_env_lossy()
+                    .add_directive("subspace_farmer=debug".parse()?),
+            ),
+        )
+        .init();
     let ctx = tauri::generate_context!();
     let id = &ctx.config().tauri.bundle.identifier;
     let app = tauri::Builder::default()
-        .plugin(
-            LoggerBuilder::new()
-                .targets(vec![
-                    LogTarget::Folder(custom_log_dir(id).unwrap()),
-                    LogTarget::Stdout,
-                ])
-                .level(LevelFilter::Info)
-                .build(),
-        )
+        // .plugin(
+        //     LoggerBuilder::new()
+        //         .targets(vec![
+        //             LogTarget::Folder(custom_log_dir(id).unwrap()),
+        //             LogTarget::Stdout,
+        //         ])
+        //         .level(LevelFilter::Info)
+        //         .build(),
+        // )
         .menu(menu::get_menu())
         .system_tray(menu::get_tray_menu())
         .on_system_tray_event(|app, event| {
