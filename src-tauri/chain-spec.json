@@ -4,7 +4,9 @@
   "chainType": {
     "Custom": "Subspace Gemini 1"
   },
-  "bootNodes": [],
+  "bootNodes": [
+    "/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWH1TnvWrVigvNxKvDR46c47aVP9UuYUA3bu3ozFZhSQHh"
+  ],
   "telemetryEndpoints": [
     [
       "/dns/telemetry.polkadot.io/tcp/443/x-parity-wss/%2Fsubmit%2F",

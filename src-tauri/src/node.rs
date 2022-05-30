@@ -1,6 +1,6 @@
 use anyhow::Result;
 use log::{error, warn};
-use sc_chain_spec::ChainSpec;
+use sc_chain_spec::{ChainSpec, ChainSpecExtension};
 use sc_executor::NativeExecutionDispatch;
 use sc_executor::WasmExecutionMethod;
 use sc_network::config::{NodeKeyConfig, Secret};
@@ -12,10 +12,14 @@ use sc_service::{
     BasePath, Configuration, DatabaseSource, KeepBlocks, PruningMode, Role, RpcMethods,
     TracingReceiver,
 };
+use serde::{Deserialize, Serialize};
 use sp_core::crypto::Ss58AddressFormat;
 use std::env;
 use std::path::{Path, PathBuf};
 use std::sync::Once;
+use subspace_node::ExecutionChainSpec;
+use subspace_node::SerializableChainSpec;
+use subspace_runtime::GenesisConfig;
 use subspace_service::{FullClient, NewFull, SubspaceConfiguration};
 use tokio::runtime::Handle;
 
@@ -35,6 +39,17 @@ const RECOMMENDED_OPEN_FILE_DESCRIPTOR_LIMIT: u64 = 10_000;
 
 pub(crate) struct ExecutorDispatch;
 
+/// The extensions for the [`ConsensusChainSpec`].
+#[derive(Clone, Serialize, Deserialize, ChainSpecExtension)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+pub struct ChainSpecExtensions {
+    /// Chain spec of execution chain.
+    pub execution_chain_spec: ExecutionChainSpec,
+}
+
+/// The `ChainSpec` parameterized for the consensus runtime.
+pub type ConsensusChainSpec = SerializableChainSpec<GenesisConfig, ChainSpecExtensions>;
+
 impl NativeExecutionDispatch for ExecutorDispatch {
     type ExtendHostFunctions = ();
 
@@ -49,10 +64,8 @@ impl NativeExecutionDispatch for ExecutorDispatch {
 
 pub(crate) async fn init_node(base_directory: PathBuf, node_name: String) -> Result<()> {
     let chain_spec =
-        sc_service::GenericChainSpec::<subspace_runtime::GenesisConfig>::from_json_bytes(
-            include_bytes!("../chain-spec.json").as_ref(),
-        )
-        .map_err(anyhow::Error::msg)?;
+        ConsensusChainSpec::from_json_bytes(include_bytes!("../chain-spec.json").as_ref())
+            .map_err(anyhow::Error::msg)?;
 
     let full_client_fut = tokio::task::spawn_blocking(move || {
         Handle::current().block_on(create_full_client(chain_spec, base_directory, node_name))
@@ -224,7 +237,9 @@ fn create_configuration<CS: ChainSpec + 'static>(
             telemetry_endpoints,
             default_heap_pages: None,
             offchain_worker: OffchainWorkerConfig::default(),
-            force_authoring: true,
+            force_authoring: env::var("FORCE_AUTHORING")
+                .map(|force_authoring| force_authoring.as_str() == "1")
+                .unwrap_or_default(),
             disable_grandpa: false,
             dev_key_seed: None,
             tracing_targets: None,
