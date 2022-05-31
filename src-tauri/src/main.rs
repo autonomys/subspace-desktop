@@ -115,9 +115,7 @@ async fn main() -> Result<()> {
         .setup(|app| {
             #[cfg(debug_assertions)] // only include this code on debug builds
             {
-            let window = app.get_window("main").unwrap();
-            window.open_devtools();
-            window.close_devtools();
+                app.get_window("main").unwrap().open_devtools();
             }
             Ok(())
         })
