@@ -92,7 +92,7 @@ async fn init_node(base_directory: PathBuf, node_name: String) -> Result<()> {
 }
 
 // TODO: Allow customization of a bunch of these things
-pub(crate) async fn create_full_client<CS: ChainSpec + 'static>(
+async fn create_full_client<CS: ChainSpec + 'static>(
     chain_spec: CS,
     base_path: PathBuf,
     node_name: String,

@@ -12,7 +12,7 @@ mod node;
 mod utils;
 
 use anyhow::Result;
-use std::fs::File;
+use std::fs::{create_dir_all, File};
 use tauri::SystemTrayEvent;
 use tauri::{Manager, RunEvent, WindowEvent};
 use tracing::level_filters::LevelFilter;
@@ -24,13 +24,14 @@ use tracing_subscriber::{fmt, fmt::format::FmtSpan, EnvFilter};
 async fn main() -> Result<()> {
     let ctx = tauri::generate_context!();
     let id = &ctx.config().tauri.bundle.identifier;
-
+    let log_dir = utils::custom_log_dir(id);
+    create_dir_all(log_dir.clone()).expect("path creation should always succeed");
     // start logger, after we acquire the bundle identifier
     tracing_subscriber::registry()
         .with(
             fmt::layer()
                 .with_writer(utils::Tee(
-                    File::create(utils::custom_log_dir(id)).unwrap(),
+                    File::create(log_dir.join(format!("{}.log", id))).unwrap(),
                     std::io::stdout,
                 ))
                 .with_span_events(FmtSpan::CLOSE)

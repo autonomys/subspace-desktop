@@ -122,12 +122,12 @@ async fn farm(
     Ok(())
 }
 
-pub(crate) fn parse_reward_address(s: &str) -> Result<PublicKey, sp_core::crypto::PublicError> {
+fn parse_reward_address(s: &str) -> Result<PublicKey, sp_core::crypto::PublicError> {
     s.parse::<sp_core::sr25519::Public>()
         .map(|key| PublicKey::from(key.0))
 }
 
-pub(crate) fn raise_fd_limit() {
+fn raise_fd_limit() {
     match std::panic::catch_unwind(fdlimit::raise_fd_limit) {
         Ok(Some(limit)) => {
             log::info!("Increase file limit from soft to hard (limit is {limit})")
