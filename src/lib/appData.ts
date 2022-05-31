@@ -35,7 +35,7 @@ export const appDataDialog = {
         <p style="font-size:14px; color: orange">
           <b>${plotDirectory}</b>
         </p>
-        `,
+      `,
       html: true,
       dark: true,
       ok: { label: "Close", icon: "close", flat: true, color: "gray" }
@@ -49,13 +49,13 @@ export const appDataDialog = {
       title: `Do you want to create a new directory?`,
       // TODO: the styling below is not applied due to CSP. Make it NOT inline, or abandon it
       message: `
-      <p style="font-size:12px;">
-        A new directory will be created.</br>
-      </p>
-      <p style="font-size:14px; color: #2196f3">
-        <b>${plotDirectory}</b>
-      </p>
-`,
+        <p style="font-size:12px;">
+          A new directory will be created.</br>
+        </p>
+        <p style="font-size:14px; color: #2196f3">
+          <b>${plotDirectory}</b>
+        </p>
+      `,
       html: true,
       dark: true,
       ok: { label: "Create", icon: "check", flat: true, color: "blue" },
@@ -72,13 +72,13 @@ export const appDataDialog = {
       title: `Confirm selected directory.`,
       // TODO: the styling below is not applied due to CSP. Make it NOT inline, or abandon it
       message: `
-    <p style="font-size:12px;">
-      Seleted plot directory.</br>
-    </p>
-    <p style="font-size:14px; color: #2196f3">
-      <b>${plotDirectory}</b>
-    </p>
-`,
+        <p style="font-size:12px;">
+          Selected plot directory.</br>
+        </p>
+        <p style="font-size:14px; color: #2196f3">
+          <b>${plotDirectory}</b>
+        </p>
+      `,
       html: true,
       dark: true,
       ok: {
