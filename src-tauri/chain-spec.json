@@ -5,7 +5,12 @@
     "Custom": "Subspace Gemini 1"
   },
   "bootNodes": [
-    "/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWH1TnvWrVigvNxKvDR46c47aVP9UuYUA3bu3ozFZhSQHh"
+    "/dns/bootstrap-0.gemini-1a.subspace.network/tcp/30333/p2p/12D3KooWGqEhYUggBXtn7AwUE3HyXwwPHJDv5kHXo3rRY2Tv5K9i",
+    "/dns/bootstrap-1.gemini-1a.subspace.network/tcp/30333/p2p/12D3KooWK7t8QPg3LjwTjKLyNsRoc3W6Y62S6E3HTprAtoa3x6Eb",
+    "/dns/bootstrap-2.gemini-1a.subspace.network/tcp/30333/p2p/12D3KooWGQBWissDu2DYh6SXuGykkY5ejyhNDFu6VwiqPECZTQao",
+    "/dns/bootstrap-3.gemini-1a.subspace.network/tcp/30333/p2p/12D3KooWNHM9c5pbKxnZff6Eghudb8jNjXuo8y5wWUjZruC6ySn3",
+    "/dns/bootstrap-4.gemini-1a.subspace.network/tcp/30333/p2p/12D3KooWAiEcxKoSvoyvDgSmQ9Mb8eUr9xdoGo1aHo26zouR2wGk",
+    "/dns/bootstrap-5.gemini-1a.subspace.network/tcp/30333/p2p/12D3KooWJJU7q77dk84FDqB9cPmPwJ874Vi2L39CapUugwmdzPxP"
   ],
   "telemetryEndpoints": [
     [
