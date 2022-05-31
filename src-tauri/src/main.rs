@@ -112,6 +112,13 @@ async fn main() -> Result<()> {
     let ctx = tauri::generate_context!();
     let id = &ctx.config().tauri.bundle.identifier;
     let app = tauri::Builder::default()
+        .setup(|app| {
+            #[cfg(debug_assertions)] // only include this code on debug builds
+            {
+                app.get_window("main").unwrap().open_devtools();
+            }
+            Ok(())
+        })
         .plugin(
             LoggerBuilder::new()
                 .targets(vec![
