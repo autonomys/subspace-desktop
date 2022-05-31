@@ -9,132 +9,41 @@ mod windows;
 mod farmer;
 mod menu;
 mod node;
+mod utils;
 
 use anyhow::Result;
-use log::{debug, error, info, LevelFilter};
-use serde::Serialize;
-use std::path::PathBuf;
+use std::fs::File;
 use tauri::SystemTrayEvent;
-use tauri::{
-    api::{self},
-    Env, Manager, RunEvent, WindowEvent,
-};
-use tauri_plugin_log::{LogTarget, LoggerBuilder};
-use tokio::sync::mpsc;
-use tokio::sync::mpsc::{Receiver, Sender};
-use tracing::level_filters::LevelFilter as t_LevelFilter;
+use tauri::{Manager, RunEvent, WindowEvent};
+use tracing::level_filters::LevelFilter;
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::Layer;
 use tracing_subscriber::{fmt, fmt::format::FmtSpan, EnvFilter};
 
-#[derive(Serialize)]
-struct DiskStats {
-    free_bytes: u64,
-    total_bytes: u64,
-}
-
-#[tauri::command]
-fn frontend_error_logger(message: &str) {
-    error!("Frontend error: {message}");
-}
-
-#[tauri::command]
-fn frontend_info_logger(message: &str) {
-    info!("Frontend info: {message}");
-}
-
-#[tauri::command]
-async fn farming(path: String, reward_address: String, plot_size: u64) -> bool {
-    // create a channel to listen for farmer errors, and restart another farmer instance in case any error
-    let (error_sender, mut error_receiver): (Sender<()>, Receiver<()>) = mpsc::channel(1);
-
-    if let Ok(address) = farmer::parse_reward_address(&reward_address) {
-        farmer::farm(
-            path.clone().into(),
-            "ws://127.0.0.1:9947",
-            Some(address),
-            plot_size,
-            error_sender.clone(),
-        )
-        .await
-        .unwrap();
-
-        // farmer started successfully, now listen in the background for errors
-        tokio::spawn(async move {
-            // if there is an error, restart another farmer, and start listening again, in a loop
-            loop {
-                let result = error_receiver.recv().await;
-                match result {
-                    // we have received an error, let's restart the farmer
-                    Some(_) => farmer::farm(
-                        path.clone().into(),
-                        "ws://127.0.0.1:9947",
-                        Some(address),
-                        plot_size,
-                        error_sender.clone(),
-                    )
-                    .await
-                    .unwrap(),
-                    None => unreachable!(
-                        "sender should not have been dropped before sending an error message"
-                    ),
-                }
-            }
-        });
-        true
-    } else {
-        // reward address could not be parsed, and farmer did not start
-        false
-    }
-}
-
-#[tauri::command]
-async fn start_node(path: String, node_name: String) {
-    node::init_node(path.into(), node_name).await.unwrap();
-}
-
-#[tauri::command]
-fn get_disk_stats(dir: String) -> DiskStats {
-    debug!("{}", dir);
-    let free: u64 = fs2::available_space(&dir).expect("error");
-    let total: u64 = fs2::total_space(&dir).expect("error");
-
-    DiskStats {
-        free_bytes: free,
-        total_bytes: total,
-    }
-}
-
-#[tauri::command]
-fn get_this_binary() -> PathBuf {
-    let bin = api::process::current_binary(&Env::default());
-    bin.unwrap()
-}
-
 #[tokio::main]
 async fn main() -> Result<()> {
-    tracing_subscriber::registry()
-        .with(
-            fmt::layer().with_span_events(FmtSpan::CLOSE).with_filter(
-                EnvFilter::builder()
-                    .with_default_directive(t_LevelFilter::INFO.into())
-                    .from_env_lossy()
-                    .add_directive("subspace_farmer=debug".parse()?),
-            ),
-        )
-        .init();
     let ctx = tauri::generate_context!();
     let id = &ctx.config().tauri.bundle.identifier;
+
+    // start logger, after we acquire the bundle identifier
+    tracing_subscriber::registry()
+        .with(
+            fmt::layer()
+                .with_writer(utils::Tee(
+                    File::create(utils::custom_log_dir(id)).unwrap(),
+                    std::io::stdout,
+                ))
+                .with_span_events(FmtSpan::CLOSE)
+                .with_filter(
+                    EnvFilter::builder()
+                        .with_default_directive(LevelFilter::INFO.into())
+                        .from_env_lossy()
+                        .add_directive("subspace_farmer=debug".parse()?),
+                ),
+        )
+        .init();
+
     let app = tauri::Builder::default()
-        // .plugin(
-        //     LoggerBuilder::new()
-        //         .targets(vec![
-        //             LogTarget::Folder(custom_log_dir(id).unwrap()),
-        //             LogTarget::Stdout,
-        //         ])
-        //         .level(LevelFilter::Info)
-        //         .build(),
-        // )
         .menu(menu::get_menu())
         .system_tray(menu::get_tray_menu())
         .on_system_tray_event(|app, event| {
@@ -166,24 +75,24 @@ async fn main() -> Result<()> {
         .invoke_handler(
             #[cfg(not(target_os = "windows"))]
             tauri::generate_handler![
-                get_disk_stats,
-                get_this_binary,
-                farming,
-                start_node,
-                frontend_error_logger,
-                frontend_info_logger
+                utils::get_disk_stats,
+                utils::get_this_binary,
+                farmer::farming,
+                node::start_node,
+                utils::frontend_error_logger,
+                utils::frontend_info_logger
             ],
             #[cfg(target_os = "windows")]
             tauri::generate_handler![
                 windows::winreg_get,
                 windows::winreg_set,
                 windows::winreg_delete,
-                get_this_binary,
-                get_disk_stats,
-                farming,
-                start_node,
-                frontend_error_logger,
-                frontend_info_logger
+                utils::get_disk_stats,
+                utils::get_this_binary,
+                farmer::farming,
+                node::start_node,
+                utils::frontend_error_logger,
+                utils::frontend_info_logger
             ],
         )
         .build(ctx)
@@ -215,22 +124,4 @@ async fn main() -> Result<()> {
     });
 
     Ok(())
-}
-
-pub fn custom_log_dir(id: &str) -> Option<PathBuf> {
-    #[cfg(target_os = "macos")]
-    let path = dirs::home_dir().map(|dir| {
-        dir.join("Library/Logs").join(id)
-        // evaluates to: `~/Library/Logs/${bundle_name}
-    });
-
-    #[cfg(target_os = "linux")]
-    let path = dirs::data_local_dir().map(|dir| dir.join(id).join("logs"));
-    // evaluates to: `~/.local/share/${bundle_name}/logs
-
-    #[cfg(target_os = "windows")]
-    let path = dirs::data_local_dir().map(|dir| dir.join(id).join("logs"));
-    // evaluates to: `C:/Users/Username/AppData/Local/${bundle_name}/logs
-
-    path
 }

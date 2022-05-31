@@ -62,7 +62,12 @@ impl NativeExecutionDispatch for ExecutorDispatch {
     }
 }
 
-pub(crate) async fn init_node(base_directory: PathBuf, node_name: String) -> Result<()> {
+#[tauri::command]
+pub(crate) async fn start_node(path: String, node_name: String) {
+    init_node(path.into(), node_name).await.unwrap();
+}
+
+async fn init_node(base_directory: PathBuf, node_name: String) -> Result<()> {
     let chain_spec =
         ConsensusChainSpec::from_json_bytes(include_bytes!("../chain-spec.json").as_ref())
             .map_err(anyhow::Error::msg)?;

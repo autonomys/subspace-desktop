@@ -4,11 +4,56 @@ use std::path::PathBuf;
 use subspace_core_primitives::PublicKey;
 use subspace_farmer::multi_farming::{MultiFarming, Options as MultiFarmingOptions};
 use subspace_farmer::{Identity, NodeRpcClient, ObjectMappings, Plot, RpcClient};
-use tokio::sync::mpsc::Sender;
+use tokio::sync::mpsc::{channel, Receiver, Sender};
+
+#[tauri::command]
+pub(crate) async fn farming(path: String, reward_address: String, plot_size: u64) -> bool {
+    // create a channel to listen for farmer errors, and restart another farmer instance in case any error
+    let (error_sender, mut error_receiver): (Sender<()>, Receiver<()>) = channel(1);
+
+    if let Ok(address) = parse_reward_address(&reward_address) {
+        farm(
+            path.clone().into(),
+            "ws://127.0.0.1:9947",
+            Some(address),
+            plot_size,
+            error_sender.clone(),
+        )
+        .await
+        .unwrap();
+
+        // farmer started successfully, now listen in the background for errors
+        tokio::spawn(async move {
+            // if there is an error, restart another farmer, and start listening again, in a loop
+            loop {
+                let result = error_receiver.recv().await;
+                match result {
+                    // we have received an error, let's restart the farmer
+                    Some(_) => farm(
+                        path.clone().into(),
+                        "ws://127.0.0.1:9947",
+                        Some(address),
+                        plot_size,
+                        error_sender.clone(),
+                    )
+                    .await
+                    .unwrap(),
+                    None => unreachable!(
+                        "sender should not have been dropped before sending an error message"
+                    ),
+                }
+            }
+        });
+        true
+    } else {
+        // reward address could not be parsed, and farmer did not start
+        false
+    }
+}
 
 /// Start farming by using plot in specified path and connecting to WebSocket server at specified
 /// address.
-pub(crate) async fn farm(
+async fn farm(
     base_directory: PathBuf,
     node_rpc_url: &str,
     reward_address: Option<PublicKey>,
