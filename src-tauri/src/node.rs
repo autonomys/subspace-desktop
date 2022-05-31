@@ -14,7 +14,7 @@ use sc_service::{
 };
 use sp_core::crypto::Ss58AddressFormat;
 use std::env;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::Once;
 use subspace_service::{FullClient, NewFull, SubspaceConfiguration};
 use tokio::runtime::Handle;
@@ -143,7 +143,6 @@ fn create_configuration<CS: ChainSpec + 'static>(
     let config_dir = base_path.config_dir(chain_spec.id());
     let net_config_dir = config_dir.join(DEFAULT_NETWORK_CONFIG_PATH);
     let client_id = format!("{}/v{}", impl_name, impl_version);
-    let database_cache_size = 1024;
     let mut network = NetworkConfiguration::new(
         node_name,
         client_id,
