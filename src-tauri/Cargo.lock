@@ -109,7 +109,7 @@ version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d52a9bb7ec0cf484c551830a7ce27bd20d67eac647e1befb56b0be4ee39a55d2"
 dependencies = [
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -223,7 +223,7 @@ dependencies = [
  "slab",
  "socket2",
  "waker-fn",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -267,7 +267,7 @@ dependencies = [
  "libc",
  "once_cell",
  "signal-hook",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -408,7 +408,7 @@ checksum = "d9b39be18770d11421cdb1b9947a45dd3f37e93092cbf377614828a319d5fee8"
 dependencies = [
  "hermit-abi",
  "libc",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -596,7 +596,7 @@ checksum = "c0940dc441f31689269e10ac70eb1002a3a1d3ad1390e030043662eb7fe4688b"
 dependencies = [
  "block-padding",
  "byte-tools",
- "byteorder 1.4.3",
+ "byteorder",
  "generic-array 0.12.4",
 ]
 
@@ -712,12 +712,6 @@ checksum = "95ebf10dda65f19ff0f42ea15572a359ed60d7fc74fdc984d90310937be0014b"
 dependencies = [
  "utf8-width",
 ]
-
-[[package]]
-name = "byteorder"
-version = "0.5.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0fc10e8cc6b2580fda3f36eb6dc5316657f812a3df879a44a66fc9f0fdbc4855"
 
 [[package]]
 name = "byteorder"
@@ -844,7 +838,7 @@ version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "74f89d248799e3f15f91b70917f65381062a01bb8e222700ea0e5a7ff9785f9c"
 dependencies = [
- "byteorder 1.4.3",
+ "byteorder",
  "uuid 0.8.2",
 ]
 
@@ -905,7 +899,7 @@ dependencies = [
  "num-integer",
  "num-traits",
  "time",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -939,129 +933,6 @@ dependencies = [
  "crypto-common",
  "inout",
  "zeroize",
-]
-
-[[package]]
-name = "cirrus-block-builder"
-version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=005c2a2ca82bba443a226d5f62a17e03e1ccabce#005c2a2ca82bba443a226d5f62a17e03e1ccabce"
-dependencies = [
- "parity-scale-codec",
- "sc-client-api",
- "sp-api",
- "sp-block-builder",
- "sp-blockchain",
- "sp-core",
- "sp-inherents",
- "sp-runtime",
- "sp-state-machine",
-]
-
-[[package]]
-name = "cirrus-client-executor"
-version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=005c2a2ca82bba443a226d5f62a17e03e1ccabce#005c2a2ca82bba443a226d5f62a17e03e1ccabce"
-dependencies = [
- "cirrus-block-builder",
- "cirrus-client-executor-gossip",
- "cirrus-primitives",
- "crossbeam",
- "futures 0.3.21",
- "futures-timer",
- "merkletree",
- "parity-scale-codec",
- "parking_lot 0.12.0",
- "rand 0.8.5",
- "rand_chacha 0.3.1",
- "sc-client-api",
- "sc-consensus",
- "sc-network",
- "sc-transaction-pool-api",
- "sc-utils",
- "sha2 0.10.2",
- "sp-api",
- "sp-block-builder",
- "sp-blockchain",
- "sp-consensus",
- "sp-consensus-slots",
- "sp-core",
- "sp-executor",
- "sp-keystore",
- "sp-runtime",
- "sp-trie",
- "subspace-core-primitives",
- "subspace-fraud-proof",
- "subspace-runtime-primitives",
- "thiserror",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "cirrus-client-executor-gossip"
-version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=005c2a2ca82bba443a226d5f62a17e03e1ccabce#005c2a2ca82bba443a226d5f62a17e03e1ccabce"
-dependencies = [
- "futures 0.3.21",
- "parity-scale-codec",
- "parking_lot 0.12.0",
- "sc-network",
- "sc-network-gossip",
- "sc-utils",
- "sp-core",
- "sp-executor",
- "sp-runtime",
- "tracing",
-]
-
-[[package]]
-name = "cirrus-node"
-version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=005c2a2ca82bba443a226d5f62a17e03e1ccabce#005c2a2ca82bba443a226d5f62a17e03e1ccabce"
-dependencies = [
- "cirrus-client-executor",
- "cirrus-client-executor-gossip",
- "cirrus-primitives",
- "cirrus-runtime",
- "clap",
- "cumulus-client-consensus-relay-chain",
- "frame-benchmarking",
- "frame-benchmarking-cli",
- "futures 0.3.21",
- "hex-literal",
- "jsonrpsee",
- "log",
- "pallet-transaction-payment-rpc",
- "sc-chain-spec",
- "sc-cli",
- "sc-client-api",
- "sc-consensus",
- "sc-executor",
- "sc-network",
- "sc-rpc",
- "sc-rpc-api",
- "sc-service",
- "sc-telemetry",
- "sc-transaction-pool",
- "sc-transaction-pool-api",
- "sc-utils",
- "serde",
- "sp-api",
- "sp-block-builder",
- "sp-blockchain",
- "sp-consensus",
- "sp-consensus-slots",
- "sp-core",
- "sp-executor",
- "sp-inherents",
- "sp-keystore",
- "sp-offchain",
- "sp-runtime",
- "sp-session",
- "sp-transaction-pool",
- "subspace-core-primitives",
- "substrate-build-script-utils",
- "substrate-frame-rpc-system",
 ]
 
 [[package]]
@@ -1214,17 +1085,6 @@ checksum = "2a604e93b79d1808327a6fca85a6f2d69de66461e7620f5a4cbf5fb4d1d7c948"
 dependencies = [
  "bytes",
  "memchr",
-]
-
-[[package]]
-name = "comfy-table"
-version = "5.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b103d85ca6e209388771bfb7aa6b68a7aeec4afbf6f0a0264bfbf50360e5212e"
-dependencies = [
- "strum 0.23.0",
- "strum_macros 0.23.1",
- "unicode-width",
 ]
 
 [[package]]
@@ -1421,20 +1281,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "crossbeam"
-version = "0.8.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4ae5588f6b3c3cb05239e90bd110f257254aecd01e4635400391aeae07497845"
-dependencies = [
- "cfg-if",
- "crossbeam-channel",
- "crossbeam-deque",
- "crossbeam-epoch",
- "crossbeam-queue",
- "crossbeam-utils",
-]
-
-[[package]]
 name = "crossbeam-channel"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1466,16 +1312,6 @@ dependencies = [
  "lazy_static",
  "memoffset",
  "scopeguard",
-]
-
-[[package]]
-name = "crossbeam-queue"
-version = "0.3.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1f25d8400f4a7a5778f0e4e52384a48cbd9b5c495d110786187fc750075277a2"
-dependencies = [
- "cfg-if",
- "crossbeam-utils",
 ]
 
 [[package]]
@@ -1594,23 +1430,9 @@ version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b810a8449931679f64cd7eef1bbd0fa315801b6d5d9cdc1ace2804d6529eee18"
 dependencies = [
- "byteorder 1.4.3",
+ "byteorder",
  "fnv",
  "rand 0.7.3",
-]
-
-[[package]]
-name = "cumulus-client-consensus-relay-chain"
-version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=005c2a2ca82bba443a226d5f62a17e03e1ccabce#005c2a2ca82bba443a226d5f62a17e03e1ccabce"
-dependencies = [
- "async-trait",
- "sc-consensus",
- "sp-blockchain",
- "sp-consensus",
- "sp-core",
- "sp-runtime",
- "substrate-prometheus-endpoint",
 ]
 
 [[package]]
@@ -1619,7 +1441,7 @@ version = "2.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4a9b85542f99a2dfa2a1b8e192662741c9859a846b296bef1c92ef9b58b5a216"
 dependencies = [
- "byteorder 1.4.3",
+ "byteorder",
  "digest 0.8.1",
  "rand_core 0.5.1",
  "subtle",
@@ -1632,7 +1454,7 @@ version = "3.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0b9fdf9972b2bd6af2d913799d9ebc165ea4d2e65878e329d9c6b372c4491b61"
 dependencies = [
- "byteorder 1.4.3",
+ "byteorder",
  "digest 0.9.0",
  "rand_core 0.5.1",
  "subtle",
@@ -1645,7 +1467,7 @@ version = "4.0.0-pre.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4033478fbf70d6acf2655ac70da91ee65852d69daf7a67bf7a2f518fb47aafcf"
 dependencies = [
- "byteorder 1.4.3",
+ "byteorder",
  "digest 0.9.0",
  "rand_core 0.6.3",
  "subtle",
@@ -1756,7 +1578,7 @@ checksum = "de0a745c25b32caa56b82a3950f5fec7893a960f4c10ca3b02060b0c38d8c2ce"
 dependencies = [
  "libc",
  "libdbus-sys",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -1766,7 +1588,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "707b6a7b384888a70c8d2e8650b3e60170dfc6a67bb4aa67b6dfca57af4bedb4"
 dependencies = [
  "adler32",
- "byteorder 1.4.3",
+ "byteorder",
 ]
 
 [[package]]
@@ -1856,7 +1678,7 @@ checksum = "3fd78930633bd1c6e35c4b42b1df7b0cbc6bc191146e512bb3bedf243fcc3901"
 dependencies = [
  "libc",
  "redox_users 0.3.5",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -1886,7 +1708,7 @@ checksum = "03d86534ed367a67548dc68113a0f5db55432fdfbb6e6f9d77704397d95d5780"
 dependencies = [
  "libc",
  "redox_users 0.4.0",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -1897,7 +1719,7 @@ checksum = "4ebda144c4fe02d1f7ea1a7d9641b6fc6b580adcfa024ae48797ecdeb6825b4d"
 dependencies = [
  "libc",
  "redox_users 0.4.0",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -1912,7 +1734,7 @@ version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c4d33be9473d06f75f58220f71f7a9317aca647dc061dbd3c361b0bef505fbea"
 dependencies = [
- "byteorder 1.4.3",
+ "byteorder",
  "quick-error",
 ]
 
@@ -2080,7 +1902,7 @@ checksum = "f639046355ee4f37944e44f60642c6f3a7efa3cf6b78c78a0d989a8ce6c396a1"
 dependencies = [
  "errno-dragonfly",
  "libc",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -2116,7 +1938,7 @@ version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e43f2f1833d64e33f15592464d6fdd70f349dda7b1a53088eb83cd94014008c5"
 dependencies = [
- "futures 0.3.21",
+ "futures",
 ]
 
 [[package]]
@@ -2197,7 +2019,7 @@ dependencies = [
  "cfg-if",
  "libc",
  "redox_syscall 0.2.10",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -2207,7 +2029,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d9def033d8505edf199f6a5d07aa7e6d2d6185b164293b77f0efd108f4f3e11d"
 dependencies = [
  "either",
- "futures 0.3.21",
+ "futures",
  "futures-timer",
  "log",
  "num-traits",
@@ -2222,7 +2044,7 @@ version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cfcf0ed7fe52a17a03854ec54a9f76d6d84508d1c0e66bc1793301c73fc8493c"
 dependencies = [
- "byteorder 1.4.3",
+ "byteorder",
  "rand 0.8.5",
  "rustc-hex",
  "static_assertions",
@@ -2306,56 +2128,6 @@ dependencies = [
  "sp-runtime-interface",
  "sp-std",
  "sp-storage",
-]
-
-[[package]]
-name = "frame-benchmarking-cli"
-version = "4.0.0-dev"
-source = "git+https://github.com/paritytech/substrate?rev=24bea4c3cba7479e2cf2976a21e8111dfda6b1cd#24bea4c3cba7479e2cf2976a21e8111dfda6b1cd"
-dependencies = [
- "Inflector",
- "chrono",
- "clap",
- "comfy-table",
- "frame-benchmarking",
- "frame-support",
- "frame-system",
- "handlebars",
- "hash-db",
- "hex",
- "itertools",
- "kvdb",
- "lazy_static",
- "linked-hash-map",
- "log",
- "memory-db",
- "parity-scale-codec",
- "rand 0.8.5",
- "rand_pcg 0.3.1",
- "sc-block-builder",
- "sc-cli",
- "sc-client-api",
- "sc-client-db",
- "sc-executor",
- "sc-service",
- "sc-sysinfo",
- "serde",
- "serde_json",
- "serde_nanos",
- "sp-api",
- "sp-blockchain",
- "sp-core",
- "sp-database",
- "sp-externalities",
- "sp-inherents",
- "sp-keystore",
- "sp-runtime",
- "sp-state-machine",
- "sp-storage",
- "sp-trie",
- "tempfile",
- "thiserror",
- "thousands",
 ]
 
 [[package]]
@@ -2485,7 +2257,7 @@ dependencies = [
  "lazy_static",
  "libc",
  "libloading 0.5.2",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -2495,7 +2267,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9564fc758e15025b46aa6643b1b77d047d1a56a1aea6e01002ac0c7026876213"
 dependencies = [
  "libc",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -2503,12 +2275,6 @@ name = "fs_extra"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2022715d62ab30faffd124d40b76f4134a550a87792276512b18d63272333394"
-
-[[package]]
-name = "fuchsia-cprng"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a06f77d526c1a601b7c4cdd98f54b5eaabffc14d5f2f0296febdc7f357c6d3ba"
 
 [[package]]
 name = "funty"
@@ -2525,12 +2291,6 @@ dependencies = [
  "mac",
  "new_debug_unreachable",
 ]
-
-[[package]]
-name = "futures"
-version = "0.1.31"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3a471a38ef8ed83cd6e40aa59c1ffe17db6855c18e3604d9c4ed8c08ebc28678"
 
 [[package]]
 name = "futures"
@@ -2655,7 +2415,6 @@ version = "0.3.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d8b7abd5d659d9b90c8cba917f6ec750a74e2dc23902ef9cd4cc8c8b22e6036a"
 dependencies = [
- "futures 0.1.31",
  "futures-channel",
  "futures-core",
  "futures-io",
@@ -2674,7 +2433,7 @@ version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c31b6d751ae2c7f11320402d34e41349dd1016f8d5d45e48c4312bc8625af50c"
 dependencies = [
- "byteorder 1.4.3",
+ "byteorder",
 ]
 
 [[package]]
@@ -2759,7 +2518,7 @@ dependencies = [
  "libc",
  "log",
  "rustversion",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -2853,7 +2612,7 @@ dependencies = [
  "gobject-sys",
  "libc",
  "system-deps 6.0.2",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -3060,20 +2819,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "handlebars"
-version = "4.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d113a9853e5accd30f43003560b5563ffbb007e3f325e8b103fa0d0029c6e6df"
-dependencies = [
- "log",
- "pest",
- "pest_derive",
- "serde",
- "serde_json",
- "thiserror",
-]
-
-[[package]]
 name = "hash-db"
 version = "0.15.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3147,12 +2892,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "hex-literal"
-version = "0.3.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7ebdb29d2ea9ed0083cd8cece49bbd968021bd99b0849edb4a9a7ee0fdf6a4e0"
-
-[[package]]
 name = "hex_fmt"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3206,7 +2945,7 @@ checksum = "3c731c3e10504cc8ed35cfe2f1db4c9274c3d35fa486e3b31df46f068ef3e867"
 dependencies = [
  "libc",
  "match_cfg",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -3315,7 +3054,7 @@ version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6a4b3331534254a9b64095ae60d3dc2a8225a7a70229cd5888be127cdc1f6804"
 dependencies = [
- "byteorder 1.4.3",
+ "byteorder",
  "png 0.11.0",
 ]
 
@@ -3343,7 +3082,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cbc0fa01ffc752e9dbc72818cdb072cd028b86be5e09dd04c5a643704fe101a9"
 dependencies = [
  "libc",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -3355,7 +3094,7 @@ dependencies = [
  "async-io",
  "core-foundation",
  "fnv",
- "futures 0.3.21",
+ "futures",
  "if-addrs",
  "ipnet",
  "log",
@@ -3487,7 +3226,7 @@ checksum = "723519edce41262b05d4143ceb95050e4c614f483e78e9fd9e39a8275a84ad98"
 dependencies = [
  "socket2",
  "widestring",
- "winapi 0.3.9",
+ "winapi",
  "winreg 0.7.0",
 ]
 
@@ -3782,16 +3521,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "67c21572b4949434e4fc1e1978b99c5f77064153c59d998bf13ecd96fb5ecba7"
 
 [[package]]
-name = "kernel32-sys"
-version = "0.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7507624b29483431c0ba2d82aece8ca6cdba9382bff4ddd0f7490560c056098d"
-dependencies = [
- "winapi 0.2.8",
- "winapi-build",
-]
-
-[[package]]
 name = "kuchiki"
 version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3908,7 +3637,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f2b111a074963af1d37a139918ac6d49ad1d0d5e47f72fd55388619691a7d753"
 dependencies = [
  "cc",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -3918,7 +3647,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "efbc0f03f9a775e9f6aed295c6a1ba2253c5757a9e03d55c6caa46a681abcddd"
 dependencies = [
  "cfg-if",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -3934,7 +3663,7 @@ source = "git+https://github.com/subspace/rust-libp2p?branch=add-sr25519-keys-v4
 dependencies = [
  "atomic",
  "bytes",
- "futures 0.3.21",
+ "futures",
  "futures-timer",
  "getrandom 0.2.4",
  "instant",
@@ -3977,7 +3706,7 @@ version = "0.3.0"
 source = "git+https://github.com/subspace/rust-libp2p?branch=add-sr25519-keys-v44#59a74b8038fadb430ec56f7771487cb9c6d3bbc0"
 dependencies = [
  "async-trait",
- "futures 0.3.21",
+ "futures",
  "futures-timer",
  "instant",
  "libp2p-core",
@@ -3999,7 +3728,7 @@ dependencies = [
  "ed25519-dalek",
  "either",
  "fnv",
- "futures 0.3.21",
+ "futures",
  "futures-timer",
  "instant",
  "lazy_static",
@@ -4030,7 +3759,7 @@ version = "0.32.0"
 source = "git+https://github.com/subspace/rust-libp2p?branch=add-sr25519-keys-v44#59a74b8038fadb430ec56f7771487cb9c6d3bbc0"
 dependencies = [
  "flate2",
- "futures 0.3.21",
+ "futures",
  "libp2p-core",
 ]
 
@@ -4040,7 +3769,7 @@ version = "0.32.1"
 source = "git+https://github.com/subspace/rust-libp2p?branch=add-sr25519-keys-v44#59a74b8038fadb430ec56f7771487cb9c6d3bbc0"
 dependencies = [
  "async-std-resolver",
- "futures 0.3.21",
+ "futures",
  "libp2p-core",
  "log",
  "smallvec",
@@ -4054,7 +3783,7 @@ source = "git+https://github.com/subspace/rust-libp2p?branch=add-sr25519-keys-v4
 dependencies = [
  "cuckoofilter",
  "fnv",
- "futures 0.3.21",
+ "futures",
  "libp2p-core",
  "libp2p-swarm",
  "log",
@@ -4071,10 +3800,10 @@ source = "git+https://github.com/subspace/rust-libp2p?branch=add-sr25519-keys-v4
 dependencies = [
  "asynchronous-codec",
  "base64",
- "byteorder 1.4.3",
+ "byteorder",
  "bytes",
  "fnv",
- "futures 0.3.21",
+ "futures",
  "hex_fmt",
  "instant",
  "libp2p-core",
@@ -4096,7 +3825,7 @@ name = "libp2p-identify"
 version = "0.35.0"
 source = "git+https://github.com/subspace/rust-libp2p?branch=add-sr25519-keys-v44#59a74b8038fadb430ec56f7771487cb9c6d3bbc0"
 dependencies = [
- "futures 0.3.21",
+ "futures",
  "futures-timer",
  "libp2p-core",
  "libp2p-swarm",
@@ -4117,7 +3846,7 @@ dependencies = [
  "bytes",
  "either",
  "fnv",
- "futures 0.3.21",
+ "futures",
  "futures-timer",
  "instant",
  "libp2p-core",
@@ -4142,7 +3871,7 @@ dependencies = [
  "async-io",
  "data-encoding",
  "dns-parser",
- "futures 0.3.21",
+ "futures",
  "if-watch",
  "lazy_static",
  "libp2p-core",
@@ -4176,7 +3905,7 @@ source = "git+https://github.com/subspace/rust-libp2p?branch=add-sr25519-keys-v4
 dependencies = [
  "asynchronous-codec",
  "bytes",
- "futures 0.3.21",
+ "futures",
  "libp2p-core",
  "log",
  "nohash-hasher",
@@ -4193,7 +3922,7 @@ source = "git+https://github.com/subspace/rust-libp2p?branch=add-sr25519-keys-v4
 dependencies = [
  "bytes",
  "curve25519-dalek 3.2.0",
- "futures 0.3.21",
+ "futures",
  "lazy_static",
  "libp2p-core",
  "log",
@@ -4212,7 +3941,7 @@ name = "libp2p-ping"
 version = "0.35.0"
 source = "git+https://github.com/subspace/rust-libp2p?branch=add-sr25519-keys-v44#59a74b8038fadb430ec56f7771487cb9c6d3bbc0"
 dependencies = [
- "futures 0.3.21",
+ "futures",
  "futures-timer",
  "instant",
  "libp2p-core",
@@ -4229,7 +3958,7 @@ source = "git+https://github.com/subspace/rust-libp2p?branch=add-sr25519-keys-v4
 dependencies = [
  "asynchronous-codec",
  "bytes",
- "futures 0.3.21",
+ "futures",
  "libp2p-core",
  "log",
  "prost 0.9.0",
@@ -4243,7 +3972,7 @@ name = "libp2p-pnet"
 version = "0.22.0"
 source = "git+https://github.com/subspace/rust-libp2p?branch=add-sr25519-keys-v44#59a74b8038fadb430ec56f7771487cb9c6d3bbc0"
 dependencies = [
- "futures 0.3.21",
+ "futures",
  "log",
  "pin-project 1.0.10",
  "rand 0.7.3",
@@ -4259,7 +3988,7 @@ dependencies = [
  "asynchronous-codec",
  "bytes",
  "either",
- "futures 0.3.21",
+ "futures",
  "futures-timer",
  "instant",
  "libp2p-core",
@@ -4283,7 +4012,7 @@ source = "git+https://github.com/subspace/rust-libp2p?branch=add-sr25519-keys-v4
 dependencies = [
  "asynchronous-codec",
  "bimap",
- "futures 0.3.21",
+ "futures",
  "futures-timer",
  "instant",
  "libp2p-core",
@@ -4305,7 +4034,7 @@ source = "git+https://github.com/subspace/rust-libp2p?branch=add-sr25519-keys-v4
 dependencies = [
  "async-trait",
  "bytes",
- "futures 0.3.21",
+ "futures",
  "instant",
  "libp2p-core",
  "libp2p-swarm",
@@ -4322,7 +4051,7 @@ source = "git+https://github.com/subspace/rust-libp2p?branch=add-sr25519-keys-v4
 dependencies = [
  "either",
  "fnv",
- "futures 0.3.21",
+ "futures",
  "futures-timer",
  "instant",
  "libp2p-core",
@@ -4349,7 +4078,7 @@ version = "0.32.0"
 source = "git+https://github.com/subspace/rust-libp2p?branch=add-sr25519-keys-v44#59a74b8038fadb430ec56f7771487cb9c6d3bbc0"
 dependencies = [
  "async-io",
- "futures 0.3.21",
+ "futures",
  "futures-timer",
  "if-addrs",
  "if-watch",
@@ -4367,7 +4096,7 @@ version = "0.32.0"
 source = "git+https://github.com/subspace/rust-libp2p?branch=add-sr25519-keys-v44#59a74b8038fadb430ec56f7771487cb9c6d3bbc0"
 dependencies = [
  "async-std",
- "futures 0.3.21",
+ "futures",
  "libp2p-core",
  "log",
 ]
@@ -4377,7 +4106,7 @@ name = "libp2p-wasm-ext"
 version = "0.32.0"
 source = "git+https://github.com/subspace/rust-libp2p?branch=add-sr25519-keys-v44#59a74b8038fadb430ec56f7771487cb9c6d3bbc0"
 dependencies = [
- "futures 0.3.21",
+ "futures",
  "js-sys",
  "libp2p-core",
  "parity-send-wrapper",
@@ -4391,7 +4120,7 @@ version = "0.34.0"
 source = "git+https://github.com/subspace/rust-libp2p?branch=add-sr25519-keys-v44#59a74b8038fadb430ec56f7771487cb9c6d3bbc0"
 dependencies = [
  "either",
- "futures 0.3.21",
+ "futures",
  "futures-rustls",
  "libp2p-core",
  "log",
@@ -4407,7 +4136,7 @@ name = "libp2p-yamux"
 version = "0.36.0"
 source = "git+https://github.com/subspace/rust-libp2p?branch=add-sr25519-keys-v44#59a74b8038fadb430ec56f7771487cb9c6d3bbc0"
 dependencies = [
- "futures 0.3.21",
+ "futures",
  "libp2p-core",
  "parking_lot 0.12.0",
  "thiserror",
@@ -4628,12 +4357,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "maplit"
-version = "1.0.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
-
-[[package]]
 name = "markup5ever"
 version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4702,16 +4425,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "memmap"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6585fd95e7bb50d6cc31e20d4cf9afb4e2ba16c5846fc76793f11218da9c475b"
-dependencies = [
- "libc",
- "winapi 0.3.9",
-]
-
-[[package]]
 name = "memmap2"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4761,31 +4474,12 @@ version = "0.4.0"
 source = "git+https://github.com/sitano/merkle_light?rev=fe31d4ef27a1fbe54e82ab589b610ae4bfd2008e#fe31d4ef27a1fbe54e82ab589b610ae4bfd2008e"
 
 [[package]]
-name = "merkletree"
-version = "0.21.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2202d6eb93a775e0a619fc08924b341d0cf12d6e0f064ee52d24311de45b925b"
-dependencies = [
- "anyhow",
- "arrayref",
- "log",
- "memmap",
- "positioned-io",
- "rand 0.7.3",
- "rayon",
- "serde",
- "tempdir",
- "tempfile",
- "typenum",
-]
-
-[[package]]
 name = "merlin"
 version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4e261cf0f8b3c42ded9f7d2bb59dea03aa52bc8a1cbc7482f9fc3fd1229d3b42"
 dependencies = [
- "byteorder 1.4.3",
+ "byteorder",
  "keccak",
  "rand_core 0.5.1",
  "zeroize",
@@ -4827,7 +4521,7 @@ dependencies = [
  "miow",
  "ntapi",
  "wasi 0.11.0+wasi-snapshot-preview1",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -4836,7 +4530,7 @@ version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b9f1c5b025cda876f66ef43a113f91ebc9f4ccef34843000e0adf6ebbab84e21"
 dependencies = [
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -4853,7 +4547,7 @@ checksum = "3c580bfdd8803cce319b047d239559a22f809094aaea4ac13902a1fdcfcd4261"
 dependencies = [
  "arrayref",
  "bs58",
- "byteorder 1.4.3",
+ "byteorder",
  "data-encoding",
  "multihash",
  "percent-encoding",
@@ -4917,7 +4611,7 @@ version = "0.11.0"
 source = "git+https://github.com/subspace/rust-libp2p?branch=add-sr25519-keys-v44#59a74b8038fadb430ec56f7771487cb9c6d3bbc0"
 dependencies = [
  "bytes",
- "futures 0.3.21",
+ "futures",
  "log",
  "pin-project 1.0.10",
  "smallvec",
@@ -4951,15 +4645,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
-]
-
-[[package]]
-name = "names"
-version = "0.13.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e7d66043b25d4a6cccb23619d10c19c25304b355a7dccd4a8e11423dd2382146"
-dependencies = [
- "rand 0.8.5",
 ]
 
 [[package]]
@@ -5033,7 +4718,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "345b8ab5bd4e71a2986663e88c56856699d060e78e152e6e9d7966fcd5491297"
 dependencies = [
  "anyhow",
- "byteorder 1.4.3",
+ "byteorder",
  "libc",
  "netlink-packet-utils",
 ]
@@ -5046,7 +4731,7 @@ checksum = "733ea73609acfd7fa7ddadfb7bf709b0471668c456ad9513685af543a06342b2"
 dependencies = [
  "anyhow",
  "bitflags",
- "byteorder 1.4.3",
+ "byteorder",
  "libc",
  "netlink-packet-core",
  "netlink-packet-utils",
@@ -5059,7 +4744,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "25af9cf0dc55498b7bd94a1508af7a78706aa0ab715a73c5169273e03c84845e"
 dependencies = [
  "anyhow",
- "byteorder 1.4.3",
+ "byteorder",
  "paste",
  "thiserror",
 ]
@@ -5071,7 +4756,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ef8785b8141e8432aa45fceb922a7e876d7da3fad37fa7e7ec702ace3aa0826b"
 dependencies = [
  "bytes",
- "futures 0.3.21",
+ "futures",
  "log",
  "netlink-packet-core",
  "netlink-sys",
@@ -5086,7 +4771,7 @@ checksum = "3e4c9f9547a08241bee7b6558b9b98e1f290d187de8b7cfca2bbb4937bcaa8f8"
 dependencies = [
  "async-io",
  "bytes",
- "futures 0.3.21",
+ "futures",
  "libc",
  "log",
 ]
@@ -5150,7 +4835,7 @@ version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3f6bb902e437b6d86e03cce10a7e2af662292c5dfef23b65899ea3ac9354ad44"
 dependencies = [
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -5343,7 +5028,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "176ee4b630d174d2da8241336763bb459281dddc0f4d87f72c3b1efc9a6109b7"
 dependencies = [
  "pathdiff",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -5402,7 +5087,7 @@ checksum = "023df84d545ef479cf67fd2f4459a613585c9db4852c2fad12ab70587859d340"
 dependencies = [
  "log",
  "serde",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -5412,7 +5097,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2c92f2b54f081d635c77e7120862d48db8e91f7f21cef23ab1b4fe9971c59f55"
 dependencies = [
  "libc",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -5751,7 +5436,7 @@ dependencies = [
  "parking_lot 0.12.0",
  "primitive-types",
  "smallvec",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -5771,7 +5456,7 @@ version = "0.32.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "16ad52817c4d343339b3bc2e26861bd21478eda0b7509acf83505727000512ac"
 dependencies = [
- "byteorder 1.4.3",
+ "byteorder",
 ]
 
 [[package]]
@@ -5818,7 +5503,7 @@ dependencies = [
  "libc",
  "redox_syscall 0.2.10",
  "smallvec",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -5883,40 +5568,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "10f4872ae94d7b90ae48754df22fd42ad52ce740b8f370b03da4835417403e53"
 dependencies = [
  "ucd-trie",
-]
-
-[[package]]
-name = "pest_derive"
-version = "2.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "833d1ae558dc601e9a60366421196a8d94bc0ac980476d0b67e1d0988d72b2d0"
-dependencies = [
- "pest",
- "pest_generator",
-]
-
-[[package]]
-name = "pest_generator"
-version = "2.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "99b8db626e31e5b81787b9783425769681b347011cc59471e33ea46d2ea0cf55"
-dependencies = [
- "pest",
- "pest_meta",
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
-name = "pest_meta"
-version = "2.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "54be6e404f5317079812fc8f9f5279de376d8856929e21c184ecf6bbd692a11d"
-dependencies = [
- "maplit",
- "pest",
- "sha-1 0.8.2",
 ]
 
 [[package]]
@@ -6131,7 +5782,7 @@ dependencies = [
  "libc",
  "log",
  "wepoll-ffi",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -6155,18 +5806,6 @@ dependencies = [
  "cpufeatures",
  "opaque-debug 0.3.0",
  "universal-hash",
-]
-
-[[package]]
-name = "positioned-io"
-version = "0.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c405a565f48a728dbb07fa1770e30791b0fa3e6344c1e5615225ce84049354d6"
-dependencies = [
- "byteorder 0.5.3",
- "kernel32-sys",
- "libc",
- "winapi 0.2.8",
 ]
 
 [[package]]
@@ -6408,19 +6047,6 @@ checksum = "dc33ff2d4973d518d823d61aa239014831e521c75da58e3df4840d3f47749d09"
 
 [[package]]
 name = "rand"
-version = "0.4.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "552840b97013b1a26992c11eac34bdd778e464601a4c2054b5f0bff7c6761293"
-dependencies = [
- "fuchsia-cprng",
- "libc",
- "rand_core 0.3.1",
- "rdrand",
- "winapi 0.3.9",
-]
-
-[[package]]
-name = "rand"
 version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6a6b1679d49b24bbfe0c803429aa1874472f50d9b363131f0e89fc356b544d03"
@@ -6430,7 +6056,7 @@ dependencies = [
  "rand_chacha 0.2.2",
  "rand_core 0.5.1",
  "rand_hc",
- "rand_pcg 0.2.1",
+ "rand_pcg",
 ]
 
 [[package]]
@@ -6463,21 +6089,6 @@ dependencies = [
  "ppv-lite86",
  "rand_core 0.6.3",
 ]
-
-[[package]]
-name = "rand_core"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7a6fdeb83b075e8266dcc8762c22776f6877a63111121f5f8c7411e5be7eed4b"
-dependencies = [
- "rand_core 0.4.2",
-]
-
-[[package]]
-name = "rand_core"
-version = "0.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9c33a3c44ca05fa6f1807d8e6743f3824e8509beca625669633be0acbdf509dc"
 
 [[package]]
 name = "rand_core"
@@ -6526,15 +6137,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rand_pcg"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "59cad018caf63deb318e5a4586d99a24424a364f40f1e5778c29aca23f4fc73e"
-dependencies = [
- "rand_core 0.6.3",
-]
-
-[[package]]
 name = "raw-window-handle"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6571,15 +6173,6 @@ dependencies = [
  "crossbeam-deque",
  "crossbeam-utils",
  "num_cpus",
-]
-
-[[package]]
-name = "rdrand"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "678054eb77286b51581ba43620cc911abf02758c91f93f479767aed0f90458b2"
-dependencies = [
- "rand_core 0.3.1",
 ]
 
 [[package]]
@@ -6698,7 +6291,7 @@ dependencies = [
  "bitflags",
  "libc",
  "mach",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -6707,7 +6300,7 @@ version = "0.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3acd125665422973a33ac9d3dd2df85edad0f4ae9b00dafb1a05e43a9f5ef8e7"
 dependencies = [
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -6773,7 +6366,7 @@ dependencies = [
  "spin 0.5.2",
  "untrusted",
  "web-sys",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -6787,23 +6380,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "rpassword"
-version = "5.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ffc936cf8a7ea60c58f030fd36a612a48f440610214dc54bc36431f9ea0c3efb"
-dependencies = [
- "libc",
- "winapi 0.3.9",
-]
-
-[[package]]
 name = "rtnetlink"
 version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6f54290e54521dac3de4149d83ddf9f62a359b3cc93bcb494a794a41e6f4744b"
 dependencies = [
  "async-global-executor",
- "futures 0.3.21",
+ "futures",
  "log",
  "netlink-packet-route",
  "netlink-proto",
@@ -6870,7 +6453,7 @@ dependencies = [
  "io-lifetimes",
  "libc",
  "linux-raw-sys",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -6918,7 +6501,7 @@ version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4da5fcb054c46f5a5dff833b129285a93d3f0179531735e6c866e8cc307d2020"
 dependencies = [
- "futures 0.3.21",
+ "futures",
  "pin-project 0.4.29",
  "static_assertions",
 ]
@@ -6963,7 +6546,7 @@ name = "sc-basic-authorship"
 version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate?rev=24bea4c3cba7479e2cf2976a21e8111dfda6b1cd#24bea4c3cba7479e2cf2976a21e8111dfda6b1cd"
 dependencies = [
- "futures 0.3.21",
+ "futures",
  "futures-timer",
  "log",
  "parity-scale-codec",
@@ -7026,51 +6609,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "sc-cli"
-version = "0.10.0-dev"
-source = "git+https://github.com/paritytech/substrate?rev=24bea4c3cba7479e2cf2976a21e8111dfda6b1cd#24bea4c3cba7479e2cf2976a21e8111dfda6b1cd"
-dependencies = [
- "chrono",
- "clap",
- "fdlimit",
- "futures 0.3.21",
- "hex",
- "libp2p",
- "log",
- "names",
- "parity-scale-codec",
- "rand 0.7.3",
- "regex",
- "rpassword",
- "sc-client-api",
- "sc-client-db",
- "sc-keystore",
- "sc-network",
- "sc-service",
- "sc-telemetry",
- "sc-tracing",
- "sc-utils",
- "serde",
- "serde_json",
- "sp-blockchain",
- "sp-core",
- "sp-keyring",
- "sp-keystore",
- "sp-panic-handler",
- "sp-runtime",
- "sp-version",
- "thiserror",
- "tiny-bip39",
- "tokio",
-]
-
-[[package]]
 name = "sc-client-api"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?rev=24bea4c3cba7479e2cf2976a21e8111dfda6b1cd#24bea4c3cba7479e2cf2976a21e8111dfda6b1cd"
 dependencies = [
  "fnv",
- "futures 0.3.21",
+ "futures",
  "hash-db",
  "log",
  "parity-scale-codec",
@@ -7123,7 +6667,7 @@ version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate?rev=24bea4c3cba7479e2cf2976a21e8111dfda6b1cd#24bea4c3cba7479e2cf2976a21e8111dfda6b1cd"
 dependencies = [
  "async-trait",
- "futures 0.3.21",
+ "futures",
  "futures-timer",
  "libp2p",
  "log",
@@ -7147,7 +6691,7 @@ version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate?rev=24bea4c3cba7479e2cf2976a21e8111dfda6b1cd#24bea4c3cba7479e2cf2976a21e8111dfda6b1cd"
 dependencies = [
  "async-trait",
- "futures 0.3.21",
+ "futures",
  "futures-timer",
  "log",
  "parity-scale-codec",
@@ -7173,7 +6717,7 @@ source = "git+https://github.com/subspace/subspace?rev=005c2a2ca82bba443a226d5f6
 dependencies = [
  "async-trait",
  "fork-tree",
- "futures 0.3.21",
+ "futures",
  "futures-timer",
  "log",
  "lru",
@@ -7212,7 +6756,7 @@ version = "0.1.0"
 source = "git+https://github.com/subspace/subspace?rev=005c2a2ca82bba443a226d5f62a17e03e1ccabce#005c2a2ca82bba443a226d5f62a17e03e1ccabce"
 dependencies = [
  "async-oneshot",
- "futures 0.3.21",
+ "futures",
  "futures-timer",
  "jsonrpsee",
  "log",
@@ -7316,7 +6860,7 @@ version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate?rev=24bea4c3cba7479e2cf2976a21e8111dfda6b1cd#24bea4c3cba7479e2cf2976a21e8111dfda6b1cd"
 dependencies = [
  "ansi_term",
- "futures 0.3.21",
+ "futures",
  "futures-timer",
  "log",
  "parity-util-mem",
@@ -7355,7 +6899,7 @@ dependencies = [
  "either",
  "fnv",
  "fork-tree",
- "futures 0.3.21",
+ "futures",
  "futures-timer",
  "hex",
  "ip_network",
@@ -7399,7 +6943,7 @@ name = "sc-network-common"
 version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate?rev=24bea4c3cba7479e2cf2976a21e8111dfda6b1cd#24bea4c3cba7479e2cf2976a21e8111dfda6b1cd"
 dependencies = [
- "futures 0.3.21",
+ "futures",
  "libp2p",
  "parity-scale-codec",
  "prost-build",
@@ -7408,28 +6952,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "sc-network-gossip"
-version = "0.10.0-dev"
-source = "git+https://github.com/paritytech/substrate?rev=24bea4c3cba7479e2cf2976a21e8111dfda6b1cd#24bea4c3cba7479e2cf2976a21e8111dfda6b1cd"
-dependencies = [
- "ahash",
- "futures 0.3.21",
- "futures-timer",
- "libp2p",
- "log",
- "lru",
- "sc-network",
- "sp-runtime",
- "substrate-prometheus-endpoint",
- "tracing",
-]
-
-[[package]]
 name = "sc-network-light"
 version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate?rev=24bea4c3cba7479e2cf2976a21e8111dfda6b1cd#24bea4c3cba7479e2cf2976a21e8111dfda6b1cd"
 dependencies = [
- "futures 0.3.21",
+ "futures",
  "libp2p",
  "log",
  "parity-scale-codec",
@@ -7452,7 +6979,7 @@ dependencies = [
  "bitflags",
  "either",
  "fork-tree",
- "futures 0.3.21",
+ "futures",
  "libp2p",
  "log",
  "lru",
@@ -7480,7 +7007,7 @@ source = "git+https://github.com/paritytech/substrate?rev=24bea4c3cba7479e2cf297
 dependencies = [
  "bytes",
  "fnv",
- "futures 0.3.21",
+ "futures",
  "futures-timer",
  "hex",
  "hyper",
@@ -7506,7 +7033,7 @@ name = "sc-peerset"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?rev=24bea4c3cba7479e2cf2976a21e8111dfda6b1cd#24bea4c3cba7479e2cf2976a21e8111dfda6b1cd"
 dependencies = [
- "futures 0.3.21",
+ "futures",
  "libp2p",
  "log",
  "sc-utils",
@@ -7528,7 +7055,7 @@ name = "sc-rpc"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?rev=24bea4c3cba7479e2cf2976a21e8111dfda6b1cd#24bea4c3cba7479e2cf2976a21e8111dfda6b1cd"
 dependencies = [
- "futures 0.3.21",
+ "futures",
  "hash-db",
  "jsonrpsee",
  "log",
@@ -7558,7 +7085,7 @@ name = "sc-rpc-api"
 version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate?rev=24bea4c3cba7479e2cf2976a21e8111dfda6b1cd#24bea4c3cba7479e2cf2976a21e8111dfda6b1cd"
 dependencies = [
- "futures 0.3.21",
+ "futures",
  "jsonrpsee",
  "log",
  "parity-scale-codec",
@@ -7581,7 +7108,7 @@ name = "sc-rpc-server"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?rev=24bea4c3cba7479e2cf2976a21e8111dfda6b1cd#24bea4c3cba7479e2cf2976a21e8111dfda6b1cd"
 dependencies = [
- "futures 0.3.21",
+ "futures",
  "jsonrpsee",
  "log",
  "serde_json",
@@ -7597,7 +7124,7 @@ dependencies = [
  "async-trait",
  "directories",
  "exit-future",
- "futures 0.3.21",
+ "futures",
  "futures-timer",
  "hash-db",
  "jsonrpsee",
@@ -7686,11 +7213,11 @@ name = "sc-sysinfo"
 version = "6.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?rev=24bea4c3cba7479e2cf2976a21e8111dfda6b1cd#24bea4c3cba7479e2cf2976a21e8111dfda6b1cd"
 dependencies = [
- "futures 0.3.21",
+ "futures",
  "libc",
  "log",
  "rand 0.7.3",
- "rand_pcg 0.2.1",
+ "rand_pcg",
  "regex",
  "sc-telemetry",
  "serde",
@@ -7706,7 +7233,7 @@ version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?rev=24bea4c3cba7479e2cf2976a21e8111dfda6b1cd#24bea4c3cba7479e2cf2976a21e8111dfda6b1cd"
 dependencies = [
  "chrono",
- "futures 0.3.21",
+ "futures",
  "libp2p",
  "log",
  "parking_lot 0.12.0",
@@ -7765,7 +7292,7 @@ name = "sc-transaction-pool"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?rev=24bea4c3cba7479e2cf2976a21e8111dfda6b1cd#24bea4c3cba7479e2cf2976a21e8111dfda6b1cd"
 dependencies = [
- "futures 0.3.21",
+ "futures",
  "futures-timer",
  "linked-hash-map",
  "log",
@@ -7792,7 +7319,7 @@ name = "sc-transaction-pool-api"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?rev=24bea4c3cba7479e2cf2976a21e8111dfda6b1cd#24bea4c3cba7479e2cf2976a21e8111dfda6b1cd"
 dependencies = [
- "futures 0.3.21",
+ "futures",
  "log",
  "serde",
  "sp-blockchain",
@@ -7805,7 +7332,7 @@ name = "sc-utils"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?rev=24bea4c3cba7479e2cf2976a21e8111dfda6b1cd#24bea4c3cba7479e2cf2976a21e8111dfda6b1cd"
 dependencies = [
- "futures 0.3.21",
+ "futures",
  "futures-timer",
  "lazy_static",
  "log",
@@ -7846,7 +7373,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8f05ba609c234e60bee0d547fe94a4c7e9da733d1c962cf6e59efa4cd9c8bc75"
 dependencies = [
  "lazy_static",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -8060,15 +7587,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "serde_nanos"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e44969a61f5d316be20a42ff97816efb3b407a924d06824c3d8a49fa8450de0e"
-dependencies = [
- "serde",
-]
-
-[[package]]
 name = "serde_repr"
 version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -8144,18 +7662,6 @@ checksum = "d98238b800e0d1576d8b6e3de32827c2d74bee68bb97748dcf5071fb53965432"
 dependencies = [
  "nodrop",
  "stable_deref_trait",
-]
-
-[[package]]
-name = "sha-1"
-version = "0.8.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f7d94d0bede923b3cea61f3f1ff57ff8cdfd77b400fb8f9998949e0cf04163df"
-dependencies = [
- "block-buffer 0.7.3",
- "digest 0.8.1",
- "fake-simd",
- "opaque-debug 0.2.3",
 ]
 
 [[package]]
@@ -8243,7 +7749,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b0d94659ad3c2137fef23ae75b03d5241d633f8acded53d672decfa0e6e0caef"
 dependencies = [
  "libc",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -8353,7 +7859,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "66d72b759436ae32898a2af0a14218dbf55efde3feeb170eb623637db85ee1e0"
 dependencies = [
  "libc",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -8365,11 +7871,11 @@ dependencies = [
  "base64",
  "bytes",
  "flate2",
- "futures 0.3.21",
+ "futures",
  "httparse",
  "log",
  "rand 0.8.5",
- "sha-1 0.9.8",
+ "sha-1",
 ]
 
 [[package]]
@@ -8486,7 +7992,7 @@ name = "sp-blockchain"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?rev=24bea4c3cba7479e2cf2976a21e8111dfda6b1cd#24bea4c3cba7479e2cf2976a21e8111dfda6b1cd"
 dependencies = [
- "futures 0.3.21",
+ "futures",
  "log",
  "lru",
  "parity-scale-codec",
@@ -8505,7 +8011,7 @@ version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate?rev=24bea4c3cba7479e2cf2976a21e8111dfda6b1cd#24bea4c3cba7479e2cf2976a21e8111dfda6b1cd"
 dependencies = [
  "async-trait",
- "futures 0.3.21",
+ "futures",
  "futures-timer",
  "log",
  "parity-scale-codec",
@@ -8565,10 +8071,10 @@ dependencies = [
  "base58",
  "bitflags",
  "blake2-rfc",
- "byteorder 1.4.3",
+ "byteorder",
  "dyn-clonable",
  "ed25519-dalek",
- "futures 0.3.21",
+ "futures",
  "hash-db",
  "hash256-std-hasher",
  "hex",
@@ -8609,7 +8115,7 @@ version = "4.0.0"
 source = "git+https://github.com/paritytech/substrate?rev=24bea4c3cba7479e2cf2976a21e8111dfda6b1cd#24bea4c3cba7479e2cf2976a21e8111dfda6b1cd"
 dependencies = [
  "blake2",
- "byteorder 1.4.3",
+ "byteorder",
  "digest 0.10.3",
  "sha2 0.10.2",
  "sha3",
@@ -8716,7 +8222,7 @@ name = "sp-io"
 version = "6.0.0"
 source = "git+https://github.com/paritytech/substrate?rev=24bea4c3cba7479e2cf2976a21e8111dfda6b1cd#24bea4c3cba7479e2cf2976a21e8111dfda6b1cd"
 dependencies = [
- "futures 0.3.21",
+ "futures",
  "hash-db",
  "libsecp256k1",
  "log",
@@ -8737,23 +8243,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "sp-keyring"
-version = "6.0.0"
-source = "git+https://github.com/paritytech/substrate?rev=24bea4c3cba7479e2cf2976a21e8111dfda6b1cd#24bea4c3cba7479e2cf2976a21e8111dfda6b1cd"
-dependencies = [
- "lazy_static",
- "sp-core",
- "sp-runtime",
- "strum 0.23.0",
-]
-
-[[package]]
 name = "sp-keystore"
 version = "0.12.0"
 source = "git+https://github.com/paritytech/substrate?rev=24bea4c3cba7479e2cf2976a21e8111dfda6b1cd#24bea4c3cba7479e2cf2976a21e8111dfda6b1cd"
 dependencies = [
  "async-trait",
- "futures 0.3.21",
+ "futures",
  "merlin",
  "parity-scale-codec",
  "parking_lot 0.12.0",
@@ -9248,7 +8743,7 @@ dependencies = [
 
 [[package]]
 name = "subspace-desktop"
-version = "0.5.1"
+version = "0.5.3"
 dependencies = [
  "anyhow",
  "dirs 4.0.0",
@@ -9270,7 +8765,6 @@ dependencies = [
  "sp-panic-handler",
  "subspace-core-primitives",
  "subspace-farmer",
- "subspace-node",
  "subspace-runtime",
  "subspace-service",
  "subspace-solving",
@@ -9299,7 +8793,7 @@ dependencies = [
  "dirs 4.0.0",
  "event-listener-primitives",
  "fdlimit",
- "futures 0.3.21",
+ "futures",
  "hex",
  "hex-buffer-serde",
  "jsonrpsee",
@@ -9354,7 +8848,7 @@ source = "git+https://github.com/subspace/subspace?rev=005c2a2ca82bba443a226d5f6
 dependencies = [
  "bytes",
  "event-listener-primitives",
- "futures 0.3.21",
+ "futures",
  "hex",
  "libp2p",
  "nohash-hasher",
@@ -9363,45 +8857,6 @@ dependencies = [
  "thiserror",
  "tokio",
  "tracing",
-]
-
-[[package]]
-name = "subspace-node"
-version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=005c2a2ca82bba443a226d5f62a17e03e1ccabce#005c2a2ca82bba443a226d5f62a17e03e1ccabce"
-dependencies = [
- "cirrus-node",
- "cirrus-runtime",
- "clap",
- "dirs 4.0.0",
- "frame-benchmarking-cli",
- "frame-support",
- "futures 0.3.21",
- "log",
- "parity-scale-codec",
- "sc-cli",
- "sc-client-api",
- "sc-consensus",
- "sc-executor",
- "sc-service",
- "sc-subspace-chain-specs",
- "sc-telemetry",
- "sc-tracing",
- "serde",
- "serde_json",
- "sp-consensus",
- "sp-core",
- "sp-executor",
- "sp-runtime",
- "subspace-archiving",
- "subspace-core-primitives",
- "subspace-networking",
- "subspace-runtime",
- "subspace-runtime-primitives",
- "subspace-service",
- "substrate-build-script-utils",
- "thiserror",
- "tokio",
 ]
 
 [[package]]
@@ -9485,7 +8940,7 @@ dependencies = [
  "derive_more",
  "frame-support",
  "frame-system-rpc-runtime-api",
- "futures 0.3.21",
+ "futures",
  "jsonrpsee",
  "pallet-transaction-payment-rpc",
  "pallet-transaction-payment-rpc-runtime-api",
@@ -9576,7 +9031,7 @@ version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?rev=24bea4c3cba7479e2cf2976a21e8111dfda6b1cd#24bea4c3cba7479e2cf2976a21e8111dfda6b1cd"
 dependencies = [
  "frame-system-rpc-runtime-api",
- "futures 0.3.21",
+ "futures",
  "jsonrpsee",
  "log",
  "parity-scale-codec",
@@ -9786,7 +9241,7 @@ dependencies = [
  "dirs-next",
  "embed_plist",
  "flate2",
- "futures 0.3.21",
+ "futures",
  "futures-lite",
  "glib",
  "glob",
@@ -9956,16 +9411,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tempdir"
-version = "0.3.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "15f2b5fb00ccdf689e0149d1b1b3c03fead81c2b37735d812fa8bddbbf41b6d8"
-dependencies = [
- "rand 0.4.6",
- "remove_dir_all",
-]
-
-[[package]]
 name = "tempfile"
 version = "3.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -9976,7 +9421,7 @@ dependencies = [
  "libc",
  "redox_syscall 0.2.10",
  "remove_dir_all",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -10032,12 +9477,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "thousands"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3bf63baf9f5039dadc247375c29eb13706706cfde997d0330d05aa63a77d8820"
-
-[[package]]
 name = "thread_local"
 version = "1.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -10073,7 +9512,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ca8a50ef2360fbd1eeb0ecd46795a87a19024eb4b53c5dc916ca1fd95fe62438"
 dependencies = [
  "libc",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -10124,10 +9563,9 @@ dependencies = [
  "once_cell",
  "parking_lot 0.12.0",
  "pin-project-lite 0.2.8",
- "signal-hook-registry",
  "socket2",
  "tokio-macros",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -10420,7 +9858,7 @@ version = "0.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1b1b413ebfe8c2c74a69ff124699dd156a7fa41cb1d09ba6df94aa2f2b0a4a3a"
 dependencies = [
- "byteorder 1.4.3",
+ "byteorder",
  "crunchy",
  "hex",
  "static_assertions",
@@ -10461,12 +9899,6 @@ name = "unicode-segmentation"
 version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8895849a949e7845e06bd6dc1aa51731a103c42707010a5b591c0038fb73385b"
-
-[[package]]
-name = "unicode-width"
-version = "0.1.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3ed742d4ea2bd1176e236172c8429aaf54486e7ac098db29ffe6529e0ce50973"
 
 [[package]]
 name = "unicode-xid"
@@ -10601,7 +10033,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "808cf2735cd4b6866113f648b791c6adc5714537bc222d9347bb203386ffda56"
 dependencies = [
  "same-file",
- "winapi 0.3.9",
+ "winapi",
  "winapi-util",
 ]
 
@@ -10727,7 +10159,7 @@ version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "be0ecb0db480561e9a7642b5d3e4187c128914e58aa84330b9493e3eb68c5e7f"
 dependencies = [
- "futures 0.3.21",
+ "futures",
  "js-sys",
  "parking_lot 0.11.2",
  "pin-utils",
@@ -10795,7 +10227,7 @@ dependencies = [
  "wasmtime-environ",
  "wasmtime-jit",
  "wasmtime-runtime",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -10814,7 +10246,7 @@ dependencies = [
  "serde",
  "sha2 0.9.9",
  "toml",
- "winapi 0.3.9",
+ "winapi",
  "zstd",
 ]
 
@@ -10883,7 +10315,7 @@ dependencies = [
  "wasmtime-environ",
  "wasmtime-jit-debug",
  "wasmtime-runtime",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -10920,7 +10352,7 @@ dependencies = [
  "thiserror",
  "wasmtime-environ",
  "wasmtime-jit-debug",
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -11082,12 +10514,6 @@ checksum = "d6c48bd20df7e4ced539c12f570f937c6b4884928a87fee70a479d72f031d4e0"
 
 [[package]]
 name = "winapi"
-version = "0.2.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "167dc9d6949a9b857f3451275e911c3f44255842c1f7a76f33c55103a909087a"
-
-[[package]]
-name = "winapi"
 version = "0.3.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5c839a674fcd7a98952e593242ea400abe93992746761e38641405d28b00f419"
@@ -11095,12 +10521,6 @@ dependencies = [
  "winapi-i686-pc-windows-gnu",
  "winapi-x86_64-pc-windows-gnu",
 ]
-
-[[package]]
-name = "winapi-build"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2d315eee3b34aca4797b2da6b13ed88266e6d612562a0c46390af8299fc699bc"
 
 [[package]]
 name = "winapi-i686-pc-windows-gnu"
@@ -11114,7 +10534,7 @@ version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "70ec6ce85bb158151cae5e5c87f95a8e97d2c0c4b001223f33a334e3ce5de178"
 dependencies = [
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -11381,7 +10801,7 @@ version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0120db82e8a1e0b9fb3345a539c478767c0048d842860994d96113d5b667bd69"
 dependencies = [
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -11390,7 +10810,7 @@ version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "80d0f4e272c85def139476380b12f9ac60926689dd2e01d4923222f40580869d"
 dependencies = [
- "winapi 0.3.9",
+ "winapi",
 ]
 
 [[package]]
@@ -11507,7 +10927,7 @@ version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "29d4c1dd079043fe673e79fe3c3a260ae2d2fb413f1062cae9e062748df0df03"
 dependencies = [
- "futures 0.3.21",
+ "futures",
  "log",
  "nohash-hasher",
  "parking_lot 0.11.2",

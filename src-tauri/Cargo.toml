@@ -1,6 +1,6 @@
 [package]
 name = "subspace-desktop"
-version = "0.5.1"
+version = "0.5.3"
 description = "Subspace desktop"
 authors = ["Subspace Labs <https://subspace.network>"]
 license = "Apache-2.0"
@@ -31,7 +31,6 @@ sp-core = { version = "6.0.0", git = "https://github.com/paritytech/substrate", 
 sp-panic-handler = { version = "4.0.0", git = "https://github.com/paritytech/substrate", rev = "24bea4c3cba7479e2cf2976a21e8111dfda6b1cd" }
 subspace-core-primitives = { git = "https://github.com/subspace/subspace", rev = "005c2a2ca82bba443a226d5f62a17e03e1ccabce" }
 subspace-farmer = { git = "https://github.com/subspace/subspace", rev = "005c2a2ca82bba443a226d5f62a17e03e1ccabce" }
-subspace-node = { git = "https://github.com/subspace/subspace", rev = "005c2a2ca82bba443a226d5f62a17e03e1ccabce" }
 subspace-runtime = { git = "https://github.com/subspace/subspace", rev = "005c2a2ca82bba443a226d5f62a17e03e1ccabce" }
 subspace-service = { git = "https://github.com/subspace/subspace", rev = "005c2a2ca82bba443a226d5f62a17e03e1ccabce" }
 subspace-solving = { git = "https://github.com/subspace/subspace", rev = "005c2a2ca82bba443a226d5f62a17e03e1ccabce" }
