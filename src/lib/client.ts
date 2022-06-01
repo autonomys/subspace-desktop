@@ -1,6 +1,5 @@
 import { ApiPromise, Keyring } from "@polkadot/api"
 import type { Vec } from "@polkadot/types/codec"
-import type { u128 } from "@polkadot/types"
 import { mnemonicGenerate, cryptoWaitReady } from "@polkadot/util-crypto"
 import * as event from "@tauri-apps/api/event"
 import { invoke } from "@tauri-apps/api/tauri"
@@ -14,7 +13,8 @@ import {
   FarmedBlock,
   SubPreDigest
 } from "../lib/types"
-import type { SyncState } from '@polkadot/types/interfaces/system';
+import type { SyncState, EventRecord } from '@polkadot/types/interfaces/system';
+import { IU8a } from "@polkadot/types-codec/types"
 
 const tauri = { event, invoke }
 const SUNIT = 1000000000000000000n
@@ -41,40 +41,38 @@ export class Client {
     return peers.length;
   }
 
+  // TODO: implement unit test
+  // TODO: refactor using reduce
+  async getBlockRewards(hash: IU8a): Promise<number> {
+    let blockReward = 0;
+    const apiAt = await this.api.at(hash);
+    const records = (await apiAt.query.system.events()) as Vec<EventRecord>;
+    records.forEach((record) => {
+      const { section, method, data } = record.event
+      if (section === "rewards" && method === "BlockReward") {
+        const reward = this.api.registry.createType("u128", data[1]);
+        blockReward = Number((reward.toBigInt() * 100n) / SUNIT) / 100;
+      } else if (section === "transactionFees") {
+        // TODO
+      }
+    })
+
+    return blockReward;
+  }
+
   async startSubscription(): Promise<void> {
-    const rewardAddress: string = (await appConfig.read()).rewardAddress
-    if (rewardAddress === "") {
-      util.errorLogger("Reward address should not have been empty...")
-      return
-    }
+    const rewardAddress: string = (await appConfig.read()).rewardAddress;
 
     this.unsubscribe = await this.api.rpc.chain.subscribeNewHeads(
       async ({ hash, number }) => {
         const blockNum = number.toNumber()
         const signedBlock = await this.api.rpc.chain.getBlock(hash)
-        const preRuntime: SubPreDigest = this.api.registry.createType(
-          'SubPreDigest',
-          signedBlock.block.header.digest.logs.find((digestItem) => digestItem.isPreRuntime)
-            ?.asPreRuntime![1]);
+        const preRuntimeLog = signedBlock.block.header.digest.logs.find((digestItem) => digestItem.isPreRuntime)?.asPreRuntime[1];
+        const preRuntime: SubPreDigest = this.api.registry.createType('SubPreDigest', preRuntimeLog);
 
         if (preRuntime.solution.reward_address.toString() === rewardAddress) {
-          console.log("Farmed by me:", blockNum)
-          let blockReward = 0
-          const allRecords: Vec<any> =
-            await this.api.query.system.events.at(hash)
-          allRecords.forEach((record) => {
-            const { section, method, data } = record.event
-            if (section === "rewards" && method === "BlockReward") {
-              const reward: u128 = this.api.registry.createType(
-                "u128",
-                data[1]
-              )
-              blockReward = Number((reward.toBigInt() * 100n) / SUNIT) / 100
-            } else if (section === "transactionFees") {
-              // TODO
-            }
-          })
-
+          console.log("Farmed by me:", blockNum);
+          const blockReward = await this.getBlockRewards(hash);
           const block: FarmedBlock = {
             id: hash.toString(),
             time: Date.now(),
@@ -82,6 +80,7 @@ export class Client {
             blockNum,
             blockReward,
             feeReward: 0,
+            // TODO: check if necessary to store address here since we only process blocks farmed by user
             rewardAddr: rewardAddress.toString(),
             appsLink: appsLink + blockNum.toString()
           }
@@ -95,6 +94,8 @@ export class Client {
         this.data.farming.events.emit("newBlock", blockNum)
       }
     )
+
+    // TODO: move to separate method
     process.on("beforeExit", this.stopSubscription)
     window.addEventListener("unload", this.stopSubscription)
     this.clearTauriDestroy = await tauri.event.once(
@@ -106,7 +107,7 @@ export class Client {
     )
   }
 
-  stopSubscription () {
+  stopSubscription() {
     util.infoLogger("block subscription stop triggered")
     this.unsubscribe()
     this.api.disconnect()
