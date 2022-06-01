@@ -89,7 +89,7 @@ export default defineComponent({
         util.errorLogger("DASHBOARD | Farmer start error!")
       }
       util.infoLogger("DASHBOARD | starting block subscription")
-      await this.$client.startBlockSubscription()
+      await this.$client.startSubscription();
     }
 
     this.global.status.state = "loading"
