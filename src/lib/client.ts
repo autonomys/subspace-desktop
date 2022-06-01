@@ -11,7 +11,6 @@ import { appConfig } from "./appConfig"
 import { getStoredBlocks, storeBlocks } from "./blockStorage"
 import {
   emptyClientData,
-  NetStatus,
   FarmedBlock,
   SubPreDigest
 } from "../lib/types"
@@ -32,16 +31,14 @@ export class Client {
 
   private api: ApiPromise;
 
-  constructor (api: ApiPromise) {
+  constructor(api: ApiPromise) {
     this.api = api;
   }
 
   data = reactive(emptyClientData)
-  status = {
-    net: async (): Promise<NetStatus> => {
-      const peers = await this.api.rpc.system.peers()
-      return { peers }
-    }
+  async getPeersCount(): Promise<number> {
+    const peers = await this.api.rpc.system.peers();
+    return peers.length;
   }
   do = {
     blockSubscription: {
@@ -154,7 +151,7 @@ export class Client {
     await this.api.isReadyOrError
   }
 
-  public async getSyncState():Promise<SyncState> {
+  public async getSyncState(): Promise<SyncState> {
     return this.api.rpc.system.syncState();
   }
 

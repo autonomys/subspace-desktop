@@ -97,7 +97,10 @@ export default defineComponent({
 
     this.clientData = this.$client.data
     this.loading = false
-    this.peerInterval = window.setInterval(this.getNetInfo, 10000)
+
+    this.fetchPeersCount();// fetch initial peers count value
+    this.peerInterval = window.setInterval(this.fetchPeersCount, 30000);
+    
     this.$client.data.farming.events.on("newBlock", this.newBlock)
     this.$client.data.farming.events.on("farmedBlock", this.farmBlock)
     this.global.status.state = "live"
@@ -113,9 +116,9 @@ export default defineComponent({
     this.$client.data.farming.events.off("farmedBlock", this.farmBlock)
   },
   methods: {
-    async getNetInfo() {
-      const netData = await this.$client.status.net()
-      this.network.peers = netData.peers.length
+    async fetchPeersCount() {
+      const peers = await this.$client.getPeersCount();
+      this.network.peers = peers;
     },
     expand(val: boolean) {
       this.expanded = val
