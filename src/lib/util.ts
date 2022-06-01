@@ -49,6 +49,7 @@ export async function infoLogger(info: unknown): Promise<void> {
   }
 }
 
+// TODO: rethink about the signature of this function, it should be string instead, and refactor the codebase accordingly
 export function toFixed(num: number, precision: number): number {
   if (!num) return 0
   return parseFloat(num.toFixed(precision))

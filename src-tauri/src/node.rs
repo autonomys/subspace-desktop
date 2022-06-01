@@ -15,7 +15,7 @@ use sc_service::{
 use sc_subspace_chain_specs::ConsensusChainSpec;
 use sp_core::crypto::Ss58AddressFormat;
 use std::env;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::Once;
 use subspace_runtime::GenesisConfig as ConsensusGenesisConfig;
 use subspace_service::{FullClient, NewFull, SubspaceConfiguration};
@@ -148,7 +148,6 @@ fn create_configuration<CS: ChainSpec + 'static>(
     let config_dir = base_path.config_dir(chain_spec.id());
     let net_config_dir = config_dir.join(DEFAULT_NETWORK_CONFIG_PATH);
     let client_id = format!("{}/v{}", impl_name, impl_version);
-    let database_cache_size = 1024;
     let mut network = NetworkConfiguration::new(
         node_name,
         client_id,
@@ -179,7 +178,9 @@ fn create_configuration<CS: ChainSpec + 'static>(
             network,
             keystore_remote,
             keystore,
-            database: database_config(&config_dir, database_cache_size, &role),
+            database: DatabaseSource::ParityDb {
+                path: config_dir.join("paritydb").join("full"),
+            },
             state_cache_size: 67_108_864,
             state_cache_child_ratio: None,
             // TODO: Change to constrained eventually (need DSN for this)
@@ -249,19 +250,4 @@ fn create_configuration<CS: ChainSpec + 'static>(
         },
         force_new_slot_notifications: false,
     })
-}
-
-/// Get the database configuration object for the parameters provided
-fn database_config(base_path: &Path, cache_size: usize, role: &Role) -> DatabaseSource {
-    let role_dir = match role {
-        Role::Light => "light",
-        Role::Full | Role::Authority => "full",
-    };
-    let rocksdb_path = base_path.join("db").join(role_dir);
-    let paritydb_path = base_path.join("paritydb").join(role_dir);
-    DatabaseSource::Auto {
-        paritydb_path,
-        rocksdb_path,
-        cache_size,
-    }
 }
