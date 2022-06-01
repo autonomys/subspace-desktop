@@ -13,6 +13,7 @@ tauri-build = { version = "1.0.0-rc.9", features = [] }
 
 [dependencies]
 anyhow = "1.0.44"
+cirrus-runtime = { git = "https://github.com/subspace/subspace", rev = "005c2a2ca82bba443a226d5f62a17e03e1ccabce" }
 dirs = "4.0.0"
 dotenv = "0.15.0"
 event-listener-primitives = "2.0.1"

@@ -1,4 +1,5 @@
 use anyhow::Result;
+use cirrus_runtime::GenesisConfig as ExecutionGenesisConfig;
 use log::{error, warn};
 use sc_chain_spec::ChainSpec;
 use sc_executor::{NativeExecutionDispatch, WasmExecutionMethod, WasmtimeInstantiationStrategy};
@@ -16,6 +17,7 @@ use sp_core::crypto::Ss58AddressFormat;
 use std::env;
 use std::path::{Path, PathBuf};
 use std::sync::Once;
+use subspace_runtime::GenesisConfig as ConsensusGenesisConfig;
 use subspace_service::{FullClient, NewFull, SubspaceConfiguration};
 use tokio::runtime::Handle;
 
@@ -53,7 +55,7 @@ pub(crate) async fn start_node(path: String, node_name: String) {
 }
 
 async fn init_node(base_directory: PathBuf, node_name: String) -> Result<()> {
-    let chain_spec =
+    let chain_spec: ConsensusChainSpec<ConsensusGenesisConfig, ExecutionGenesisConfig> =
         ConsensusChainSpec::from_json_bytes(include_bytes!("../chain-spec.json").as_ref())
             .map_err(anyhow::Error::msg)?;
 

@@ -8746,6 +8746,7 @@ name = "subspace-desktop"
 version = "0.5.3"
 dependencies = [
  "anyhow",
+ "cirrus-runtime",
  "dirs 4.0.0",
  "dotenv",
  "event-listener-primitives",
