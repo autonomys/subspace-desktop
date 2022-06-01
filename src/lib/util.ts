@@ -1,6 +1,7 @@
 import {
   Dialog,
   DialogChainObject,
+  LocalStorage,
 } from "quasar"
 import { Component } from "vue"
 import * as process from "process"
@@ -58,6 +59,7 @@ export function plotTimeMsEstimate(gb: number): number {
 }
 
 export async function resetAndClear(): Promise<void> {
+  await LocalStorage.clear()
   await appData.clearDataDir()
   await appConfig.remove()
 }
