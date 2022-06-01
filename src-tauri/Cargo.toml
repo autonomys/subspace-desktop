@@ -8,7 +8,7 @@ repository = "https://github.com/subspace/subspace-desktop"
 edition = "2021"
 
 [build-dependencies]
-substrate-build-script-utils = { version = "3.0.0", git = "https://github.com/paritytech/substrate", rev = "5d3e7c4ee9f5c8e370022d5f3fa9723185710831" }
+substrate-build-script-utils = { version = "3.0.0", git = "https://github.com/paritytech/substrate", rev = "24bea4c3cba7479e2cf2976a21e8111dfda6b1cd" }
 tauri-build = { version = "1.0.0-rc.9", features = [] }
 
 [dependencies]
@@ -20,20 +20,21 @@ fdlimit = "0.2.1"
 fs2 = "0.4.3"
 hex = "0.4.3"
 log = "0.4.14"
-sc-chain-spec = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate", rev = "5d3e7c4ee9f5c8e370022d5f3fa9723185710831" }
-sc-executor = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "5d3e7c4ee9f5c8e370022d5f3fa9723185710831", features = ["wasmtime"] }
-sc-network = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "5d3e7c4ee9f5c8e370022d5f3fa9723185710831" }
-sc-service = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "5d3e7c4ee9f5c8e370022d5f3fa9723185710831", features = ["wasmtime"] }
+sc-chain-spec = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate", rev = "24bea4c3cba7479e2cf2976a21e8111dfda6b1cd" }
+sc-executor = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "24bea4c3cba7479e2cf2976a21e8111dfda6b1cd", features = ["wasmtime"] }
+sc-network = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "24bea4c3cba7479e2cf2976a21e8111dfda6b1cd" }
+sc-service = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "24bea4c3cba7479e2cf2976a21e8111dfda6b1cd", features = ["wasmtime"] }
+sc-subspace-chain-specs = { git = "https://github.com/subspace/subspace", rev = "005c2a2ca82bba443a226d5f62a17e03e1ccabce" }
 serde_json = "1.0.81"
 serde = { version = "1.0.137", features = [ "derive" ] }
-sp-core = { version = "6.0.0", git = "https://github.com/paritytech/substrate", rev = "5d3e7c4ee9f5c8e370022d5f3fa9723185710831" }
-sp-panic-handler = { version = "4.0.0", git = "https://github.com/paritytech/substrate", rev = "5d3e7c4ee9f5c8e370022d5f3fa9723185710831" }
-subspace-core-primitives = { git = "https://github.com/subspace/subspace", rev = "2729d61f4a0c48421191df241bf0c03c2ab96844" }
-subspace-farmer = { git = "https://github.com/subspace/subspace", rev = "2729d61f4a0c48421191df241bf0c03c2ab96844" }
-subspace-node = { git = "https://github.com/subspace/subspace", rev = "2729d61f4a0c48421191df241bf0c03c2ab96844" }
-subspace-runtime = { git = "https://github.com/subspace/subspace", rev = "2729d61f4a0c48421191df241bf0c03c2ab96844" }
-subspace-service = { git = "https://github.com/subspace/subspace", rev = "2729d61f4a0c48421191df241bf0c03c2ab96844" }
-subspace-solving = { git = "https://github.com/subspace/subspace", rev = "2729d61f4a0c48421191df241bf0c03c2ab96844" }
+sp-core = { version = "6.0.0", git = "https://github.com/paritytech/substrate", rev = "24bea4c3cba7479e2cf2976a21e8111dfda6b1cd" }
+sp-panic-handler = { version = "4.0.0", git = "https://github.com/paritytech/substrate", rev = "24bea4c3cba7479e2cf2976a21e8111dfda6b1cd" }
+subspace-core-primitives = { git = "https://github.com/subspace/subspace", rev = "005c2a2ca82bba443a226d5f62a17e03e1ccabce" }
+subspace-farmer = { git = "https://github.com/subspace/subspace", rev = "005c2a2ca82bba443a226d5f62a17e03e1ccabce" }
+subspace-node = { git = "https://github.com/subspace/subspace", rev = "005c2a2ca82bba443a226d5f62a17e03e1ccabce" }
+subspace-runtime = { git = "https://github.com/subspace/subspace", rev = "005c2a2ca82bba443a226d5f62a17e03e1ccabce" }
+subspace-service = { git = "https://github.com/subspace/subspace", rev = "005c2a2ca82bba443a226d5f62a17e03e1ccabce" }
+subspace-solving = { git = "https://github.com/subspace/subspace", rev = "005c2a2ca82bba443a226d5f62a17e03e1ccabce" }
 tokio = { version = "1.11.0", features = ["macros", "rt-multi-thread"] }
 tracing = "0.1.31"
 tracing-subscriber = "0.3.11"

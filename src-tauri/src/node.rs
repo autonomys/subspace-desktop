@@ -1,8 +1,7 @@
 use anyhow::Result;
 use log::{error, warn};
-use sc_chain_spec::{ChainSpec, ChainSpecExtension};
-use sc_executor::NativeExecutionDispatch;
-use sc_executor::WasmExecutionMethod;
+use sc_chain_spec::ChainSpec;
+use sc_executor::{NativeExecutionDispatch, WasmExecutionMethod, WasmtimeInstantiationStrategy};
 use sc_network::config::{NodeKeyConfig, Secret};
 use sc_service::config::{
     ExecutionStrategies, ExecutionStrategy, KeystoreConfig, NetworkConfiguration,
@@ -12,14 +11,11 @@ use sc_service::{
     BasePath, Configuration, DatabaseSource, KeepBlocks, PruningMode, Role, RpcMethods,
     TracingReceiver,
 };
-use serde::{Deserialize, Serialize};
+use sc_subspace_chain_specs::ConsensusChainSpec;
 use sp_core::crypto::Ss58AddressFormat;
 use std::env;
 use std::path::{Path, PathBuf};
 use std::sync::Once;
-use subspace_node::ExecutionChainSpec;
-use subspace_node::SerializableChainSpec;
-use subspace_runtime::GenesisConfig;
 use subspace_service::{FullClient, NewFull, SubspaceConfiguration};
 use tokio::runtime::Handle;
 
@@ -38,17 +34,6 @@ const NODE_KEY_ED25519_FILE: &str = "secret_ed25519";
 const RECOMMENDED_OPEN_FILE_DESCRIPTOR_LIMIT: u64 = 10_000;
 
 pub(crate) struct ExecutorDispatch;
-
-/// The extensions for the [`ConsensusChainSpec`].
-#[derive(Clone, Serialize, Deserialize, ChainSpecExtension)]
-#[serde(deny_unknown_fields, rename_all = "camelCase")]
-pub struct ChainSpecExtensions {
-    /// Chain spec of execution chain.
-    pub execution_chain_spec: ExecutionChainSpec,
-}
-
-/// The `ChainSpec` parameterized for the consensus runtime.
-pub type ConsensusChainSpec = SerializableChainSpec<GenesisConfig, ChainSpecExtensions>;
 
 impl NativeExecutionDispatch for ExecutorDispatch {
     type ExtendHostFunctions = ();
@@ -198,7 +183,9 @@ fn create_configuration<CS: ChainSpec + 'static>(
             // TODO: Change to constrained eventually (need DSN for this)
             state_pruning: Some(PruningMode::keep_blocks(1024)),
             keep_blocks: KeepBlocks::Some(1024),
-            wasm_method: WasmExecutionMethod::Compiled,
+            wasm_method: WasmExecutionMethod::Compiled {
+                instantiation_strategy: WasmtimeInstantiationStrategy::PoolingCopyOnWrite,
+            },
             wasm_runtime_overrides: None,
             #[cfg(not(target_os = "windows"))]
             execution_strategies: ExecutionStrategies {
