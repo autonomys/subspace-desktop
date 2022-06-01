@@ -111,7 +111,7 @@ export default defineComponent({
   unmounted() {
     this.unsubscribe()
     clearInterval(this.peerInterval)
-    this.$client.do.blockSubscription.stop()
+    this.$client.stopSubscription()
     this.$client.data.farming.events.off("newBlock", this.newBlock)
     this.$client.data.farming.events.off("farmedBlock", this.farmBlock)
   },

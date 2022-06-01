@@ -40,99 +40,83 @@ export class Client {
     const peers = await this.api.rpc.system.peers();
     return peers.length;
   }
-  do = {
-    blockSubscription: {
-      stopOnReload(): void {
-        this.stop()
-      },
-      start: async (): Promise<void> => {
 
-        const rewardAddress: string = (await appConfig.read()).rewardAddress
-        if (rewardAddress === "") {
-          util.errorLogger("Reward address should not have been empty...")
-          return
-        }
-
-        this.unsubscribe = await this.api.rpc.chain.subscribeNewHeads(
-          async ({ hash, number }) => {
-            const blockNum = number.toNumber()
-            const signedBlock = await this.api.rpc.chain.getBlock(hash)
-            const preRuntime: SubPreDigest = this.api.registry.createType(
-              'SubPreDigest',
-              signedBlock.block.header.digest.logs.find((digestItem) => digestItem.isPreRuntime)
-                ?.asPreRuntime![1]);
-
-            if (preRuntime.solution.reward_address.toString() === rewardAddress) {
-              console.log("Farmed by me:", blockNum)
-              let blockReward = 0
-              const allRecords: Vec<any> =
-                await this.api.query.system.events.at(hash)
-              allRecords.forEach((record) => {
-                const { section, method, data } = record.event
-                if (section === "rewards" && method === "BlockReward") {
-                  const reward: u128 = this.api.registry.createType(
-                    "u128",
-                    data[1]
-                  )
-                  blockReward = Number((reward.toBigInt() * 100n) / SUNIT) / 100
-                } else if (section === "transactionFees") {
-                  // TODO
-                }
-              })
-
-              const block: FarmedBlock = {
-                id: hash.toString(),
-                time: Date.now(),
-                transactions: 0,
-                blockNum,
-                blockReward,
-                feeReward: 0,
-                rewardAddr: rewardAddress.toString(),
-                appsLink: appsLink + blockNum.toString()
-              }
-              this.data.farming.farmed = [block].concat(
-                this.data.farming.farmed
-              )
-              storeBlocks(this.data.farming.farmed)
-              this.data.farming.events.emit("farmedBlock", block)
-
-            }
-            this.data.farming.events.emit("newBlock", blockNum)
-          }
-        )
-        process.on("beforeExit", this.do.blockSubscription.stopOnReload)
-        window.addEventListener(
-          "unload",
-          this.do.blockSubscription.stopOnReload
-        )
-        this.clearTauriDestroy = await tauri.event.once(
-          "tauri://destroyed",
-          () => {
-            console.log("Destroyed event!")
-            storeBlocks(this.data.farming.farmed)
-          }
-        )
-      },
-      stop: (): void => {
-        util.infoLogger("block subscription stop triggered")
-        this.unsubscribe()
-        this.api.disconnect()
-        try {
-          this.clearTauriDestroy()
-          storeBlocks(this.data.farming.farmed)
-          window.removeEventListener(
-            "unload",
-            this.do.blockSubscription.stopOnReload
-          )
-        } catch (error) {
-          util.errorLogger(error)
-        }
-      }
+  async startSubscription(): Promise<void> {
+    const rewardAddress: string = (await appConfig.read()).rewardAddress
+    if (rewardAddress === "") {
+      util.errorLogger("Reward address should not have been empty...")
+      return
     }
+
+    this.unsubscribe = await this.api.rpc.chain.subscribeNewHeads(
+      async ({ hash, number }) => {
+        const blockNum = number.toNumber()
+        const signedBlock = await this.api.rpc.chain.getBlock(hash)
+        const preRuntime: SubPreDigest = this.api.registry.createType(
+          'SubPreDigest',
+          signedBlock.block.header.digest.logs.find((digestItem) => digestItem.isPreRuntime)
+            ?.asPreRuntime![1]);
+
+        if (preRuntime.solution.reward_address.toString() === rewardAddress) {
+          console.log("Farmed by me:", blockNum)
+          let blockReward = 0
+          const allRecords: Vec<any> =
+            await this.api.query.system.events.at(hash)
+          allRecords.forEach((record) => {
+            const { section, method, data } = record.event
+            if (section === "rewards" && method === "BlockReward") {
+              const reward: u128 = this.api.registry.createType(
+                "u128",
+                data[1]
+              )
+              blockReward = Number((reward.toBigInt() * 100n) / SUNIT) / 100
+            } else if (section === "transactionFees") {
+              // TODO
+            }
+          })
+
+          const block: FarmedBlock = {
+            id: hash.toString(),
+            time: Date.now(),
+            transactions: 0,
+            blockNum,
+            blockReward,
+            feeReward: 0,
+            rewardAddr: rewardAddress.toString(),
+            appsLink: appsLink + blockNum.toString()
+          }
+          this.data.farming.farmed = [block].concat(
+            this.data.farming.farmed
+          )
+          storeBlocks(this.data.farming.farmed)
+          this.data.farming.events.emit("farmedBlock", block)
+
+        }
+        this.data.farming.events.emit("newBlock", blockNum)
+      }
+    )
+    process.on("beforeExit", this.stopSubscription)
+    window.addEventListener("unload", this.stopSubscription)
+    this.clearTauriDestroy = await tauri.event.once(
+      "tauri://destroyed",
+      () => {
+        console.log("Destroyed event!")
+        storeBlocks(this.data.farming.farmed)
+      }
+    )
   }
 
-  public async startBlockSubscription(): Promise<void> {
-    await this.do.blockSubscription.start()
+  stopSubscription () {
+    util.infoLogger("block subscription stop triggered")
+    this.unsubscribe()
+    this.api.disconnect()
+    try {
+      this.clearTauriDestroy()
+      storeBlocks(this.data.farming.farmed)
+      window.removeEventListener("unload", this.stopSubscription)
+    } catch (error) {
+      util.errorLogger(error)
+    }
   }
 
   /* To be called ONLY from plotting progress */
