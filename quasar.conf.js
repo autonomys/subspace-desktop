@@ -46,7 +46,7 @@ module.exports = configure(function (ctx) {
     // Full list of options: https://v2.quasar.dev/quasar-cli/quasar-conf-js#Property%3A-build
     build: {
       env: {
-        PUBLIC_API_WS: "wss://aries-farm-rpc-b.subspace.network",
+        PUBLIC_API_WS: "wss://eu.gemini-1b.subsapce.network/ws",
         LOCAL_API_WS: "ws://localhost:9947",
         APP_VERSION: version,
         APP_NAME: "subspace-desktop"

@@ -79,8 +79,8 @@
     "continue": "continue"
   },
   "mainMenu": {
-    "nonIncentivizedLabel": "Non-Incentivized Testnet",
-    "nonIncentivizedTooltip": "Rewards (testSSC) you earn from farming do not and will not hold a real value throughout the testnet phase.",
+    "IncentivizedLabel": "Incentivized Testnet",
+    "IncentivizedTooltip": "Rewards (testSSC) you earn during incentivized testnet, will contribute to your mainnet rewards!",
     "reset": "Reset",
     "autoStart": "Start on Boot",
     "willAutoLaunch": "Subspace will launch automatically during boot",

@@ -9,26 +9,26 @@ q-layout(view="hHh lpr fFf")
             p {{ appVersion }}
           .col-auto.q-mr-md.relative-position
             q-badge(color="grey" text-color="white")
-              .q-pa-xs(style="font-size: 14px") {{ lang.nonIncentivizedLabel }}
+              .q-pa-xs(style="font-size: 14px") {{ lang.IncentivizedLabel }}
             q-tooltip
               .col
-                p.no-margin(style="font-size: 12px") {{ lang.nonIncentivizedTooltip }}
+                p.no-margin(style="font-size: 12px") {{ lang.IncentivizedTooltip }}
           .col-auto.q-mr-md.relative-position(v-if="global.nodeName || oldNodeName")
             // TODO: add .cursor-pointer and @click="onNameClick" after node restarting is implemented on the backend
             q-badge(
-              v-if="!isEdittingName" 
-              color="blue-8" 
+              v-if="!isEdittingName"
+              color="blue-8"
               text-color="white"
             )
               .q-ma-xs(style="font-size: 14px") {{ "Node Name:" }}
               .q-mr-xs(
-                class="text-italic" 
+                class="text-italic"
                 style="font-size: 14px"
               ) {{ trimmedName }}
             q-input.name-input(
               ref="nameInput"
-              v-else 
-              v-model="global.nodeName" 
+              v-else
+              v-model="global.nodeName"
               @blur="saveName"
               @keyup.enter="saveName"
               dense="dense"
@@ -74,8 +74,8 @@ export default defineComponent({
   computed: {
     trimmedName() {
       const { nodeName } = global.data;
-      return nodeName.length > 20 
-        ? `${nodeName.slice(0, 20)}...` 
+      return nodeName.length > 20
+        ? `${nodeName.slice(0, 20)}...`
         : nodeName;
     }
   },
