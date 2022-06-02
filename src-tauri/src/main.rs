@@ -45,6 +45,13 @@ async fn main() -> Result<()> {
         .init();
 
     let app = tauri::Builder::default()
+        .setup(|app| {
+            #[cfg(debug_assertions)] // only include this code on debug builds
+            {
+                app.get_window("main").unwrap().open_devtools();
+            }
+            Ok(())
+        })
         .menu(menu::get_menu())
         .system_tray(menu::get_tray_menu())
         .on_system_tray_event(|app, event| {
