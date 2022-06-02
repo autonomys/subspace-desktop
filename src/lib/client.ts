@@ -50,7 +50,7 @@ export class Client {
         const reward = this.api.registry.createType("u128", data[1]);
         blockReward = Number((reward.toBigInt() * 100n) / SUNIT) / 100;
       } else if (section === "transactionFees") {
-        // TODO
+        // TODO: include storage and compute fees
       }
     })
 
@@ -63,16 +63,19 @@ export class Client {
     this.unsubscribe = await this.api.rpc.chain.subscribeNewHeads(
       async ({ hash, number }) => {
         const blockNum = number.toNumber()
-        const signedBlock = await this.api.rpc.chain.getBlock(hash)
-        const preRuntimeLog = signedBlock.block.header.digest.logs.find((digestItem) => digestItem.isPreRuntime)?.asPreRuntime[1];
+        const header = await this.api.rpc.chain.getHeader(hash);
+
+        // TODO: handle vote rewards: check VoteReward events and aggregate
+        // TODO: extract farmed block rewards logic
+        const preRuntimeLog = header.digest.logs.find((digestItem) => digestItem.isPreRuntime)?.asPreRuntime[1];
         const preRuntime: SubPreDigest = this.api.registry.createType('SubPreDigest', preRuntimeLog);
 
         if (preRuntime.solution.reward_address.toString() === rewardAddress) {
-          console.log("Farmed by me:", blockNum);
           const blockReward = await this.getBlockRewards(hash);
           const block: FarmedBlock = {
             id: hash.toString(),
             time: Date.now(),
+            // TODO: remove, transactions count is not displayed anywhere   
             transactions: 0,
             blockNum,
             blockReward,
@@ -83,7 +86,6 @@ export class Client {
           this.data.farming.farmed = [block, ...this.data.farming.farmed];
           storeBlocks(this.data.farming.farmed)
           this.data.farming.events.emit("farmedBlock", block)
-
         }
         this.data.farming.events.emit("newBlock", blockNum)
       }

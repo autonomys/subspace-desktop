@@ -53,7 +53,7 @@ q-card(bordered flat)
           .col-4
             p {{ formatAddress(block.rewardAddr) }}
           .col-3
-            a(:href="blockLink(block.blockNum.toString())" target="_blank") # {{ block.blockNum.toLocaleString() }}
+            a(:href="blockLink(block.blockNum)" target="_blank") # {{ block.blockNum.toLocaleString() }}
           .col-3
             p.text-weight-light {{ formatDate(block.time) }}
           .col-2
@@ -104,8 +104,8 @@ export default defineComponent({
     this.rewardAddress = (await appConfig.read()).rewardAddress;
   },
   methods: {
-    blockLink(blockNumber: string) {
-      return appsLink + blockNumber;
+    blockLink(blockNumber: number) {
+      return appsLink + blockNumber.toLocaleString();
     },
     formatDate(date: Date) {
       return formatDistanceToNowStrict(date)
