@@ -1,8 +1,8 @@
 use anyhow::Result;
+use cirrus_runtime::GenesisConfig as ExecutionGenesisConfig;
 use log::{error, warn};
 use sc_chain_spec::ChainSpec;
-use sc_executor::NativeExecutionDispatch;
-use sc_executor::WasmExecutionMethod;
+use sc_executor::{NativeExecutionDispatch, WasmExecutionMethod, WasmtimeInstantiationStrategy};
 use sc_network::config::{NodeKeyConfig, Secret};
 use sc_service::config::{
     ExecutionStrategies, ExecutionStrategy, KeystoreConfig, NetworkConfiguration,
@@ -12,10 +12,12 @@ use sc_service::{
     BasePath, Configuration, DatabaseSource, KeepBlocks, PruningMode, Role, RpcMethods,
     TracingReceiver,
 };
+use sc_subspace_chain_specs::ConsensusChainSpec;
 use sp_core::crypto::Ss58AddressFormat;
 use std::env;
 use std::path::PathBuf;
 use std::sync::Once;
+use subspace_runtime::GenesisConfig as ConsensusGenesisConfig;
 use subspace_service::{FullClient, NewFull, SubspaceConfiguration};
 use tokio::runtime::Handle;
 
@@ -47,12 +49,15 @@ impl NativeExecutionDispatch for ExecutorDispatch {
     }
 }
 
-pub(crate) async fn init_node(base_directory: PathBuf, node_name: String) -> Result<()> {
-    let chain_spec =
-        sc_service::GenericChainSpec::<subspace_runtime::GenesisConfig>::from_json_bytes(
-            include_bytes!("../chain-spec.json").as_ref(),
-        )
-        .map_err(anyhow::Error::msg)?;
+#[tauri::command]
+pub(crate) async fn start_node(path: String, node_name: String) {
+    init_node(path.into(), node_name).await.unwrap();
+}
+
+async fn init_node(base_directory: PathBuf, node_name: String) -> Result<()> {
+    let chain_spec: ConsensusChainSpec<ConsensusGenesisConfig, ExecutionGenesisConfig> =
+        ConsensusChainSpec::from_json_bytes(include_bytes!("../chain-spec.json").as_ref())
+            .map_err(anyhow::Error::msg)?;
 
     let full_client_fut = tokio::task::spawn_blocking(move || {
         Handle::current().block_on(create_full_client(chain_spec, base_directory, node_name))
@@ -74,7 +79,7 @@ pub(crate) async fn init_node(base_directory: PathBuf, node_name: String) -> Res
 }
 
 // TODO: Allow customization of a bunch of these things
-pub(crate) async fn create_full_client<CS: ChainSpec + 'static>(
+async fn create_full_client<CS: ChainSpec + 'static>(
     chain_spec: CS,
     base_path: PathBuf,
     node_name: String,
@@ -181,23 +186,16 @@ fn create_configuration<CS: ChainSpec + 'static>(
             // TODO: Change to constrained eventually (need DSN for this)
             state_pruning: Some(PruningMode::keep_blocks(1024)),
             keep_blocks: KeepBlocks::Some(1024),
-            wasm_method: WasmExecutionMethod::Compiled,
+            wasm_method: WasmExecutionMethod::Compiled {
+                instantiation_strategy: WasmtimeInstantiationStrategy::PoolingCopyOnWrite,
+            },
             wasm_runtime_overrides: None,
-            #[cfg(not(target_os = "windows"))]
             execution_strategies: ExecutionStrategies {
                 syncing: ExecutionStrategy::AlwaysWasm,
                 importing: ExecutionStrategy::AlwaysWasm,
                 block_construction: ExecutionStrategy::AlwaysWasm,
                 offchain_worker: ExecutionStrategy::AlwaysWasm,
                 other: ExecutionStrategy::AlwaysWasm,
-            },
-            #[cfg(target_os = "windows")]
-            execution_strategies: ExecutionStrategies {
-                syncing: ExecutionStrategy::NativeElseWasm,
-                importing: ExecutionStrategy::NativeElseWasm,
-                block_construction: ExecutionStrategy::NativeElseWasm,
-                offchain_worker: ExecutionStrategy::NativeElseWasm,
-                other: ExecutionStrategy::NativeElseWasm,
             },
             rpc_http: None,
             rpc_ws: Some("127.0.0.1:9947".parse().expect("IP and port are valid")),

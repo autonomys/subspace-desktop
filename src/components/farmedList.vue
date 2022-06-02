@@ -84,7 +84,10 @@ export default defineComponent({
   },
   computed: {
     farmedBlocksList(): FarmedBlock[] {
-      return this.$client?.data?.farming.farmed || []
+      const result = this.$client.data?.farming.farmed.filter((block) => {
+        return block.rewardAddr == this.rewardAddress
+      })
+      return result
     },
     blocksListStyle(): { [index: string]: string } {
       return this.expanded ? { height: "370px" } : { height: "185px" }
