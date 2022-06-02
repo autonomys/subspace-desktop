@@ -51,9 +51,9 @@ q-card(bordered flat)
         q-separator
         .row.q-pa-xs.q-ml-sm.q-ma-xs
           .col-4
-            p {{ block.rewardAddr.substring(0, 8) + '...' + block.rewardAddr.substring(block.rewardAddr.length - 8, block.rewardAddr.length) }}
+            p {{ formatAddress(block.rewardAddr) }}
           .col-3
-            a(:href="block.appsLink" target="_blank") # {{ block.blockNum.toLocaleString() }}
+            a(:href="blockLink(block.blockNum)" target="_blank") # {{ block.blockNum.toLocaleString() }}
           .col-3
             p.text-weight-light {{ formatDate(block.time) }}
           .col-2
@@ -63,12 +63,16 @@ q-card(bordered flat)
 <script lang="ts">
 import { defineComponent } from "vue"
 import { formatDistanceToNowStrict } from "date-fns"
+import * as process from "process"
 import * as util from "../lib/util"
 import { globalState as global } from "../lib/global"
 import { FarmedBlock } from "../lib/types"
 import { appConfig } from "../lib/appConfig"
 
 const lang = global.data.loc.text.dashboard
+
+const NETWORK_RPC = process.env.PUBLIC_API_WS || "ws://localhost:9947";
+const appsLink = "https://polkadot.js.org/apps/?rpc=" + NETWORK_RPC + "#/explorer/query/"
 
 export default defineComponent({
   props: {
@@ -77,10 +81,13 @@ export default defineComponent({
   },
   emits: ["expand"],
   data() {
-    return { lang, util, global: global.data, rewardAddress: "", }
-  },
-  async mounted() {
-    this.rewardAddress = await this.displayRewardAddress()
+    return { 
+      lang, 
+      util, 
+      global: global.data, 
+      rewardAddress: "", 
+      appsLink,
+    }
   },
   computed: {
     farmedBlocksList(): FarmedBlock[] {
@@ -91,20 +98,20 @@ export default defineComponent({
     },
     blocksListStyle(): { [index: string]: string } {
       return this.expanded ? { height: "370px" } : { height: "185px" }
-    }
+    },
+  },
+  async mounted() {
+    this.rewardAddress = (await appConfig.read()).rewardAddress;
   },
   methods: {
+    blockLink(blockNumber: number) {
+      return appsLink + blockNumber.toLocaleString();
+    },
     formatDate(date: Date) {
       return formatDistanceToNowStrict(date)
     },
-    async displayRewardAddress() {
-      const rewardAddress = (await appConfig.read()).rewardAddress
-      if (rewardAddress === "") {
-        util.errorLogger("Reward Address was null/undefined!")
-        return "???"
-      } else {
-        return rewardAddress
-      }
+    formatAddress(address: string){
+      return address.substring(0, 8) + '...' + address.substring(address.length - 8, address.length)
     }
   }
 })
