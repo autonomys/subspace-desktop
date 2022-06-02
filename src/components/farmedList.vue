@@ -53,7 +53,7 @@ q-card(bordered flat)
           .col-4
             p {{ formatAddress(block.rewardAddr) }}
           .col-3
-            a(:href={{`${appsLink}${block.blockNum.toString()}`}} target="_blank") # {{ block.blockNum.toLocaleString() }}
+            a(:href="blockLink(block.blockNum.toString())" target="_blank") # {{ block.blockNum.toLocaleString() }}
           .col-3
             p.text-weight-light {{ formatDate(block.time) }}
           .col-2
@@ -98,12 +98,15 @@ export default defineComponent({
     },
     blocksListStyle(): { [index: string]: string } {
       return this.expanded ? { height: "370px" } : { height: "185px" }
-    }
+    },
   },
   async mounted() {
     this.rewardAddress = (await appConfig.read()).rewardAddress;
   },
   methods: {
+    blockLink(blockNumber: string) {
+      return appsLink + blockNumber;
+    },
     formatDate(date: Date) {
       return formatDistanceToNowStrict(date)
     },
