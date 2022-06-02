@@ -1,5 +1,3 @@
-import { Vec } from "@polkadot/types/codec"
-import { PeerInfo } from "@polkadot/types/interfaces/system"
 import mitt, { Emitter } from "mitt"
 import { ApexOptions } from "apexcharts"
 import type { AccountId32 } from "@polkadot/types/interfaces"
@@ -13,7 +11,6 @@ export interface FarmedBlock {
   feeReward: number
   id: string
   rewardAddr: string
-  appsLink: string
 }
 
 export interface AutoLaunchParams {
@@ -25,10 +22,6 @@ export interface AutoLaunchParams {
 export interface ChildReturnData {
   stdout: string[]
   stderr: string[]
-}
-
-export interface NetStatus {
-  peers: Vec<PeerInfo>
 }
 
 export interface PeerData {

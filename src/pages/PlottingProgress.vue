@@ -221,7 +221,7 @@ export default defineComponent({
       }
       util.infoLogger("PLOTTING PROGRESS | farmer started")
       this.plottingData.allocatedGB = config.plot.sizeGB
-      await this.$client.startBlockSubscription()
+      await this.$client.startSubscription();
       util.infoLogger("PLOTTING PROGRESS | block subscription started")
       this.syncState = (await this.$client.getSyncState()).toJSON() as unknown as SyncState;
 
