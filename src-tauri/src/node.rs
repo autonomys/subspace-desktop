@@ -223,10 +223,9 @@ fn create_configuration<CS: ChainSpec + 'static>(
             telemetry_endpoints,
             default_heap_pages: None,
             offchain_worker: OffchainWorkerConfig::default(),
-            force_authoring: true,
-            // force_authoring: env::var("FORCE_AUTHORING")
-            //     .map(|force_authoring| force_authoring.as_str() == "1")
-            //     .unwrap_or_default(),
+            force_authoring: env::var("FORCE_AUTHORING")
+                .map(|force_authoring| force_authoring.as_str() == "1")
+                .unwrap_or_default(),
             disable_grandpa: false,
             dev_key_seed: None,
             tracing_targets: None,
