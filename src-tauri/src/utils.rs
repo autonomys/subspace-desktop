@@ -2,10 +2,7 @@ use log::{debug, error, info};
 use serde::Serialize;
 use std::io::Write;
 use std::path::PathBuf;
-use tauri::{
-    api::{self},
-    Env,
-};
+use tauri::{api, Env};
 use tracing_subscriber::fmt::MakeWriter;
 
 pub(crate) struct Tee<A, B>(pub A, pub B);

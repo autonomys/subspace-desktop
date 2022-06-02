@@ -190,21 +190,12 @@ fn create_configuration<CS: ChainSpec + 'static>(
                 instantiation_strategy: WasmtimeInstantiationStrategy::PoolingCopyOnWrite,
             },
             wasm_runtime_overrides: None,
-            #[cfg(not(target_os = "windows"))]
             execution_strategies: ExecutionStrategies {
                 syncing: ExecutionStrategy::AlwaysWasm,
                 importing: ExecutionStrategy::AlwaysWasm,
                 block_construction: ExecutionStrategy::AlwaysWasm,
                 offchain_worker: ExecutionStrategy::AlwaysWasm,
                 other: ExecutionStrategy::AlwaysWasm,
-            },
-            #[cfg(target_os = "windows")]
-            execution_strategies: ExecutionStrategies {
-                syncing: ExecutionStrategy::NativeElseWasm,
-                importing: ExecutionStrategy::NativeElseWasm,
-                block_construction: ExecutionStrategy::NativeElseWasm,
-                offchain_worker: ExecutionStrategy::NativeElseWasm,
-                other: ExecutionStrategy::NativeElseWasm,
             },
             rpc_http: None,
             rpc_ws: Some("127.0.0.1:9947".parse().expect("IP and port are valid")),
@@ -232,9 +223,10 @@ fn create_configuration<CS: ChainSpec + 'static>(
             telemetry_endpoints,
             default_heap_pages: None,
             offchain_worker: OffchainWorkerConfig::default(),
-            force_authoring: env::var("FORCE_AUTHORING")
-                .map(|force_authoring| force_authoring.as_str() == "1")
-                .unwrap_or_default(),
+            force_authoring: true,
+            // force_authoring: env::var("FORCE_AUTHORING")
+            //     .map(|force_authoring| force_authoring.as_str() == "1")
+            //     .unwrap_or_default(),
             disable_grandpa: false,
             dev_key_seed: None,
             tracing_targets: None,
