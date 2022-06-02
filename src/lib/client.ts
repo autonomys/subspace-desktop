@@ -19,9 +19,6 @@ import { IU8a } from "@polkadot/types-codec/types"
 const tauri = { event, invoke }
 const SUNIT = 1000000000000000000n
 
-const NETWORK_RPC = process.env.PUBLIC_API_WS || "ws://localhost:9947";
-const appsLink = "https://polkadot.js.org/apps/?rpc=" + NETWORK_RPC + "#/explorer/query/"
-
 export class Client {
   protected firstLoad = false
   protected mnemonic = ""
@@ -82,11 +79,8 @@ export class Client {
             feeReward: 0,
             // TODO: check if necessary to store address here since we only process blocks farmed by user
             rewardAddr: rewardAddress.toString(),
-            appsLink: appsLink + blockNum.toString()
           }
-          this.data.farming.farmed = [block].concat(
-            this.data.farming.farmed
-          )
+          this.data.farming.farmed = [block, ...this.data.farming.farmed];
           storeBlocks(this.data.farming.farmed)
           this.data.farming.events.emit("farmedBlock", block)
 
@@ -95,7 +89,6 @@ export class Client {
       }
     )
 
-    // TODO: move to separate method
     process.on("beforeExit", this.stopSubscription)
     window.addEventListener("unload", this.stopSubscription)
     this.clearTauriDestroy = await tauri.event.once(
