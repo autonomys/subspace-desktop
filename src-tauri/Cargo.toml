@@ -13,7 +13,7 @@ tauri-build = { version = "1.0.0-rc.9", features = [] }
 
 [dependencies]
 anyhow = "1.0.44"
-cirrus-runtime = { git = "https://github.com/subspace/subspace", rev = "cc2da6fcc34ef735cfcd4212aa2e709ccd8e5de6" }
+cirrus-runtime = { git = "https://github.com/subspace/subspace", rev = "6da2858adb16631a98cbf1bbd44082ae1b7a8a1a" }
 dirs = "4.0.0"
 dotenv = "0.15.0"
 event-listener-primitives = "2.0.1"
@@ -25,16 +25,16 @@ sc-chain-spec = { version = "4.0.0-dev", git = "https://github.com/subspace/subs
 sc-executor = { version = "0.10.0-dev", git = "https://github.com/subspace/substrate", rev = "24bea4c3cba7479e2cf2976a21e8111dfda6b1cd", features = ["wasmtime"] }
 sc-network = { version = "0.10.0-dev", git = "https://github.com/subspace/substrate", rev = "24bea4c3cba7479e2cf2976a21e8111dfda6b1cd" }
 sc-service = { version = "0.10.0-dev", git = "https://github.com/subspace/substrate", rev = "24bea4c3cba7479e2cf2976a21e8111dfda6b1cd", features = ["wasmtime"] }
-sc-subspace-chain-specs = { git = "https://github.com/subspace/subspace", rev = "cc2da6fcc34ef735cfcd4212aa2e709ccd8e5de6" }
+sc-subspace-chain-specs = { git = "https://github.com/subspace/subspace", rev = "6da2858adb16631a98cbf1bbd44082ae1b7a8a1a" }
 serde_json = "1.0.81"
 serde = { version = "1.0.137", features = [ "derive" ] }
 sp-core = { version = "6.0.0", git = "https://github.com/subspace/substrate", rev = "24bea4c3cba7479e2cf2976a21e8111dfda6b1cd" }
 sp-panic-handler = { version = "4.0.0", git = "https://github.com/subspace/substrate", rev = "24bea4c3cba7479e2cf2976a21e8111dfda6b1cd" }
-subspace-core-primitives = { git = "https://github.com/subspace/subspace", rev = "cc2da6fcc34ef735cfcd4212aa2e709ccd8e5de6" }
-subspace-farmer = { git = "https://github.com/subspace/subspace", rev = "cc2da6fcc34ef735cfcd4212aa2e709ccd8e5de6" }
-subspace-runtime = { git = "https://github.com/subspace/subspace", rev = "cc2da6fcc34ef735cfcd4212aa2e709ccd8e5de6" }
-subspace-service = { git = "https://github.com/subspace/subspace", rev = "cc2da6fcc34ef735cfcd4212aa2e709ccd8e5de6" }
-subspace-solving = { git = "https://github.com/subspace/subspace", rev = "cc2da6fcc34ef735cfcd4212aa2e709ccd8e5de6" }
+subspace-core-primitives = { git = "https://github.com/subspace/subspace", rev = "6da2858adb16631a98cbf1bbd44082ae1b7a8a1a" }
+subspace-farmer = { git = "https://github.com/subspace/subspace", rev = "6da2858adb16631a98cbf1bbd44082ae1b7a8a1a" }
+subspace-runtime = { git = "https://github.com/subspace/subspace", rev = "6da2858adb16631a98cbf1bbd44082ae1b7a8a1a" }
+subspace-service = { git = "https://github.com/subspace/subspace", rev = "6da2858adb16631a98cbf1bbd44082ae1b7a8a1a" }
+subspace-solving = { git = "https://github.com/subspace/subspace", rev = "6da2858adb16631a98cbf1bbd44082ae1b7a8a1a" }
 tokio = { version = "1.11.0", features = ["macros", "rt-multi-thread"] }
 tracing = "0.1.31"
 tracing-subscriber = "0.3.11"
