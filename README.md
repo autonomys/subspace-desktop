@@ -50,9 +50,7 @@ if you followed unofficial one, ask guide author for proper upgrade steps.
    Make sure to replace `FARMER_FILE_NAME` and `NODE_FILE_NAME` with actual file names
 2. Delete those files `FARMER_FILE_NAME` and `NODE_FILE_NAME`
 3. Install Subspace Desktop
-4. If you didn't specify `--reward-address`, didn't import mnemonic or don't care, use "Quick start" at the first screen
-5. In case you specified `--reward-address` when running your farmer before, choose "Advanced" on the first screen and use the same reward address there
-6. In case you imported mnemonic before, choose "Advanced" and specify the address that corresponds to that mnemonic (can be found in Polkadot.js waller or explorer, both "any chain", "Polkadot" and Subspace addresses are fine)
+4. Choose `I've run a farmer before and still have my keys` on the first screen and use the same reward address (that you used for CLI) there
 
 # Development
 
