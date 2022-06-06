@@ -6,12 +6,12 @@
     "advanced": "I've run a farmer before and still have my keys"
   },
   "saveKeys": {
-    "pageTitle": "Backup Private Key",
-    "tooltip": "Please confirm you have backed up your private key first",
-    "yourPrivateKey": "Your private key",
-    "userConfirm": "I have backed up my private key. I understand that my account can't be recovered without my private key.",
-    "saved": "Private Key copied to clipboard. Backup key in a secure location.",
-    "privateKey": "Private Key",
+    "pageTitle": "Backup Seed Phrase",
+    "tooltip": "Please confirm you have backed up your seed phrase first",
+    "yourSeedPhrase": "Your seed phrase",
+    "userConfirm": "I have backed up my seed phrase. I understand that my account can't be recovered without my seed phrase.",
+    "saved": "Seed phrase copied to clipboard. Backup key in a secure location.",
+    "seedPhrase": "Seed phrase",
     "reveal": "reveal",
     "copy": "copy to clipboard"
   },
@@ -81,9 +81,12 @@
   "mainMenu": {
     "IncentivizedLabel": "Incentivized Testnet",
     "IncentivizedTooltip": "Rewards (testSSC) you earn during incentivized testnet, will contribute to your mainnet rewards!",
-    "reset": "Reset",
+    "reset": "Reset Node!",
     "autoStart": "Start on Boot",
     "willAutoLaunch": "Subspace will launch automatically during boot",
-    "willNotAutoLaunch": "Subspace will not launch automatically during boot"
+    "willNotAutoLaunch": "Subspace will not launch automatically during boot",
+    "reset_heading": "Are you sure you want to reset and start from scratch?",
+    "reset_explanation": " This will erase everything, and you will have to start from the beginning. Only do this if there is something wrong with the network, or you imported a wrong reward address.",
+    "export_log": "Show Logs"
   }
 }
