@@ -12,7 +12,7 @@ q-menu(auto-close)
         .col
           p.text-grey(v-if="!launchOnStart") {{ lang.autoStart }}
           p.text-black(v-else) {{ lang.autoStart }}
-    q-item(@click="reset()" clickable v-if="util.CONTEXT_MENU != 'OFF'")
+    q-item(@click="reset()" clickable)
       .row.items-center
         .col-auto.q-mr-md
           q-icon(color="red" name="refresh")
@@ -22,7 +22,7 @@ q-menu(auto-close)
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import { Dialog, LocalStorage, Notify } from "quasar"
+import { Dialog, Notify } from "quasar"
 import { relaunch } from "@tauri-apps/api/process"
 import * as util from "../lib/util"
 import { globalState as global } from "../lib/global"
@@ -76,12 +76,12 @@ export default defineComponent({
       Dialog.create({
         message: `
         <h6>
-          Are you sure you want to reset?
+          ${lang.reset_heading}
         </h6>
         <div style="height:10px;">
         </div>
         <p>
-          You will need to re-import your existing private key in order to recover any existing plot or funds.
+         ${lang.reset_explanation}
         </p>
         `,
         html: true,

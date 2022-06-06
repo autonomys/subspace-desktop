@@ -81,9 +81,11 @@
   "mainMenu": {
     "IncentivizedLabel": "Incentivized Testnet",
     "IncentivizedTooltip": "Rewards (testSSC) you earn during incentivized testnet, will contribute to your mainnet rewards!",
-    "reset": "Reset",
+    "reset": "Reset Node!",
     "autoStart": "Start on Boot",
     "willAutoLaunch": "Subspace will launch automatically during boot",
-    "willNotAutoLaunch": "Subspace will not launch automatically during boot"
+    "willNotAutoLaunch": "Subspace will not launch automatically during boot",
+    "reset_heading": "Are you sure you want to reset and start from scratch?",
+    "reset_explanation": " This will erase everything, and you will have to start from the beginning. Only do this if there is something wrong in the network, or you imported a wrong reward address. You will need to re-import your existing private key."
   }
 }
