@@ -55,7 +55,7 @@
       "shell": {
         "all": true,
         "execute": true,
-        "open": true,
+        "open": "[/subspace\\-desktop/]",
         "scope": [
           {
             "name": "run-osascript",

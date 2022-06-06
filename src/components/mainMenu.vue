@@ -12,6 +12,12 @@ q-menu(auto-close)
         .col
           p.text-grey(v-if="!launchOnStart") {{ lang.autoStart }}
           p.text-black(v-else) {{ lang.autoStart }}
+    q-item(@click="exportLogs()" clickable)
+      .row.items-center
+        .col-auto.q-mr-md
+          q-icon(name="print")
+        .col
+          p {{ lang.export_log }}
     q-item(@click="reset()" clickable)
       .row.items-center
         .col-auto.q-mr-md
@@ -26,8 +32,10 @@ import { Dialog, Notify } from "quasar"
 import { relaunch } from "@tauri-apps/api/process"
 import * as util from "../lib/util"
 import { globalState as global } from "../lib/global"
+import { open as shell_open } from '@tauri-apps/api/shell'
 
 const lang = global.data.loc.text.mainMenu
+
 
 export default defineComponent({
   data() {
@@ -92,6 +100,15 @@ export default defineComponent({
         await new Promise((resolve) => setTimeout(resolve, 1000))
         await relaunch()
       })
+    },
+    async exportLogs() {
+      try {
+        const log_path = await util.getLogPath()
+        console.log("THIS IS LOG PATH:", log_path)
+        await shell_open(log_path)
+      } catch(error) {
+        console.error(error)
+      }
     },
     async initMenu() {
       if (this.$autoLauncher.enabled !== undefined) {

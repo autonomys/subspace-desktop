@@ -63,6 +63,7 @@ pub(crate) fn frontend_info_logger(message: &str) {
     info!("Frontend info: {message}");
 }
 
+#[tauri::command]
 pub(crate) fn custom_log_dir(id: &str) -> PathBuf {
     #[cfg(target_os = "macos")]
     let path = dirs::home_dir().map(|dir| {

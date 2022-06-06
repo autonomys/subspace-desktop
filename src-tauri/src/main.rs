@@ -88,7 +88,8 @@ async fn main() -> Result<()> {
                 farmer::farming,
                 node::start_node,
                 utils::frontend_error_logger,
-                utils::frontend_info_logger
+                utils::frontend_info_logger,
+                utils::custom_log_dir
             ],
             #[cfg(target_os = "windows")]
             tauri::generate_handler![
@@ -100,7 +101,8 @@ async fn main() -> Result<()> {
                 farmer::farming,
                 node::start_node,
                 utils::frontend_error_logger,
-                utils::frontend_info_logger
+                utils::frontend_info_logger,
+                utils::custom_log_dir
             ],
         )
         .build(ctx)
