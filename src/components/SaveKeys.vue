@@ -3,7 +3,7 @@
   .row.justify-center.q-gutter-lg
     .col-auto
       q-icon(color="blue-3" name="vpn_key" size="80px")
-      p.q-ml-sm {{ lang.privateKey }}
+      p.q-ml-sm {{ lang.seedPhrase }}
     .col
       .row.justify-center
         .col-8
@@ -34,7 +34,7 @@
               style="max-width: 200px"
             )
     .row
-      p Private keys are your password for your subspace farmer and wallet, this cannot be changed, guessed(easily), or reset if lost. It is imperative that this is stored in a secure, safe location. Without the Private Key you will not have access to your funds. Furthermore, anyone who steals your private keys will be able to do as they please with your funds.
+      p Seed phrases are your password for your subspace farmer and wallet, this cannot be changed, guessed(easily), or reset if lost. It is imperative that this is stored in a secure, safe location. Without the seed phrase, you will not have access to your funds. Furthermore, anyone who steals your seed phrase will be able to do as they please with your funds.
   .row.q-pt-md
     q-checkbox(:label="lang.userConfirm" size="lg" v-model="userConfirm" :disable="!revealKey")
 </template>
