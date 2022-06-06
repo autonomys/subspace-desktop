@@ -32,7 +32,7 @@ import { Dialog, Notify } from "quasar"
 import { relaunch } from "@tauri-apps/api/process"
 import * as util from "../lib/util"
 import { globalState as global } from "../lib/global"
-import { open as shell_open } from '@tauri-apps/api/shell'
+import { open as shellOpen } from '@tauri-apps/api/shell'
 
 const lang = global.data.loc.text.mainMenu
 
@@ -105,7 +105,7 @@ export default defineComponent({
       try {
         const log_path = await util.getLogPath()
         console.log("THIS IS LOG PATH:", log_path)
-        await shell_open(log_path)
+        await shellOpen(log_path)
       } catch(error) {
         console.error(error)
       }
