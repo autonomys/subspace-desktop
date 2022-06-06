@@ -86,7 +86,7 @@
     "willAutoLaunch": "Subspace will launch automatically during boot",
     "willNotAutoLaunch": "Subspace will not launch automatically during boot",
     "reset_heading": "Are you sure you want to reset and start from scratch?",
-    "reset_explanation": " This will erase everything, and you will have to start from the beginning. Only do this if there is something wrong in the network, or you imported a wrong reward address.",
+    "reset_explanation": " This will erase everything, and you will have to start from the beginning. Only do this if there is something wrong with the network, or you imported a wrong reward address.",
     "export_log": "Show Logs"
   }
 }
