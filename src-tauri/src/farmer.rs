@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use subspace_core_primitives::PublicKey;
 use subspace_farmer::multi_farming::{MultiFarming, Options as MultiFarmingOptions};
 use subspace_farmer::{Identity, NodeRpcClient, ObjectMappings, Plot, RpcClient};
-use tokio::net::tcp::TcpStream;
+use tokio::net::TcpStream;
 use tokio::sync::mpsc::{channel, Receiver, Sender};
 use tokio::time::{sleep, timeout, Duration};
 
@@ -64,7 +64,7 @@ async fn farm(
 ) -> Result<(), anyhow::Error> {
     if let Err(error) = timeout(Duration::from_secs(20), async {
         loop {
-            if TcpStream::connect("127.0.0.1:9947").is_ok() {
+            if TcpStream::connect("127.0.0.1:9947").await.is_ok() {
                 break;
             } else {
                 sleep(Duration::from_millis(500)).await;
