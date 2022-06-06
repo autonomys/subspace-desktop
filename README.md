@@ -15,10 +15,11 @@ Below is not necessarily strict boundaries, but rather what we have tested and c
 1. Download the latest [release](https://github.com/subspace/subspace-desktop/releases) for your preferred platform.
 2. Install the program.
 3. Open `subspace-desktop` application.
-4. Click the `Quick Start` option.
-5. Wait for app to sync network size, and click `Start Plotting` (In this version, you plot the full history. In future versions you will be able to set your plot size on this page).
-6. The network will begin to sync, while you wait you can click `next` to open up the `what is plotting` page, and reveal your `seed` phrase, and provide you with our social links.
-7. Once the node fully syncs you will be taken the the Farmer Dashboard which will show you the network status, and if you have won any blocks.
+4. Click the `This is my first time farming` option (or, if you want to use an existing reward address, click `I've run a farmer before and still have my keys`).
+5. Select how much space you want to pledge
+6. When you click `start plotting`, it may prompt you to store your seed phrase, if you did not import a reward address.
+7. The network will begin to sync and plotting will start. While you wait you can click `hints` to open up the `what is plotting` page, and join our online communities from the social links displayed in there!
+8. Once the node fully syncs you will be taken the the Farmer Dashboard which will show you the network/plot status, and your total earned rewards.
 
 # How to Upgrade
 
@@ -32,7 +33,7 @@ Below is not necessarily strict boundaries, but rather what we have tested and c
 **UNLESS STATED OTHERWISE IN THE RELEASE NOTES:**
 - You don't need to delete your existing plot
 - You don't need to create a new identity
-- You don't need to delete the config files
+- You don't need to delete the config and log files
 
 ## Upgrade from CLI (subspace-node + subspace-farmer)
 
@@ -49,10 +50,7 @@ if you followed unofficial one, ask guide author for proper upgrade steps.
    Make sure to replace `FARMER_FILE_NAME` and `NODE_FILE_NAME` with actual file names
 2. Delete those files `FARMER_FILE_NAME` and `NODE_FILE_NAME`
 3. Install Subspace Desktop
-4. If you didn't specify `--reward-address`, didn't import mnemonic or don't care, use "Quick start" at the first screen
-5. In case you specified `--reward-address` when running your farmer before, choose "Advanced" on the first screen and use the same reward address there
-6. In case you imported mnemonic before, choose "Advanced" and specify the address that corresponds to that mnemonic (can be found in Polkadot.js waller or explorer, both "any chain", "Polkadot" and Subspace addresses are fine)
-7. If you didn't specify `--reward-address` and didn't import mnemonic and farmed some coins already, use `./FARMER_FILE_NAME identity view --mnemonic` to find mnemonic (replace `FARMER_FILE_NAME` with the actual file name), import it into Polkadot.js wallet and follow step 6 above
+4. Choose `I've run a farmer before and still have my keys` on the first screen and use the same reward address (that you used for CLI) there
 
 # Development
 
