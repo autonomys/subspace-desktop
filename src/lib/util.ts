@@ -31,6 +31,10 @@ export async function showModal(
   })
 }
 
+export async function getLogPath(): Promise<string> {
+  return await invoke("custom_log_dir", { id: appName })
+}
+
 export async function errorLogger(error: unknown): Promise<void> {
   if (error instanceof Error) {
     const message = error.message
