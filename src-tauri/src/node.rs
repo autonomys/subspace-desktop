@@ -249,5 +249,3 @@ fn create_configuration<CS: ChainSpec + 'static>(
         force_new_slot_notifications: false,
     })
 }
-
-
