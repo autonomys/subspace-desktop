@@ -95,12 +95,11 @@ export default defineComponent({
       // if user left input empty - use prev name
       if (!global.data.nodeName) {
         global.setNodeName(this.oldNodeName)
-      } else {
-        global.setNodeName(global.data.nodeName)
-        await appConfig.update({ nodeName: global.data.nodeName })
-        // TODO: consider restarting elsewhere
-        console.log('Restarting...');
-        await relaunch()
+      // only restart if name has changed
+      } else if (this.oldNodeName !== global.data.nodeName) {
+        await appConfig.update({ nodeName: global.data.nodeName });
+        global.setNodeName(global.data.nodeName);
+        await relaunch();
       }
     },
     setEditName(value: boolean) {
