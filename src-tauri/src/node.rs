@@ -19,7 +19,7 @@ use std::path::PathBuf;
 use std::sync::Once;
 use subspace_runtime::GenesisConfig as ConsensusGenesisConfig;
 use subspace_service::{FullClient, NewFull, SubspaceConfiguration};
-use tokio::{runtime::Handle, sync::Mutex, task::JoinHandle};
+use tokio::runtime::Handle;
 
 static INITIALIZE_SUBSTRATE: Once = Once::new();
 
@@ -51,18 +51,10 @@ impl NativeExecutionDispatch for ExecutorDispatch {
 
 #[tauri::command]
 pub(crate) async fn start_node(path: String, node_name: String) {
-    static NODE_HANDLE: Mutex<Option<JoinHandle<()>>> = Mutex::const_new(None);
-
-    let mut node_handle_guard = NODE_HANDLE.lock().await;
-    // if there is already a node running, stop it
-    if let Some(guard) = node_handle_guard.take() {
-        guard.abort();
-    }
-    // start the new node, and store its handle
-    *node_handle_guard = Some(init_node(path.into(), node_name).await.unwrap());
+    init_node(path.into(), node_name).await.unwrap();
 }
 
-async fn init_node(base_directory: PathBuf, node_name: String) -> Result<JoinHandle<()>> {
+async fn init_node(base_directory: PathBuf, node_name: String) -> Result<()> {
     let chain_spec: ConsensusChainSpec<ConsensusGenesisConfig, ExecutionGenesisConfig> =
         ConsensusChainSpec::from_json_bytes(include_bytes!("../chain-spec.json").as_ref())
             .map_err(anyhow::Error::msg)?;
@@ -74,7 +66,8 @@ async fn init_node(base_directory: PathBuf, node_name: String) -> Result<JoinHan
 
     full_client.network_starter.start_network();
 
-    let node_handle = tokio::spawn(async move {
+    // TODO: Make this interruptable if needed
+    tokio::spawn(async move {
         if let Err(error) = full_client.task_manager.future().await {
             error!("Task manager exited with error: {error}");
         } else {
@@ -82,7 +75,7 @@ async fn init_node(base_directory: PathBuf, node_name: String) -> Result<JoinHan
         }
     });
 
-    Ok(node_handle)
+    Ok(())
 }
 
 // TODO: Allow customization of a bunch of these things
