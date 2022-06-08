@@ -14,9 +14,9 @@ q-layout(view="hHh lpr fFf")
               .col
                 p.no-margin(style="font-size: 12px") {{ lang.IncentivizedTooltip }}
           .col-auto.q-mr-md.relative-position(v-if="global.nodeName || oldNodeName")
-            // TODO: add .cursor-pointer and @click="onNameClick" after node restarting is implemented on the backend
-            q-badge(
+            q-badge.cursor-pointer(
               v-if="!isEdittingName"
+              @click="onNameClick"
               color="blue-8"
               text-color="white"
             )
@@ -54,6 +54,7 @@ import * as util from "../lib/util"
 import MainMenu from "../components/mainMenu.vue"
 import { globalState as global } from "../lib/global"
 import { appConfig } from "../lib/appConfig"
+import { relaunch } from "@tauri-apps/api/process"
 
 const lang = global.data.loc.text.mainMenu
 
@@ -90,15 +91,16 @@ export default defineComponent({
       this.oldNodeName = global.data.nodeName;
     },
     async saveName() {
+      this.setEditName(false);
       // if user left input empty - use prev name
       if (!global.data.nodeName) {
         global.setNodeName(this.oldNodeName)
-      } else {
-        global.setNodeName(global.data.nodeName)
-        await appConfig.update({ nodeName: global.data.nodeName })
+      // only restart if name has changed
+      } else if (this.oldNodeName !== global.data.nodeName) {
+        await appConfig.update({ nodeName: global.data.nodeName });
+        global.setNodeName(global.data.nodeName);
+        await relaunch();
       }
-
-      this.setEditName(false);
     },
     setEditName(value: boolean) {
       this.isEdittingName = value;
