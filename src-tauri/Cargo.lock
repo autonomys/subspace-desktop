@@ -8725,7 +8725,7 @@ dependencies = [
 
 [[package]]
 name = "subspace-desktop"
-version = "0.6.3"
+version = "0.6.4"
 dependencies = [
  "anyhow",
  "cirrus-runtime",
