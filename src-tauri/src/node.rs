@@ -17,6 +17,7 @@ use sp_core::crypto::Ss58AddressFormat;
 use std::env;
 use std::path::PathBuf;
 use std::sync::Once;
+use subspace_fraud_proof::VerifyFraudProof;
 use subspace_runtime::GenesisConfig as ConsensusGenesisConfig;
 use subspace_service::{FullClient, NewFull, SubspaceConfiguration};
 use tokio::runtime::Handle;
@@ -83,7 +84,12 @@ async fn create_full_client<CS: ChainSpec + 'static>(
     chain_spec: CS,
     base_path: PathBuf,
     node_name: String,
-) -> Result<NewFull<FullClient<subspace_runtime::RuntimeApi, ExecutorDispatch>>> {
+) -> Result<
+    NewFull<
+        FullClient<subspace_runtime::RuntimeApi, ExecutorDispatch>,
+        impl VerifyFraudProof + Clone + Send + Sync + 'static,
+    >,
+> {
     // This must only be initialized once
     INITIALIZE_SUBSTRATE.call_once(|| {
         dotenv::dotenv().ok();
