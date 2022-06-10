@@ -70,8 +70,8 @@ async fn farm(
     };
 
     info!("Connecting to node at {}", node_rpc_url);
-    let archiving_client = NodeRpcClient::new(&node_rpc_url).await?;
-    let farming_client = NodeRpcClient::new(&node_rpc_url).await?;
+    let archiving_client = NodeRpcClient::new(node_rpc_url).await?;
+    let farming_client = NodeRpcClient::new(node_rpc_url).await?;
 
     let metadata = farming_client
         .farmer_metadata()
