@@ -1,7 +1,8 @@
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use cirrus_runtime::GenesisConfig as ExecutionGenesisConfig;
 use log::{error, warn};
 use sc_chain_spec::ChainSpec;
+use sc_client_api::HeaderBackend;
 use sc_executor::{NativeExecutionDispatch, WasmExecutionMethod, WasmtimeInstantiationStrategy};
 use sc_network::config::{NodeKeyConfig, Secret};
 use sc_service::config::{
@@ -18,7 +19,7 @@ use std::env;
 use std::path::PathBuf;
 use std::sync::Once;
 use subspace_fraud_proof::VerifyFraudProof;
-use subspace_runtime::GenesisConfig as ConsensusGenesisConfig;
+use subspace_runtime::{GenesisConfig as ConsensusGenesisConfig, RuntimeApi};
 use subspace_service::{FullClient, NewFull, SubspaceConfiguration};
 use tokio::runtime::Handle;
 
@@ -119,8 +120,35 @@ async fn create_full_client<CS: ChainSpec + 'static>(
         node_name,
     )?;
 
-    subspace_service::new_full::<subspace_runtime::RuntimeApi, ExecutorDispatch>(config, true)
-        .map_err(Into::into)
+    let config_dir = config
+        .base_path
+        .as_ref()
+        .map(|base_path| base_path.config_dir("subspace_gemini_1b"));
+
+    // subspace_service::new_full::<subspace_runtime::RuntimeApi, ExecutorDispatch>(config, true)
+    //     .map_err(Into::into)
+    let primary_chain_node = subspace_service::new_full::<RuntimeApi, ExecutorDispatch>(
+        config, true,
+    )
+    .map_err(|error| {
+        sc_service::Error::Other(format!("Failed to build a full subspace node: {error:?}"))
+    })?;
+
+    if primary_chain_node.client.info().best_number == 33670 {
+        if let Some(config_dir) = config_dir {
+            let workaround_file = config_dir.join("network").join("gemini_1b_workaround");
+            if !workaround_file.exists() {
+                let _ = std::fs::write(workaround_file, &[]);
+                let _ = std::fs::remove_file(config_dir.join("network").join("secret_ed25519"));
+                return Err(anyhow!(
+                    "Applied workaround for upgrade from gemini-1b-2022-jun-08, \
+                                    please restart this node"
+                ));
+            }
+        }
+    }
+
+    Ok(primary_chain_node)
 }
 
 fn set_default_ss58_version<CS: ChainSpec>(chain_spec: &CS) {
