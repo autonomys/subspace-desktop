@@ -125,8 +125,6 @@ async fn create_full_client<CS: ChainSpec + 'static>(
         .as_ref()
         .map(|base_path| base_path.config_dir("subspace_gemini_1b"));
 
-    // subspace_service::new_full::<subspace_runtime::RuntimeApi, ExecutorDispatch>(config, true)
-    //     .map_err(Into::into)
     let primary_chain_node = subspace_service::new_full::<RuntimeApi, ExecutorDispatch>(
         config, true,
     )
