@@ -3,18 +3,11 @@ q-page.q-pl-lg.q-pr-lg.q-pt-md
   .row.justify-center
   .row.q-pb-sm.justify-center
   div(v-if="!loading")
-    .row.q-gutter-md.q-pb-md(v-if="!expanded")
+    .row.q-gutter-md.q-pb-md
       .col
         plotCard(:plot="plot")
       .col
         netCard(:network="network")
-    .row.q-gutter-md
-      .col
-        farmedList(
-          :expanded="expanded"
-          :farmedTotalEarned="farmedTotalEarned"
-          @expand="expand"
-        )
   div(v-else)
     .flex
       .absolute-center
@@ -25,13 +18,12 @@ q-page.q-pl-lg.q-pr-lg.q-pt-md
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import { Notify } from "quasar"
 import { globalState as global } from "../lib/global"
 import * as util from "../lib/util"
 import farmedList from "../components/farmedList.vue"
 import netCard from "../components/netCard.vue"
 import plotCard from "../components/plotCard.vue"
-import { emptyClientData, ClientData, FarmedBlock } from "../lib/types"
+import { emptyClientData, ClientData } from "../lib/types"
 import { appConfig } from "../lib/appConfig"
 const lang = global.data.loc.text.dashboard
 
@@ -56,7 +48,6 @@ export default defineComponent({
         state: "starting",
         message: lang.initializing
       },
-      expanded: false,
       util,
       loading: true,
       unsubscribe: () => null,
@@ -65,6 +56,7 @@ export default defineComponent({
     }
   },
   computed: {
+    // TODO: get balance
     farmedTotalEarned(): number {
       if (!this.$client) return 0
       return this.$client.data.farming.farmed.reduce((agg: number, val: { blockReward: number, feeReward: number }) => {
@@ -101,8 +93,6 @@ export default defineComponent({
     this.fetchPeersCount();// fetch initial peers count value
     this.peerInterval = window.setInterval(this.fetchPeersCount, 30000);
     
-    this.$client.data.farming.events.on("newBlock", this.newBlock)
-    this.$client.data.farming.events.on("farmedBlock", this.farmBlock)
     this.global.status.state = "live"
     this.global.status.message = lang.syncedMsg
     await this.checkNodeAndNetwork()
@@ -112,16 +102,11 @@ export default defineComponent({
     this.unsubscribe()
     clearInterval(this.peerInterval)
     this.$client.stopSubscription()
-    this.$client.data.farming.events.off("newBlock", this.newBlock)
-    this.$client.data.farming.events.off("farmedBlock", this.farmBlock)
   },
   methods: {
     async fetchPeersCount() {
       const peers = await this.$client.getPeersCount();
       this.network.peers = peers;
-    },
-    expand(val: boolean) {
-      this.expanded = val
     },
     async checkFarmerAndPlot() {
       this.plot.state = "verifying"
@@ -147,21 +132,6 @@ export default defineComponent({
       this.network.message = lang.synced
       this.network.state = "finished"
     },
-    newBlock(blockNumber: number) {
-      if (this.network.state === "finished")
-        this.network.message =
-          "Synced at " + lang.blockNum + " " + blockNumber.toLocaleString()
-    },
-    farmBlock(block: FarmedBlock) {
-      Notify.create({
-        color: "green",
-        progress: true,
-        message: `${lang.farmedBlock}: ${block.blockNum} ${lang.reward} ${
-          block.blockReward + block.feeReward
-        } testSSC`,
-        position: "bottom-right"
-      })
-    }
   }
 })
 </script>
