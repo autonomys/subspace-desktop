@@ -104,10 +104,10 @@ export default defineComponent({
     async exportLogs() {
       try {
         const log_path = await util.getLogPath()
-        console.log("THIS IS LOG PATH:", log_path)
+        util.infoLogger("log path acquired:" + log_path)
         await shellOpen(log_path)
       } catch(error) {
-        console.error(error)
+        util.errorLogger(error)
       }
     },
     async initMenu() {
