@@ -55,13 +55,17 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
                 q-tooltip.q-pa-sm
                   p {{ lang.availableSpace }}
               .q-mt-sm {{ lang.allocated }}
+              // TODO: get error message from internationalization context
+              // TODO: remove validation and restrict input to positive numbers when possible (Quasar component limitation)
               q-input(
+                type="number"
                 bg-color="blue-2"
                 dense
                 input-class="setupPlotInput"
                 outlined
                 suffix="GB"
-                v-model="allocatedGB"
+                v-model.number="allocatedGB"
+                :rules="[val => val > 0 || 'Value should be a positive number']"
               )
                 q-tooltip.q-pa-sm
                   p {{ lang.allocatedSpace }}
@@ -97,7 +101,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
     .col-expand
     .col-auto
       q-btn(
-        :disable="!validPath"
+        :disable="(!validPath || allocatedGB <= 0)"
         @click="confirmCreateDir()"
         color="blue-8"
         icon-right="downloading"
@@ -144,7 +148,7 @@ export default defineComponent({
       return [
         this.stats.utilizedGB,
         this.stats.freeGB,
-        this.allocatedGB < 5 ? 5 : this.allocatedGB
+        this.allocatedGB,
       ]
     },
     stats(): StatsType {
@@ -182,15 +186,20 @@ export default defineComponent({
       }
     },
     allocatedGB(val) {
-      if (!this.stats?.safeAvailableGB) return
-      if (val > this.stats?.safeAvailableGB) {
-        this.$nextTick(() => {
-          this.allocatedGB = parseFloat(this.stats?.safeAvailableGB.toFixed(0))
-        })
+      // input component currently allows negative numbers as value, so we need to check
+      if (val >= 0) {
+        if (!this.stats?.safeAvailableGB) return
+        if (val > this.stats?.safeAvailableGB) {
+          this.$nextTick(() => {
+            this.allocatedGB = parseFloat(this.stats?.safeAvailableGB.toFixed(0))
+          })
+        } else {
+          this.$nextTick(() => {
+            this.allocatedGB = util.toFixed(this.allocatedGB, 2)
+          })
+        }
       } else {
-        this.$nextTick(() => {
-          this.allocatedGB = util.toFixed(this.allocatedGB, 2)
-        })
+        this.allocatedGB = 0;
       }
     }
   },
