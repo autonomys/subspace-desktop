@@ -55,6 +55,8 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
                 q-tooltip.q-pa-sm
                   p {{ lang.availableSpace }}
               .q-mt-sm {{ lang.allocated }}
+              // TODO: get error message from internationalization context
+              // TODO: remove validation and restrict input to positive numbers when possible (Quasar component limitation)
               q-input(
                 type="number"
                 bg-color="blue-2"
@@ -184,6 +186,7 @@ export default defineComponent({
       }
     },
     allocatedGB(val) {
+      // input component currently allows negative numbers as value, so we need to check
       if (val >= 0) {
         if (!this.stats?.safeAvailableGB) return
         if (val > this.stats?.safeAvailableGB) {
