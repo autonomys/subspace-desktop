@@ -16,6 +16,7 @@ use std::fs::{create_dir_all, File};
 use tauri::SystemTrayEvent;
 use tauri::{Manager, RunEvent, WindowEvent};
 use tracing::level_filters::LevelFilter;
+use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::Layer;
 use tracing_subscriber::{fmt, fmt::format::FmtSpan, EnvFilter};
@@ -26,21 +27,30 @@ async fn main() -> Result<()> {
     let id = &ctx.config().tauri.bundle.identifier;
     let log_dir = utils::custom_log_dir(id);
     create_dir_all(log_dir.clone()).expect("path creation should always succeed");
+
+    let filter = || {
+        EnvFilter::builder()
+            .with_default_directive(LevelFilter::INFO.into())
+            .from_env_lossy()
+            .add_directive("subspace_farmer=debug".parse().unwrap())
+    };
+
     // start logger, after we acquire the bundle identifier
     tracing_subscriber::registry()
         .with(
             fmt::layer()
-                .with_writer(utils::Tee(
-                    File::create(log_dir.join(format!("{}.log", id))).unwrap(),
-                    std::io::stdout,
-                ))
+                .with_ansi(!cfg!(windows))
                 .with_span_events(FmtSpan::CLOSE)
-                .with_filter(
-                    EnvFilter::builder()
-                        .with_default_directive(LevelFilter::INFO.into())
-                        .from_env_lossy()
-                        .add_directive("subspace_farmer=debug".parse()?),
-                ),
+                .with_filter(filter()),
+        )
+        .with(
+            BunyanFormattingLayer::new(
+                "subspace-desktop".to_owned(),
+                File::create(log_dir.join(format!("{}.log", id)))
+                    .expect("Failed to create log file"),
+            )
+            .and_then(JsonStorageLayer)
+            .with_filter(filter()),
         )
         .init();
 
