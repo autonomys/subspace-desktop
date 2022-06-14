@@ -1,33 +1,7 @@
 use log::{debug, error, info};
 use serde::Serialize;
-use std::io::Write;
 use std::path::PathBuf;
 use tauri::{api, Env};
-use tracing_subscriber::fmt::MakeWriter;
-
-pub(crate) struct Tee<A, B>(pub A, pub B);
-
-impl<A: Write, B: Write> Write for Tee<A, B> {
-    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
-        let a = self.0.write(buf)?;
-        let b = self.1.write(buf)?;
-        Ok(a.min(b))
-    }
-
-    fn flush(&mut self) -> std::io::Result<()> {
-        self.0.flush()?;
-        self.1.flush()?;
-        Ok(())
-    }
-}
-
-impl<'a, A: for<'b> MakeWriter<'a>, B: for<'b> MakeWriter<'a>> MakeWriter<'a> for Tee<A, B> {
-    type Writer = Tee<<A as MakeWriter<'a>>::Writer, <B as MakeWriter<'a>>::Writer>;
-
-    fn make_writer(&'a self) -> Self::Writer {
-        Tee(self.0.make_writer(), self.1.make_writer())
-    }
-}
 
 #[derive(Serialize)]
 pub(crate) struct DiskStats {
