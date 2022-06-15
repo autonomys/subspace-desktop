@@ -100,7 +100,7 @@ export default defineComponent({
 
     this.fetchPeersCount();// fetch initial peers count value
     this.peerInterval = window.setInterval(this.fetchPeersCount, 30000);
-    
+
     this.$client.data.farming.events.on("newBlock", this.newBlock)
     this.$client.data.farming.events.on("farmedBlock", this.farmBlock)
     this.global.status.state = "live"
@@ -144,7 +144,7 @@ export default defineComponent({
         syncState = await this.$client.getSyncState()
       } while (syncState.currentBlock.toNumber() < syncState.highestBlock.unwrapOrDefault().toNumber())
 
-      this.network.message = lang.synced
+      this.network.message = `Node is synced at block: ${syncState.currentBlock}`
       this.network.state = "finished"
     },
     newBlock(blockNumber: number) {
