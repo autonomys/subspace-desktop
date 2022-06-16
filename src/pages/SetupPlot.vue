@@ -275,7 +275,7 @@ export default defineComponent({
     },
     async updateDriveStats() {
       const stats = await native.driveStats(this.plotDirectory)
-      console.log("Drive Stats:", stats)
+      util.infoLogger("Drive Stats -> free: " + stats.freeBytes + "; total: " + stats.totalBytes)
       this.driveStats = stats
     },
     async selectDir() {
@@ -285,6 +285,7 @@ export default defineComponent({
           util.errorLogger(error)
         })
       if (result) this.plotDirectory = result
+      await this.updateDriveStats()
     },
     async checkIdentity() {
       const config = await appConfig.read()
