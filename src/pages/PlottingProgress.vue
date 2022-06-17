@@ -224,13 +224,15 @@ export default defineComponent({
       await this.$client.startSubscription();
       util.infoLogger("PLOTTING PROGRESS | block subscription started")
       this.syncState = (await this.$client.getSyncState()).toJSON() as unknown as SyncState;
+      let isSyncing = await this.$client.isSyncing();
 
       do {
         await new Promise((resolve) => setTimeout(resolve, 3000))
         this.syncState = (await this.$client.getSyncState()).toJSON() as unknown as SyncState;
         this.plottingData.status = `Syncing ${this.syncState.currentBlock} of ${this.syncState.highestBlock} blocks`
         this.plottingData.finishedGB = (this.syncState.currentBlock * this.plottingData.allocatedGB) / this.syncState.highestBlock;
-      } while (this.syncState.currentBlock < this.syncState.highestBlock)
+        isSyncing = await this.$client.isSyncing();
+      } while (isSyncing);
     },
     startTimers() {
       farmerTimer = window.setInterval(() => {
