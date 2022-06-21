@@ -63,7 +63,7 @@ features = [
 winreg = "0.10.1"
 
 [dependencies.tauri]
-features = ["api-all", "gtk-tray", "system-tray"]
+features = ["api-all", "gtk-tray", "system-tray", "updater"]
 version = "1.0.0-rc.11"
 
 [features]
