@@ -929,7 +929,7 @@ dependencies = [
 [[package]]
 name = "cirrus-pallet-executive"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=3c3a48f865cfe0a2510512bc75e4bae099e27aae#3c3a48f865cfe0a2510512bc75e4bae099e27aae"
+source = "git+https://github.com/subspace/subspace?rev=de3dfb1c8ad35189429768653f0f1a95b357de33#de3dfb1c8ad35189429768653f0f1a95b357de33"
 dependencies = [
  "frame-executive",
  "frame-support",
@@ -946,7 +946,7 @@ dependencies = [
 [[package]]
 name = "cirrus-primitives"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=3c3a48f865cfe0a2510512bc75e4bae099e27aae#3c3a48f865cfe0a2510512bc75e4bae099e27aae"
+source = "git+https://github.com/subspace/subspace?rev=de3dfb1c8ad35189429768653f0f1a95b357de33#de3dfb1c8ad35189429768653f0f1a95b357de33"
 dependencies = [
  "parity-scale-codec",
  "sp-api",
@@ -958,7 +958,7 @@ dependencies = [
 [[package]]
 name = "cirrus-runtime"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=3c3a48f865cfe0a2510512bc75e4bae099e27aae#3c3a48f865cfe0a2510512bc75e4bae099e27aae"
+source = "git+https://github.com/subspace/subspace?rev=de3dfb1c8ad35189429768653f0f1a95b357de33#de3dfb1c8ad35189429768653f0f1a95b357de33"
 dependencies = [
  "cirrus-pallet-executive",
  "cirrus-primitives",
@@ -5068,7 +5068,7 @@ dependencies = [
 [[package]]
 name = "orml-vesting"
 version = "0.4.1-dev"
-source = "git+https://github.com/subspace/subspace?rev=3c3a48f865cfe0a2510512bc75e4bae099e27aae#3c3a48f865cfe0a2510512bc75e4bae099e27aae"
+source = "git+https://github.com/subspace/subspace?rev=de3dfb1c8ad35189429768653f0f1a95b357de33#de3dfb1c8ad35189429768653f0f1a95b357de33"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -5134,7 +5134,7 @@ dependencies = [
 [[package]]
 name = "pallet-executor"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=3c3a48f865cfe0a2510512bc75e4bae099e27aae#3c3a48f865cfe0a2510512bc75e4bae099e27aae"
+source = "git+https://github.com/subspace/subspace?rev=de3dfb1c8ad35189429768653f0f1a95b357de33#de3dfb1c8ad35189429768653f0f1a95b357de33"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -5150,7 +5150,7 @@ dependencies = [
 [[package]]
 name = "pallet-feeds"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=3c3a48f865cfe0a2510512bc75e4bae099e27aae#3c3a48f865cfe0a2510512bc75e4bae099e27aae"
+source = "git+https://github.com/subspace/subspace?rev=de3dfb1c8ad35189429768653f0f1a95b357de33#de3dfb1c8ad35189429768653f0f1a95b357de33"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -5166,7 +5166,7 @@ dependencies = [
 [[package]]
 name = "pallet-grandpa-finality-verifier"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=3c3a48f865cfe0a2510512bc75e4bae099e27aae#3c3a48f865cfe0a2510512bc75e4bae099e27aae"
+source = "git+https://github.com/subspace/subspace?rev=de3dfb1c8ad35189429768653f0f1a95b357de33#de3dfb1c8ad35189429768653f0f1a95b357de33"
 dependencies = [
  "finality-grandpa",
  "frame-support",
@@ -5186,7 +5186,7 @@ dependencies = [
 [[package]]
 name = "pallet-object-store"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=3c3a48f865cfe0a2510512bc75e4bae099e27aae#3c3a48f865cfe0a2510512bc75e4bae099e27aae"
+source = "git+https://github.com/subspace/subspace?rev=de3dfb1c8ad35189429768653f0f1a95b357de33#de3dfb1c8ad35189429768653f0f1a95b357de33"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -5201,7 +5201,7 @@ dependencies = [
 [[package]]
 name = "pallet-offences-subspace"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=3c3a48f865cfe0a2510512bc75e4bae099e27aae#3c3a48f865cfe0a2510512bc75e4bae099e27aae"
+source = "git+https://github.com/subspace/subspace?rev=de3dfb1c8ad35189429768653f0f1a95b357de33#de3dfb1c8ad35189429768653f0f1a95b357de33"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -5216,7 +5216,7 @@ dependencies = [
 [[package]]
 name = "pallet-rewards"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=3c3a48f865cfe0a2510512bc75e4bae099e27aae#3c3a48f865cfe0a2510512bc75e4bae099e27aae"
+source = "git+https://github.com/subspace/subspace?rev=de3dfb1c8ad35189429768653f0f1a95b357de33#de3dfb1c8ad35189429768653f0f1a95b357de33"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -5227,9 +5227,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-runtime-configs"
+version = "0.1.0"
+source = "git+https://github.com/subspace/subspace?rev=de3dfb1c8ad35189429768653f0f1a95b357de33#de3dfb1c8ad35189429768653f0f1a95b357de33"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "scale-info",
+]
+
+[[package]]
 name = "pallet-subspace"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=3c3a48f865cfe0a2510512bc75e4bae099e27aae#3c3a48f865cfe0a2510512bc75e4bae099e27aae"
+source = "git+https://github.com/subspace/subspace?rev=de3dfb1c8ad35189429768653f0f1a95b357de33#de3dfb1c8ad35189429768653f0f1a95b357de33"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -5282,7 +5293,7 @@ dependencies = [
 [[package]]
 name = "pallet-transaction-fees"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=3c3a48f865cfe0a2510512bc75e4bae099e27aae#3c3a48f865cfe0a2510512bc75e4bae099e27aae"
+source = "git+https://github.com/subspace/subspace?rev=de3dfb1c8ad35189429768653f0f1a95b357de33#de3dfb1c8ad35189429768653f0f1a95b357de33"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6689,7 +6700,7 @@ dependencies = [
 [[package]]
 name = "sc-consensus-fraud-proof"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=3c3a48f865cfe0a2510512bc75e4bae099e27aae#3c3a48f865cfe0a2510512bc75e4bae099e27aae"
+source = "git+https://github.com/subspace/subspace?rev=de3dfb1c8ad35189429768653f0f1a95b357de33#de3dfb1c8ad35189429768653f0f1a95b357de33"
 dependencies = [
  "async-trait",
  "parity-scale-codec",
@@ -6729,7 +6740,7 @@ dependencies = [
 [[package]]
 name = "sc-consensus-subspace"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=3c3a48f865cfe0a2510512bc75e4bae099e27aae#3c3a48f865cfe0a2510512bc75e4bae099e27aae"
+source = "git+https://github.com/subspace/subspace?rev=de3dfb1c8ad35189429768653f0f1a95b357de33#de3dfb1c8ad35189429768653f0f1a95b357de33"
 dependencies = [
  "async-trait",
  "fork-tree",
@@ -6769,7 +6780,7 @@ dependencies = [
 [[package]]
 name = "sc-consensus-subspace-rpc"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=3c3a48f865cfe0a2510512bc75e4bae099e27aae#3c3a48f865cfe0a2510512bc75e4bae099e27aae"
+source = "git+https://github.com/subspace/subspace?rev=de3dfb1c8ad35189429768653f0f1a95b357de33#de3dfb1c8ad35189429768653f0f1a95b357de33"
 dependencies = [
  "async-oneshot",
  "futures",
@@ -7214,7 +7225,7 @@ dependencies = [
 [[package]]
 name = "sc-subspace-chain-specs"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=3c3a48f865cfe0a2510512bc75e4bae099e27aae#3c3a48f865cfe0a2510512bc75e4bae099e27aae"
+source = "git+https://github.com/subspace/subspace?rev=de3dfb1c8ad35189429768653f0f1a95b357de33#de3dfb1c8ad35189429768653f0f1a95b357de33"
 dependencies = [
  "sc-chain-spec",
  "sc-service",
@@ -7829,9 +7840,9 @@ checksum = "9def91fd1e018fe007022791f865d0ccc9b3a0d5001e01aabb8b40e46000afb5"
 
 [[package]]
 name = "sloth256-189"
-version = "0.3.2"
+version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e7b133a57a9d83343174c83a77be5dfbe5c7c4f2f49291967aee4cd53901e0bc"
+checksum = "cad77264d5774ba979d342531c2b6e46c4dd075f557acca7b6a55bbfdda54d8b"
 dependencies = [
  "cc",
  "glob",
@@ -8057,7 +8068,7 @@ dependencies = [
 [[package]]
 name = "sp-consensus-subspace"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=3c3a48f865cfe0a2510512bc75e4bae099e27aae#3c3a48f865cfe0a2510512bc75e4bae099e27aae"
+source = "git+https://github.com/subspace/subspace?rev=de3dfb1c8ad35189429768653f0f1a95b357de33#de3dfb1c8ad35189429768653f0f1a95b357de33"
 dependencies = [
  "async-trait",
  "parity-scale-codec",
@@ -8172,7 +8183,7 @@ dependencies = [
 [[package]]
 name = "sp-executor"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=3c3a48f865cfe0a2510512bc75e4bae099e27aae#3c3a48f865cfe0a2510512bc75e4bae099e27aae"
+source = "git+https://github.com/subspace/subspace?rev=de3dfb1c8ad35189429768653f0f1a95b357de33#de3dfb1c8ad35189429768653f0f1a95b357de33"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
@@ -8287,7 +8298,7 @@ dependencies = [
 [[package]]
 name = "sp-objects"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=3c3a48f865cfe0a2510512bc75e4bae099e27aae#3c3a48f865cfe0a2510512bc75e4bae099e27aae"
+source = "git+https://github.com/subspace/subspace?rev=de3dfb1c8ad35189429768653f0f1a95b357de33#de3dfb1c8ad35189429768653f0f1a95b357de33"
 dependencies = [
  "sp-api",
  "sp-std",
@@ -8732,7 +8743,7 @@ dependencies = [
 [[package]]
 name = "subspace-archiving"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=3c3a48f865cfe0a2510512bc75e4bae099e27aae#3c3a48f865cfe0a2510512bc75e4bae099e27aae"
+source = "git+https://github.com/subspace/subspace?rev=de3dfb1c8ad35189429768653f0f1a95b357de33#de3dfb1c8ad35189429768653f0f1a95b357de33"
 dependencies = [
  "merkle_light",
  "parity-scale-codec",
@@ -8746,7 +8757,7 @@ dependencies = [
 [[package]]
 name = "subspace-core-primitives"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=3c3a48f865cfe0a2510512bc75e4bae099e27aae#3c3a48f865cfe0a2510512bc75e4bae099e27aae"
+source = "git+https://github.com/subspace/subspace?rev=de3dfb1c8ad35189429768653f0f1a95b357de33#de3dfb1c8ad35189429768653f0f1a95b357de33"
 dependencies = [
  "hmac 0.12.1",
  "num-traits",
@@ -8755,11 +8766,12 @@ dependencies = [
  "serde",
  "serde_arrays",
  "sha2 0.10.2",
+ "uint",
 ]
 
 [[package]]
 name = "subspace-desktop"
-version = "0.6.8"
+version = "0.6.9"
 dependencies = [
  "anyhow",
  "cirrus-runtime",
@@ -8800,7 +8812,7 @@ dependencies = [
 [[package]]
 name = "subspace-farmer"
 version = "0.3.0"
-source = "git+https://github.com/subspace/subspace?rev=3c3a48f865cfe0a2510512bc75e4bae099e27aae#3c3a48f865cfe0a2510512bc75e4bae099e27aae"
+source = "git+https://github.com/subspace/subspace?rev=de3dfb1c8ad35189429768653f0f1a95b357de33#de3dfb1c8ad35189429768653f0f1a95b357de33"
 dependencies = [
  "anyhow",
  "arc-swap",
@@ -8844,7 +8856,7 @@ dependencies = [
 [[package]]
 name = "subspace-fraud-proof"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=3c3a48f865cfe0a2510512bc75e4bae099e27aae#3c3a48f865cfe0a2510512bc75e4bae099e27aae"
+source = "git+https://github.com/subspace/subspace?rev=de3dfb1c8ad35189429768653f0f1a95b357de33#de3dfb1c8ad35189429768653f0f1a95b357de33"
 dependencies = [
  "hash-db",
  "parity-scale-codec",
@@ -8862,25 +8874,28 @@ dependencies = [
 [[package]]
 name = "subspace-networking"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=3c3a48f865cfe0a2510512bc75e4bae099e27aae#3c3a48f865cfe0a2510512bc75e4bae099e27aae"
+source = "git+https://github.com/subspace/subspace?rev=de3dfb1c8ad35189429768653f0f1a95b357de33#de3dfb1c8ad35189429768653f0f1a95b357de33"
 dependencies = [
+ "async-trait",
  "bytes",
  "event-listener-primitives",
  "futures",
  "hex",
  "libp2p",
  "nohash-hasher",
+ "parity-scale-codec",
  "parking_lot 0.12.0",
  "subspace-core-primitives",
  "thiserror",
  "tokio",
  "tracing",
+ "unsigned-varint",
 ]
 
 [[package]]
 name = "subspace-rpc-primitives"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=3c3a48f865cfe0a2510512bc75e4bae099e27aae#3c3a48f865cfe0a2510512bc75e4bae099e27aae"
+source = "git+https://github.com/subspace/subspace?rev=de3dfb1c8ad35189429768653f0f1a95b357de33#de3dfb1c8ad35189429768653f0f1a95b357de33"
 dependencies = [
  "hex-buffer-serde",
  "serde",
@@ -8890,7 +8905,7 @@ dependencies = [
 [[package]]
 name = "subspace-runtime"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=3c3a48f865cfe0a2510512bc75e4bae099e27aae#3c3a48f865cfe0a2510512bc75e4bae099e27aae"
+source = "git+https://github.com/subspace/subspace?rev=de3dfb1c8ad35189429768653f0f1a95b357de33#de3dfb1c8ad35189429768653f0f1a95b357de33"
 dependencies = [
  "cirrus-primitives",
  "cirrus-runtime",
@@ -8906,6 +8921,7 @@ dependencies = [
  "pallet-object-store",
  "pallet-offences-subspace",
  "pallet-rewards",
+ "pallet-runtime-configs",
  "pallet-subspace",
  "pallet-sudo",
  "pallet-timestamp",
@@ -8938,7 +8954,7 @@ dependencies = [
 [[package]]
 name = "subspace-runtime-primitives"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=3c3a48f865cfe0a2510512bc75e4bae099e27aae#3c3a48f865cfe0a2510512bc75e4bae099e27aae"
+source = "git+https://github.com/subspace/subspace?rev=de3dfb1c8ad35189429768653f0f1a95b357de33#de3dfb1c8ad35189429768653f0f1a95b357de33"
 dependencies = [
  "parity-scale-codec",
  "parity-util-mem",
@@ -8952,7 +8968,7 @@ dependencies = [
 [[package]]
 name = "subspace-service"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=3c3a48f865cfe0a2510512bc75e4bae099e27aae#3c3a48f865cfe0a2510512bc75e4bae099e27aae"
+source = "git+https://github.com/subspace/subspace?rev=de3dfb1c8ad35189429768653f0f1a95b357de33#de3dfb1c8ad35189429768653f0f1a95b357de33"
 dependencies = [
  "cirrus-primitives",
  "derive_more",
@@ -9005,7 +9021,7 @@ dependencies = [
 [[package]]
 name = "subspace-solving"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=3c3a48f865cfe0a2510512bc75e4bae099e27aae#3c3a48f865cfe0a2510512bc75e4bae099e27aae"
+source = "git+https://github.com/subspace/subspace?rev=de3dfb1c8ad35189429768653f0f1a95b357de33#de3dfb1c8ad35189429768653f0f1a95b357de33"
 dependencies = [
  "merlin",
  "num-traits",
@@ -9016,13 +9032,12 @@ dependencies = [
  "subspace-core-primitives",
  "thiserror",
  "tracing",
- "uint",
 ]
 
 [[package]]
 name = "subspace-wasm-tools"
 version = "0.1.0"
-source = "git+https://github.com/subspace/subspace?rev=3c3a48f865cfe0a2510512bc75e4bae099e27aae#3c3a48f865cfe0a2510512bc75e4bae099e27aae"
+source = "git+https://github.com/subspace/subspace?rev=de3dfb1c8ad35189429768653f0f1a95b357de33#de3dfb1c8ad35189429768653f0f1a95b357de33"
 
 [[package]]
 name = "substrate-bip39"
