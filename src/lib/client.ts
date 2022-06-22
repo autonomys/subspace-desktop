@@ -135,6 +135,11 @@ export class Client {
     return this.api.rpc.system.syncState();
   }
 
+  public async isSyncing(): Promise<boolean> {
+    const { isSyncing } = await this.api.rpc.system.health();
+    return isSyncing.isTrue;
+  }
+
   public async startNode(path: string, nodeName: string): Promise<void> {
     await tauri.invoke("start_node", { path, nodeName })
     if (!this.firstLoad) {
