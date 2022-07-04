@@ -52,10 +52,31 @@
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDU4OTU2Qjc2QUFERTE4RjcKUldUM0dONnFkbXVWV0huTEN1bEZveUpZb1pXd0NOOFd1OXYvSUk2RjJRRnR6QUltelNaZXl2MTQK"
     },
     "allowlist": {
-      "all": true,
+      "dialog": {
+        "all": true
+      },
       "fs": {
         "all": true,
         "scope": ["$HOME/*"]
+      },
+      "globalShortcut": {
+        "all": true
+      },
+      "notification": {
+        "all": true
+      },
+      "os": {
+        "all": true
+      },
+      "path": {
+        "all": true
+      },
+      "process": {
+        "relaunch": true,
+        "exit": true
+      },
+      "clipboard": {
+        "all": true
       },
       "shell": {
         "all": true,
@@ -68,19 +89,24 @@
             "args": true
           }
         ]
+      },
+      "window": {
+        "all": true
       }
     },
     "windows": [
       {
         "title": "Subspace Desktop",
+        "minWidth": 800,
+        "minHeight": 600,
         "width": 800,
         "height": 600,
-        "resizable": false,
+        "resizable": true,
         "fullscreen": false
       }
     ],
     "security": {
-      "csp": "default-src https tauri 'self'; img-src 'self'; object-src 'none'; connect-src ws://localhost:9947/; script-src 'wasm-unsafe-eval' 'unsafe-eval' 'self'"
+      "csp": "default-src tauri 'self'; img-src 'self'; object-src 'none'; connect-src ws://localhost:9947/; script-src 'wasm-unsafe-eval' 'unsafe-eval' 'self'"
     }
   }
 }
