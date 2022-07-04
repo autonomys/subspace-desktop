@@ -78,11 +78,16 @@ jobs:
       - name: install app dependencies and build it
         # sometimes it fails downloading packages, so set a timeout https://github.com/yarnpkg/yarn/issues/4890
         run: yarn install --network-timeout 1000000 && yarn build
+        env:
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
 
       - name: tauri run
         uses: tauri-apps/tauri-action@v0.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
 
       - name: fmt
         uses: actions-rs/cargo@v1
