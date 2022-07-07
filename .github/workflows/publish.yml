@@ -200,7 +200,7 @@ jobs:
         with:
           body: "See the assets to download this version and install. \n ⚠️ This version is not tested yet, please use the version with latest tag on it! ⚠️"
           prerelease: true
-          draft: false
+          draft: true
           name: ${{ steps.extract_version.outputs.version }}
           tag_name: ${{ steps.extract_version.outputs.version }}
           fail_on_unmatched_files: true
