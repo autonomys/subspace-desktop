@@ -2,5 +2,6 @@
 # TODO: when https://github.com/rust-lang/rust/issues/95267 and https://github.com/briansmith/ring/issues/1469
 # are resolved, revert back to `nightly`
 channel = "nightly-2022-02-15"
+components = ["rust-src"]
 targets = ["wasm32-unknown-unknown"]
 profile = "default"
