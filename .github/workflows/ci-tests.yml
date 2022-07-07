@@ -45,10 +45,18 @@ jobs:
       - name: install Rust nightly
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly-2022-02-15
+          toolchain: nightly-2022-05-16
           target: wasm32-unknown-unknown
           override: true
           components: rustfmt, clippy
+
+      - name: CUDA toolchain
+        uses: Jimver/cuda-toolkit@v0.2.6
+        if: matrix.os == 'ubuntu-latest' || matrix.os == 'windows-2022'
+
+      - name: OpenCL (Linux x86_64)
+        run: sudo apt-get install -y --no-install-recommends ocl-icd-opencl-dev
+        if: matrix.os == 'ubuntu-latest'
 
         # Workaround to resolve link error with C:\msys64\mingw64\bin\libclang.dll
       - name: Remove msys64
@@ -75,12 +83,21 @@ jobs:
           Remove-Item –path certificate -include tempCert.txt
           Import-PfxCertificate -FilePath certificate/certificate.pfx -CertStoreLocation Cert:\CurrentUser\My -Password (ConvertTo-SecureString -String $env:WINDOWS_PFX_PASSWORD -Force -AsPlainText)
 
-      - name: install app dependencies and build it
+      - name: install app dependencies and build it (macos)
         # sometimes it fails downloading packages, so set a timeout https://github.com/yarnpkg/yarn/issues/4890
         run: yarn install --network-timeout 1000000 && yarn build
         env:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+        if: matrix.os == 'macos-latest'
+
+      - name: install app dependencies and build it with opencl (windos & linux)
+        # sometimes it fails downloading packages, so set a timeout https://github.com/yarnpkg/yarn/issues/4890
+        run: yarn install --network-timeout 1000000 && yarn build --features=opencl
+        env:
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+        if: matrix.os == 'ubuntu-latest' || matrix.os == 'windows-2022'
 
       - name: tauri run
         uses: tauri-apps/tauri-action@v0.3

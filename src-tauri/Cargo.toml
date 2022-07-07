@@ -77,7 +77,8 @@ opencl = ["subspace-farmer/opencl"]
 [profile.dev]
 opt-level = 3
 
-[profile.release]
+[profile.production]
+inherits = "release"
 lto = "fat"
 codegen-units = 1
 
