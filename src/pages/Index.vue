@@ -4,11 +4,11 @@ q-page(padding)
     .row.no-wrap.items-center.q-ma-xl.q-pt-lg
       .text-h1.q-pr-lg 👩‍🌾
       .column
-        .text-h5.q-pb-md {{ lang.pageTitle }}
-        p {{ lang.subtitle }}
+        .text-h5.q-pb-md {{ $t('index.pageTitle') }}
+        p {{ $t('index.subtitle') }}
   .row.justify-center.q-mt-xl
     q-btn(
-      :label="lang.quickStart"
+      :label="$t('index.quickStart')"
       @click="viewDisclaimer('setupPlot')"
       outline
       size="md"
@@ -18,7 +18,7 @@ q-page(padding)
     p — or —
   .row.justify-center
     q-btn(
-      :label="lang.advanced"
+      :label="$t('index.advanced')"
       @click="viewDisclaimer('importKey')"
       color="grey"
       flat
@@ -29,17 +29,11 @@ q-page(padding)
 <script lang="ts">
 import { defineComponent } from "vue"
 import { Notify } from "quasar"
-import { globalState as global } from "../lib/global"
 import * as util from "../lib/util"
 import { appConfig } from "../lib/appConfig"
 import disclaimer from "../components/disclaimer.vue"
 
-const lang = global.data.loc.text.index
-
 export default defineComponent({
-  data() {
-    return { lang }
-  },
   async mounted() {
     try {
       this.checkDev()
