@@ -10,20 +10,20 @@ q-menu(auto-close)
             v-model="launchOnStart"
           )
         .col
-          p.text-grey(v-if="!launchOnStart") {{ lang.autoStart }}
-          p.text-black(v-else) {{ lang.autoStart }}
+          p.text-grey(v-if="!launchOnStart") {{ $t('mainMenu.autoStart') }}
+          p.text-black(v-else) {{ $t('mainMenu.autoStart') }}
     q-item(@click="exportLogs()" clickable)
       .row.items-center
         .col-auto.q-mr-md
           q-icon(name="print")
         .col
-          p {{ lang.export_log }}
+          p {{ $t('mainMenu.export_log') }}
     q-item(@click="reset()" clickable)
       .row.items-center
         .col-auto.q-mr-md
           q-icon(color="red" name="refresh")
         .col
-          p.text-red {{ lang.reset }}
+          p.text-red {{ $t('mainMenu.reset') }}
 </template>
 
 <script lang="ts">
@@ -31,16 +31,11 @@ import { defineComponent } from "vue"
 import { Dialog, Notify } from "quasar"
 import { relaunch } from "@tauri-apps/api/process"
 import * as util from "../lib/util"
-import { globalState as global } from "../lib/global"
 import { open as shellOpen } from '@tauri-apps/api/shell'
-
-const lang = global.data.loc.text.mainMenu
-
 
 export default defineComponent({
   data() {
     return {
-      lang,
       util,
       launchOnStart: false,
       disableAutoLaunch: false
@@ -61,14 +56,14 @@ export default defineComponent({
       console.log("toggle Clicked", this.launchOnStart)
       if (this.launchOnStart) {
         Notify.create({
-          message: lang.willAutoLaunch,
+          message: this.$t('mainMenu.willAutoLaunch'),
           icon: "info",
           group: 1,
           badgeStyle: "visibility:hidden;"
         })
       } else {
         Notify.create({
-          message: lang.willNotAutoLaunch,
+          message: this.$t('mainMenu.willNotAutoLaunch'),
           icon: "info",
           group: 1,
           badgeStyle: "visibility:hidden;"
@@ -84,12 +79,12 @@ export default defineComponent({
       Dialog.create({
         message: `
         <h6>
-          ${lang.reset_heading}
+          ${this.$t('mainMenu.reset_heading')}
         </h6>
         <div style="height:10px;">
         </div>
         <p>
-         ${lang.reset_explanation}
+         ${this.$t('mainMenu.reset_explanation')}
         </p>
         `,
         html: true,

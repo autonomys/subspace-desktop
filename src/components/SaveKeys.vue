@@ -3,7 +3,7 @@
   .row.justify-center.q-gutter-lg
     .col-auto
       q-icon(color="blue-3" name="vpn_key" size="80px")
-      p.q-ml-sm {{ lang.seedPhrase }}
+      p.q-ml-sm {{ $t('saveKeys.seedPhrase') }}
     .col
       .row.justify-center
         .col-8
@@ -21,14 +21,14 @@
               )
             .row.justify-center.q-mb-lg.full-width.bg-grey-2(v-if="!revealKey")
               q-btn.full-width.full-width(
-                :label="lang.reveal"
+                :label="$t('saveKeys.reveal')"
                 @click="revealKey = true"
                 flat
                 size="lg"
               )
           .row.justify-center.q-mt-md(v-if="revealKey")
             q-btn(
-              :label="lang.copy"
+              :label="$t('saveKeys.copy')"
               @click="copyMnemonic"
               color="primary"
               style="max-width: 200px"
@@ -36,15 +36,12 @@
     .row
       p Seed phrase is your password for your subspace farmer and wallet, this cannot be changed, guessed, or reset if lost. It is imperative that this is stored in a secure, safe location. Without the seed phrase, you will not have access to your funds. Furthermore, anyone who steals your seed phrase will be able to do as they please with your funds.
   .row.q-pt-md
-    q-checkbox(:label="lang.userConfirm" size="lg" v-model="userConfirm" :disable="!revealKey")
+    q-checkbox(:label="$t('saveKeys.userConfirm')" size="lg" v-model="userConfirm" :disable="!revealKey")
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue"
 import { QInput, Notify } from "quasar"
-import { globalState as global } from "../lib/global"
-
-const lang = global.data.loc.text.saveKeys
 
 // @vue/component
 export default defineComponent({
@@ -54,7 +51,7 @@ export default defineComponent({
     const userConfirm = false
     const mnemonic = this.$client.getMnemonic()
     const revealKey = false
-    return { revealKey, userConfirm, lang, mnemonic }
+    return { revealKey, userConfirm, mnemonic }
   },
   watch: {
     userConfirm(val) {
@@ -76,7 +73,7 @@ export default defineComponent({
         var msg = successful ? "successful" : "unsuccessful"
         console.log(msg)
         this.revealKey = previousState
-        Notify.create({ message: lang.saved, icon: "content_copy" })
+        Notify.create({ message: this.$t('saveKeys.saved'), icon: "content_copy" })
       })
       return 3
     }

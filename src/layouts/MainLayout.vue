@@ -9,10 +9,10 @@ q-layout(view="hHh lpr fFf")
             p {{ appVersion }}
           .col-auto.q-mr-md.relative-position
             q-badge(color="grey" text-color="white")
-              .q-pa-xs(style="font-size: 14px") {{ lang.IncentivizedLabel }}
+              .q-pa-xs(style="font-size: 14px") {{ $t('mainMenu.IncentivizedLabel') }}
             q-tooltip
               .col
-                p.no-margin(style="font-size: 12px") {{ lang.IncentivizedTooltip }}
+                p.no-margin(style="font-size: 12px") {{ $t('mainMenu.IncentivizedTooltip') }}
           .col-auto.q-mr-md.relative-position(v-if="global.nodeName || oldNodeName")
             q-badge.cursor-pointer(
               v-if="!isEdittingName"
@@ -56,14 +56,11 @@ import { globalState as global } from "../lib/global"
 import { appConfig } from "../lib/appConfig"
 import { relaunch } from "@tauri-apps/api/process"
 
-const lang = global.data.loc.text.mainMenu
-
 export default defineComponent({
   name: "MainLayout",
   components: { MainMenu },
   data() {
     return {
-      lang,
       global: global.data,
       appVersion: "",
       util,

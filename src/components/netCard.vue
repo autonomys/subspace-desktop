@@ -3,7 +3,7 @@ q-card(bordered flat)
   .q-pa-sm
     .row.items-center
       q-icon.q-mr-sm(color="grey" name="settings_ethernet" size="40px")
-      h6.text-weight-light {{ lang.network }}
+      h6.text-weight-light {{ $t('dashboard.network') }}
     q-separator.q-mt-xs
     .row.items-center.q-mt-sm
       .col-auto.q-mr-md(v-if="network.state == 'finished'")
@@ -33,16 +33,13 @@ q-card(bordered flat)
 <script lang="ts" >
 import { defineComponent } from "vue"
 import * as util from "../lib/util"
-import { globalState as global } from "../lib/global"
-
-const lang = global.data.loc.text.dashboard
 
 export default defineComponent({
   props: {
     network: { type: Object, required: true }
   },
   data() {
-    return { lang, util }
+    return { util }
   }
 })
 </script>

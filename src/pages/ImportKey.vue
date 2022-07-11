@@ -1,11 +1,10 @@
 <template lang="pug">
 q-page(padding)
   .row.justify-center.q-mt-xl
-    .text-h4 {{ lang.pageTitle }}
+    .text-h4 {{ $t('importKey.pageTitle') }}
   .row.justify-center.q-mt-md
-    .text-p {{ lang.rewardAddress }}
+    .text-p {{ $t('importKey.rewardAddress') }}
   .row.justify-center.q-mt-sm
-    div {{ lang.securePassword }}
     q-input(
       outlined
       dense
@@ -22,30 +21,26 @@ q-page(padding)
     .col-auto
       q-btn(
         :disable="!isValidSubstrateAddress(rewardAddress)"
-        :label="lang.continue"
+        :label="$t('importKey.continue')"
         @click="importKey()"
         icon-right="arrow_forward"
         outline
         size="lg"
       )
       q-tooltip.q-pa-md(v-if="!isValidSubstrateAddress(rewardAddress)")
-        p.q-mb-lg {{ lang.tooltip }}
+        p.q-mb-lg {{ $t('importKey.tooltip') }}
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue"
 import { decodeAddress, encodeAddress } from "@polkadot/keyring"
 import { hexToU8a, isHex } from "@polkadot/util"
-import { globalState as global } from "../lib/global"
 import { appConfig } from "../lib/appConfig"
-const lang = global.data.loc.text.importKey
 
 export default defineComponent({
   data() {
     return {
       rewardAddress: "",
-      global: global.data,
-      lang
     }
   },
   methods: {

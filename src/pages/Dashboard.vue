@@ -33,28 +33,25 @@ import netCard from "../components/netCard.vue"
 import plotCard from "../components/plotCard.vue"
 import { emptyClientData, ClientData, FarmedBlock } from "../lib/types"
 import { appConfig } from "../lib/appConfig"
-const lang = global.data.loc.text.dashboard
 
 export default defineComponent({
   components: { farmedList, netCard, plotCard },
   data() {
-    // TODO remove this.client after invariants are protected
     return {
-      lang,
       network: {
         state: "starting",
-        message: lang.initializing,
+        message: this.$t('dashboard.initializing'),
         peers: 0
       },
       plot: {
         state: "starting",
-        message: lang.initializing,
+        message: this.$t('dashboard.initializing'),
         plotSizeGB: 0
       },
       global: global.data,
       globalState: {
         state: "starting",
-        message: lang.initializing
+        message: this.$t('dashboard.initializing')
       },
       expanded: false,
       util,
@@ -104,7 +101,7 @@ export default defineComponent({
     this.$client.data.farming.events.on("newBlock", this.newBlock)
     this.$client.data.farming.events.on("farmedBlock", this.farmBlock)
     this.global.status.state = "live"
-    this.global.status.message = lang.syncedMsg
+    this.global.status.message = this.$t('dashboard.syncedMsg')
     await this.checkNodeAndNetwork()
     await this.checkFarmerAndPlot()
   },
@@ -125,17 +122,17 @@ export default defineComponent({
     },
     async checkFarmerAndPlot() {
       this.plot.state = "verifying"
-      this.plot.message = lang.verifyingPlot
+      this.plot.message = this.$t('dashboard.verifyingPlot')
 
       const config = await appConfig.read()
       this.plot.plotSizeGB = config.plot.sizeGB
 
-      this.plot.message = lang.syncedMsg
+      this.plot.message = this.$t('dashboard.syncedMsg')
       this.plot.state = "finished"
     },
     async checkNodeAndNetwork() {
       this.network.state = "verifying"
-      this.network.message = lang.verifyingNet
+      this.network.message = this.$t('dashboard.verifyingNet')
 
       let syncState = await this.$client.getSyncState()
       do {
@@ -150,13 +147,13 @@ export default defineComponent({
     newBlock(blockNumber: number) {
       if (this.network.state === "finished")
         this.network.message =
-          "Synced at " + lang.blockNum + " " + blockNumber.toLocaleString()
+          "Synced at " + this.$t('dashboard.blockNum') + " " + blockNumber.toLocaleString()
     },
     farmBlock(block: FarmedBlock) {
       Notify.create({
         color: "green",
         progress: true,
-        message: `${lang.farmedBlock}: ${block.blockNum} ${lang.reward} ${
+        message: `${this.$t('dashboard.farmedBlock')}: ${block.blockNum} ${this.$t('dashboard.reward')} ${
           block.blockReward + block.feeReward
         } testSSC`,
         position: "bottom-right"

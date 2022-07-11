@@ -1,17 +1,17 @@
 <template lang="pug">
 q-page.q-pa-lg.q-mr-lg.q-ml-lg
   .row.justify-center.q-mb-md
-    .text-h4 {{ lang.pageTitle }}
+    .text-h4 {{ $t('setupPlot.pageTitle') }}
   .row.justify-center
-    p {{ lang.infoDialog }}
+    p {{ $t('setupPlot.infoDialog') }}
   .row.justify-center.q-mr-lg.q-ml-lg
     .col
       .row
         .col.q-mt-sm
-          div {{ lang.plotsDirectory }}
+          div {{ $t('setupPlot.plotsDirectory') }}
           q-input.q-field--highlighted(
             :error="!validPath"
-            :error-message="lang.invalidDir"
+            :error-message="$t('setupPlot.invalidDir')"
             color="blue"
             dense
             input-class="setupPlotInput"
@@ -30,7 +30,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
         .col-4
           .row
             .col.q-pr-md
-              .q-mt-sm {{ lang.utilized }}
+              .q-mt-sm {{ $t('setupPlot.utilized') }}
               q-input.bg-grey-3(
                 dense
                 input-class="setupPlotInput"
@@ -40,8 +40,8 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
                 v-model="stats.utilizedGB"
               )
                 q-tooltip.q-pa-sm
-                  p {{ lang.utilizedSpace }}
-              .q-mt-sm {{ lang.available }}
+                  p {{ $t('setupPlot.utilizedSpace') }}
+              .q-mt-sm {{ $t('setupPlot.available') }}
               q-input(
                 :error="unsafeFree"
                 dense
@@ -53,8 +53,8 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
                 v-model="stats.freeGB"
               )
                 q-tooltip.q-pa-sm
-                  p {{ lang.availableSpace }}
-              .q-mt-sm {{ lang.allocated }}
+                  p {{ $t('setupPlot.availableSpace') }}
+              .q-mt-sm {{ $t('setupPlot.allocated') }}
               // TODO: get error message from internationalization context
               // TODO: remove validation and restrict input to positive numbers when possible (Quasar component limitation)
               q-input(
@@ -68,7 +68,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
                 :rules="[val => val > 0 || 'Value should be a positive number']"
               )
                 q-tooltip.q-pa-sm
-                  p {{ lang.allocatedSpace }}
+                  p {{ $t('setupPlot.allocatedSpace') }}
 
         .col.q-pr-md
           .row.justify-center(
@@ -95,9 +95,9 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
             .col-1
   .row.justify-end.q-mt-sm.absolute-bottom.q-pb-md
     .col-auto.q-pr-md
-      div {{ lang.hint }}
+      div {{ $t('setupPlot.hint') }}
     .col.q-pr-md
-      div {{ lang.hint2 }}
+      div {{ $t('setupPlot.hint2') }}
     .col-expand
     .col-auto
       q-btn(
@@ -110,7 +110,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
         size="lg"
       )
       q-tooltip.q-pa-md(v-if="!validPath")
-        p.q-mb-lg {{ lang.tooltip }}
+        p.q-mb-lg {{ $t('setupPlot.tooltip') }}
 </template>
 
 <script lang="ts">
@@ -127,7 +127,6 @@ import { appData, appDataDialog } from "../lib/appData"
 import mnemonicModal from "../components/mnemonicModal.vue"
 
 const tauri = { path, fs }
-const lang = global.data.loc.text.setupPlot
 
 export default defineComponent({
   data() {
@@ -138,7 +137,6 @@ export default defineComponent({
       validPath: true,
       defaultPath: "/",
       driveStats: <native.DriveStats>{ freeBytes: 0, totalBytes: 0 },
-      lang,
       chartOptions,
       rewardAddress: ""
     }
