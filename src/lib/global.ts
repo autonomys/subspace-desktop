@@ -9,13 +9,6 @@ export class Global {
     }, 
     nodeName: '',
   })
-  // async changeLang(newLang: string): Promise<void> {
-  //   this.data.loc.selected = newLang
-  //   await this.loadLangData()
-  // }
-  // async loadLangData(): Promise<void> {
-  //   this.data.loc.text = await getLang(this.data.loc.selected)
-  // }
   setNodeName(name: string) {
     this.data.nodeName = name;
   }
