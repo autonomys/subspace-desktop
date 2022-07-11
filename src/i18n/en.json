@@ -80,7 +80,8 @@
     "loadingStatus": "loading...",
     "syncingMsg": "Syncing node {currentBlock} of {highestBlock} Blocks",
     "nodeIsSynced": "Node is synced at block: {currentBlock}",
-    "syncedAt": "Synced at Block # {blockNumber}"
+    "syncedAt": "Synced at Block # {blockNumber}",
+    "blockNum": "Block #"
   },
   "importKey": {
     "tooltip": "Please provide a valid Reward Address to proceed.",
