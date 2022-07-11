@@ -2,35 +2,35 @@
 mixin page1
   .row.q-mb-md.items-center
     q-icon(color="blue-3" name="downloading" size="80px")
-    h6.q-ml-md What is Plotting, Farming, & Rewards
+    h6.q-ml-md {{ $t('introModal.title') }}
   //- .row.q-mb-md
   .row.q-mb-md
-    p Plotting is the process of assigning various "plots" aka tiny spots across the allocated storage of your hard drive. You can think of this as planting the seeds in a tilled field. Every plot is cryptographically independent, and verifiable, all of the plots are stored in a single file on your system.
+    p {{ $t('introModal.slide1.text1') }}
     br
-    p Farming is the act of checking with the current "challenge" of the blockchain and seeing if any of your plots will win the challenge, you can think of this as checking to see if your various crops are ripe for the picking.
+    p {{ $t('introModal.slide1.text2') }}
     br
-    p If your "fruit is ripe" aka if you have a plot that wins the current challenge then you are rewarded with subspace credits. aka "Winning the block".
+    p {{ $t('introModal.slide1.text3') }}
 mixin page2
   .row.justify-center.q-pb-md.items-center
     .col-auto.q-mr-md
       q-icon(color="yellow" name="lightbulb" size="100px")
     .col
       .row.q-mb-md
-        h6 Hints
+        h6 {{ $t('introModal.hints') }}
   .row.q-mb-md
     ul
       li
-        p Did you know Subspace is the first Proof of Capacity blockchain on Substrate?
+        p {{ $t('introModal.slide2.text1')}}
       li
-        p Did you know that Subspace stores all data On-Chain?
+        p {{ $t('introModal.slide2.text2')}}
       li
-        p You can talk with us on #[a(href="https://discord.gg/5MAp8CD684" target="_blank") Discord]
+        p {{ $t('introModal.slide2.talkWithUs')}} #[a(href="https://discord.gg/5MAp8CD684" target="_blank") Discord]
       li
-        p You can talk with us on #[a(href="https://t.me/subspace_network" target="_blank") Telegram]
+        p {{ $t('introModal.slide2.talkWithUs')}} #[a(href="https://t.me/subspace_network" target="_blank") Telegram]
       li
-        p Visit us on #[a(href="https://twitter.com/NetworkSubspace" target="_blank") Twitter]
+        p {{ $t('introModal.slide2.visitUs')}} #[a(href="https://twitter.com/NetworkSubspace" target="_blank") Twitter]
       li
-        p Read up about subspace on #[a(href="https://medium.com/subspace-network" target="_blank") Medium]
+        p {{ $t('introModal.slide2.readUp')}} #[a(href="https://medium.com/subspace-network" target="_blank") Medium]
 
 q-dialog(@hide="onDialogHide" persistent ref="dialog")
   q-card.q-dialog-plugin.relative-position(
@@ -55,7 +55,7 @@ q-dialog(@hide="onDialogHide" persistent ref="dialog")
           .row.justify-end
             q-btn(
               @click="currentPage++"
-              label="next"
+              :label="$t('introModal.next')"
               outline
               size="lg"
               stretch

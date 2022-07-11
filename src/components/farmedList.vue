@@ -4,14 +4,14 @@ q-card(bordered flat)
     .row.items-center
       .col-auto.q-mr-sm
         .row.items-center
-          .text-h6.text-weight-light {{ lang.farmedBlocks }}:
+          .text-h6.text-weight-light {{ $t('dashboard.farmedBlocks') }}:
       .col-auto.q-mr-xl
         h6 {{ farmedBlocksList?.length }}
       .col-auto.q-mr-xl
-        .text-weight-light Total Earned
-        p {{ farmedTotalEarned }} testSSC
+        .text-weight-light {{ $t('dashboard.totalEarned') }}
+        p {{ farmedTotalEarned }} {{ $t('dashboard.tokenName') }}
       .col-auto
-        .text-weight-light Reward Address
+        .text-weight-light {{ $t('dashboard.rewardAddress') }}
         .reward-address {{ rewardAddress }}
       q-space
       .col.col-auto
@@ -37,10 +37,10 @@ q-card(bordered flat)
 
   q-separator
   .row.q-pa-sm.q-ml-lg.q-ma-sm
-    .col-4 {{ lang.farmedBy }}
-    .col-3 {{ lang.blockNum }}
-    .col-3 {{ lang.time }}
-    .col-2 {{ lang.rewards }}
+    .col-4 {{ $t('dashboard.farmedBy') }}
+    .col-3 {{ $t('dashboard.blockNum') }}
+    .col-3 {{ $t('dashboard.time') }}
+    .col-2 {{ $t('dashboard.rewards') }}
   q-scroll-area(:style="blocksListStyle")
     transition-group(
       appear
@@ -57,6 +57,7 @@ q-card(bordered flat)
           .col-3
             p.text-weight-light {{ formatDate(block.time) }}
           .col-2
+            // remove hardcoded 
             p {{ block.blockReward }} testSSC
 </template>
 
@@ -69,8 +70,6 @@ import { globalState as global } from "../lib/global"
 import { FarmedBlock } from "../lib/types"
 import { appConfig } from "../lib/appConfig"
 
-const lang = global.data.loc.text.dashboard
-
 const NETWORK_RPC = process.env.PUBLIC_API_WS || "ws://localhost:9947";
 const appsLink = "https://polkadot.js.org/apps/?rpc=" + NETWORK_RPC + "#/explorer/query/"
 
@@ -82,7 +81,6 @@ export default defineComponent({
   emits: ["expand"],
   data() {
     return { 
-      lang, 
       util, 
       global: global.data, 
       rewardAddress: "", 

@@ -3,7 +3,7 @@ q-card(bordered flat)
   .q-pa-sm
     .row.items-center
       q-icon.q-mr-sm(color="grey" name="downloading" size="40px")
-      h6.text-weight-light {{ lang.plot }}
+      h6.text-weight-light {{ $t('dashboard.plot') }}
     q-separator.q-mt-xs
     .row.items-center.q-mt-sm
       .col-auto.q-mr-md(v-if="plot.state == 'finished'")
@@ -13,29 +13,26 @@ q-card(bordered flat)
       .col-auto.q-mr-md(v-if="plot.state == 'verifying'")
         q-spinner-box(color="grey" size="40px")
       .col
-        .text-weight-light {{ lang.status }}
+        .text-weight-light {{ $t('dashboard.status') }}
         p {{ plot.message }}
     .row.items-center.q-mt-sm
       .col-auto.q-mr-md
         q-icon(color="black" name="storage" size="40px")
       .col
-        .text-weight-light {{ lang.allocated }}
+        .text-weight-light {{ $t('dashboard.allocated') }}
         p {{ plot.plotSizeGB }} GB
 </template>
 
 <script lang="ts" >
 import { defineComponent } from "vue"
 import * as util from "../lib/util"
-import { globalState as global } from "../lib/global"
-
-const lang = global.data.loc.text.dashboard
 
 export default defineComponent({
   props: {
     plot: { type: Object, required: true }
   },
   data() {
-    return { lang, util }
+    return { util }
   }
 })
 </script>

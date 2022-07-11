@@ -5,13 +5,17 @@ q-dialog(@hide="onDialogHide" persistent ref="dialog")
   q-card
     q-card-section
       .row.items-center
-        .text-h6 TESTNET DISCLAIMER
+        .text-h6 {{ $t('disclaimer.title') }}
         q-space
         q-icon(color="grey" name="info" size="40px")
-    q-card-section.q-pt-none
-      | Tokens/credits generated on the Subspace Network testnet ("testSSCs") do not equate to Subspace Network mainnet tokens, have no monetary value, and cannot be exchanged for cash, cash equivalent, or other tokens or cryptocurrencies.
+    q-card-section.q-pt-none {{ $t('disclaimer.text') }}
     q-card-actions(align='right')
-      q-btn(flat='', label='I understand', color='primary', v-close-popup='')
+      q-btn(
+        flat='', 
+        :label="$t('disclaimer.confirm')", 
+        color='primary', 
+        v-close-popup=''
+      )
 
 </template>
 
