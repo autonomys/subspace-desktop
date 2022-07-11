@@ -10,20 +10,20 @@ q-menu(auto-close)
             v-model="launchOnStart"
           )
         .col
-          p.text-grey(v-if="!launchOnStart") {{ $t('mainMenu.autoStart') }}
-          p.text-black(v-else) {{ $t('mainMenu.autoStart') }}
+          p.text-grey(v-if="!launchOnStart") {{ $t('menu.autoStart') }}
+          p.text-black(v-else) {{ $t('menu.autoStart') }}
     q-item(@click="exportLogs()" clickable)
       .row.items-center
         .col-auto.q-mr-md
           q-icon(name="print")
         .col
-          p {{ $t('mainMenu.export_log') }}
+          p {{ $t('menu.export_log') }}
     q-item(@click="reset()" clickable)
       .row.items-center
         .col-auto.q-mr-md
           q-icon(color="red" name="refresh")
         .col
-          p.text-red {{ $t('mainMenu.reset') }}
+          p.text-red {{ $t('menu.reset') }}
 </template>
 
 <script lang="ts">
@@ -48,7 +48,7 @@ export default defineComponent({
     async toggleClicked() {
       if (this.disableAutoLaunch) {
         Notify.create({
-          message: "Launch on Boot is not supported on this system.",
+          message: this.$t('menu.autoLaunchNotSupported'),
           icon: "info"
         })
         return
@@ -56,14 +56,14 @@ export default defineComponent({
       console.log("toggle Clicked", this.launchOnStart)
       if (this.launchOnStart) {
         Notify.create({
-          message: this.$t('mainMenu.willAutoLaunch'),
+          message: this.$t('menu.willAutoLaunch'),
           icon: "info",
           group: 1,
           badgeStyle: "visibility:hidden;"
         })
       } else {
         Notify.create({
-          message: this.$t('mainMenu.willNotAutoLaunch'),
+          message: this.$t('menu.willNotAutoLaunch'),
           icon: "info",
           group: 1,
           badgeStyle: "visibility:hidden;"
@@ -79,12 +79,12 @@ export default defineComponent({
       Dialog.create({
         message: `
         <h6>
-          ${this.$t('mainMenu.reset_heading')}
+          ${this.$t('menu.reset_heading')}
         </h6>
         <div style="height:10px;">
         </div>
         <p>
-         ${this.$t('mainMenu.reset_explanation')}
+         ${this.$t('menu.reset_explanation')}
         </p>
         `,
         html: true,

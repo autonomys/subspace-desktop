@@ -55,7 +55,6 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
                 q-tooltip.q-pa-sm
                   p {{ $t('setupPlot.availableSpace') }}
               .q-mt-sm {{ $t('setupPlot.allocated') }}
-              // TODO: get error message from internationalization context
               // TODO: remove validation and restrict input to positive numbers when possible (Quasar component limitation)
               q-input(
                 type="number"
@@ -65,7 +64,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
                 outlined
                 suffix="GB"
                 v-model.number="allocatedGB"
-                :rules="[val => val > 0 || 'Value should be a positive number']"
+                :rules="[val => val > 0 || $t('setupPlot.allocatedErrorMsg')]"
               )
                 q-tooltip.q-pa-sm
                   p {{ $t('setupPlot.allocatedSpace') }}
@@ -105,7 +104,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
         @click="confirmCreateDir()"
         color="blue-8"
         icon-right="downloading"
-        label="Start Plotting"
+        :label="$t('setupPlot.start')"
         outline
         size="lg"
       )

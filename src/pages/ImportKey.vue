@@ -11,12 +11,18 @@ q-page(padding)
       class="reward-address"
       v-model="rewardAddress"
       input-class="text-center"
-      :rules="[val => isValidSubstrateAddress(val) || 'Invalid address']"
+      :rules="[val => isValidSubstrateAddress(val) || $t('importKey.addressErrorMsg')]"
     )
   .row.justify-center.q-mt-sm
   .row.justify-end.items-center.q-mt-lg.absolute-bottom.q-pa-lg
     .col-auto.q-mr-md
-      q-btn(@click="$router.replace({ name: 'index' })" label="Cancel" outline size="lg" icon-right="cancel")
+      q-btn(
+        @click="$router.replace({ name: 'index' })" 
+        :label="$t('importKey.cancel')" 
+        outline 
+        size="lg" 
+        icon-right="cancel"
+      )
     q-space
     .col-auto
       q-btn(

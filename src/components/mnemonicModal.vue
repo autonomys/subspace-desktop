@@ -17,7 +17,7 @@ q-dialog(@hide="onDialogHide" persistent ref="dialog")
             q-btn(
               :disabled="!userConfirmed"
               @click="hide"
-              label="next"
+              :label="$t('plottingProgress.next')"
               outline
               size="lg"
               stretch

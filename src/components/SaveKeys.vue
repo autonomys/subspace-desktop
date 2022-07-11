@@ -34,9 +34,14 @@
               style="max-width: 200px"
             )
     .row
-      p Seed phrase is your password for your subspace farmer and wallet, this cannot be changed, guessed, or reset if lost. It is imperative that this is stored in a secure, safe location. Without the seed phrase, you will not have access to your funds. Furthermore, anyone who steals your seed phrase will be able to do as they please with your funds.
+      p {{ $t('saveKeys.seedPhraseText')}}
   .row.q-pt-md
-    q-checkbox(:label="$t('saveKeys.userConfirm')" size="lg" v-model="userConfirm" :disable="!revealKey")
+    q-checkbox(
+      :label="$t('saveKeys.userConfirm')" 
+      size="lg" 
+      v-model="userConfirm" 
+      :disable="!revealKey"
+    )
 </template>
 
 <script lang="ts">

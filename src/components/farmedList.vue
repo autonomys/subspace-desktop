@@ -8,10 +8,10 @@ q-card(bordered flat)
       .col-auto.q-mr-xl
         h6 {{ farmedBlocksList?.length }}
       .col-auto.q-mr-xl
-        .text-weight-light Total Earned
-        p {{ farmedTotalEarned }} testSSC
+        .text-weight-light {{ $t('dashboard.totalEarned') }}
+        p {{ farmedTotalEarned }} {{ $t('dashboard.tokenName') }}
       .col-auto
-        .text-weight-light Reward Address
+        .text-weight-light {{ $t('dashboard.rewardAddress') }}
         .reward-address {{ rewardAddress }}
       q-space
       .col.col-auto
@@ -57,6 +57,7 @@ q-card(bordered flat)
           .col-3
             p.text-weight-light {{ formatDate(block.time) }}
           .col-2
+            // remove hardcoded 
             p {{ block.blockReward }} testSSC
 </template>
 
