@@ -42,7 +42,7 @@ The backend of the app is handled by the [Tauri Framework](https://tauri.studio/
 ### [`/src-tauri/tauri.conf.json`](src-tauri/tauri.conf.json)
 The Tauri framework is configured here (no features enabled). For details about configuration refer to the [config documentation](https://tauri.studio/en/docs/api/config).
 
-### [`/src-tauri/tauri.conf.opencl.json`](src-tauri/tauri.conf.opencl.json)
+### [`/src-tauri/tauri.opencl.conf.json`](src-tauri/tauri.opencl.conf.json)
 The Tauri framework is configured here (opencl feature enabled). For details about configuration refer to the [config documentation](https://tauri.studio/en/docs/api/config).
 
 ### [`src-tauri/icons`](src-tauri/icons)
