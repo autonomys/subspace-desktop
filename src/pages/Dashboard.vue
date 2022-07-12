@@ -58,7 +58,12 @@ export default defineComponent({
       loading: true,
       unsubscribe: () => null,
       peerInterval: 0,
-      clientData: <ClientData>emptyClientData
+      clientData: <ClientData>emptyClientData,
+      syncState: {
+        currentBlock: 0,
+        highestBlock: 0,
+        startingBlock: 0,
+      }
     }
   },
   computed: {
@@ -133,16 +138,21 @@ export default defineComponent({
     async checkNodeAndNetwork() {
       this.network.state = "verifying"
       this.network.message = this.$t('dashboard.verifyingNet')
+      this.syncState = await this.$client.getSyncState();
+      let isSyncing = await this.$client.isSyncing();
 
-      let syncState = await this.$client.getSyncState()
       do {
-        const { currentBlock, highestBlock } = syncState;
-        this.network.message = this.$t('dashboard.syncingMsg', { currentBlock, highestBlock });
         await new Promise((resolve) => setTimeout(resolve, 3000))
-        syncState = await this.$client.getSyncState()
-      } while (syncState.currentBlock.toNumber() < syncState.highestBlock.unwrapOrDefault().toNumber())
+        const newSyncState = await this.$client.getSyncState();
+        if (newSyncState.highestBlock > this.syncState.highestBlock) {
+          this.syncState = newSyncState;
+        } else {
+          this.syncState.currentBlock = newSyncState.currentBlock;
+        }
+        this.network.message = this.$t('dashboard.syncingMsg', { currentBlock: this.syncState.currentBlock, highestBlock: this.syncState.highestBlock });
+      } while (isSyncing)
 
-      this.network.message = this.$t('dashboard.nodeIsSynced', { currentBlock: syncState.currentBlock });
+      this.network.message = this.$t('dashboard.nodeIsSynced', { currentBlock: this.syncState.currentBlock });
       this.network.state = "finished"
     },
     newBlock(blockNumber: number) {

@@ -123,7 +123,6 @@ import { defineComponent } from "vue"
 import * as util from "../lib/util"
 import introModal from "../components/introModal.vue"
 import { appConfig } from "../lib/appConfig"
-import { SyncState } from "../lib/types";
 
 let farmerTimer: number
 
@@ -220,13 +219,20 @@ export default defineComponent({
       this.plottingData.allocatedGB = config.plot.sizeGB
       await this.$client.startSubscription();
       util.infoLogger("PLOTTING PROGRESS | block subscription started")
-      this.syncState = (await this.$client.getSyncState()).toJSON() as unknown as SyncState;
+
+      // TODO: this currently duplicates syncing logic from Dashboard component and will be removed after Dashboard re-design (only Dashboard component will remain)
+      this.syncState = await this.$client.getSyncState();
       let isSyncing = await this.$client.isSyncing();
 
       do {
         await new Promise((resolve) => setTimeout(resolve, 3000))
-        this.syncState = (await this.$client.getSyncState()).toJSON() as unknown as SyncState;
-        this.plottingData.status = `Syncing ${this.syncState.currentBlock} of ${this.syncState.highestBlock} blocks`
+        const newSyncState = await this.$client.getSyncState();
+        if (newSyncState.highestBlock > this.syncState.highestBlock) {
+          this.syncState = newSyncState;
+        } else {
+          this.syncState.currentBlock = newSyncState.currentBlock;
+        }
+        this.plottingData.status = this.$t('dashboard.syncingMsg', { currentBlock: this.syncState.currentBlock, highestBlock: this.syncState.highestBlock });
         this.plottingData.finishedGB = (this.syncState.currentBlock * this.plottingData.allocatedGB) / this.syncState.highestBlock;
         isSyncing = await this.$client.isSyncing();
       } while (isSyncing);

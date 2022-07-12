@@ -11,9 +11,10 @@ import { getStoredBlocks, storeBlocks } from "./blockStorage"
 import {
   emptyClientData,
   FarmedBlock,
-  SubPreDigest
+  SubPreDigest,
+  SyncState
 } from "../lib/types"
-import type { SyncState, EventRecord } from '@polkadot/types/interfaces/system';
+import type { EventRecord } from '@polkadot/types/interfaces/system';
 import { IU8a } from "@polkadot/types-codec/types"
 
 const tauri = { event, invoke }
@@ -132,7 +133,7 @@ export class Client {
   }
 
   public async getSyncState(): Promise<SyncState> {
-    return this.api.rpc.system.syncState();
+    return (await this.api.rpc.system.syncState()).toJSON() as unknown as SyncState;
   }
 
   public async isSyncing(): Promise<boolean> {
