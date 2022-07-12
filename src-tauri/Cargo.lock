@@ -8796,7 +8796,6 @@ dependencies = [
  "fdlimit",
  "fs2",
  "hex",
- "libp2p",
  "log",
  "openssl",
  "sc-chain-spec",
