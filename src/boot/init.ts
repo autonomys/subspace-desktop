@@ -1,6 +1,8 @@
 import { boot } from 'quasar/wrappers'
 import VueApexCharts from "vue3-apexcharts";
 import { createI18n } from 'vue-i18n'
+import * as tauriEvents from '@tauri-apps/api/event';
+
 import messages from '../i18n'
 import { globalState } from "../lib/global"
 import { Client } from "../lib/client"
@@ -18,6 +20,11 @@ declare module "@vue/runtime-core" {
 }
 
 export default boot(async ({ app }) => {
+  // check for newer version every day
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  setInterval(() => tauriEvents.emit('tauri://update'), DAY_MS);
+  // update app state to reflect that newer version is available
+  tauriEvents.listen('tauri://update-available', globalState.setHasNewUpdate);
   await appConfig.init()
   const { nodeName } = (await appConfig.read());
   globalState.setNodeName(nodeName);

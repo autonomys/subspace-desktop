@@ -8,9 +8,13 @@ export class Global {
       message: "loading" 
     }, 
     nodeName: '',
+    hasNewUpdate: false,
   })
   setNodeName(name: string) {
     this.data.nodeName = name;
+  }
+  setHasNewUpdate() {
+    this.data.hasNewUpdate = true;
   }
 }
 
