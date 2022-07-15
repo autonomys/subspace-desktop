@@ -20,7 +20,7 @@ q-page.q-pl-lg.q-pr-lg.q-pt-md
       .absolute-center
         .row.justify-center
           q-spinner-orbit(color="grey" size="120px")
-        h4 Connecting to client...
+        h4 {{ $t('dashboard.loadingMsg')}}
 </template>
 
 <script lang="ts">
@@ -33,28 +33,25 @@ import netCard from "../components/netCard.vue"
 import plotCard from "../components/plotCard.vue"
 import { emptyClientData, ClientData, FarmedBlock } from "../lib/types"
 import { appConfig } from "../lib/appConfig"
-const lang = global.data.loc.text.dashboard
 
 export default defineComponent({
   components: { farmedList, netCard, plotCard },
   data() {
-    // TODO remove this.client after invariants are protected
     return {
-      lang,
       network: {
         state: "starting",
-        message: lang.initializing,
+        message: this.$t('dashboard.initializing'),
         peers: 0
       },
       plot: {
         state: "starting",
-        message: lang.initializing,
+        message: this.$t('dashboard.initializing'),
         plotSizeGB: 0
       },
       global: global.data,
       globalState: {
         state: "starting",
-        message: lang.initializing
+        message: this.$t('dashboard.initializing')
       },
       expanded: false,
       util,
@@ -93,7 +90,7 @@ export default defineComponent({
     }
 
     this.global.status.state = "loading"
-    this.global.status.message = "loading..."
+    this.global.status.message = this.$t('dashboard.loadingStatus');
 
     this.clientData = this.$client.data
     this.loading = false
@@ -104,7 +101,7 @@ export default defineComponent({
     this.$client.data.farming.events.on("newBlock", this.newBlock)
     this.$client.data.farming.events.on("farmedBlock", this.farmBlock)
     this.global.status.state = "live"
-    this.global.status.message = lang.syncedMsg
+    this.global.status.message = this.$t('dashboard.syncedMsg')
     await this.checkNodeAndNetwork()
     await this.checkFarmerAndPlot()
   },
@@ -125,40 +122,39 @@ export default defineComponent({
     },
     async checkFarmerAndPlot() {
       this.plot.state = "verifying"
-      this.plot.message = lang.verifyingPlot
+      this.plot.message = this.$t('dashboard.verifyingPlot')
 
       const config = await appConfig.read()
       this.plot.plotSizeGB = config.plot.sizeGB
 
-      this.plot.message = lang.syncedMsg
+      this.plot.message = this.$t('dashboard.syncedMsg')
       this.plot.state = "finished"
     },
     async checkNodeAndNetwork() {
       this.network.state = "verifying"
-      this.network.message = lang.verifyingNet
+      this.network.message = this.$t('dashboard.verifyingNet')
 
       let syncState = await this.$client.getSyncState()
       do {
-        this.network.message = `Syncing node ${syncState.currentBlock} of ${syncState.highestBlock} Blocks`
+        const { currentBlock, highestBlock } = syncState;
+        this.network.message = this.$t('dashboard.syncingMsg', { currentBlock, highestBlock });
         await new Promise((resolve) => setTimeout(resolve, 3000))
         syncState = await this.$client.getSyncState()
       } while (syncState.currentBlock.toNumber() < syncState.highestBlock.unwrapOrDefault().toNumber())
 
-      this.network.message = `Node is synced at block: ${syncState.currentBlock}`
+      this.network.message = this.$t('dashboard.nodeIsSynced', { currentBlock: syncState.currentBlock });
       this.network.state = "finished"
     },
     newBlock(blockNumber: number) {
       if (this.network.state === "finished")
-        this.network.message =
-          "Synced at " + lang.blockNum + " " + blockNumber.toLocaleString()
+        this.network.message = this.$t('dashboard.syncedAt', { blockNumber: blockNumber.toLocaleString() });
     },
     farmBlock(block: FarmedBlock) {
       Notify.create({
         color: "green",
         progress: true,
-        message: `${lang.farmedBlock}: ${block.blockNum} ${lang.reward} ${
-          block.blockReward + block.feeReward
-        } testSSC`,
+        // this is ugly, but will be removed in the new Dashboard design
+        message: `${this.$t('dashboard.farmedBlock')}: ${block.blockNum} ${this.$t('dashboard.reward')} ${block.blockReward + block.feeReward} ${this.$t('dashboard.tokenName')}`,
         position: "bottom-right"
       })
     }

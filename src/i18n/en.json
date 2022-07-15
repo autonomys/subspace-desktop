@@ -13,7 +13,8 @@
     "saved": "Seed phrase copied to clipboard. Backup key in a secure location.",
     "seedPhrase": "Seed phrase",
     "reveal": "reveal",
-    "copy": "copy to clipboard"
+    "copy": "copy to clipboard",
+    "seedPhraseText": "Seed phrase is your password for your subspace farmer and wallet, this cannot be changed, guessed, or reset if lost. It is imperative that this is stored in a secure, safe location. Without the seed phrase, you will not have access to your funds. Furthermore, anyone who steals your seed phrase will be able to do as they please with your funds."
   },
   "setupPlot": {
     "pageTitle": "Setup Plots",
@@ -30,7 +31,9 @@
     "utilizedSpace": "How much space is currently being used.",
     "allocatedSpace": "Space to be shared with Subspace Protocol.",
     "estimatingSpace": "Requesting the blockchain size from the network.",
-    "plotsDirectory": "Plots Directory"
+    "plotsDirectory": "Plots Directory",
+    "start": "Start Plotting",
+    "allocatedErrorMsg": "Value should be a positive number"
   },
   "plottingProgress": {
     "startingFarmer": "Starting the farmer ...",
@@ -67,26 +70,62 @@
     "reward": "Reward",
     "farmedBlocks": "Farmed Blocks",
     "farmedBy": "Farmed By",
-    "blockNum": "Block #",
     "time": "Time",
     "transactions": "# Transactions",
-    "rewards": "Reward + Fees"
+    "rewards": "Reward + Fees",
+    "totalEarned": "Total Earned",
+    "tokenName": "testSSC",
+    "rewardAddress": "Reward Address",
+    "loadingMsg": "Connecting to client...",
+    "loadingStatus": "loading...",
+    "syncingMsg": "Syncing node {currentBlock} of {highestBlock} Blocks",
+    "nodeIsSynced": "Node is synced at block: {currentBlock}",
+    "syncedAt": "Synced at Block # {blockNumber}",
+    "blockNum": "Block #"
   },
   "importKey": {
     "tooltip": "Please provide a valid Reward Address to proceed.",
     "pageTitle": "Import Reward Address",
     "rewardAddress": "Please enter your Reward Address in SS58 format (it should start with the letters \"st\")",
-    "continue": "continue"
+    "continue": "continue",
+    "cancel": "Cancel",
+    "addressErrorMsg": "Invalid address"
   },
-  "mainMenu": {
+  "header": {
     "IncentivizedLabel": "Incentivized Testnet",
     "IncentivizedTooltip": "Rewards (testSSC) you earn during incentivized testnet, will contribute to your mainnet rewards!",
+    "nodeName": "Node Name:"
+  },
+  "menu": {
     "reset": "Reset Node!",
     "autoStart": "Start on Boot",
+    "export_log": "Show Logs",
+    "autoLaunchNotSupported": "Launch on Boot is not supported on this system.",
     "willAutoLaunch": "Subspace will launch automatically during boot",
     "willNotAutoLaunch": "Subspace will not launch automatically during boot",
     "reset_heading": "Are you sure you want to reset and start from scratch?",
-    "reset_explanation": " This will erase everything, and you will have to start from the beginning. Only do this if there is something wrong with the network, or you imported a wrong reward address.",
-    "export_log": "Show Logs"
+    "reset_explanation": " This will erase everything, and you will have to start from the beginning. Only do this if there is something wrong with the network, or you imported a wrong reward address."
+  },
+  "disclaimer": {
+    "title": "TESTNET DISCLAIMER",
+    "text": "Tokens/credits generated on the Subspace Network testnet (\"testSSCs\") do not equate to Subspace Network mainnet tokens, have no monetary value, and cannot be exchanged for cash, cash equivalent, or other tokens or cryptocurrencies.",
+    "confirm": "I understand"
+  },
+  "introModal": {
+    "next": "next",
+    "hints": "Hints",
+    "title": "What is Plotting, Farming, & Rewards",
+    "slide1": {
+      "text1": "Plotting is the process of assigning various \"plots\" aka tiny spots across the allocated storage of your hard drive. You can think of this as planting the seeds in a tilled field. Every plot is cryptographically independent, and verifiable, all of the plots are stored in a single file on your system.",
+      "text2": "Farming is the act of checking with the current \"challenge\" of the blockchain and seeing if any of your plots will win the challenge, you can think of this as checking to see if your various crops are ripe for the picking.",
+      "text3": "If your \"fruit is ripe\" aka if you have a plot that wins the current challenge then you are rewarded with subspace credits. aka \"Winning the block\"."
+    },
+    "slide2": {
+      "text1": "Did you know Subspace is the first Proof of Capacity blockchain on Substrate?",
+      "text2": "Did you know that Subspace stores all data On-Chain?",
+      "talkWithUs": "You can talk with us on",
+      "visitUs": "Visit us on",
+      "readUp": "Read up about Subspace on"
+    }
   }
 }

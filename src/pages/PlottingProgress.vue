@@ -1,14 +1,14 @@
 <template lang="pug">
 q-page.q-pa-lg.q-mr-lg.q-ml-lg
   .row.justify-center.q-mb-md
-    .text-h4 {{ lang.pageTitle }}
+    .text-h4 {{ $t('plottingProgress.pageTitle') }}
   .row.justify-center
-    p {{ lang.infoDialog }}
+    p {{ $t('plottingProgress.infoDialog') }}
   .row.justify-center.q-mr-lg.q-ml-lg
     .col
       .row
         .col.q-mt-sm
-          div {{ lang.plotsDirectory }}
+          div {{ $t('plottingProgress.plotsDirectory') }}
           q-input(
             dense
             input-class="plottingInput"
@@ -45,7 +45,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
             size="180px"
             style="z-index: -100; right: 100px"
           )
-          .q-mt-sm {{ lang.plotted }}
+          .q-mt-sm {{ $t('plottingProgress.plotted') }}
           q-input.bg-white(
             dense
             input-class="plottingInput"
@@ -54,7 +54,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
             suffix="GB"
             v-model="plottingData.finishedGB"
           )
-          .q-mt-sm {{ lang.remaining }}
+          .q-mt-sm {{ $t('plottingProgress.remaining') }}
           q-input.bg-white(
             dense
             input-class="plottingInput"
@@ -71,7 +71,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
             size="180px"
             style="z-index: -100; right: 100px"
           )
-          .q-mt-sm {{ lang.elapsedTime }}
+          .q-mt-sm {{ $t('plottingProgress.elapsedTime') }}
           q-input.bg-white(
             dense
             input-class="plottingInput"
@@ -79,7 +79,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
             readonly
             v-model="printElapsedTime"
           )
-          .q-mt-sm {{ lang.remainingTime }}
+          .q-mt-sm {{ $t('plottingProgress.remainingTime') }}
           q-input.bg-white(
             dense
             input-class="plottingInput"
@@ -90,14 +90,14 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
 
   .row.justify-end.q-mt-lg.absolute-bottom.q-pb-lg
     .col-auto.q-ml-xl.q-pr-md
-      div {{ lang.hint }}
+      div {{ $t('plottingProgress.hint') }}
     .col.q-pr-md
-      div {{ lang.hintInfo }}
+      div {{ $t('plottingProgress.hintInfo') }}
     .col-auto.q-pr-md
     .col-expand
     .col-auto
       q-btn(
-        :label="lang.hints"
+        :label="$t('plottingProgress.hints')"
         @click="viewIntro()"
         color="blue-8"
         icon-right="info"
@@ -106,7 +106,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
       )
     .col-auto
       q-btn(
-        :label="lang.next"
+        :label="$t('plottingProgress.next')"
         @click="$router.replace({ name: 'dashboard' })"
         color="blue-8"
         icon-right="play_arrow"
@@ -115,31 +115,28 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
         :disable="!plotFinished"
       )
       q-tooltip.q-pa-md(v-if="!plotFinished")
-        p.q-mb-lg {{ lang.waitPlotting }}
+        p.q-mb-lg {{ $t('plottingProgress.waitPlotting') }}
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import { globalState as global } from "../lib/global"
 import * as util from "../lib/util"
 import introModal from "../components/introModal.vue"
 import { appConfig } from "../lib/appConfig"
 import { SyncState } from "../lib/types";
 
-const lang = global.data.loc.text.plottingProgress
 let farmerTimer: number
 
 export default defineComponent({
   data() {
     return {
-      lang,
       elapsedms: 0,
       remainingms: 0,
       plottingData: {
         finishedGB: 0,
         remainingGB: 0,
         allocatedGB: 0,
-        status: lang.fetchingPlot
+        status: this.$t('plottingProgress.fetchingPlot'),
       },
       plotFinished: false,
       plotDirectory: "",
