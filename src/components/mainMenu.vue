@@ -12,6 +12,12 @@ q-menu(auto-close)
         .col
           p.text-grey(v-if="!launchOnStart") {{ $t('menu.autoStart') }}
           p.text-black(v-else) {{ $t('menu.autoStart') }}
+    q-item(@click="installNewUpdate()" clickable v-if="hasNewUpdate")
+      .row.items-center
+        .col-auto.q-mr-md
+          q-icon(color="green" name="upload")
+        .col
+          p {{ $t('menu.updateAvailable') }}
     q-item(@click="exportLogs()" clickable)
       .row.items-center
         .col-auto.q-mr-md
@@ -30,12 +36,16 @@ q-menu(auto-close)
 import { defineComponent } from "vue"
 import { Dialog, Notify } from "quasar"
 import { relaunch } from "@tauri-apps/api/process"
-import * as util from "../lib/util"
 import { open as shellOpen } from '@tauri-apps/api/shell'
+import { installUpdate } from '@tauri-apps/api/updater';
+
+import * as util from "../lib/util";
+import { globalState as global } from "../lib/global";
 
 export default defineComponent({
   data() {
     return {
+      hasNewUpdate: global.data.hasNewUpdate,
       util,
       launchOnStart: false,
       disableAutoLaunch: false
@@ -95,6 +105,15 @@ export default defineComponent({
         await new Promise((resolve) => setTimeout(resolve, 1000))
         await relaunch()
       })
+    },
+    async installNewUpdate() {
+      try {
+        await installUpdate();
+        await relaunch();
+      } catch (error) {
+        // TODO: handle error
+        console.log(error);
+      }
     },
     async exportLogs() {
       try {
