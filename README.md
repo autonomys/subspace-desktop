@@ -109,6 +109,12 @@ yarn tauri dev
 yarn build
 ```
 
+### Build the app for production with opencl support (Builds Quasar and Tauri)
+
+```bash
+yarn build -c ./src-tauri/tauri.conf.opencl.json
+```
+
 ### Access Tauri or Quasar specific commands
 
 ```bash

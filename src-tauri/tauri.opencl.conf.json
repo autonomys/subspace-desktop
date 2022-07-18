@@ -1,0 +1,12 @@
+{
+  "build": {
+    "features": ["opencl"]
+  },
+  "tauri": {
+    "bundle": {
+      "deb": {
+        "depends": ["ocl-icd-libopencl1"]
+      }
+    }
+  }
+}
