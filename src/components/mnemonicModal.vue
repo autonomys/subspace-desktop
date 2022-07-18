@@ -11,7 +11,7 @@ q-dialog(@hide="onDialogHide" persistent ref="dialog")
           .row.justify-center.q-mb-md
             .col
               .row.q-mb-md
-                saveKeys(@userConfirm="userConfirm")
+                saveKeys(@userConfirm="userConfirm", :mnemonic="mnemonic")
         .absolute-bottom.q-pa-md
           .row.justify-end
             q-btn(
@@ -29,6 +29,12 @@ import { defineComponent } from "vue"
 import saveKeys from "components/SaveKeys.vue"
 const component = defineComponent({
   components: { saveKeys },
+  props: {
+    mnemonic: { 
+      type: String,
+      required: true,
+    }
+  },
   emits: [
     // REQUIRED
     "ok",
