@@ -106,6 +106,70 @@ jobs:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
 
+  clippy-fmt:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-2022
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v2
+
+      # For sloth256-189 Wasm support we need `llvm-ar`, which is not available by default
+      - name: Install LLVM and Clang
+        uses: KyleMayes/install-llvm-action@v1
+        with:
+          version: "14.0"
+
+      - name: setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16
+
+      # TODO: when https://github.com/rust-lang/rust/issues/95267 and https://github.com/briansmith/ring/issues/1469
+      # are resolved, revert back to `nightly`
+      - name: install Rust nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly-2022-05-16
+          target: wasm32-unknown-unknown
+          override: true
+          components: rustfmt, clippy
+
+      - name: CUDA toolchain
+        uses: Jimver/cuda-toolkit@v0.2.6
+        if: matrix.os == 'ubuntu-latest' || matrix.os == 'windows-2022'
+
+      - name: OpenCL (Linux x86_64)
+        run: sudo apt-get install -y --no-install-recommends ocl-icd-opencl-dev
+        if: matrix.os == 'ubuntu-latest'
+
+        # Workaround to resolve link error with C:\msys64\mingw64\bin\libclang.dll
+      - name: Remove msys64
+        run: Remove-Item -LiteralPath "C:\msys64\" -Force -Recurse
+        if: runner.os == 'Windows'
+
+      - name: install webkit2gtk (ubuntu only)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.0-dev libappindicator3-dev
+
+      - name: install app dependencies
+        # sometimes it fails downloading packages, so set a timeout https://github.com/yarnpkg/yarn/issues/4890
+        run: yarn install --network-timeout 1000000
+        env:
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+
+      - name:
+        run: yarn quasar build -m pwa
+
       - name: fmt
         uses: actions-rs/cargo@v1
         with:

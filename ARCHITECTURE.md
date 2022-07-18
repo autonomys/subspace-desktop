@@ -40,10 +40,10 @@ Contains utility functions for handling the launch on boot functionality of the 
 The backend of the app is handled by the [Tauri Framework](https://tauri.studio/) and written in [Rust](https://www.rust-lang.org/).
 
 ### [`/src-tauri/tauri.conf.json`](src-tauri/tauri.conf.json)
-The Tauri framework is configured here (no features enabled). For details about configuration refer to the [config documentation](https://tauri.studio/en/docs/api/config).
+The Tauri framework is configured here (no features enabled). For details about configuration refer to the [config documentation](https://tauri.app/v1/api/config/).
 
 ### [`/src-tauri/tauri.opencl.conf.json`](src-tauri/tauri.opencl.conf.json)
-The Tauri framework is configured here (opencl feature enabled). For details about configuration refer to the [config documentation](https://tauri.studio/en/docs/api/config).
+The Tauri framework is configured here (opencl feature enabled). For details about configuration refer to the [config documentation](https://tauri.app/v1/api/config/).
 
 ### [`src-tauri/icons`](src-tauri/icons)
 Platform icons are stored here. The icons can be automatically generated using `yarn tauri icon` as documented [here](https://tauri.studio/en/docs/usage/guides/visual/icons/).
