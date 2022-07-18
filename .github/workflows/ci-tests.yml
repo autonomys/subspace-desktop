@@ -48,7 +48,6 @@ jobs:
           toolchain: nightly-2022-05-16
           target: wasm32-unknown-unknown
           override: true
-          components: rustfmt, clippy
 
       - name: CUDA toolchain
         uses: Jimver/cuda-toolkit@v0.2.6
