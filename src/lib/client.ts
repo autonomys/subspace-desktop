@@ -21,7 +21,6 @@ const SUNIT = 1000000000000000000n
 
 export class Client {
   protected firstLoad = false
-  protected mnemonic = ""
   protected farmed: FarmedBlock[] = []
   protected clearTauriDestroy: event.UnlistenFn = () => null;
   protected unsubscribe: event.UnlistenFn = () => null;
@@ -155,17 +154,14 @@ export class Client {
     this.data.farming.farmed = this.farmed
   }
 
-  public async createRewardAddress(): Promise<string> {
-    try {
-      const mnemonic = mnemonicGenerate()
-      const keyring = new Keyring({ type: 'sr25519', ss58Format: 2254 }) // 2254 is the prefix for subspace-testnet
-      await cryptoWaitReady();
-      const pair = keyring.createFromUri(mnemonic)
-      this.mnemonic = mnemonic
-      return pair.address
-    } catch (error) {
-      util.errorLogger(error)
-      return ""
+  public async createRewardAddress(): Promise<{ rewardAddress: string, mnemonic: string }> {
+    const mnemonic = mnemonicGenerate()
+    const keyring = new Keyring({ type: 'sr25519', ss58Format: 2254 }) // 2254 is the prefix for subspace-testnet
+    await cryptoWaitReady();
+    const pair = keyring.createFromUri(mnemonic)
+    return {
+      rewardAddress: pair.address,
+      mnemonic,
     }
   }
 
@@ -178,13 +174,5 @@ export class Client {
       util.errorLogger("Tried to send empty reward address to backend!")
     }
     return await tauri.invoke("farming", { path, rewardAddress, plotSize })
-  }
-
-  /* MNEMONIC displayed only FIRST LOAD on SaveKeys Modal. */
-  public getMnemonic(): string {
-    return this.mnemonic
-  }
-  public clearMnemonic(): void {
-    this.mnemonic = ""
   }
 }

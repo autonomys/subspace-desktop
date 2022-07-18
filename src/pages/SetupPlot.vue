@@ -127,6 +127,7 @@ import mnemonicModal from "../components/mnemonicModal.vue"
 
 const tauri = { path, fs }
 
+// TODO: implement error handling - Implement error pages for potential worst case scenarios #253 
 export default defineComponent({
   data() {
     return {
@@ -288,15 +289,19 @@ export default defineComponent({
       const config = await appConfig.read()
       if (config.rewardAddress === "") {
         util.infoLogger("SETUP PLOT | reward address was empty, creating a new one")
-        this.rewardAddress = await this.$client.createRewardAddress()
-        await this.viewMnemonic()
-      }
-      else {
+        try {
+          const { rewardAddress, mnemonic }  = await this.$client.createRewardAddress();
+          this.rewardAddress = rewardAddress;
+          await this.viewMnemonic(mnemonic);
+        } catch (error) {
+          util.errorLogger(error);
+        }
+      } else {
         util.infoLogger("SETUP PLOT | reward address was initialized before, proceeding to plotting")
       }
     },
-    async viewMnemonic(): Promise<void> {
-      const modal = await util.showModal(mnemonicModal);
+    async viewMnemonic(mnemonic: string): Promise<void> {
+      const modal = await util.showModal(mnemonicModal, { mnemonic });
       return new Promise((resolve) => {
         modal?.onDismiss(async () => {
           await appConfig.update({
