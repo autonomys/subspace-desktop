@@ -51,20 +51,22 @@ import { QInput, Notify } from "quasar"
 // @vue/component
 export default defineComponent({
   name: "SaveKeys",
+  props: {
+    mnemonic: { 
+      type: String,
+      required: true,
+    }
+  },
   emits: ["userConfirm"],
   data() {
     const userConfirm = false
-    const mnemonic = this.$client.getMnemonic()
     const revealKey = false
-    return { revealKey, userConfirm, mnemonic }
+    return { revealKey, userConfirm }
   },
   watch: {
     userConfirm(val) {
       this.$emit("userConfirm", val)
     }
-  },
-  unmounted() {
-    this.$client.clearMnemonic()
   },
   methods: {
     copyMnemonic() {
