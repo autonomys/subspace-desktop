@@ -13,7 +13,7 @@ q-layout(view="hHh lpr fFf")
             q-tooltip
               .col
                 p.no-margin(style="font-size: 12px") {{ $t('header.IncentivizedTooltip') }}
-          .col-auto.q-mr-md.relative-position(v-if="global.nodeName || oldNodeName")
+          .col-auto.q-mr-md.relative-position(v-if="store.nodeName || oldNodeName")
             q-badge.cursor-pointer(
               v-if="!isEdittingName"
               @click="onNameClick"
@@ -24,11 +24,11 @@ q-layout(view="hHh lpr fFf")
               .q-mr-xs(
                 class="text-italic"
                 style="font-size: 14px"
-              ) {{ trimmedName }}
+              ) {{ store.trimmedName }}
             q-input.name-input(
               ref="nameInput"
               v-else
-              v-model="global.nodeName"
+              v-model="store.nodeName"
               @blur="saveName"
               @keyup.enter="saveName"
               dense="dense"
@@ -50,18 +50,22 @@ q-layout(view="hHh lpr fFf")
 <script lang="ts">
 import { defineComponent } from "vue"
 import * as process from 'process'
+import { relaunch } from "@tauri-apps/api/process"
+
 import * as util from "../lib/util"
 import MainMenu from "../components/mainMenu.vue"
-import { globalState as global } from "../lib/global"
 import { appConfig } from "../lib/appConfig"
-import { relaunch } from "@tauri-apps/api/process"
+import { useStore } from '../stores/store';
 
 export default defineComponent({
   name: "MainLayout",
   components: { MainMenu },
+  setup() {
+    const store = useStore();
+    return { store };
+  },
   data() {
     return {
-      global: global.data,
       appVersion: "",
       util,
       autoLaunch: false,
@@ -69,33 +73,24 @@ export default defineComponent({
       oldNodeName: "",
     }
   },
-  computed: {
-    trimmedName() {
-      const { nodeName } = global.data;
-      return nodeName.length > 20
-        ? `${nodeName.slice(0, 20)}...`
-        : nodeName;
-    }
-  },
   mounted() {
     this.appVersion = (process.env.APP_VERSION as string)
     util.infoLogger("Version: " + this.appVersion)
-
   },
   methods: {
     onNameClick() {
       this.setEditName(true);
-      this.oldNodeName = global.data.nodeName;
+      this.oldNodeName = this.store.nodeName;
     },
     async saveName() {
       this.setEditName(false);
       // if user left input empty - use prev name
-      if (!global.data.nodeName) {
-        global.setNodeName(this.oldNodeName)
+      if (!this.store.nodeName) {
+        this.store.setNodeName(this.oldNodeName)
       // only restart if name has changed
-      } else if (this.oldNodeName !== global.data.nodeName) {
-        await appConfig.update({ nodeName: global.data.nodeName });
-        global.setNodeName(global.data.nodeName);
+      } else if (this.oldNodeName !== this.store.nodeName) {
+        await appConfig.update({ nodeName: this.store.nodeName });
+        this.store.setNodeName(this.store.nodeName);
         await relaunch();
       }
     },

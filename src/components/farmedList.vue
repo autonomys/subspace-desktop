@@ -66,7 +66,6 @@ import { defineComponent } from "vue"
 import { formatDistanceToNowStrict } from "date-fns"
 import * as process from "process"
 import * as util from "../lib/util"
-import { globalState as global } from "../lib/global"
 import { FarmedBlock } from "../lib/types"
 import { appConfig } from "../lib/appConfig"
 
@@ -82,7 +81,6 @@ export default defineComponent({
   data() {
     return { 
       util, 
-      global: global.data, 
       rewardAddress: "", 
       appsLink,
     }
