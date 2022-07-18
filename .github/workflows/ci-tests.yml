@@ -20,8 +20,8 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-latest
-          - macos-latest
+          - ubuntu-22.04
+          - macos-11
           - windows-2022
 
     runs-on: ${{ matrix.os }}
@@ -40,8 +40,6 @@ jobs:
         with:
           node-version: 16
 
-      # TODO: when https://github.com/rust-lang/rust/issues/95267 and https://github.com/briansmith/ring/issues/1469
-      # are resolved, revert back to `nightly`
       - name: install Rust nightly
         uses: actions-rs/toolchain@v1
         with:
@@ -51,11 +49,11 @@ jobs:
 
       - name: CUDA toolchain
         uses: Jimver/cuda-toolkit@v0.2.6
-        if: matrix.os == 'ubuntu-latest' || matrix.os == 'windows-2022'
+        if: runner.os == 'Linux' || runner.os == 'Windows'
 
       - name: OpenCL (Linux x86_64)
         run: sudo apt-get install -y --no-install-recommends ocl-icd-opencl-dev
-        if: matrix.os == 'ubuntu-latest'
+        if: runner.os == 'Linux'
 
         # Workaround to resolve link error with C:\msys64\mingw64\bin\libclang.dll
       - name: Remove msys64
@@ -63,7 +61,7 @@ jobs:
         if: runner.os == 'Windows'
 
       - name: install webkit2gtk (ubuntu only)
-        if: matrix.os == 'ubuntu-latest'
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.0-dev libappindicator3-dev
@@ -88,7 +86,7 @@ jobs:
         env:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
-        if: matrix.os == 'macos-latest'
+        if: runner.os == 'macOS'
 
       - name: install app dependencies and build it with opencl (windos & linux)
         # sometimes it fails downloading packages, so set a timeout https://github.com/yarnpkg/yarn/issues/4890
@@ -96,7 +94,7 @@ jobs:
         env:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
-        if: matrix.os == 'ubuntu-latest' || matrix.os == 'windows-2022'
+        if: runner.os == 'Linux' || runner.os == 'Windows'
 
       - name: tauri run
         uses: tauri-apps/tauri-action@v0.3
@@ -110,8 +108,8 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-latest
-          - macos-latest
+          - ubuntu-22.04
+          - macos-11
           - windows-2022
 
     runs-on: ${{ matrix.os }}
@@ -130,8 +128,6 @@ jobs:
         with:
           node-version: 16
 
-      # TODO: when https://github.com/rust-lang/rust/issues/95267 and https://github.com/briansmith/ring/issues/1469
-      # are resolved, revert back to `nightly`
       - name: install Rust nightly
         uses: actions-rs/toolchain@v1
         with:
@@ -142,11 +138,11 @@ jobs:
 
       - name: CUDA toolchain
         uses: Jimver/cuda-toolkit@v0.2.6
-        if: matrix.os == 'ubuntu-latest' || matrix.os == 'windows-2022'
+        if: runner.os == 'Linux' || runner.os == 'Windows'
 
       - name: OpenCL (Linux x86_64)
         run: sudo apt-get install -y --no-install-recommends ocl-icd-opencl-dev
-        if: matrix.os == 'ubuntu-latest'
+        if: runner.os == 'Linux'
 
         # Workaround to resolve link error with C:\msys64\mingw64\bin\libclang.dll
       - name: Remove msys64
@@ -154,7 +150,7 @@ jobs:
         if: runner.os == 'Windows'
 
       - name: install webkit2gtk (ubuntu only)
-        if: matrix.os == 'ubuntu-latest'
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.0-dev libappindicator3-dev
