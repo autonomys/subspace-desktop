@@ -194,6 +194,8 @@ fn create_configuration<CS: ChainSpec + 'static>(
     ];
     network.boot_nodes = chain_spec.boot_nodes().to_vec();
 
+    // Increase default value of 25 to improve success rate of sync
+    network.default_peers_set.out_peers = 50;
     // Full + Light clients
     network.default_peers_set.in_peers = 25 + 100;
     let role = Role::Authority;
