@@ -40,8 +40,9 @@ export const useStore = defineStore('store', {
     setPlotSize(size: number) {
       this.plotSizeGB = size;
     },
-    setNodeName(name: string) {
+    async setNodeName(name: string) {
       this.nodeName = name;
+      await appConfig.update({ nodeName: name });
     },
     setSyncState(state: SyncState) {
       this.syncState = state;

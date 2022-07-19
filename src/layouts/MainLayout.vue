@@ -54,7 +54,6 @@ import { relaunch } from "@tauri-apps/api/process"
 
 import * as util from "../lib/util"
 import MainMenu from "../components/mainMenu.vue"
-import { appConfig } from "../lib/appConfig"
 import { useStore } from '../stores/store';
 
 export default defineComponent({
@@ -68,7 +67,6 @@ export default defineComponent({
     return {
       appVersion: "",
       util,
-      autoLaunch: false,
       isEdittingName: false,
       oldNodeName: "",
     }
@@ -89,7 +87,6 @@ export default defineComponent({
         this.store.setNodeName(this.oldNodeName)
       // only restart if name has changed
       } else if (this.oldNodeName !== this.store.nodeName) {
-        await appConfig.update({ nodeName: this.store.nodeName });
         this.store.setNodeName(this.store.nodeName);
         await relaunch();
       }

@@ -41,9 +41,16 @@ q-page(padding)
 import { defineComponent } from "vue"
 import { decodeAddress, encodeAddress } from "@polkadot/keyring"
 import { hexToU8a, isHex } from "@polkadot/util"
-import { appConfig } from "../lib/appConfig"
+
+import { useStore } from '../stores/store';
 
 export default defineComponent({
+  setup() {
+    const store = useStore();
+    return { 
+      setRewardAddress: store.setRewardAddress 
+    };
+  },
   data() {
     return {
       rewardAddress: "",
@@ -59,7 +66,7 @@ export default defineComponent({
       }
     },
     async importKey() {
-      await appConfig.update({ rewardAddress: this.rewardAddress })
+      await this.setRewardAddress(this.rewardAddress);
       this.$router.replace({ name: "setupPlot" })
     },
   }
