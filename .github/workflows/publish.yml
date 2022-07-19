@@ -9,7 +9,7 @@ jobs:
         build:
           # for ubuntu with arch, we need more testing with cross compilation libraries
           # since releasing on arm-linux is not a priority, we skipped it for now
-          - os: ubuntu-22.04
+          - os: ubuntu-20.04
             target: x86_64-unknown-linux-gnu
             suffix: ubuntu-x86_64
             rustflags: ""
