@@ -154,6 +154,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.0-dev libappindicator3-dev
+
       - name: install app dependencies
         # sometimes it fails downloading packages, so set a timeout https://github.com/yarnpkg/yarn/issues/4890
         run: yarn install --network-timeout 1000000

@@ -62,8 +62,6 @@ jobs:
         with:
           node-version: 16
 
-      # TODO: when https://github.com/rust-lang/rust/issues/95267 and https://github.com/briansmith/ring/issues/1469
-      # are resolved, revert back to `nightly`
       - name: install Rust nightly
         uses: actions-rs/toolchain@v1
         with:

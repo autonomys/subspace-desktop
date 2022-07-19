@@ -97,6 +97,9 @@ async fn farm(
             reward_address,
             bootstrap_nodes: vec![],
             listen_on: vec![],
+            enable_dsn_archiving: false,
+            dsn_sync: false,
+            enable_farming: true,
         },
         plot_size,
         max_plot_size,
@@ -107,7 +110,6 @@ async fn farm(
                 max_piece_count,
             )
         },
-        true,
     )
     .await?;
 
