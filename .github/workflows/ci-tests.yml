@@ -20,7 +20,7 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-20.04
+          - ubuntu-22.04
           - macos-12
           - windows-2022
 
@@ -108,7 +108,7 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-20.04
+          - ubuntu-22.04
           - macos-12
           - windows-2022
 
