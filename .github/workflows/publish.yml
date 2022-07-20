@@ -89,6 +89,11 @@ jobs:
           sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.0-dev libappindicator3-dev
         if: runner.os == 'Linux'
 
+      # for opencl build, it doesn't complain, but for without opencl build, name `cmake` could not be found in prost-build
+      - name: install protobuf (Linux)
+        run: sudo apt install protobuf-compiler
+        if: runner.os == 'Linux'
+
       # Imports PFX Certificate into keystore, allows Tauri to then sign the exe without being passed the private key.
       - name: import windows certificate
         if: runner.os == 'Windows'
@@ -134,6 +139,7 @@ jobs:
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
 
       - name: Sign Application (macOS)
+        if: runner.os == 'macOS'
         run: |
           echo "Importing certificate"
           echo "${{ secrets.MACOS_CERTIFICATE }}" | base64 --decode > certificate.p12
