@@ -5,10 +5,10 @@ jobs:
   publish-tauri:
     strategy:
       fail-fast: false
-      matrix: # Windows-2022 has been temporarily removed. We are unable to build 2x windows installs at the same name due to naming convention issues. Issue made upstream here: https://github.com/tauri-apps/tauri-action/issues/215
+      matrix:
         os:
-          - ubuntu-latest
-          - macos-latest
+          - ubuntu-22.04
+          - macos-11
           - windows-2022
 
     runs-on: ${{ matrix.os }}
@@ -27,12 +27,10 @@ jobs:
         with:
           node-version: 16
 
-      # TODO: when https://github.com/rust-lang/rust/issues/95267 and https://github.com/briansmith/ring/issues/1469
-      # are resolved, revert back to `nightly`
       - name: install Rust nightly
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly-2022-02-15
+          toolchain: nightly-2022-05-16
           override: true
 
         # Workaround to resolve link error with C:\msys64\mingw64\bin\libclang.dll
@@ -41,7 +39,7 @@ jobs:
         if: runner.os == 'Windows'
 
       - name: install webkit2gtk (ubuntu only)
-        if: matrix.os == 'ubuntu-latest'
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.0-dev libappindicator3-dev
