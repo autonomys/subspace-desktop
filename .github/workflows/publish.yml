@@ -70,6 +70,10 @@ jobs:
           components: rust-src
           override: true
 
+      - name: CUDA toolchain
+        uses: Jimver/cuda-toolkit@v0.2.6
+        if: runner.os == 'Linux' || runner.os == 'Windows'
+
       - name: install libdbus-1-dev and pkg-config (Linux)
         run: sudo apt -y --no-install-recommends install libdbus-1-dev pkg-config
         if: runner.os == 'Linux'
