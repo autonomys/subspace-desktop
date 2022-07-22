@@ -8,12 +8,12 @@ repository = "https://github.com/subspace/subspace-desktop"
 edition = "2021"
 
 [build-dependencies]
-substrate-build-script-utils = { version = "3.0.0", git = "https://github.com/subspace/substrate", rev = "b49d8ee54f4bd6e4b5b48f45d08f75705fad95b4" }
+substrate-build-script-utils = { version = "3.0.0", git = "https://github.com/subspace/substrate", rev = "1399afdcd8ab4d7fad149c96f9cadcaf04b94f86" }
 tauri-build = { version = "1.0.0-rc.9", features = [] }
 
 [dependencies]
 anyhow = "1.0.44"
-cirrus-runtime = { git = "https://github.com/subspace/subspace", rev = "61c60e35fc03e286bb91fd61f799c0e279dcb351" }
+cirrus-runtime = { git = "https://github.com/subspace/subspace", rev = "d736cf913f445a8e7dccd5c663e71b19212085ee" }
 dirs = "4.0.0"
 dotenv = "0.15.0"
 event-listener-primitives = "2.0.1"
@@ -21,22 +21,23 @@ fdlimit = "0.2.1"
 fs2 = "0.4.3"
 hex = "0.4.3"
 log = "0.4.14"
-sc-chain-spec = { version = "4.0.0-dev", git = "https://github.com/subspace/substrate", rev = "b49d8ee54f4bd6e4b5b48f45d08f75705fad95b4" }
-sc-client-api = { version = "4.0.0-dev", git = "https://github.com/subspace/substrate", rev = "b49d8ee54f4bd6e4b5b48f45d08f75705fad95b4" }
-sc-executor = { version = "0.10.0-dev", git = "https://github.com/subspace/substrate", rev = "b49d8ee54f4bd6e4b5b48f45d08f75705fad95b4", features = ["wasmtime"] }
-sc-network = { version = "0.10.0-dev", git = "https://github.com/subspace/substrate", rev = "b49d8ee54f4bd6e4b5b48f45d08f75705fad95b4" }
-sc-service = { version = "0.10.0-dev", git = "https://github.com/subspace/substrate", rev = "b49d8ee54f4bd6e4b5b48f45d08f75705fad95b4", features = ["wasmtime"] }
-sc-subspace-chain-specs = { git = "https://github.com/subspace/subspace", rev = "61c60e35fc03e286bb91fd61f799c0e279dcb351" }
-serde_json = "1.0.81"
-serde = { version = "1.0.137", features = [ "derive" ] }
-sp-core = { version = "6.0.0", git = "https://github.com/subspace/substrate", rev = "b49d8ee54f4bd6e4b5b48f45d08f75705fad95b4" }
-sp-panic-handler = { version = "4.0.0", git = "https://github.com/subspace/substrate", rev = "b49d8ee54f4bd6e4b5b48f45d08f75705fad95b4" }
-subspace-core-primitives = { git = "https://github.com/subspace/subspace", rev = "61c60e35fc03e286bb91fd61f799c0e279dcb351" }
-subspace-farmer = { git = "https://github.com/subspace/subspace", rev = "61c60e35fc03e286bb91fd61f799c0e279dcb351" }
-subspace-fraud-proof = { git = "https://github.com/subspace/subspace", rev = "61c60e35fc03e286bb91fd61f799c0e279dcb351" }
-subspace-runtime = { git = "https://github.com/subspace/subspace", rev = "61c60e35fc03e286bb91fd61f799c0e279dcb351" }
-subspace-service = { git = "https://github.com/subspace/subspace", rev = "61c60e35fc03e286bb91fd61f799c0e279dcb351" }
-subspace-solving = { git = "https://github.com/subspace/subspace", rev = "61c60e35fc03e286bb91fd61f799c0e279dcb351" }
+sc-chain-spec = { version = "4.0.0-dev", git = "https://github.com/subspace/substrate", rev = "1399afdcd8ab4d7fad149c96f9cadcaf04b94f86" }
+sc-client-api = { version = "4.0.0-dev", git = "https://github.com/subspace/substrate", rev = "1399afdcd8ab4d7fad149c96f9cadcaf04b94f86" }
+sc-consensus-slots = { version = "0.10.0-dev", git = "https://github.com/subspace/substrate", rev = "1399afdcd8ab4d7fad149c96f9cadcaf04b94f86" }
+sc-executor = { version = "0.10.0-dev", git = "https://github.com/subspace/substrate", rev = "1399afdcd8ab4d7fad149c96f9cadcaf04b94f86", features = ["wasmtime"] }
+sc-network = { version = "0.10.0-dev", git = "https://github.com/subspace/substrate", rev = "1399afdcd8ab4d7fad149c96f9cadcaf04b94f86" }
+sc-service = { version = "0.10.0-dev", git = "https://github.com/subspace/substrate", rev = "1399afdcd8ab4d7fad149c96f9cadcaf04b94f86", features = ["wasmtime"] }
+sc-subspace-chain-specs = { git = "https://github.com/subspace/subspace", rev = "d736cf913f445a8e7dccd5c663e71b19212085ee" }
+serde_json = "1.0.82"
+serde = { version = "1.0.139", features = [ "derive" ] }
+sp-core = { version = "6.0.0", git = "https://github.com/subspace/substrate", rev = "1399afdcd8ab4d7fad149c96f9cadcaf04b94f86" }
+sp-panic-handler = { version = "4.0.0", git = "https://github.com/subspace/substrate", rev = "1399afdcd8ab4d7fad149c96f9cadcaf04b94f86" }
+subspace-core-primitives = { git = "https://github.com/subspace/subspace", rev = "d736cf913f445a8e7dccd5c663e71b19212085ee" }
+subspace-farmer = { git = "https://github.com/subspace/subspace", rev = "d736cf913f445a8e7dccd5c663e71b19212085ee" }
+subspace-fraud-proof = { git = "https://github.com/subspace/subspace", rev = "d736cf913f445a8e7dccd5c663e71b19212085ee" }
+subspace-runtime = { git = "https://github.com/subspace/subspace", rev = "d736cf913f445a8e7dccd5c663e71b19212085ee" }
+subspace-service = { git = "https://github.com/subspace/subspace", rev = "d736cf913f445a8e7dccd5c663e71b19212085ee" }
+subspace-solving = { git = "https://github.com/subspace/subspace", rev = "d736cf913f445a8e7dccd5c663e71b19212085ee" }
 tokio = { version = "1.11.0", features = ["macros", "rt-multi-thread"] }
 tracing = "0.1.31"
 tracing-bunyan-formatter = "0.3.2"
@@ -68,4 +69,4 @@ codegen-units = 1
 [patch.crates-io]
 # TODO: Remove once chacha20poly1305 0.10 appears in libp2p's dependencies
 chacha20poly1305 = { git = "https://github.com/RustCrypto/AEADs", rev = "06dbfb5571687fd1bbe9d3c9b2193a1ba17f8e99" }
-libp2p = { git = "https://github.com/subspace/rust-libp2p", branch = "subspace-v2" }
+libp2p = { git = "https://github.com/subspace/rust-libp2p", branch = "subspace-v3" }
