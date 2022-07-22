@@ -4,6 +4,7 @@ use std::path::PathBuf;
 use subspace_core_primitives::PublicKey;
 use subspace_farmer::multi_farming::{MultiFarming, Options as MultiFarmingOptions};
 use subspace_farmer::{Identity, NodeRpcClient, ObjectMappings, Plot, RpcClient};
+use subspace_rpc_primitives::FarmerProtocolInfo;
 use tokio::sync::mpsc::{channel, Receiver, Sender};
 
 #[tauri::command]
@@ -69,45 +70,85 @@ async fn farm(
         identity.public_key().to_bytes().into()
     };
 
-    info!("Connecting to node at {}", node_rpc_url);
-    let archiving_client = NodeRpcClient::new(node_rpc_url).await?;
-    let farming_client = NodeRpcClient::new(node_rpc_url).await?;
+    if plot_size < 1024 * 1024 {
+        return Err(anyhow::anyhow!(
+            "Plot size is too low ({0} bytes). Did you mean {0}G or {0}T?",
+            plot_size
+        ));
+    }
 
-    let metadata = farming_client
-        .farmer_metadata()
+    info!("Connecting to node at {}", node_rpc_url);
+    let archiving_client = NodeRpcClient::new(&node_rpc_url).await?;
+    let farming_client = NodeRpcClient::new(&node_rpc_url).await?;
+
+    let mut farmer_protocol_info = farming_client
+        .farmer_protocol_info()
         .await
         .map_err(|error| anyhow!(error))?;
 
-    let max_plot_size = metadata.max_plot_size;
+    let FarmerProtocolInfo {
+        record_size,
+        recorded_history_segment_size,
+        ..
+    } = farmer_protocol_info;
 
     info!("Opening object mapping");
     let object_mappings = tokio::task::spawn_blocking({
-        let base_directory = base_directory.clone();
+        let path = base_directory.join("object-mappings");
 
-        move || ObjectMappings::open_or_create(&base_directory)
+        move || LegacyObjectMappings::open_or_create(path)
     })
     .await??;
 
-    let multi_farming = MultiFarming::new(
+    // Starting the relay server node.
+    let (relay_server_node, mut relay_node_runner) = subspace_networking::create(Config {
+        listen_on,
+        allow_non_globals_in_dht: true,
+        ..Config::with_generated_keypair()
+    })
+    .await?;
+
+    relay_server_node
+        .on_new_listener(Arc::new({
+            let node_id = relay_server_node.id();
+
+            move |multiaddr| {
+                info!(
+                    "Relay listening on {}",
+                    multiaddr.clone().with(Protocol::P2p(node_id.into()))
+                );
+            }
+        }))
+        .detach();
+
+    tokio::spawn(async move {
+        relay_node_runner.run().await;
+    });
+
+    trace!(node_id = %relay_server_node.id(), "Relay Node started");
+
+    let multi_plots_farm = LegacyMultiPlotsFarm::new(
         MultiFarmingOptions {
-            base_directory: base_directory.clone(),
+            base_directory,
+            farmer_protocol_info,
             archiving_client,
             farming_client,
             object_mappings: object_mappings.clone(),
             reward_address,
-            bootstrap_nodes: vec![],
-            listen_on: vec![],
-            enable_dsn_archiving: false,
-            dsn_sync: false,
-            enable_farming: true,
+            bootstrap_nodes,
+            enable_dsn_archiving: matches!(archiving, ArchivingFrom::Dsn),
+            enable_dsn_sync: dsn_sync,
+            enable_farming: !disable_farming,
+            relay_server_node,
         },
-        plot_size,
-        max_plot_size,
-        move |plot_index, public_key, max_piece_count| {
+        plot_size.as_u64(),
+        move |options: PlotFactoryOptions<'_>| {
             Plot::open_or_create(
-                base_directory.join(format!("plot{plot_index}")),
-                public_key,
-                max_piece_count,
+                options.single_plot_farm_id,
+                options.plot_directory,
+                options.metadata_directory,
+                options.public_key,
+                options.max_plot_size,
             )
         },
     )
