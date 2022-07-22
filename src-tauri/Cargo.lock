@@ -8878,6 +8878,7 @@ dependencies = [
  "subspace-core-primitives",
  "subspace-farmer",
  "subspace-fraud-proof",
+ "subspace-networking",
  "subspace-rpc-primitives",
  "subspace-runtime",
  "subspace-service",

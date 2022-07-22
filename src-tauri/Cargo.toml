@@ -35,6 +35,7 @@ sp-panic-handler = { version = "4.0.0", git = "https://github.com/subspace/subst
 subspace-core-primitives = { git = "https://github.com/subspace/subspace", rev = "d736cf913f445a8e7dccd5c663e71b19212085ee" }
 subspace-farmer = { git = "https://github.com/subspace/subspace", rev = "d736cf913f445a8e7dccd5c663e71b19212085ee" }
 subspace-fraud-proof = { git = "https://github.com/subspace/subspace", rev = "d736cf913f445a8e7dccd5c663e71b19212085ee" }
+subspace-networking = { git = "https://github.com/subspace/subspace", rev = "d736cf913f445a8e7dccd5c663e71b19212085ee" }
 subspace-rpc-primitives = { git = "https://github.com/subspace/subspace", rev = "d736cf913f445a8e7dccd5c663e71b19212085ee" }
 subspace-runtime = { git = "https://github.com/subspace/subspace", rev = "d736cf913f445a8e7dccd5c663e71b19212085ee" }
 subspace-service = { git = "https://github.com/subspace/subspace", rev = "d736cf913f445a8e7dccd5c663e71b19212085ee" }
