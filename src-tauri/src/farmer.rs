@@ -10,7 +10,7 @@ use subspace_farmer::{Identity, LegacyObjectMappings, NodeRpcClient, Plot, RpcCl
 use subspace_networking::libp2p::{multiaddr::Protocol, Multiaddr};
 use subspace_networking::Config;
 use tokio::sync::mpsc::{channel, Receiver, Sender};
-use tracing::{error, info, trace};
+use tracing::{debug, error, info, trace, warn};
 
 #[derive(Clone)]
 struct FarmingArgs {
@@ -170,7 +170,7 @@ async fn farm(base_directory: PathBuf, farm_args: FarmingArgs) -> Result<(), any
             enable_farming: true,
             relay_server_node,
         },
-        plot_size,
+        plot_size * 92 / 100, // LegacyMultiPlotsFarm was reducing input to 92% before, but it is not going it anymore. This is to make code equivalent to the old version.
         move |options: PlotFactoryOptions<'_>| {
             Plot::open_or_create(
                 options.single_plot_farm_id,
@@ -205,9 +205,9 @@ fn parse_reward_address(s: &str) -> Result<PublicKey, sp_core::crypto::PublicErr
 fn raise_fd_limit() {
     match std::panic::catch_unwind(fdlimit::raise_fd_limit) {
         Ok(Some(limit)) => {
-            log::info!("Increase file limit from soft to hard (limit is {limit})")
+            info!("Increase file limit from soft to hard (limit is {limit})")
         }
-        Ok(None) => log::debug!("Failed to increase file limit"),
+        Ok(None) => debug!("Failed to increase file limit"),
         Err(err) => {
             let err = if let Some(err) = err.downcast_ref::<&str>() {
                 *err
@@ -216,7 +216,7 @@ fn raise_fd_limit() {
             } else {
                 unreachable!("Should be unreachable as `fdlimit` uses panic macro, which should return either `&str` or `String`.")
             };
-            log::warn!("Failed to increase file limit: {err}")
+            warn!("Failed to increase file limit: {err}")
         }
     }
 }

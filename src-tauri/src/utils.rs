@@ -1,7 +1,7 @@
-use log::{debug, error, info};
 use serde::Serialize;
 use std::path::PathBuf;
 use tauri::{api, Env};
+use tracing::{debug, error, info};
 
 #[derive(Serialize)]
 pub(crate) struct DiskStats {

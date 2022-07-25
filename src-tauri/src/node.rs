@@ -1,6 +1,5 @@
 use anyhow::{anyhow, Result};
 use cirrus_runtime::GenesisConfig as ExecutionGenesisConfig;
-use log::{error, warn};
 use sc_chain_spec::ChainSpec;
 use sc_client_api::HeaderBackend;
 use sc_executor::{NativeExecutionDispatch, WasmExecutionMethod, WasmtimeInstantiationStrategy};
@@ -22,6 +21,7 @@ use subspace_fraud_proof::VerifyFraudProof;
 use subspace_runtime::{GenesisConfig as ConsensusGenesisConfig, RuntimeApi};
 use subspace_service::{FullClient, NewFull, SubspaceConfiguration};
 use tokio::runtime::Handle;
+use tracing::{error, warn};
 
 static INITIALIZE_SUBSTRATE: Once = Once::new();
 
