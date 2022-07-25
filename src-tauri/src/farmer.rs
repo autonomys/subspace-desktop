@@ -50,7 +50,7 @@ pub(crate) async fn farming(path: String, reward_address: String, plot_size: u64
             reward_address: Some(address),
             plot_size,
             error_sender: error_sender.clone(),
-            listen_on: vec!["127.0.0.1".parse().unwrap()],
+            listen_on: vec!["/ip4/127.0.0.1/tcp/40333".parse().unwrap()],
             bootstrap_nodes: vec![],
             archiving: ArchivingFrom::Rpc,
             dsn_sync: false,
