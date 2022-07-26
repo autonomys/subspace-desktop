@@ -156,6 +156,7 @@ async fn farm(base_directory: PathBuf, farm_args: FarmingArgs) -> Result<(), any
 
     trace!(node_id = %relay_server_node.id(), "Relay Node started");
 
+    let usable_space = get_usable_plot_space(plot_size);
     let multi_plots_farm = LegacyMultiPlotsFarm::new(
         MultiFarmingOptions {
             base_directory,
@@ -170,7 +171,7 @@ async fn farm(base_directory: PathBuf, farm_args: FarmingArgs) -> Result<(), any
             enable_farming: true,
             relay_server_node,
         },
-        plot_size * 92 / 100, // LegacyMultiPlotsFarm was reducing input to 92% before, but it is not going it anymore. This is to make code equivalent to the old version.
+        usable_space,
         move |options: PlotFactoryOptions<'_>| {
             Plot::open_or_create(
                 options.single_plot_farm_id,
@@ -219,4 +220,10 @@ fn raise_fd_limit() {
             warn!("Failed to increase file limit: {err}")
         }
     }
+}
+
+fn get_usable_plot_space(allocated_space: u64) -> u64 {
+    // TODO: Should account for database overhead of various additional databases.
+    //  For now assume 92% will go for plot itself
+    allocated_space * 92 / 100
 }
