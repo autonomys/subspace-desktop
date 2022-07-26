@@ -2,6 +2,11 @@ import { LocalStorage } from "quasar"
 import { FarmedBlock } from "../lib/types"
 import { errorLogger } from "./util"
 
+export interface IBlockStorage {
+  getStoredBlocks: () => FarmedBlock[];
+  storeBlocks: (blocks: FarmedBlock[]) => void;
+}
+
 export function getStoredBlocks(): FarmedBlock[] {
   const mined: FarmedBlock[] = []
   try {

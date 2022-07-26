@@ -118,12 +118,13 @@ import { debounce } from "quasar"
 import * as path from "@tauri-apps/api/path"
 import * as fs from "@tauri-apps/api/fs"
 
-import * as util from "../lib/util"
 import { chartOptions, ChartDataType, StatsType } from "../lib/types"
 import * as native from "../lib/native"
 import { appData, appDataDialog } from "../lib/appData"
 import mnemonicModal from "../components/mnemonicModal.vue"
 import { useStore } from '../stores/store';
+import * as util from '../lib/util';
+import { config } from '../lib/appConfig';
 
 const tauri = { path, fs }
 
@@ -262,7 +263,7 @@ export default defineComponent({
       await appData.createCustomDataDir(this.store.plotDir)
       util.infoLogger("SETUP PLOT | custom directory created")
       await this.checkIdentity();
-      await this.store.confirmPlottingSetup();
+      await this.store.confirmPlottingSetup(config, util);
       this.$router.replace({ name: "plottingProgress" });
     },
     async updateDriveStats() {
@@ -299,7 +300,7 @@ export default defineComponent({
       const modal = await util.showModal(mnemonicModal, { mnemonic });
       return new Promise((resolve) => {
         modal?.onDismiss(async () => {
-          await this.store.confirmRewardAddress();
+          await this.store.confirmRewardAddress(config);
           resolve()
         })
       })

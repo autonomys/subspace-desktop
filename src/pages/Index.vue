@@ -29,10 +29,12 @@ q-page(padding)
 <script lang="ts">
 import { defineComponent } from "vue"
 import { Notify } from "quasar"
-import * as util from "../lib/util"
-import { appConfig } from "../lib/appConfig"
+
 import disclaimer from "../components/disclaimer.vue"
 import { useStore } from '../stores/store';
+import { config } from "../lib/appConfig";
+import * as util from '../lib/util';
+import * as blockStorage from '../lib/blockStorage';
 
 // TODO: consider removing appConfig from component and call store methods instead
 export default defineComponent({
@@ -43,9 +45,9 @@ export default defineComponent({
   async mounted() {
     try {
       this.checkDev()
-      if (await appConfig.validate()) {
+      if (await config.validate()) {
         util.infoLogger("INDEX | NOT First Time RUN.")
-        await this.store.updateFromConfig();
+        await this.store.updateFromConfig(blockStorage, config);
         this.dashboard();
         return
       }
@@ -68,9 +70,9 @@ export default defineComponent({
     },
     async firstLoad() {
       util.infoLogger("INDEX | First Time RUN, resetting reward address")
-      await appConfig.update({ rewardAddress: "" })
-      const config = await appConfig.read()
-      if (config.launchOnBoot) {
+      await config.update({ rewardAddress: "" });
+      const { launchOnBoot } = await config.read();
+      if (launchOnBoot) {
         Notify.create({
           message: "Subspace Desktop will be started on boot. You can disable this from settings (the gear icon on top-right).",
           icon: "info"

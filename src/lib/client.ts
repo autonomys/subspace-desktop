@@ -5,18 +5,31 @@ import * as event from "@tauri-apps/api/event"
 import { invoke } from "@tauri-apps/api/tauri"
 import * as process from "process"
 import * as util from "../lib/util"
-import { appConfig } from "./appConfig"
+import { config } from "./appConfig"
 import {
   FarmedBlock,
-  SubPreDigest
+  SubPreDigest,
+  SyncState,
 } from "../lib/types"
-import type { SyncState, EventRecord } from '@polkadot/types/interfaces/system';
+import type { EventRecord } from '@polkadot/types/interfaces/system';
 import { IU8a } from "@polkadot/types-codec/types"
 
 const tauri = { event, invoke }
 const SUNIT = 1000000000000000000n
 
-export class Client {
+export interface IClient {
+  getPeersCount: () => Promise<number>;
+  startNode: (path: string, nodeName: string) => Promise<void>;
+  startSubscription: (handlers: {
+    farmedBlockHandler: (block: FarmedBlock) => void;
+    newBlockHandler: (blockNum: number) => void;
+  }) => Promise<void>;
+  isSyncing: () => Promise<boolean>;
+  getSyncState: () => Promise<SyncState>;
+  startFarming: (path: string, plotSizeGB: number) => Promise<boolean>;
+}
+
+export class Client implements IClient {
   protected clearTauriDestroy: event.UnlistenFn = () => null;
   protected unsubscribe: event.UnlistenFn = () => null;
 
@@ -55,7 +68,7 @@ export class Client {
     farmedBlockHandler: (block: FarmedBlock) => void;
     newBlockHandler: (blockNum: number) => void;
   }): Promise<void> {
-    const rewardAddress: string = (await appConfig.read()).rewardAddress;
+    const rewardAddress: string = (await config.read()).rewardAddress;
 
     this.unsubscribe = await this.api.rpc.chain.subscribeNewHeads(
       async ({ hash, number }) => {
@@ -114,7 +127,7 @@ export class Client {
   }
 
   public async getSyncState(): Promise<SyncState> {
-    return this.api.rpc.system.syncState();
+    return (await this.api.rpc.system.syncState()).toJSON() as unknown as SyncState;
   }
 
   public async isSyncing(): Promise<boolean> {
@@ -144,7 +157,7 @@ export class Client {
   public async startFarming(path: string, plotSizeGB: number): Promise<boolean> {
     // convert GB to Bytes
     const plotSize = Math.round(plotSizeGB * 1024 * 1024 * 1024)
-    const rewardAddress: string = (await appConfig.read()).rewardAddress
+    const { rewardAddress } = (await config.read());
     if (rewardAddress === "") {
       util.errorLogger("Tried to send empty reward address to backend!")
     }

@@ -120,9 +120,11 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import * as util from "../lib/util"
+
 import introModal from "../components/introModal.vue"
 import { useStore } from '../stores/store';
+import * as util from '../lib/util';
+import * as blockStorage from '../lib/blockStorage';
 
 let farmerTimer: number
 
@@ -161,7 +163,7 @@ export default defineComponent({
     this.store.setFirstLoad()
     this.store.setPlottingRemaining(this.store.plotSizeGB);
     util.infoLogger("PLOTTING PROGRESS | starting node")
-    await this.store.startNode(this.$client);
+    await this.store.startNode(this.$client, util);
     this.startTimers()
     util.infoLogger("PLOTTING PROGRESS | starting plotting")
     await this.startFarmer();
@@ -171,7 +173,7 @@ export default defineComponent({
   },
   methods: {
     async startFarmer(): Promise<void> {
-      await this.store.startFarmer(this.$client);
+      await this.store.startFarmer(this.$client, util, blockStorage);
       clearInterval(farmerTimer)
     },
     startTimers() {

@@ -5,7 +5,7 @@ import messages from '../i18n'
 import { Client } from "../lib/client"
 import { createApi } from '../lib/util';
 import { AutoLauncher } from "../lib/autoLauncher"
-import { appConfig } from "../lib/appConfig";
+import { config } from "../lib/appConfig";
 import { useStore } from '../stores/store';
 
 const LOCAL_RPC = process.env.LOCAL_API_WS || "ws://localhost:9947"
@@ -18,10 +18,10 @@ declare module "@vue/runtime-core" {
 }
 
 export default boot(async ({ app }) => {
-  await appConfig.init()
-  const { nodeName } = (await appConfig.read());
+  await config.init()
+  const { nodeName } = (await config.read());
   const store = useStore();
-  store.setNodeName(nodeName);
+  store.setNodeName(config, nodeName);
   const api = createApi(LOCAL_RPC);
   const client = new Client(api);
   const autoLauncher = new AutoLauncher();

@@ -52,7 +52,8 @@ import { defineComponent } from "vue"
 import * as process from 'process'
 import { relaunch } from "@tauri-apps/api/process"
 
-import * as util from "../lib/util"
+import * as util from '../lib/util';
+import { config } from "../lib/appConfig"
 import MainMenu from "../components/mainMenu.vue"
 import { useStore } from '../stores/store';
 
@@ -84,10 +85,10 @@ export default defineComponent({
       this.setEditName(false);
       // if user left input empty - use prev name
       if (!this.store.nodeName) {
-        this.store.setNodeName(this.oldNodeName)
+        this.store.setNodeName(config, this.oldNodeName)
       // only restart if name has changed
       } else if (this.oldNodeName !== this.store.nodeName) {
-        this.store.setNodeName(this.store.nodeName);
+        this.store.setNodeName(config, this.store.nodeName);
         await relaunch();
       }
     },

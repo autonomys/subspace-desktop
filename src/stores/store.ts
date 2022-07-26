@@ -1,11 +1,10 @@
-import { SyncState } from 'app/lib/types';
 import { defineStore } from 'pinia';
 
-import { appConfig } from "../lib/appConfig";
-import * as util from "../lib/util";
-import { FarmedBlock } from '../lib/types';
-import { storeBlocks, getStoredBlocks } from '../lib/blockStorage';
-import { Client } from '../lib/client';
+import { SyncState, FarmedBlock } from '../lib/types';
+import { IClient } from '../lib/client';
+import { IUtil } from "../lib/util";
+import { IConfig } from "../lib/appConfig";
+import { IBlockStorage } from '../lib/blockStorage';
 
 export type Status = 'idle' | 'startingNode' | 'syncing' | 'farming';
 
@@ -41,32 +40,41 @@ interface State {
   plotting: Plotting;
 }
 
+// constants are also used in unit tests
+export const INITIAL_STATUS = 'idle';
+export const INITIAL_PLOT_SIZE = 1;
+export const INITIAL_PLOT_DIR = '/';
+export const INITIAL_SYNC_STATE = {
+  currentBlock: 0,
+  startingBlock: 0,
+  highestBlock: 0,
+}
+
 export const useStore = defineStore('store', {
   state: (): State => ({
-    status: 'idle',
-    plotSizeGB: 1,
-    plotDir: '/',
+    status: INITIAL_STATUS,
+    plotSizeGB: INITIAL_PLOT_SIZE,
+    plotDir: INITIAL_PLOT_DIR,
     farmedBlocks: [],
     nodeName: '',
-    syncState: {
-      startingBlock: 0,
-      currentBlock: 0,
-      highestBlock: 0,
-    },
-    // TODO: consider creating separate store for Network
+    syncState: INITIAL_SYNC_STATE,
     network: {
       syncedAtNum: 0,
       peers: 0,
+      // TODO: consider removing network.state - probably can depend on the app statuses: 
+      // 'idle' | 'startingNode' | 'syncing' | 'farming'
       state: 'starting',
       message: 'dashboard.initializing',
     },
     rewardAddress: '',
     // TODO: it is confusing to start with 'false' value, replace with better mechanism
     isFirstLoad: false,
+    // plot is displayed on Dashboard
     plot: {
       state: 'starting',
       message: 'dashboard.initializing',
     },
+    // plotting is displayed on PlottingProgress
     plotting: {
       finishedGB: 0,
       remainingGB: 0,
@@ -100,9 +108,9 @@ export const useStore = defineStore('store', {
       const { currentBlock, highestBlock } = this.syncState;
       return {
         string: this.plotting.status,
-        values: { 
-          currentBlock, 
-          highestBlock, 
+        values: {
+          currentBlock,
+          highestBlock,
         }
       }
     },
@@ -112,15 +120,17 @@ export const useStore = defineStore('store', {
       const { message, syncedAtNum } = this.network;
       return {
         string: message,
-        values: { 
-          currentBlock, 
-          highestBlock, 
+        values: {
+          currentBlock,
+          highestBlock,
           syncedAt: syncedAtNum,
         }
       }
     },
   },
 
+  // unfortunately Pinia currently does not allow DI, so it is necessary to provide client, util and blockStorage as parameters in order to make store testable
+  // TODO: find more elegant solution
   actions: {
     setPlotDir(dir: string) {
       this.plotDir = dir;
@@ -128,9 +138,9 @@ export const useStore = defineStore('store', {
     setPlotSize(size: number) {
       this.plotSizeGB = size;
     },
-    async setNodeName(name: string) {
+    async setNodeName(config: IConfig, name: string) {
       this.nodeName = name;
-      await appConfig.update({ nodeName: name });
+      await config.update({ nodeName: name });
     },
     setSyncState(state: SyncState) {
       this.syncState = state;
@@ -141,11 +151,11 @@ export const useStore = defineStore('store', {
     setStatus(status: Status) {
       this.status = status;
     },
-    async confirmPlottingSetup() {
+    async confirmPlottingSetup(config: IConfig, util: IUtil) {
       const nodeName = util.generateNodeName();
-      this.setNodeName(nodeName);
+      this.setNodeName(config, nodeName);
 
-      await appConfig.update({
+      await config.update({
         plot: {
           location: this.plotDir,
           sizeGB: this.plotSizeGB,
@@ -157,26 +167,26 @@ export const useStore = defineStore('store', {
       this.rewardAddress = address;
     },
     // we need a separate method, because we store address to config only after user confirmed (modal in SetupPlot.vue)
-    async confirmRewardAddress() {
-      await appConfig.update({ rewardAddress: this.rewardAddress });
+    async confirmRewardAddress(config: IConfig) {
+      await config.update({ rewardAddress: this.rewardAddress });
     },
     setFirstLoad() {
       this.isFirstLoad = true;
     },
-    addFarmedBlock(block: FarmedBlock) {
+    addFarmedBlock(blockStorage: IBlockStorage, block: FarmedBlock) {
       this.farmedBlocks = [block, ...this.farmedBlocks];
-      storeBlocks(this.farmedBlocks);
+      blockStorage.storeBlocks(this.farmedBlocks);
     },
     updateBlockNum(blockNum: number) {
       this.network.syncedAtNum = blockNum;
     },
-    async updateFromConfig() {
-      const config = await appConfig.read();
-      this.plotSizeGB = config.plot.sizeGB;
-      this.plotDir = config.plot.location;
-      this.nodeName = config.nodeName;
-      this.rewardAddress = config.rewardAddress;
-      this.farmedBlocks = getStoredBlocks();
+    async updateFromConfig(blockStorage: IBlockStorage, config: IConfig) {
+      const { plot, nodeName, rewardAddress } = await config.read();
+      this.plotSizeGB = plot.sizeGB;
+      this.plotDir = plot.location;
+      this.nodeName = nodeName;
+      this.rewardAddress = rewardAddress;
+      this.farmedBlocks = blockStorage.getStoredBlocks();
     },
     setNetworkState(state: string) {
       this.network.state = state;
@@ -190,8 +200,7 @@ export const useStore = defineStore('store', {
     setPlotMessage(message: string) {
       this.plot.message = message;
     },
-    // TODO: find better way to provide client
-    async startNode(client: Client) {
+    async startNode(client: IClient, util: IUtil) {
       if (this.nodeName && this.plotDir) {
         this.setStatus('startingNode');
         await client.startNode(this.plotDir, this.nodeName);
@@ -200,9 +209,9 @@ export const useStore = defineStore('store', {
         util.errorLogger("NODE START | node name and plot directory are required to start node");
       }
     },
-    // TODO: find better way to provide client
-    async startFarmer(client: Client) {
+    async startFarmer(client: IClient, util: IUtil, blockStorage: IBlockStorage) {
       this.setStatus('syncing');
+      // TODO: consider refactoring statuses after Dashboard Plot component #294 is resolved
       this.setNetworkState('verifying');
       this.setPlotMessage('dashboard.verifyingPlot');
       this.setNetworkMessage('dashboard.verifyingNet');
@@ -212,14 +221,14 @@ export const useStore = defineStore('store', {
         util.errorLogger("PLOTTING PROGRESS | Farmer start error!")
       }
       util.infoLogger("PLOTTING PROGRESS | farmer started")
-      
-      const syncState = (await client.getSyncState()).toJSON() as unknown as SyncState;
+
+      const syncState = await client.getSyncState();
       this.setSyncState(syncState);
       let isSyncing = await client.isSyncing();
 
       do {
         await new Promise((resolve) => setTimeout(resolve, 3000))
-        const syncState = (await client.getSyncState()).toJSON() as unknown as SyncState;
+        const syncState = await client.getSyncState();
         this.setSyncState(syncState);
         this.setPlotMessage('dashboard.plotActive');
         this.setNetworkMessage('dashboard.syncingMsg');
@@ -235,7 +244,7 @@ export const useStore = defineStore('store', {
       this.setStatus('farming');
 
       await client.startSubscription({
-        farmedBlockHandler: this.addFarmedBlock,
+        farmedBlockHandler: (block) => this.addFarmedBlock(blockStorage, block),
         newBlockHandler: this.updateBlockNum,
       });
 

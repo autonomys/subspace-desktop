@@ -25,12 +25,14 @@ q-page.q-pl-lg.q-pr-lg.q-pt-md
 <script lang="ts">
 import { defineComponent, watch } from "vue"
 import { Notify } from "quasar"
-import * as util from "../lib/util"
+
 import farmedList from "../components/farmedList.vue"
 import netCard from "../components/netCard.vue"
 import plotCard from "../components/plotCard.vue"
 import { FarmedBlock } from "../lib/types"
 import { useStore } from '../stores/store';
+import * as util from '../lib/util';
+import * as blockStorage from '../lib/blockStorage';
 
 export default defineComponent({
   components: { farmedList, netCard, plotCard },
@@ -70,13 +72,13 @@ export default defineComponent({
 
     if (!this.store.isFirstLoad) {
       util.infoLogger("DASHBOARD | starting node");
-      await this.store.startNode(this.$client);
+      await this.store.startNode(this.$client, util);
     }
 
     // TODO: consider moving fetching peers into store 
     this.fetchPeersCount(); // fetch initial peers count value
     this.peerInterval = window.setInterval(this.fetchPeersCount, 30000);
-    await this.store.startFarmer(this.$client);
+    await this.store.startFarmer(this.$client, util, blockStorage);
   },
   unmounted() {
     clearInterval(this.peerInterval)
