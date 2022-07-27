@@ -169,7 +169,8 @@ async fn farm(base_directory: PathBuf, farm_args: FarmingArgs) -> Result<(), any
             enable_dsn_archiving: matches!(archiving, ArchivingFrom::Dsn),
             enable_dsn_sync: dsn_sync,
             enable_farming: true,
-            relay_server_node,
+            listen_on: vec![],
+            relay_server_node: Some(relay_server_node),
         },
         usable_space,
         move |options: PlotFactoryOptions<'_>| {
