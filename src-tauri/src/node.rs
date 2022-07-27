@@ -2,7 +2,10 @@ use anyhow::{anyhow, Result};
 use cirrus_runtime::GenesisConfig as ExecutionGenesisConfig;
 use sc_chain_spec::ChainSpec;
 use sc_client_api::HeaderBackend;
-use sc_executor::{NativeExecutionDispatch, WasmExecutionMethod, WasmtimeInstantiationStrategy};
+use sc_executor::{
+    NativeElseWasmExecutor, NativeExecutionDispatch, WasmExecutionMethod,
+    WasmtimeInstantiationStrategy,
+};
 use sc_network::config::{NodeKeyConfig, Secret};
 use sc_service::config::{
     ExecutionStrategies, ExecutionStrategy, KeystoreConfig, NetworkConfiguration,
@@ -16,9 +19,10 @@ use sc_subspace_chain_specs::ConsensusChainSpec;
 use sp_core::crypto::Ss58AddressFormat;
 use std::env;
 use std::path::PathBuf;
-use std::sync::Once;
+use std::sync::{Arc, Once, Weak};
 use subspace_fraud_proof::VerifyFraudProof;
 use subspace_runtime::{GenesisConfig as ConsensusGenesisConfig, RuntimeApi};
+use subspace_runtime_primitives::opaque::Block;
 use subspace_service::{FullClient, NewFull, SubspaceConfiguration};
 use tokio::time::{sleep, timeout, Duration};
 use tokio::{runtime::Handle, sync::Mutex, task::JoinHandle};
@@ -57,35 +61,51 @@ impl NativeExecutionDispatch for ExecutorDispatch {
 /// if there is a node instance running previously,
 /// first it stops the previous instance, then starts a new instance
 pub(crate) async fn start_node(path: String, node_name: String) -> bool {
+    type FullClient<RuntimeApi, ExecutorDispatch> =
+        sc_service::TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<ExecutorDispatch>>;
+
     static NODE_HANDLE: Mutex<Option<JoinHandle<()>>> = Mutex::const_new(None);
+    static WEAK_CLIENT: Mutex<Option<Weak<FullClient<RuntimeApi, ExecutorDispatch>>>> =
+        Mutex::const_new(None);
 
     let mut node_handle_guard = NODE_HANDLE.lock().await;
+    let mut weak_client_guard = WEAK_CLIENT.lock().await;
 
     // if there is already a node running, stop it
-    if let Some(guard) = node_handle_guard.take() {
-        guard.abort();
+    if let Some(handle) = node_handle_guard.take() {
+        handle.abort();
+        while !handle.is_finished() {
+            sleep(Duration::from_millis(200)).await;
+        }
+        let weak_client = weak_client_guard.take().unwrap(); // safe to unwrap, since we know a previous instance is present
+        while weak_client.upgrade().is_some() {
+            sleep(Duration::from_millis(200)).await;
+        }
     }
 
     // wait for the previous instance to finish if new instance is unable to start
+    // TODO: remove this when https://github.com/paritytech/substrate/issues/11654 and https://github.com/subspace/subspace/issues/578 are resolved
     // we cannot know the previous node instance is completely finished for now
-    // track the issue from here: https://github.com/paritytech/substrate/issues/11654 and https://github.com/subspace/subspace/issues/578
-    if let Err(_) = timeout(Duration::from_secs(10), async {
+    // IMPORTANT: don't remove the timeout mechanism, carry it to the other strategy when removing this: either `is_finished` or `Weak<Client>.upgrade()`
+    if (timeout(Duration::from_secs(10), async {
         loop {
             match init_node(path.clone().into(), node_name.clone()).await {
-                Ok(guard) => {
-                    *node_handle_guard = Some(guard);
+                Ok((handle, weak_client)) => {
+                    *node_handle_guard = Some(handle);
+                    *weak_client_guard = Some(weak_client);
                     break;
                 }
                 Err(err) => {
                     error!(
-                        "could not start the node with err: {err}, will wait for 100 milliseconds"
+                        "could not start the node with err: {err}, will wait for 200 milliseconds"
                     );
                     sleep(Duration::from_millis(200)).await;
                 }
             }
         }
     })
-    .await
+    .await)
+        .is_err()
     {
         error!(
             "Previous instance is not terminating for 10 seconds, unable to start a new instance"
@@ -95,7 +115,13 @@ pub(crate) async fn start_node(path: String, node_name: String) -> bool {
     true
 }
 
-async fn init_node(base_directory: PathBuf, node_name: String) -> Result<JoinHandle<()>> {
+async fn init_node(
+    base_directory: PathBuf,
+    node_name: String,
+) -> Result<(
+    JoinHandle<()>,
+    Weak<sc_service::TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<ExecutorDispatch>>>,
+)> {
     let chain_spec: ConsensusChainSpec<ConsensusGenesisConfig, ExecutionGenesisConfig> =
         ConsensusChainSpec::from_json_bytes(include_bytes!("../chain-spec.json").as_ref())
             .map_err(anyhow::Error::msg)?;
@@ -107,6 +133,9 @@ async fn init_node(base_directory: PathBuf, node_name: String) -> Result<JoinHan
 
     full_client.network_starter.start_network();
 
+    let client = full_client.client;
+    let weak = Arc::downgrade(&client);
+
     let node_handle = tokio::spawn(async move {
         if let Err(error) = full_client.task_manager.future().await {
             error!("Task manager exited with error: {error}");
@@ -115,7 +144,7 @@ async fn init_node(base_directory: PathBuf, node_name: String) -> Result<JoinHan
         }
     });
 
-    Ok(node_handle)
+    Ok((node_handle, weak))
 }
 
 // TODO: Allow customization of a bunch of these things
