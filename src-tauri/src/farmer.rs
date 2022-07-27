@@ -10,6 +10,7 @@ use subspace_farmer::{Identity, LegacyObjectMappings, NodeRpcClient, Plot, RpcCl
 use subspace_networking::libp2p::{multiaddr::Protocol, Multiaddr};
 use subspace_networking::Config;
 use tokio::sync::mpsc::{channel, Receiver, Sender};
+use tokio::time::{sleep, timeout, Duration};
 use tracing::{debug, error, info, trace, warn};
 
 #[derive(Clone)]
@@ -96,6 +97,7 @@ async fn farm(base_directory: PathBuf, farm_args: FarmingArgs) -> Result<(), any
         archiving,
         dsn_sync,
     } = farm_args;
+
     raise_fd_limit();
 
     let reward_address = if let Some(reward_address) = reward_address {
@@ -113,6 +115,20 @@ async fn farm(base_directory: PathBuf, farm_args: FarmingArgs) -> Result<(), any
     }
 
     info!("Connecting to node at {}", node_rpc_url);
+    if let Err(error) = timeout(Duration::from_secs(10), async {
+        loop {
+            if NodeRpcClient::new(&node_rpc_url).await.is_ok() {
+                break;
+            } else {
+                sleep(Duration::from_millis(500)).await;
+            }
+        }
+    })
+    .await
+    {
+        error!("Node is not responding for 10 seconds, farmer is unable to start");
+        return Err(anyhow!(error));
+    }
     let archiving_client = NodeRpcClient::new(&node_rpc_url).await?;
     let farming_client = NodeRpcClient::new(&node_rpc_url).await?;
 
@@ -192,7 +208,10 @@ async fn farm(base_directory: PathBuf, farm_args: FarmingArgs) -> Result<(), any
                 error!("{error}");
                 error_sender.send(()).await.unwrap() // this send should always be successful
             }
-            Ok(_) => unreachable!("wait function should not return Ok()"),
+            Ok(_) => {
+                debug!("Node should be restarted");
+                error_sender.send(()).await.unwrap() // this send should always be successful
+            }
         }
     });
 

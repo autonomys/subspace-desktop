@@ -74,7 +74,7 @@ export class Client {
           const block: FarmedBlock = {
             id: hash.toString(),
             time: Date.now(),
-            // TODO: remove, transactions count is not displayed anywhere   
+            // TODO: remove, transactions count is not displayed anywhere
             transactions: 0,
             blockNum,
             blockReward,
@@ -139,14 +139,18 @@ export class Client {
     return isSyncing.isTrue;
   }
 
-  public async startNode(path: string, nodeName: string): Promise<void> {
-    await tauri.invoke("start_node", { path, nodeName })
+  public async startNode(path: string, nodeName: string): Promise<boolean> {
+    const result = await tauri.invoke("start_node", { path, nodeName })
+    if (!result) {
+      return false
+    }
     if (!this.firstLoad) {
       this.loadStoredBlocks()
     }
     // TODO: workaround in case node takes some time to fully start.
     await new Promise((resolve) => setTimeout(resolve, 7000))
     await this.connectApi()
+    return true
   }
 
   private loadStoredBlocks(): void {

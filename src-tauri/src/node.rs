@@ -20,7 +20,8 @@ use std::sync::Once;
 use subspace_fraud_proof::VerifyFraudProof;
 use subspace_runtime::{GenesisConfig as ConsensusGenesisConfig, RuntimeApi};
 use subspace_service::{FullClient, NewFull, SubspaceConfiguration};
-use tokio::runtime::Handle;
+use tokio::time::{sleep, timeout, Duration};
+use tokio::{runtime::Handle, sync::Mutex, task::JoinHandle};
 use tracing::{error, warn};
 
 static INITIALIZE_SUBSTRATE: Once = Once::new();
@@ -52,11 +53,49 @@ impl NativeExecutionDispatch for ExecutorDispatch {
 }
 
 #[tauri::command]
-pub(crate) async fn start_node(path: String, node_name: String) {
-    init_node(path.into(), node_name).await.unwrap();
+/// starts a new node instance
+/// if there is a node instance running previously,
+/// first it stops the previous instance, then starts a new instance
+pub(crate) async fn start_node(path: String, node_name: String) -> bool {
+    static NODE_HANDLE: Mutex<Option<JoinHandle<()>>> = Mutex::const_new(None);
+
+    let mut node_handle_guard = NODE_HANDLE.lock().await;
+
+    // if there is already a node running, stop it
+    if let Some(guard) = node_handle_guard.take() {
+        guard.abort();
+    }
+
+    // wait for the previous instance to finish if new instance is unable to start
+    // we cannot know the previous node instance is completely finished for now
+    // track the issue from here: https://github.com/paritytech/substrate/issues/11654 and https://github.com/subspace/subspace/issues/578
+    if let Err(_) = timeout(Duration::from_secs(10), async {
+        loop {
+            match init_node(path.clone().into(), node_name.clone()).await {
+                Ok(guard) => {
+                    *node_handle_guard = Some(guard);
+                    break;
+                }
+                Err(err) => {
+                    error!(
+                        "could not start the node with err: {err}, will wait for 100 milliseconds"
+                    );
+                    sleep(Duration::from_millis(200)).await;
+                }
+            }
+        }
+    })
+    .await
+    {
+        error!(
+            "Previous instance is not terminating for 10 seconds, unable to start a new instance"
+        );
+        return false;
+    }
+    true
 }
 
-async fn init_node(base_directory: PathBuf, node_name: String) -> Result<()> {
+async fn init_node(base_directory: PathBuf, node_name: String) -> Result<JoinHandle<()>> {
     let chain_spec: ConsensusChainSpec<ConsensusGenesisConfig, ExecutionGenesisConfig> =
         ConsensusChainSpec::from_json_bytes(include_bytes!("../chain-spec.json").as_ref())
             .map_err(anyhow::Error::msg)?;
@@ -68,8 +107,7 @@ async fn init_node(base_directory: PathBuf, node_name: String) -> Result<()> {
 
     full_client.network_starter.start_network();
 
-    // TODO: Make this interruptable if needed
-    tokio::spawn(async move {
+    let node_handle = tokio::spawn(async move {
         if let Err(error) = full_client.task_manager.future().await {
             error!("Task manager exited with error: {error}");
         } else {
@@ -77,7 +115,7 @@ async fn init_node(base_directory: PathBuf, node_name: String) -> Result<()> {
         }
     });
 
-    Ok(())
+    Ok(node_handle)
 }
 
 // TODO: Allow customization of a bunch of these things
@@ -87,7 +125,7 @@ async fn create_full_client<CS: ChainSpec + 'static>(
     node_name: String,
 ) -> Result<
     NewFull<
-        FullClient<subspace_runtime::RuntimeApi, ExecutorDispatch>,
+        FullClient<RuntimeApi, ExecutorDispatch>,
         impl VerifyFraudProof + Clone + Send + Sync + 'static,
     >,
 > {

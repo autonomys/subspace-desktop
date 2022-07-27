@@ -54,7 +54,6 @@ import * as util from "../lib/util"
 import MainMenu from "../components/mainMenu.vue"
 import { globalState as global } from "../lib/global"
 import { appConfig } from "../lib/appConfig"
-import { relaunch } from "@tauri-apps/api/process"
 
 export default defineComponent({
   name: "MainLayout",
@@ -94,9 +93,13 @@ export default defineComponent({
         global.setNodeName(this.oldNodeName)
       // only restart if name has changed
       } else if (this.oldNodeName !== global.data.nodeName) {
+        const config = await appConfig.read()
         await appConfig.update({ nodeName: global.data.nodeName });
         global.setNodeName(global.data.nodeName);
-        await relaunch();
+        const nodeStarted = await this.$client.startNode(config.plot.location, config.nodeName)
+        if (!nodeStarted) {
+          util.errorLogger("MAIN LAYOUT | Node start error!")
+        }
       }
     },
     setEditName(value: boolean) {
