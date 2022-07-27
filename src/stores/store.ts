@@ -93,9 +93,10 @@ export const useStore = defineStore('store', {
         .filter(({ rewardAddr }: FarmedBlock) => rewardAddr === state.rewardAddress)
     },
     // TODO: include voting rewards
-    totalEarned(): number {
+    totalEarned(): string {
       return this.blocksByAddress
         .reduce((agg: number, { blockReward, feeReward }) => blockReward + feeReward + agg, 0)
+        .toFixed(2)
     },
     plottingFinished(): number {
       return parseFloat(this.plotting.finishedGB.toFixed(2))
@@ -123,7 +124,7 @@ export const useStore = defineStore('store', {
         values: {
           currentBlock,
           highestBlock,
-          syncedAt: syncedAtNum,
+          syncedAtNum,
         }
       }
     },

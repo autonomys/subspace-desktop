@@ -78,7 +78,7 @@
     "loadingMsg": "Connecting to client...",
     "loadingStatus": "loading...",
     "syncingMsg": "Syncing node {currentBlock} of {highestBlock} Blocks",
-    "syncedAt": "Synced at Block # {blockNumber}",
+    "syncedAt": "Synced at Block # {syncedAtNum}",
     "blockNum": "Block #"
   },
   "importKey": {

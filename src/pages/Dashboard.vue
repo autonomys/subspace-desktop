@@ -56,29 +56,17 @@ export default defineComponent({
           this.farmBlock(this.store.farmedBlocks[0]);
         }
       },
-      { immediate: true }
-    )
-
-    // watch for new blocks (synced at block number)
-    watch(
-      () => this.store.network.syncedAtNum,
-      () => {
-        if (this.store.network.state === "finished") {
-          this.store.setNetworkMessage(this.$t('dashboard.syncedAt', { blockNumber: this.store.network.syncedAtNum }));
-        }
-      },
-      { immediate: true }
     )
 
     if (!this.store.isFirstLoad) {
       util.infoLogger("DASHBOARD | starting node");
       await this.store.startNode(this.$client, util);
+      await this.store.startFarmer(this.$client, util, blockStorage);
     }
 
     // TODO: consider moving fetching peers into store 
     this.fetchPeersCount(); // fetch initial peers count value
     this.peerInterval = window.setInterval(this.fetchPeersCount, 30000);
-    await this.store.startFarmer(this.$client, util, blockStorage);
   },
   unmounted() {
     clearInterval(this.peerInterval)

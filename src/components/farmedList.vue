@@ -57,7 +57,7 @@ q-card(bordered flat)
           .col-3
             p.text-weight-light {{ formatDate(block.time) }}
           .col-2
-            p {{ block.blockReward }} $t('dashboard.tokenName')
+            p {{ block.blockReward }} {{$t('dashboard.tokenName')}}
 </template>
 
 <script lang="ts">
