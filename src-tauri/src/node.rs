@@ -77,7 +77,9 @@ pub(crate) async fn start_node(path: String, node_name: String) -> bool {
         while !handle.is_finished() {
             sleep(Duration::from_millis(200)).await;
         }
-        let weak_client = weak_client_guard.take().unwrap(); // safe to unwrap, since we know a previous instance is present
+        let weak_client = weak_client_guard
+            .take()
+            .expect("previous instance is present");
         while weak_client.upgrade().is_some() {
             sleep(Duration::from_millis(200)).await;
         }

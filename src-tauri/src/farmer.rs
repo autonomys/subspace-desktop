@@ -51,7 +51,9 @@ pub(crate) async fn farming(path: String, reward_address: String, plot_size: u64
             reward_address: Some(address),
             plot_size,
             error_sender: error_sender.clone(),
-            listen_on: vec!["/ip4/127.0.0.1/tcp/40333".parse().unwrap()],
+            listen_on: vec!["/ip4/127.0.0.1/tcp/40333"
+                .parse()
+                .expect("the address is hardcoded and correct")],
             bootstrap_nodes: vec![],
             archiving: ArchivingFrom::Rpc,
             dsn_sync: false,
@@ -59,7 +61,7 @@ pub(crate) async fn farming(path: String, reward_address: String, plot_size: u64
 
         farm(path.clone().into(), farming_args.clone())
             .await
-            .unwrap();
+            .expect("farm function should not panic");
 
         // farmer started successfully, now listen in the background for errors
         tokio::spawn(async move {
@@ -70,7 +72,7 @@ pub(crate) async fn farming(path: String, reward_address: String, plot_size: u64
                     // we have received an error, let's restart the farmer
                     Some(_) => farm(path.clone().into(), farming_args.clone())
                         .await
-                        .unwrap(),
+                        .expect("farm function should not panic"),
                     None => unreachable!(
                         "sender should not have been dropped before sending an error message"
                     ),
@@ -206,11 +208,17 @@ async fn farm(base_directory: PathBuf, farm_args: FarmingArgs) -> Result<(), any
         match result {
             Err(error) => {
                 error!("{error}");
-                error_sender.send(()).await.unwrap() // this send should always be successful
+                error_sender
+                    .send(())
+                    .await
+                    .expect("error receiver is always listening")
             }
             Ok(_) => {
                 debug!("Node should be restarted");
-                error_sender.send(()).await.unwrap() // this send should always be successful
+                error_sender
+                    .send(())
+                    .await
+                    .expect("error receiver is always listening")
             }
         }
     });
