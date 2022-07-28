@@ -1,6 +1,5 @@
 use anyhow::{anyhow, Result};
 use cirrus_runtime::GenesisConfig as ExecutionGenesisConfig;
-use log::{error, warn};
 use sc_chain_spec::ChainSpec;
 use sc_client_api::HeaderBackend;
 use sc_executor::{NativeExecutionDispatch, WasmExecutionMethod, WasmtimeInstantiationStrategy};
@@ -22,6 +21,7 @@ use subspace_fraud_proof::VerifyFraudProof;
 use subspace_runtime::{GenesisConfig as ConsensusGenesisConfig, RuntimeApi};
 use subspace_service::{FullClient, NewFull, SubspaceConfiguration};
 use tokio::runtime::Handle;
+use tracing::{error, warn};
 
 static INITIALIZE_SUBSTRATE: Once = Once::new();
 
@@ -125,12 +125,15 @@ async fn create_full_client<CS: ChainSpec + 'static>(
         .as_ref()
         .map(|base_path| base_path.config_dir("subspace_gemini_1b"));
 
-    let primary_chain_node =
-        subspace_service::new_full::<RuntimeApi, ExecutorDispatch>(config, true)
-            .await
-            .map_err(|error| {
-                sc_service::Error::Other(format!("Failed to build a full subspace node: {error:?}"))
-            })?;
+    let primary_chain_node = subspace_service::new_full::<RuntimeApi, ExecutorDispatch>(
+        config,
+        true,
+        sc_consensus_slots::SlotProportion::new(2f32 / 3f32),
+    )
+    .await
+    .map_err(|error| {
+        sc_service::Error::Other(format!("Failed to build a full subspace node: {error:?}"))
+    })?;
 
     if primary_chain_node.client.info().best_number == 33670 {
         if let Some(config_dir) = config_dir {
