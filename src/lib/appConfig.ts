@@ -3,6 +3,18 @@ import { appName, errorLogger, toFixed } from "./util"
 import * as path from "@tauri-apps/api/path"
 import * as fs from "@tauri-apps/api/fs"
 
+export interface IConfig {
+  configDir: () => Promise<string>;
+  configFullPath: () => Promise<string>;
+  init: () => Promise<void>;
+  validate: () => Promise<boolean>;
+  remove: () => Promise<void>;
+  read: () => Promise<Config>;
+  write: (config: Config) => Promise<void>;
+  update: (params: UpdateParams) => Promise<void>;
+  showErrorModal: () => DialogChainObject;
+}
+
 export interface Plot {
   location: string
   sizeGB: number
@@ -17,6 +29,14 @@ interface Config {
   nodeName: string,
 }
 
+interface UpdateParams {
+  plot?: Plot;
+  launchOnBoot?: boolean;
+  rewardAddress?: string;
+  version?: string;
+  nodeName?: string;
+}
+
 const emptyConfig: Config = {
   plot: { location: "", sizeGB: 0 },
   rewardAddress: "",
@@ -25,7 +45,7 @@ const emptyConfig: Config = {
   nodeName: "",
 }
 
-export const appConfig = {
+export const config: IConfig = {
   async configDir(): Promise<string> {
     return (await path.configDir()) + appName
   },
@@ -78,28 +98,20 @@ export const appConfig = {
       }
     });
     await fs.writeFile({
-        path: await this.configFullPath(),
-        contents: JSON.stringify(config, null, 2)
-      })
+      path: await this.configFullPath(),
+      contents: JSON.stringify(config, null, 2)
+    })
       .catch((error) => {
         errorLogger(error)
       })
   },
-  async update(
-    {
-      plot,
-      launchOnBoot,
-      rewardAddress,
-      version,
-      nodeName,
-    }: {
-      plot?: Plot;
-      launchOnBoot?: boolean;
-      rewardAddress?: string;
-      version?: string;
-      nodeName?: string;
-    }
-  ): Promise<void> {
+  async update({
+    plot,
+    launchOnBoot,
+    rewardAddress,
+    version,
+    nodeName,
+  }: UpdateParams): Promise<void> {
     const newAppConfig = await this.read()
     if (plot !== undefined) newAppConfig.plot = plot
     if (launchOnBoot !== undefined) newAppConfig.launchOnBoot = launchOnBoot
