@@ -43,7 +43,6 @@ import { decodeAddress, encodeAddress } from "@polkadot/keyring"
 import { hexToU8a, isHex } from "@polkadot/util"
 
 import { useStore } from '../stores/store';
-import { config } from "../lib/appConfig";
 
 export default defineComponent({
   setup() {
@@ -60,7 +59,6 @@ export default defineComponent({
       }
     },
     async importKey() {
-      await this.store.confirmRewardAddress(config);
       this.$router.replace({ name: "setupPlot" })
     },
   }

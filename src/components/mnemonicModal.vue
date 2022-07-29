@@ -16,7 +16,7 @@ q-dialog(@hide="onDialogHide" persistent ref="dialog")
           .row.justify-end
             q-btn(
               :disabled="!userConfirmed"
-              @click="hide"
+              @click="handleNextClick"
               :label="$t('plottingProgress.next')"
               outline
               size="lg"
@@ -27,11 +27,14 @@ q-dialog(@hide="onDialogHide" persistent ref="dialog")
 <script>
 import { defineComponent } from "vue"
 import saveKeys from "components/SaveKeys.vue"
+
+import { useStore } from '../stores/store';
+
 const component = defineComponent({
   components: { saveKeys },
   props: {
-    mnemonic: { 
-      type: String,
+    handleConfirm: {
+      type: Function,
       required: true,
     }
   },
@@ -40,10 +43,20 @@ const component = defineComponent({
     "ok",
     "hide"
   ],
+  setup() {
+    const store = useStore();
+    return { store };
+  },
   data() {
     return {
-      userConfirmed: false
+      userConfirmed: false,
+      mnemonic: '',
     }
+  },
+  async mounted() {
+    const { rewardAddress, mnemonic }  = await this.$client.createRewardAddress();
+    this.store.setRewardAddress(rewardAddress);
+    this.mnemonic = mnemonic;
   },
   methods: {
     userConfirm(val) {
@@ -67,21 +80,10 @@ const component = defineComponent({
       this.$emit("hide")
     },
 
-    onOKClick() {
-      // on OK, it is REQUIRED to
-      // emit "ok" event (with optional payload)
-      // before hiding the QDialog
-      this.$emit("ok")
-      // or with payload: this.$emit('ok', { ... })
-
-      // then hiding dialog
+    async handleNextClick() {
       this.hide()
+      await this.handleConfirm();
     },
-
-    onCancelClick() {
-      // we just need to hide the dialog
-      this.hide()
-    }
   }
 })
 export default component
