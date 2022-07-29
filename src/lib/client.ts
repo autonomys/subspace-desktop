@@ -3,25 +3,33 @@ import type { Vec } from "@polkadot/types/codec"
 import { mnemonicGenerate, cryptoWaitReady } from "@polkadot/util-crypto"
 import * as event from "@tauri-apps/api/event"
 import { invoke } from "@tauri-apps/api/tauri"
-import { reactive } from "vue"
 import * as process from "process"
 import * as util from "../lib/util"
-import { appConfig } from "./appConfig"
-import { getStoredBlocks, storeBlocks } from "./blockStorage"
+import { config } from "./appConfig"
 import {
-  emptyClientData,
   FarmedBlock,
-  SubPreDigest
+  SubPreDigest,
+  SyncState,
 } from "../lib/types"
-import type { SyncState, EventRecord } from '@polkadot/types/interfaces/system';
+import type { EventRecord } from '@polkadot/types/interfaces/system';
 import { IU8a } from "@polkadot/types-codec/types"
 
 const tauri = { event, invoke }
 const SUNIT = 1000000000000000000n
 
-export class Client {
-  protected firstLoad = false
-  protected farmed: FarmedBlock[] = []
+export interface IClient {
+  getPeersCount: () => Promise<number>;
+  startNode: (path: string, nodeName: string) => Promise<void>;
+  startSubscription: (handlers: {
+    farmedBlockHandler: (block: FarmedBlock) => void;
+    newBlockHandler: (blockNum: number) => void;
+  }) => Promise<void>;
+  isSyncing: () => Promise<boolean>;
+  getSyncState: () => Promise<SyncState>;
+  startFarming: (path: string, plotSizeGB: number) => Promise<boolean>;
+}
+
+export class Client implements IClient {
   protected clearTauriDestroy: event.UnlistenFn = () => null;
   protected unsubscribe: event.UnlistenFn = () => null;
 
@@ -31,7 +39,6 @@ export class Client {
     this.api = api;
   }
 
-  data = reactive(emptyClientData)
   async getPeersCount(): Promise<number> {
     const peers = await this.api.rpc.system.peers();
     return peers.length;
@@ -56,8 +63,12 @@ export class Client {
     return blockReward;
   }
 
-  async startSubscription(): Promise<void> {
-    const rewardAddress: string = (await appConfig.read()).rewardAddress;
+  // TODO: handlers param is temporary - create better solution
+  async startSubscription(handlers: {
+    farmedBlockHandler: (block: FarmedBlock) => void;
+    newBlockHandler: (blockNum: number) => void;
+  }): Promise<void> {
+    const rewardAddress: string = (await config.read()).rewardAddress;
 
     this.unsubscribe = await this.api.rpc.chain.subscribeNewHeads(
       async ({ hash, number }) => {
@@ -82,11 +93,9 @@ export class Client {
             // TODO: check if necessary to store address here since we only process blocks farmed by user
             rewardAddr: rewardAddress.toString(),
           }
-          this.data.farming.farmed = [block, ...this.data.farming.farmed];
-          storeBlocks(this.data.farming.farmed)
-          this.data.farming.events.emit("farmedBlock", block)
+          handlers.farmedBlockHandler(block);
         }
-        this.data.farming.events.emit("newBlock", blockNum)
+        handlers.newBlockHandler(blockNum);
       }
     )
 
@@ -94,10 +103,7 @@ export class Client {
     window.addEventListener("unload", this.stopSubscription)
     this.clearTauriDestroy = await tauri.event.once(
       "tauri://destroyed",
-      () => {
-        console.log("Destroyed event!")
-        storeBlocks(this.data.farming.farmed)
-      }
+      () => console.log("Destroyed event!")
     )
   }
 
@@ -107,20 +113,10 @@ export class Client {
     this.api.disconnect()
     try {
       this.clearTauriDestroy()
-      storeBlocks(this.data.farming.farmed)
       window.removeEventListener("unload", this.stopSubscription)
     } catch (error) {
       util.errorLogger(error)
     }
-  }
-
-  /* To be called ONLY from plotting progress */
-  public setFirstLoad(): void {
-    this.firstLoad = true
-  }
-  /* To be called from dashboard, if isFirstLoad dashboard will not start NODE or FARMER as plottingProgress page already done this and also started block subscriptions. */
-  public isFirstLoad(): boolean {
-    return this.firstLoad
   }
 
   public async connectApi(): Promise<void> {
@@ -131,7 +127,7 @@ export class Client {
   }
 
   public async getSyncState(): Promise<SyncState> {
-    return this.api.rpc.system.syncState();
+    return (await this.api.rpc.system.syncState()).toJSON() as unknown as SyncState;
   }
 
   public async isSyncing(): Promise<boolean> {
@@ -141,17 +137,9 @@ export class Client {
 
   public async startNode(path: string, nodeName: string): Promise<void> {
     await tauri.invoke("start_node", { path, nodeName })
-    if (!this.firstLoad) {
-      this.loadStoredBlocks()
-    }
     // TODO: workaround in case node takes some time to fully start.
     await new Promise((resolve) => setTimeout(resolve, 7000))
     await this.connectApi()
-  }
-
-  private loadStoredBlocks(): void {
-    this.farmed = getStoredBlocks()
-    this.data.farming.farmed = this.farmed
   }
 
   public async createRewardAddress(): Promise<{ rewardAddress: string, mnemonic: string }> {
@@ -169,7 +157,7 @@ export class Client {
   public async startFarming(path: string, plotSizeGB: number): Promise<boolean> {
     // convert GB to Bytes
     const plotSize = Math.round(plotSizeGB * 1024 * 1024 * 1024)
-    const rewardAddress: string = (await appConfig.read()).rewardAddress
+    const { rewardAddress } = (await config.read());
     if (rewardAddress === "") {
       util.errorLogger("Tried to send empty reward address to backend!")
     }

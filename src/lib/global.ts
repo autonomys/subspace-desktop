@@ -7,11 +7,7 @@ export class Global {
       state: "loading", 
       message: "loading" 
     }, 
-    nodeName: '',
   })
-  setNodeName(name: string) {
-    this.data.nodeName = name;
-  }
 }
 
 export const globalState = new Global

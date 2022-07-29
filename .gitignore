@@ -35,3 +35,5 @@ yarn-error.log*
 
 # do not commit development or testing chain spec files
 /src-tauri/chain-spec-raw-*.json
+
+coverage
