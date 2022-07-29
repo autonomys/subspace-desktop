@@ -14,7 +14,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
             input-class="plottingInput"
             outlined
             readonly
-            v-model="plotDirectory"
+            v-model="store.plotDir"
           )
       .row.items-center.q-gutter-md
         .col.relative-position
@@ -28,13 +28,13 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
               q-badge(color="white" size="lg" text-color="black")
                 template(v-slot:default)
                   .q-pa-xs(style="font-size: 18px" v-if="progresspct > 0") {{ progresspct }}%
-                  .q-pa-xs(style="font-size: 14px") {{ plottingData.status }}
+                  .q-pa-xs(style="font-size: 14px") {{ $t(store.plottingStatus.string, store.plottingStatus.values) }}
           q-linear-progress.absolute-right(
             :value="0.9"
             indeterminate
             style="height: 1px; top: 39px"
             track-color="transparent"
-            v-if="!plotFinished"
+            v-if="store.status !== 'farming'"
           )
       .row.justify-center.q-gutter-md.q-pt-md
         .col-1
@@ -52,7 +52,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
             outlined
             readonly
             suffix="GB"
-            v-model="plottingData.finishedGB"
+            v-model="store.plottingFinished"
           )
           .q-mt-sm {{ $t('plottingProgress.remaining') }}
           q-input.bg-white(
@@ -61,7 +61,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
             outlined
             readonly
             suffix="GB"
-            v-model="plottingData.remainingGB"
+            v-model="store.plottingRemaining"
           )
         .col-2
         .col-3.relative-position
@@ -112,51 +112,43 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
         icon-right="play_arrow"
         outline
         size="lg"
-        :disable="!plotFinished"
+        :disable="store.status !== 'farming'"
       )
-      q-tooltip.q-pa-md(v-if="!plotFinished")
+      q-tooltip.q-pa-md(v-if="store.status !== 'farming'")
         p.q-mb-lg {{ $t('plottingProgress.waitPlotting') }}
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import * as util from "../lib/util"
+
 import introModal from "../components/introModal.vue"
-import { appConfig } from "../lib/appConfig"
-import { SyncState } from "../lib/types";
+import { useStore } from '../stores/store';
+import * as util from '../lib/util';
+import * as blockStorage from '../lib/blockStorage';
 
 let farmerTimer: number
 
 export default defineComponent({
+  setup() {
+    const store = useStore();
+    return { store };
+  },
   data() {
     return {
       elapsedms: 0,
       remainingms: 0,
-      plottingData: {
-        finishedGB: 0,
-        remainingGB: 0,
-        allocatedGB: 0,
-        status: this.$t('plottingProgress.fetchingPlot'),
-      },
-      plotFinished: false,
-      plotDirectory: "",
-      syncState: {
-        currentBlock: 0,
-        highestBlock: 0,
-        startingBlock: 0,
-      }
     }
   },
   computed: {
     progresspct(): number {
       const progress = parseFloat(
-        ((this.syncState.currentBlock * 100) / this.syncState.highestBlock).toFixed(2)
+        ((this.store.syncState.currentBlock * 100) / this.store.syncState.highestBlock).toFixed(2)
       )
       return isNaN(progress) ? 0 : progress <= 100 ? progress : 100
     },
     printRemainingTime(): string {
       const val =
-        this.plotFinished || this.elapsedms === 0
+        this.store.status === 'farming' || this.elapsedms === 0
           ? util.formatMS(0)
           : util.formatMS(this.remainingms)
       return val
@@ -165,85 +157,31 @@ export default defineComponent({
       return util.formatMS(this.elapsedms)
     }
   },
-  watch: {
-    "plottingData.finishedGB"(val) {
-      this.plottingData.finishedGB = parseFloat(
-        this.plottingData.finishedGB.toFixed(2)
-      )
-      this.plottingData.remainingGB = parseFloat(
-        (this.plottingData.allocatedGB - val).toFixed(2)
-      )
-      if (this.plottingData.finishedGB >= this.plottingData.allocatedGB)
-        this.plottingData.finishedGB = this.plottingData.allocatedGB
-    },
-  },
   async mounted() {
     util.infoLogger("PLOTTING PROGRESS | getting plot config")
-    await this.getPlotConfig()
+    // TODO: probably can combine these two:
+    this.store.setFirstLoad()
+    this.store.setPlottingRemaining(this.store.plotSizeGB);
     util.infoLogger("PLOTTING PROGRESS | starting node")
-    await this.waitNode()
+    await this.store.startNode(this.$client, util);
     this.startTimers()
     util.infoLogger("PLOTTING PROGRESS | starting plotting")
-    this.startPlotting()
+    await this.startFarmer();
   },
   unmounted() {
     if (farmerTimer) clearInterval(farmerTimer)
   },
   methods: {
-    async getPlotConfig() {
-      this.$client.setFirstLoad()
-      const config = await appConfig.read()
-      this.plottingData.remainingGB = config.plot.sizeGB
-      this.plottingData.allocatedGB = config.plot.sizeGB
-      this.plotDirectory = config.plot.location
-    },
-    async waitNode() {
-      const nodeName = (await appConfig.read()).nodeName
-      if (nodeName !== "") {
-        const nodeStarted = await this.$client.startNode(this.plotDirectory, nodeName)
-        if (!nodeStarted) {
-          util.errorLogger("PLOTTING PROGRESS | Node start error!")
-        }
-      } else {
-        util.errorLogger("PLOTTING PROGRESS | node name was empty when tried to start node")
-      }
-
-    },
-    pausePlotting() {
-      this.plotFinished = true
+    async startFarmer(): Promise<void> {
+      await this.store.startFarmer(this.$client, util, blockStorage);
       clearInterval(farmerTimer)
-    },
-    async farmingWrapper(): Promise<void> {
-      const config = await appConfig.read()
-      const farmerStarted = await this.$client.startFarming(this.plotDirectory, config.plot.sizeGB)
-      if (!farmerStarted) {
-        util.errorLogger("PLOTTING PROGRESS | Farmer start error!")
-      }
-      util.infoLogger("PLOTTING PROGRESS | farmer started")
-      this.plottingData.allocatedGB = config.plot.sizeGB
-      await this.$client.startSubscription();
-      util.infoLogger("PLOTTING PROGRESS | block subscription started")
-      this.syncState = (await this.$client.getSyncState()).toJSON() as unknown as SyncState;
-      let isSyncing = await this.$client.isSyncing();
-
-      do {
-        await new Promise((resolve) => setTimeout(resolve, 3000))
-        this.syncState = (await this.$client.getSyncState()).toJSON() as unknown as SyncState;
-        this.plottingData.status = `Syncing ${this.syncState.currentBlock} of ${this.syncState.highestBlock} blocks`
-        this.plottingData.finishedGB = (this.syncState.currentBlock * this.plottingData.allocatedGB) / this.syncState.highestBlock;
-        isSyncing = await this.$client.isSyncing();
-      } while (isSyncing);
     },
     startTimers() {
       farmerTimer = window.setInterval(() => {
         this.elapsedms += 1000;
-        const ms = (this.elapsedms * this.syncState.highestBlock) / this.syncState.currentBlock - this.elapsedms;
+        const ms = (this.elapsedms * this.store.syncState.highestBlock) / (this.store.syncState.currentBlock || 1) - this.elapsedms;
         this.remainingms = util.toFixed(ms, 2);
       }, 1000)
-    },
-    async startPlotting() {
-      await this.farmingWrapper()
-      this.pausePlotting()
     },
     async viewIntro() {
       await util.showModal(introModal)

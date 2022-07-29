@@ -1,5 +1,5 @@
 {
-  "extends": "@quasar/app/tsconfig-preset",
+  "extends": "@quasar/app-webpack/tsconfig-preset",
   "experimentalDecorators": true,
   "compilerOptions": {
     "target": "ESNext",

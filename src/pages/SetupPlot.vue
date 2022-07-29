@@ -16,7 +16,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
             dense
             input-class="setupPlotInput"
             outlined
-            v-model="plotDirectory"
+            v-model="store.plotDir"
           )
             template(v-slot:after)
               q-btn.shadow-0(
@@ -63,7 +63,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
                 input-class="setupPlotInput"
                 outlined
                 suffix="GB"
-                v-model.number="allocatedGB"
+                v-model.number="store.plotSizeGB"
                 :rules="[val => val > 0 || $t('setupPlot.allocatedErrorMsg')]"
               )
                 q-tooltip.q-pa-sm
@@ -89,7 +89,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
                 color="blue"
                 snap
                 style="height: 25px"
-                v-model="allocatedGB"
+                v-model="store.plotSizeGB"
               )
             .col-1
   .row.justify-end.q-mt-sm.absolute-bottom.q-pb-md
@@ -100,7 +100,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
     .col-expand
     .col-auto
       q-btn(
-        :disable="(!validPath || allocatedGB <= 0)"
+        :disable="(!validPath || store.plotSizeGB <= 0)"
         @click="confirmCreateDir()"
         color="blue-8"
         icon-right="downloading"
@@ -117,28 +117,30 @@ import { defineComponent } from "vue"
 import { debounce } from "quasar"
 import * as path from "@tauri-apps/api/path"
 import * as fs from "@tauri-apps/api/fs"
-import * as util from "../lib/util"
+
 import { chartOptions, ChartDataType, StatsType } from "../lib/types"
 import * as native from "../lib/native"
-import { globalState as global } from "../lib/global"
-import { appConfig } from "../lib/appConfig"
 import { appData, appDataDialog } from "../lib/appData"
 import mnemonicModal from "../components/mnemonicModal.vue"
+import { useStore } from '../stores/store';
+import * as util from '../lib/util';
+import { config } from '../lib/appConfig';
 
 const tauri = { path, fs }
 
 // TODO: implement error handling - Implement error pages for potential worst case scenarios #253 
+// TODO: consider moving client, tauri and native methods elsewhere - use store methods instead
 export default defineComponent({
+  setup() {
+    const store = useStore();
+    return { store };
+  },
   data() {
     return {
       revealKey: false,
-      plotDirectory: "/",
-      allocatedGB: 1,
       validPath: true,
-      defaultPath: "/",
       driveStats: <native.DriveStats>{ freeBytes: 0, totalBytes: 0 },
       chartOptions,
-      rewardAddress: ""
     }
   },
   computed: {
@@ -146,7 +148,10 @@ export default defineComponent({
       return [
         this.stats.utilizedGB,
         this.stats.freeGB,
-        this.allocatedGB,
+        // small hack to make chart look better, otherwise plot size is not visible
+        this.store.plotSizeGB < 5 ? this.store.plotSizeGB + 5 : 
+        this.store.plotSizeGB < 10 ? this.store.plotSizeGB + 3 : 
+        this.store.plotSizeGB 
       ]
     },
     stats(): StatsType {
@@ -155,7 +160,7 @@ export default defineComponent({
       const safeAvailableGB = this.driveStats.freeBytes / 1e9 - 10
       const utilizedGB = util.toFixed(totalDiskSizeGB - safeAvailableGB, 2)
       const freeGB = ((): number => {
-        const val = util.toFixed(safeAvailableGB - this.allocatedGB, 2)
+        const val = util.toFixed(safeAvailableGB - this.store.plotSizeGB, 2)
         if (val >= 0) {
           return val
         } else {
@@ -183,42 +188,40 @@ export default defineComponent({
         })
       }
     },
-    allocatedGB(val) {
+    'store.plotSizeGB'(val) {
       // input component currently allows negative numbers as value, so we need to check
       if (val >= 0) {
         if (!this.stats?.safeAvailableGB) return
         if (val > this.stats?.safeAvailableGB) {
           this.$nextTick(() => {
-            this.allocatedGB = parseFloat(this.stats?.safeAvailableGB.toFixed(0))
+            const size = parseFloat(this.stats?.safeAvailableGB.toFixed(0))
+            this.store.setPlotSize(size);
           })
         } else {
           this.$nextTick(() => {
-            this.allocatedGB = util.toFixed(this.allocatedGB, 2)
+            const size = util.toFixed(this.store.plotSizeGB, 2)
+            this.store.setPlotSize(size);
           })
         }
       } else {
-        this.allocatedGB = 0;
+        this.store.setPlotSize(0);
       }
     }
   },
   async mounted() {
     await this.updateDriveStats()
-    this.defaultPath = (await tauri.path.dataDir()) + util.appName
-    this.plotDirectory = this.defaultPath
+    const path = (await tauri.path.dataDir()) + util.appName;
+    this.store.setPlotDir(path);
   },
   async created() {
     this.$watch(
-      "plotDirectory",
+      "store.plotDir",
       debounce((val): null => {
         if (val.length === 0) {
           this.validPath = false
         } else {
-          if (this.plotDirectory == this.defaultPath) {
-            this.validPath = true
-          } else {
-            // TODO: check if path is valid on any OS
-            this.validPath = true
-          }
+          // TODO: check if path is valid on any OS
+          this.validPath = true
         }
         return null
       }, 500)
@@ -226,12 +229,12 @@ export default defineComponent({
   },
   methods: {
     async confirmCreateDir() {
-      const dirExists = await native.dirExists(this.plotDirectory)
+      const dirExists = await native.dirExists(this.store.plotDir)
 
       if (dirExists) {
         util.infoLogger("SETUP PLOT | found the old plotting directory")
         const files = await tauri.fs
-          .readDir(this.plotDirectory)
+          .readDir(this.store.plotDir)
           .catch((error) => {
             util.errorLogger(error)
           })
@@ -240,58 +243,51 @@ export default defineComponent({
           console.log("FILES ARE: :", files)
           if (files.length === 0 || (files.length === 1 && files.some(item => item.name === "subspace-desktop.cfg"))){
             appDataDialog.existingDirectoryConfirm(
-              this.plotDirectory,
-              this.prepareForPlotting
+              this.store.plotDir,
+              this.startPlotting
             )
           // we are in FIRST TIME START, meaning there is are no existing plot
           // if there are some files in this folder, it's weird
           } else {
-            appDataDialog.notEmptyDirectoryInfo(this.plotDirectory)
+            appDataDialog.notEmptyDirectoryInfo(this.store.plotDir)
           }
         }
       } else if (!dirExists) {
         appDataDialog.newDirectoryConfirm(
-          this.plotDirectory,
-          this.prepareForPlotting
+          this.store.plotDir,
+          this.startPlotting
         )
       }
     },
-    async prepareForPlotting() {
-      if (this.plotDirectory.charAt(this.plotDirectory.length - 1) == "/")
-        this.plotDirectory.slice(-1)
-      await appData.createCustomDataDir(this.plotDirectory)
+    async startPlotting() {
+      await appData.createCustomDataDir(this.store.plotDir)
       util.infoLogger("SETUP PLOT | custom directory created")
-      await this.checkIdentity()
-      const nodeName = util.generateNodeName()
-      global.setNodeName(nodeName);
-
-      await appConfig.update({
-          plot: { location: this.plotDirectory, sizeGB: this.allocatedGB },
-          nodeName,
-        })
-      this.$router.replace({ name: "plottingProgress" })
+      await this.checkIdentity();
+      await this.store.confirmPlottingSetup(config, util);
+      this.$router.replace({ name: "plottingProgress" });
     },
     async updateDriveStats() {
-      const stats = await native.driveStats(this.plotDirectory)
+      const stats = await native.driveStats(this.store.plotDir)
       util.infoLogger("Drive Stats -> free: " + stats.freeBytes + "; total: " + stats.totalBytes)
       this.driveStats = stats
     },
     async selectDir() {
       const result = await native
-        .selectDir(this.plotDirectory)
+        .selectDir(this.store.plotDir)
         .catch((error: unknown) => {
           util.errorLogger(error)
         })
-      if (result) this.plotDirectory = result
+      if (result) {
+        this.store.setPlotDir(result);
+      }
       await this.updateDriveStats()
     },
     async checkIdentity() {
-      const config = await appConfig.read()
-      if (config.rewardAddress === "") {
+      if (this.store.rewardAddress === "") {
         util.infoLogger("SETUP PLOT | reward address was empty, creating a new one")
         try {
           const { rewardAddress, mnemonic }  = await this.$client.createRewardAddress();
-          this.rewardAddress = rewardAddress;
+          this.store.setRewardAddress(rewardAddress);
           await this.viewMnemonic(mnemonic);
         } catch (error) {
           util.errorLogger(error);
@@ -304,9 +300,7 @@ export default defineComponent({
       const modal = await util.showModal(mnemonicModal, { mnemonic });
       return new Promise((resolve) => {
         modal?.onDismiss(async () => {
-          await appConfig.update({
-            rewardAddress: this.rewardAddress
-          })
+          await this.store.confirmRewardAddress(config);
           resolve()
         })
       })

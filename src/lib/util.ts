@@ -8,8 +8,14 @@ import * as process from "process"
 import { invoke } from "@tauri-apps/api/tauri"
 import { ApiPromise, WsProvider } from "@polkadot/api"
 import { appData } from "./appData"
-import { appConfig } from "./appConfig"
+import { config } from "./appConfig"
 import { generateSlug } from "random-word-slugs"
+
+export interface IUtil {
+  generateNodeName: () => string;
+  errorLogger: (str: string) => Promise<void>;
+  infoLogger: (str: string) => Promise<void>;
+}
 
 const nodeNameMaxLength = 64
 export const appName: string = process.env.APP_NAME || "subspace-desktop"
@@ -66,7 +72,7 @@ export function plotTimeMsEstimate(gb: number): number {
 export async function resetAndClear(): Promise<void> {
   await LocalStorage.clear()
   await appData.clearDataDir()
-  await appConfig.remove()
+  await config.remove()
 }
 
 

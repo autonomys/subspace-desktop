@@ -1,13 +1,13 @@
 import * as fs from "@tauri-apps/api/fs"
 import { Dialog } from "quasar"
-import { appConfig } from "./appConfig"
+import { config } from "./appConfig"
 import { errorLogger } from "./util"
 
 
 export const appData = {
   async getDataDirPath(): Promise<string> {
-    const config = await appConfig.read()
-    return config.plot.location
+    const { plot } = await config.read()
+    return plot.location
   },
   async clearDataDir(): Promise<void> {
     const dataDir = await this.getDataDirPath()

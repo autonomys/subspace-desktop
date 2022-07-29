@@ -5,7 +5,7 @@ import * as fs from "@tauri-apps/api/fs"
 import * as path from "@tauri-apps/api/path"
 import { AutoLaunchParams, ChildReturnData } from './types'
 import * as native from './native'
-import { appConfig } from "../lib/appConfig"
+import { config } from "../lib/appConfig"
 import { errorLogger, infoLogger } from "./util"
 
 type osAL = typeof macAL | typeof winAL | typeof linAL | typeof nullAL
@@ -160,7 +160,7 @@ export class AutoLauncher {
     if (!this.enabled) {
       errorLogger("ENABLE DID NOT WORK")
     } else {
-      await appConfig.update({ launchOnBoot: true })
+      await config.update({ launchOnBoot: true })
     }
     return child
   }
@@ -174,7 +174,7 @@ export class AutoLauncher {
       this.enabled = await this.isEnabled()
       trial += 1
     } while (this.enabled && trial < 5);
-    await appConfig.update({ launchOnBoot: false })
+    await config.update({ launchOnBoot: false })
     return child
   }
   async init(): Promise<void> {
@@ -194,8 +194,8 @@ export class AutoLauncher {
       this.autoLauncher = linAL
     }
 
-    const config = await appConfig.read()
-    if (config.launchOnBoot)
+    const { launchOnBoot } = await config.read()
+    if (launchOnBoot)
     {
       // the app may be initialized before, but then user may have decided to move the app to another directory
       // in this case, we have to delete the previous autoLaunch entry, and create a new one
