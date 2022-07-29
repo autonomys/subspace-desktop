@@ -19,7 +19,7 @@ const SUNIT = 1000000000000000000n
 
 export interface IClient {
   getPeersCount: () => Promise<number>;
-  startNode: (path: string, nodeName: string) => Promise<void>;
+  startNode: (path: string, nodeName: string) => Promise<boolean>;
   startSubscription: (handlers: {
     farmedBlockHandler: (block: FarmedBlock) => void;
     newBlockHandler: (blockNum: number) => void;
