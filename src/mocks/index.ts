@@ -49,4 +49,5 @@ export const clientMock = {
 export const utilMock = {
   errorLogger: jest.fn(),
   infoLogger: jest.fn(),
+  generateNodeName: jest.fn(() => 'random generated name'),
 } as unknown as IUtil

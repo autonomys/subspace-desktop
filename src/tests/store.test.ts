@@ -1,17 +1,17 @@
 import { setActivePinia, createPinia } from 'pinia';
 
-import { 
-  useStore, 
+import {
+  useStore,
   INITIAL_PLOT_DIR,
   INITIAL_PLOT_SIZE,
   INITIAL_SYNC_STATE,
   INITIAL_STATUS,
 } from '../stores/store';
 import { SyncState } from '../lib/types';
-import { 
-  blockStorageMock, 
-  configMock, 
-  FarmedBlockMock, 
+import {
+  blockStorageMock,
+  configMock,
+  FarmedBlockMock,
   configMockData,
   clientMock,
   utilMock,
@@ -22,7 +22,7 @@ describe('Store', () => {
     // creates a fresh pinia and make it active so it's automatically picked
     setActivePinia(createPinia());
   });
-  
+
   it('setPlotDir action should update directory', () => {
     const expected = '/random_dir';
     const store = useStore();
@@ -74,7 +74,7 @@ describe('Store', () => {
     store.setRewardAddress(expected);
     expect(store.rewardAddress).toBe(expected);
   });
-  
+
   it('updateBlockNum action should update network.syncedAtNum property', () => {
     const expected = 10;
     const store = useStore();
@@ -82,13 +82,37 @@ describe('Store', () => {
     store.updateBlockNum(expected);
     expect(store.network.syncedAtNum).toBe(expected);
   });
-  
-  it('setNodeName action should update node name', () => {
+
+  it('setNodeName action should update node name', async () => {
     const expected = 'random node name';
     const store = useStore();
     expect(store.nodeName).toBe('');
-    store.setNodeName(configMock, expected);
+    await store.setNodeName(configMock, expected);
     expect(store.nodeName).toBe(expected);
+  });
+
+  it('setNodeName action should set error if config update fails', async () => {
+    const errorMessage = 'random error message';
+    const config = {
+      ...configMock,
+      update() {
+        return Promise.reject(errorMessage);
+      }
+    }
+
+    const store = useStore();
+
+    expect(store.error).toEqual({
+      title: '',
+      message: '',
+    });
+
+    await store.setNodeName(config, 'random node name');
+
+    expect(store.error).toEqual({
+      title: 'errorModal.configUpdateFailed',
+      message: errorMessage,
+    });
   });
 
   it('addFarmedBlock action should update farmed blocks', () => {
@@ -118,6 +142,24 @@ describe('Store', () => {
     // TODO: we plan to replace local storage - add assertion for farmed blocks if still relevant
   });
 
+  it('updateFromConfig action should set error if config read fails', async () => {
+    const errorMessage = 'random error message';
+    const store = useStore();
+    const config = {
+      ...configMock,
+      read() {
+        return Promise.reject(errorMessage);
+      }
+    }
+
+    await store.updateFromConfig(blockStorageMock, config);
+
+    expect(store.error).toEqual({
+      title: 'errorModal.configReadFailed',
+      message: errorMessage,
+    });
+  });
+
   it('startNode action should update status and call start node client method', async () => {
     const store = useStore();
 
@@ -132,9 +174,48 @@ describe('Store', () => {
     expect(clientMock.startNode).toHaveBeenCalled();
   });
 
-  // TODO: Implement error pages for potential worst case scenarios #253 
-  it.todo('startNode action should set error state if client method throws error');
-  it.todo('startNode action should set error state if node name and plot directory are not set before');
+  it('startNode action should set error state if client method throws error', async () => {
+    const errorMessage = 'random error message';
+
+    const store = useStore();
+
+    store.setNodeName(configMock, 'random node name');
+    store.setPlotDir('/random-dir');
+
+    const client = {
+      ...clientMock,
+      startNode() {
+        return Promise.reject(errorMessage);
+      }
+    }
+
+    await store.startNode(client, utilMock);
+
+    expect(store.error).toEqual({
+      title: 'errorModal.startNodeFailed',
+      message: errorMessage,
+    });
+  });
+
+  it('startNode action should set error state if node name and plot directory are not set before', async () => {
+    const errorMessage = 'errorModal.startNodeMissingParams';
+
+    const store = useStore();
+
+    const client = {
+      ...clientMock,
+      startNode() {
+        return Promise.reject(errorMessage);
+      }
+    }
+
+    await store.startNode(client, utilMock);
+
+    expect(store.error).toEqual({
+      title: 'errorModal.startNodeFailed',
+      message: errorMessage,
+    });
+  });
 
   it('startFarmer action should update statuses and call relevant client methods', async () => {
     const plotDir = '/random_dir';
@@ -157,9 +238,151 @@ describe('Store', () => {
     expect(clientMock.getSyncState).toHaveBeenCalled();
     expect(clientMock.isSyncing).toHaveBeenCalled();
     expect(clientMock.startSubscription).toHaveBeenCalled();
-    
+
     // TODO: If relevant add assertions for Plot and Network statuses after Dashboard Plot component #294 is resolved
   });
 
-  // TODO: Add tests when startFarmer fails within Implement error pages for potential worst case scenarios #253 
+  it('startFarmer action should set error if client.startFarming throws error', async () => {
+    const errorMessage = 'random error message';
+    const client = {
+      ...clientMock,
+      startFarming() {
+        return Promise.reject(errorMessage);
+      }
+    }
+
+    const store = useStore();
+
+    await store.startFarmer(client, utilMock, blockStorageMock);
+
+    expect(store.error).toEqual({
+      title: 'errorModal.startFarmerFailed',
+      message: errorMessage,
+    });
+  });
+
+  it('startFarmer action should set error if client.getSyncState throws error', async () => {
+    const errorMessage = 'random error message';
+    const client = {
+      ...clientMock,
+      getSyncState() {
+        return Promise.reject(errorMessage);
+      }
+    }
+
+    const store = useStore();
+
+    await store.startFarmer(client, utilMock, blockStorageMock);
+
+    expect(store.error).toEqual({
+      title: 'errorModal.startFarmerFailed',
+      message: errorMessage,
+    });
+  });
+
+  it('startFarmer action should set error if client.isSyncing throws error', async () => {
+    const errorMessage = 'random error message';
+    const client = {
+      ...clientMock,
+      isSyncing() {
+        return Promise.reject(errorMessage);
+      }
+    }
+
+    const store = useStore();
+
+    await store.startFarmer(client, utilMock, blockStorageMock);
+
+    expect(store.error).toEqual({
+      title: 'errorModal.startFarmerFailed',
+      message: errorMessage,
+    });
+  });
+
+  it('startFarmer action should set error if client.startSubscription throws error', async () => {
+    const errorMessage = 'random error message';
+    const client = {
+      ...clientMock,
+      startSubscription() {
+        return Promise.reject(errorMessage);
+      }
+    }
+
+    const store = useStore();
+
+    await store.startFarmer(client, utilMock, blockStorageMock);
+
+    expect(store.error).toEqual({
+      title: 'errorModal.startFarmerFailed',
+      message: errorMessage,
+    });
+  });
+
+  it('confirmPlottingSetup action should call config update method', async () => {
+    const plotSize = 10;
+    const plotDir = '/random_dir';
+
+    const store = useStore();
+    store.setPlotSize(plotSize);
+    store.setPlotDir(plotDir);
+
+    await store.confirmPlottingSetup(configMock, utilMock);
+
+    expect(configMock.update).toHaveBeenLastCalledWith({
+      nodeName: 'random generated name',
+      plot: {
+        location: plotDir,
+        sizeGB: plotSize,
+      }
+    });
+  });
+
+  it('confirmPlottingSetup action should set error if config update fails', async () => {
+    const errorMessage = 'random error message';
+    const store = useStore();
+    const config = {
+      ...configMock,
+      update() {
+        return Promise.reject(errorMessage);
+      }
+    }
+
+    await store.confirmPlottingSetup(config, utilMock);
+
+    expect(store.error).toEqual({
+      title: 'errorModal.configUpdateFailed',
+      message: errorMessage,
+    });
+  });
+
+  it('confirmRewardAddress action should call config update method', async () => {
+    const rewardAddress = 'random reward address';
+
+    const store = useStore();
+    store.setRewardAddress(rewardAddress);
+
+    await store.confirmRewardAddress(configMock);
+
+    expect(configMock.update).toHaveBeenLastCalledWith({
+      rewardAddress
+    });
+  });
+
+  it('confirmRewardAddress action should set error if config update fails', async () => {
+    const errorMessage = 'random error message';
+    const store = useStore();
+    const config = {
+      ...configMock,
+      update() {
+        return Promise.reject(errorMessage);
+      }
+    }
+
+    await store.confirmRewardAddress(config);
+
+    expect(store.error).toEqual({
+      title: 'errorModal.configUpdateFailed',
+      message: errorMessage,
+    });
+  });
 })
