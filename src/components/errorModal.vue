@@ -10,9 +10,9 @@ q-dialog(persistent ref="dialog")
         div
           .row.q-mb-md.items-center
             q-icon(color="red" name="error_outline" size="80px")
-            h6.q-ml-md.text-red Error message
-          .row.q-mb-md
-            p {{ $t('introModal.slide1.text1') }}
+            h6.q-ml-md.text-red-10 {{ $t(title) }}
+          .row.q-mb-md.q-mx-xl.q-mt-lg
+            p {{ $t(message) }}
         .absolute-bottom.q-pa-md
           .row.justify-end
             q-btn(
@@ -29,6 +29,17 @@ import { defineComponent } from "vue"
 import { relaunch } from "@tauri-apps/api/process"
 
 export default defineComponent({
+  props: {
+    title: { 
+      type: String,
+      required: true,
+      default: 'errorModal.defaultErrorTitle'
+    },
+    message: {
+      type: String,
+      default: 'errorModal.defaultErrorMessage',
+    }
+  },
   emits: [
     "ok",
     "hide"

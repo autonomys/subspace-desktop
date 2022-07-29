@@ -48,13 +48,14 @@ q-layout(view="hHh lpr fFf")
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue"
+import { defineComponent, watch } from "vue"
 import * as process from 'process'
 import { relaunch } from "@tauri-apps/api/process"
 
 import * as util from '../lib/util';
 import { config } from "../lib/appConfig"
 import MainMenu from "../components/mainMenu.vue"
+import errorModal from "../components/errorModal.vue";
 import { useStore } from '../stores/store';
 
 export default defineComponent({
@@ -75,6 +76,14 @@ export default defineComponent({
   mounted() {
     this.appVersion = (process.env.APP_VERSION as string)
     util.infoLogger("Version: " + this.appVersion)
+
+    watch(
+      () => this.store.error.title,
+      async () => {
+        const { title, message } = this.store.error;
+        await util.showModal(errorModal, { title, message });
+      },
+    )
   },
   methods: {
     onNameClick() {

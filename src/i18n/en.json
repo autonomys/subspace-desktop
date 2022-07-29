@@ -127,6 +127,13 @@
     }
   },
   "errorModal": {
-    "restart": "Restart"
+    "restart": "Restart",
+    "configUpdateFailed": "Failed to update config",
+    "configReadFailed": "Failed to read config",
+    "startNodeFailed": "Failed to start node",
+    "startNodeMissingParams": "Node name and plot directory are required to start node",
+    "startFarmerFailed": "Failed to start farmer",
+    "defaultErrorMessage": "Please, make sure you have an Internet connection and enough disk space in order to proceed. If the problem persists, you can reach out to our team",
+    "defaultErrorTitle": "Something went wrong"
   }
 }

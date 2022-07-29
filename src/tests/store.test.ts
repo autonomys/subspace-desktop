@@ -354,35 +354,4 @@ describe('Store', () => {
       message: errorMessage,
     });
   });
-
-  it('confirmRewardAddress action should call config update method', async () => {
-    const rewardAddress = 'random reward address';
-
-    const store = useStore();
-    store.setRewardAddress(rewardAddress);
-
-    await store.confirmRewardAddress(configMock);
-
-    expect(configMock.update).toHaveBeenLastCalledWith({
-      rewardAddress
-    });
-  });
-
-  it('confirmRewardAddress action should set error if config update fails', async () => {
-    const errorMessage = 'random error message';
-    const store = useStore();
-    const config = {
-      ...configMock,
-      update() {
-        return Promise.reject(errorMessage);
-      }
-    }
-
-    await store.confirmRewardAddress(config);
-
-    expect(store.error).toEqual({
-      title: 'errorModal.configUpdateFailed',
-      message: errorMessage,
-    });
-  });
 })

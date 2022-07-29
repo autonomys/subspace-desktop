@@ -178,6 +178,7 @@ export const useStore = defineStore('store', {
         this.setNodeName(config, nodeName);
 
         await config.update({
+          rewardAddress: this.rewardAddress,
           plot: {
             location: this.plotDir,
             sizeGB: this.plotSizeGB,
@@ -193,17 +194,6 @@ export const useStore = defineStore('store', {
     },
     setRewardAddress(address: string) {
       this.rewardAddress = address;
-    },
-    // we need a separate method, because we store address to config only after user confirmed (modal in SetupPlot.vue)
-    async confirmRewardAddress(config: IConfig) {
-      try {
-        await config.update({ rewardAddress: this.rewardAddress });
-      } catch (error) {
-        this.setError({
-          title: 'errorModal.configUpdateFailed',
-          message: getErrorMessage(error),
-        })
-      }
     },
     setFirstLoad() {
       this.isFirstLoad = true;

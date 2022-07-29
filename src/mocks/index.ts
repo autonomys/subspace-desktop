@@ -1,6 +1,6 @@
 import FarmedBlockMock from './FarmedBlock.json';
 import { IClient } from '../lib/client';
-import { IUtil } from '../lib/util';
+import { IUtil } from '../lib/util/util';
 import { IConfig } from '../lib/appConfig';
 
 export {

@@ -1,5 +1,4 @@
 export {
-  IUtil,
   random,
   showModal,
   toFixed,
