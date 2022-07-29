@@ -8879,6 +8879,7 @@ dependencies = [
  "subspace-fraud-proof",
  "subspace-networking",
  "subspace-runtime",
+ "subspace-runtime-primitives",
  "subspace-service",
  "subspace-solving",
  "substrate-build-script-utils",

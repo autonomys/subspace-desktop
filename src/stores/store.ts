@@ -61,7 +61,7 @@ export const useStore = defineStore('store', {
     network: {
       syncedAtNum: 0,
       peers: 0,
-      // TODO: consider removing network.state - probably can depend on the app statuses: 
+      // TODO: consider removing network.state - probably can depend on the app statuses:
       // 'idle' | 'startingNode' | 'syncing' | 'farming'
       state: 'starting',
       message: 'dashboard.initializing',
@@ -204,7 +204,11 @@ export const useStore = defineStore('store', {
     async startNode(client: IClient, util: IUtil) {
       if (this.nodeName && this.plotDir) {
         this.setStatus('startingNode');
-        await client.startNode(this.plotDir, this.nodeName);
+        const nodeStarted = await client.startNode(this.plotDir, this.nodeName);
+        if (!nodeStarted) {
+          util.errorLogger("Node start error!")
+        }
+        util.infoLogger("node started")
       } else {
         // TODO: create error state and update here
         util.errorLogger("NODE START | node name and plot directory are required to start node");
@@ -219,9 +223,9 @@ export const useStore = defineStore('store', {
 
       const farmerStarted = await client.startFarming(this.plotDir, this.plotSizeGB);
       if (!farmerStarted) {
-        util.errorLogger("PLOTTING PROGRESS | Farmer start error!")
+        util.errorLogger("Farmer start error!")
       }
-      util.infoLogger("PLOTTING PROGRESS | farmer started")
+      util.infoLogger("farmer started")
 
       const syncState = await client.getSyncState();
       this.setSyncState(syncState);
@@ -249,7 +253,7 @@ export const useStore = defineStore('store', {
         newBlockHandler: this.updateBlockNum,
       });
 
-      util.infoLogger("PLOTTING PROGRESS | block subscription started")
+      util.infoLogger("block subscription started")
     },
     setPlottingFinished(value: number) {
       this.plotting.finishedGB = value;

@@ -36,6 +36,7 @@ subspace-farmer = { git = "https://github.com/subspace/subspace", rev = "3c98a67
 subspace-fraud-proof = { git = "https://github.com/subspace/subspace", rev = "3c98a67882cd7454a6882f56a726bb337cce6242" }
 subspace-networking = { git = "https://github.com/subspace/subspace", rev = "3c98a67882cd7454a6882f56a726bb337cce6242" }
 subspace-runtime = { git = "https://github.com/subspace/subspace", rev = "3c98a67882cd7454a6882f56a726bb337cce6242" }
+subspace-runtime-primitives = { git = "https://github.com/subspace/subspace", rev = "3c98a67882cd7454a6882f56a726bb337cce6242" }
 subspace-service = { git = "https://github.com/subspace/subspace", rev = "3c98a67882cd7454a6882f56a726bb337cce6242" }
 subspace-solving = { git = "https://github.com/subspace/subspace", rev = "3c98a67882cd7454a6882f56a726bb337cce6242" }
 tokio = { version = "1.11.0", features = ["macros", "rt-multi-thread"] }
