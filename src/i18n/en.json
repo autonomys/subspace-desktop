@@ -127,5 +127,8 @@
       "visitUs": "Visit us on",
       "readUp": "Read up about Subspace on"
     }
+  },
+  "errorModal": {
+    "restart": "Restart"
   }
 }
