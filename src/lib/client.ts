@@ -140,9 +140,6 @@ export class Client implements IClient {
     if (!result) {
       return false
     }
-    if (!this.firstLoad) {
-      this.loadStoredBlocks()
-    }
     // TODO: workaround in case node takes some time to fully start.
     await new Promise((resolve) => setTimeout(resolve, 7000))
     await this.connectApi()
