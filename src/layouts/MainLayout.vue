@@ -55,7 +55,6 @@ import { config } from "../lib/appConfig"
 import MainMenu from "../components/mainMenu.vue"
 import errorModal from "../components/errorModal.vue";
 import { useStore } from '../stores/store';
-import { client } from "websocket"
 
 export default defineComponent({
   name: "MainLayout",

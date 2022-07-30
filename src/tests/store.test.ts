@@ -321,10 +321,12 @@ describe('Store', () => {
   it('confirmPlottingSetup action should call config update method', async () => {
     const plotSize = 10;
     const plotDir = '/random_dir';
+    const rewardAddress = 'random address';
 
     const store = useStore();
     store.setPlotSize(plotSize);
     store.setPlotDir(plotDir);
+    store.setRewardAddress(rewardAddress);
 
     await store.confirmPlottingSetup(configMock, utilMock);
 
@@ -333,7 +335,8 @@ describe('Store', () => {
       plot: {
         location: plotDir,
         sizeGB: plotSize,
-      }
+      },
+      rewardAddress,
     });
   });
 

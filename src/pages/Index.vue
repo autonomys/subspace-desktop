@@ -70,7 +70,8 @@ export default defineComponent({
     },
     async firstLoad() {
       util.infoLogger("INDEX | First Time RUN, resetting reward address")
-      await config.update({ rewardAddress: "" });
+      // reset node name in case there is a leftover from prev launch (restart due to error)
+      this.store.setNodeName(config, '');
       const { launchOnBoot } = await config.read();
       if (launchOnBoot) {
         Notify.create({
