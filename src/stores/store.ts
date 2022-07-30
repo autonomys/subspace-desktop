@@ -67,7 +67,7 @@ export const useStore = defineStore('store', {
     network: {
       syncedAtNum: 0,
       peers: 0,
-      // TODO: consider removing network.state - probably can depend on the app statuses: 
+      // TODO: consider removing network.state - probably can depend on the app statuses:
       // 'idle' | 'startingNode' | 'syncing' | 'farming'
       state: 'starting',
       message: 'dashboard.initializing',
@@ -264,11 +264,7 @@ export const useStore = defineStore('store', {
         this.setPlotMessage('dashboard.verifyingPlot');
         this.setNetworkMessage('dashboard.verifyingNet');
 
-        const farmerStarted = await client.startFarming(this.plotDir, this.plotSizeGB);
-        if (!farmerStarted) {
-          // TODO: consider moving logging to client.ts
-          util.errorLogger("PLOTTING PROGRESS | Farmer start error!")
-        }
+        await client.startFarming(this.plotDir, this.plotSizeGB);
         // TODO: consider moving logging to client.ts
         util.infoLogger("PLOTTING PROGRESS | farmer started")
 
@@ -301,6 +297,8 @@ export const useStore = defineStore('store', {
         // TODO: consider moving logging to client.ts
         util.infoLogger("PLOTTING PROGRESS | block subscription started")
       } catch (error) {
+        // TODO: consider moving logging to client.ts
+        util.errorLogger("PLOTTING PROGRESS | Farmer start error!")
         this.setError({
           title: 'errorModal.startFarmerFailed',
           message: getErrorMessage(error),

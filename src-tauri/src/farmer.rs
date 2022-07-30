@@ -10,6 +10,7 @@ use subspace_farmer::{Identity, LegacyObjectMappings, NodeRpcClient, Plot, RpcCl
 use subspace_networking::libp2p::{multiaddr::Protocol, Multiaddr};
 use subspace_networking::Config;
 use tokio::sync::mpsc::{channel, Receiver, Sender};
+use tokio::time::{sleep, timeout, Duration};
 use tracing::{debug, error, info, trace, warn};
 
 #[derive(Clone)]
@@ -50,15 +51,17 @@ pub(crate) async fn farming(path: String, reward_address: String, plot_size: u64
             reward_address: Some(address),
             plot_size,
             error_sender: error_sender.clone(),
-            listen_on: vec!["/ip4/127.0.0.1/tcp/40333".parse().unwrap()],
+            listen_on: vec!["/ip4/127.0.0.1/tcp/40333"
+                .parse()
+                .expect("the address is hardcoded and correct")],
             bootstrap_nodes: vec![],
             archiving: ArchivingFrom::Rpc,
             dsn_sync: false,
         };
 
-        farm(path.clone().into(), farming_args.clone())
-            .await
-            .unwrap();
+        if let Err(err) = farm(path.clone().into(), farming_args.clone()).await {
+            error!("farm function failed to start, with error: {err}");
+        }
 
         // farmer started successfully, now listen in the background for errors
         tokio::spawn(async move {
@@ -67,9 +70,11 @@ pub(crate) async fn farming(path: String, reward_address: String, plot_size: u64
                 let result = error_receiver.recv().await;
                 match result {
                     // we have received an error, let's restart the farmer
-                    Some(_) => farm(path.clone().into(), farming_args.clone())
-                        .await
-                        .unwrap(),
+                    Some(_) => {
+                        if let Err(err) = farm(path.clone().into(), farming_args.clone()).await {
+                            error!("farm function failed to start, with error: {err}");
+                        }
+                    }
                     None => unreachable!(
                         "sender should not have been dropped before sending an error message"
                     ),
@@ -96,6 +101,7 @@ async fn farm(base_directory: PathBuf, farm_args: FarmingArgs) -> Result<(), any
         archiving,
         dsn_sync,
     } = farm_args;
+
     raise_fd_limit();
 
     let reward_address = if let Some(reward_address) = reward_address {
@@ -113,6 +119,20 @@ async fn farm(base_directory: PathBuf, farm_args: FarmingArgs) -> Result<(), any
     }
 
     info!("Connecting to node at {}", node_rpc_url);
+    if let Err(error) = timeout(Duration::from_secs(10), async {
+        loop {
+            if NodeRpcClient::new(&node_rpc_url).await.is_ok() {
+                break;
+            } else {
+                sleep(Duration::from_millis(500)).await;
+            }
+        }
+    })
+    .await
+    {
+        error!("Node is not responding for 10 seconds, farmer is unable to start");
+        return Err(anyhow!(error));
+    }
     let archiving_client = NodeRpcClient::new(&node_rpc_url).await?;
     let farming_client = NodeRpcClient::new(&node_rpc_url).await?;
 
@@ -190,9 +210,16 @@ async fn farm(base_directory: PathBuf, farm_args: FarmingArgs) -> Result<(), any
         match result {
             Err(error) => {
                 error!("{error}");
-                error_sender.send(()).await.unwrap() // this send should always be successful
+                error_sender.send(()).await.expect(
+                    "the receiver is defined in the `farming` function, it never stops listening",
+                );
             }
-            Ok(_) => unreachable!("wait function should not return Ok()"),
+            Ok(_) => {
+                debug!("Node should be restarted");
+                error_sender.send(()).await.expect(
+                    "the receiver is defined in the `farming` function, it never stops listening",
+                );
+            }
         }
     });
 

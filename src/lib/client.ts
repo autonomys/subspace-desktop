@@ -26,7 +26,7 @@ export interface IClient {
   }) => Promise<void>;
   isSyncing: () => Promise<boolean>;
   getSyncState: () => Promise<SyncState>;
-  startFarming: (path: string, plotSizeGB: number) => Promise<boolean>;
+  startFarming: (path: string, plotSizeGB: number) => Promise<void>;
 }
 
 export class Client implements IClient {
@@ -85,7 +85,7 @@ export class Client implements IClient {
           const block: FarmedBlock = {
             id: hash.toString(),
             time: Date.now(),
-            // TODO: remove, transactions count is not displayed anywhere   
+            // TODO: remove, transactions count is not displayed anywhere
             transactions: 0,
             blockNum,
             blockReward,
@@ -154,13 +154,14 @@ export class Client implements IClient {
   }
 
   /* FARMER INTEGRATION */
-  public async startFarming(path: string, plotSizeGB: number): Promise<boolean> {
+  public async startFarming(path: string, plotSizeGB: number): Promise<void> {
     // convert GB to Bytes
     const plotSize = Math.round(plotSizeGB * 1024 * 1024 * 1024)
     const { rewardAddress } = (await config.read());
     if (rewardAddress === "") {
       util.errorLogger("Tried to send empty reward address to backend!")
     }
-    return await tauri.invoke("farming", { path, rewardAddress, plotSize })
+
+    return tauri.invoke("farming", { path, rewardAddress, plotSize });
   }
 }
