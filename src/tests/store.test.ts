@@ -111,7 +111,8 @@ describe('Store', () => {
 
     expect(store.error).toEqual({
       title: 'errorModal.configUpdateFailed',
-      message: errorMessage,
+      // TODO: replace default error message with specific one
+      message: 'errorModal.defaultErrorMessage',
     });
   });
 
@@ -156,7 +157,8 @@ describe('Store', () => {
 
     expect(store.error).toEqual({
       title: 'errorModal.configReadFailed',
-      message: errorMessage,
+      // TODO: replace default error message with specific one
+      message: 'errorModal.defaultErrorMessage',
     });
   });
 
@@ -193,7 +195,8 @@ describe('Store', () => {
 
     expect(store.error).toEqual({
       title: 'errorModal.startNodeFailed',
-      message: errorMessage,
+      // TODO: replace default error message with specific one
+      message: 'errorModal.defaultErrorMessage',
     });
   });
 
@@ -213,7 +216,8 @@ describe('Store', () => {
 
     expect(store.error).toEqual({
       title: 'errorModal.startNodeFailed',
-      message: errorMessage,
+      // TODO: replace default error message with specific one
+      message: 'errorModal.defaultErrorMessage',
     });
   });
 
@@ -257,7 +261,8 @@ describe('Store', () => {
 
     expect(store.error).toEqual({
       title: 'errorModal.startFarmerFailed',
-      message: errorMessage,
+      // TODO: replace default error message with specific one
+      message: 'errorModal.defaultErrorMessage',
     });
   });
 
@@ -276,7 +281,8 @@ describe('Store', () => {
 
     expect(store.error).toEqual({
       title: 'errorModal.startFarmerFailed',
-      message: errorMessage,
+      // TODO: replace default error message with specific one
+      message: 'errorModal.defaultErrorMessage',
     });
   });
 
@@ -295,7 +301,8 @@ describe('Store', () => {
 
     expect(store.error).toEqual({
       title: 'errorModal.startFarmerFailed',
-      message: errorMessage,
+      // TODO: replace default error message with specific one
+      message: 'errorModal.defaultErrorMessage',
     });
   });
 
@@ -314,7 +321,8 @@ describe('Store', () => {
 
     expect(store.error).toEqual({
       title: 'errorModal.startFarmerFailed',
-      message: errorMessage,
+      // TODO: replace default error message with specific one
+      message: 'errorModal.defaultErrorMessage',
     });
   });
 
@@ -354,7 +362,8 @@ describe('Store', () => {
 
     expect(store.error).toEqual({
       title: 'errorModal.configUpdateFailed',
-      message: errorMessage,
+      // TODO: replace default error message with specific one
+      message: 'errorModal.defaultErrorMessage',
     });
   });
 })

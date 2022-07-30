@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 
 import { SyncState, FarmedBlock } from '../lib/types';
 import { IClient } from '../lib/client';
-import { IUtil, getErrorMessage } from "../lib/util/util";
+import { IUtil } from "../lib/util/util";
 import { IConfig } from "../lib/appConfig";
 import { IBlockStorage } from '../lib/blockStorage';
 
@@ -159,7 +159,8 @@ export const useStore = defineStore('store', {
       } catch (error) {
         this.setError({
           title: 'errorModal.configUpdateFailed',
-          message: getErrorMessage(error),
+          // TODO: replace default error message with specific one
+          message: 'errorModal.defaultErrorMessage',
         })
       }
     },
@@ -188,7 +189,8 @@ export const useStore = defineStore('store', {
       } catch (error) {
         this.setError({
           title: 'errorModal.configUpdateFailed',
-          message: getErrorMessage(error),
+          // TODO: replace default error message with specific one
+          message: 'errorModal.defaultErrorMessage',
         })
       }
     },
@@ -216,7 +218,8 @@ export const useStore = defineStore('store', {
       } catch (error) {
         this.setError({
           title: 'errorModal.configReadFailed',
-          message: getErrorMessage(error),
+          // TODO: replace default error message with specific one
+          message: 'errorModal.defaultErrorMessage',
         })
       }
     },
@@ -243,7 +246,8 @@ export const useStore = defineStore('store', {
           
           this.setError({
             title: 'errorModal.startNodeFailed',
-            message: 'errorModal.startNodeMissingParams',
+            // TODO: replace default error message with specific one
+            message: 'errorModal.defaultErrorMessage',
           })
         }
       } catch (error) {
@@ -252,7 +256,8 @@ export const useStore = defineStore('store', {
 
         this.setError({
           title: 'errorModal.startNodeFailed',
-          message: getErrorMessage(error),
+          // TODO: replace default error message with specific one
+          message: 'errorModal.defaultErrorMessage',
         })
       }
     },
@@ -301,7 +306,8 @@ export const useStore = defineStore('store', {
         util.errorLogger("PLOTTING PROGRESS | Farmer start error!")
         this.setError({
           title: 'errorModal.startFarmerFailed',
-          message: getErrorMessage(error),
+          // TODO: replace default error message with specific one
+          message: 'errorModal.defaultErrorMessage',
         })
       }
     },
