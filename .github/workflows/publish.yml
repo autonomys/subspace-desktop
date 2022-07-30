@@ -1,5 +1,9 @@
 name: "publish"
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "*"
 
 jobs:
   publish-tauri:
@@ -46,17 +50,6 @@ jobs:
         id: extract_version
         uses: Saionaro/extract-package-version@v1.0.6
 
-      - name: Create release
-        uses: actions/create-release@latest
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          tag_name: ${{ steps.extract_version.outputs.version }}
-          release_name: ${{ steps.extract_version.outputs.version }}
-          draft: false
-          prerelease: true
-        if: matrix.build.target == 'macos-aarch64'
-
       # For sloth256-189 Wasm support we need `llvm-ar`, which is not available by default
       - name: Install LLVM and Clang
         uses: KyleMayes/install-llvm-action@v1
@@ -71,7 +64,7 @@ jobs:
       - name: install Rust nightly
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly-2022-07-09
+          toolchain: nightly-2022-07-22
           target: ${{ matrix.build.target }}
           components: rust-src
           override: true
@@ -89,10 +82,11 @@ jobs:
         run: Remove-Item -LiteralPath "C:\msys64\" -Force -Recurse
         if: runner.os == 'Windows'
 
-      - name: install webkit2gtk (Linux)
+      # libayatana does not work for ubuntu20.04 -> https://github.com/subspace/subspace-desktop/runs/7581578859?check_suite_focus=true
+      - name: install webkit2gtk and libappindicator (Linux)
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.0-dev libayatana-appindicator3-dev
+          sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.0-dev libappindicator3-dev
         if: runner.os == 'Linux'
 
       # Imports PFX Certificate into keystore, allows Tauri to then sign the exe without being passed the private key.
@@ -107,6 +101,7 @@ jobs:
           certutil -decode certificate/tempCert.txt certificate/certificate.pfx
           Remove-Item –path certificate -include tempCert.txt
           Import-PfxCertificate -FilePath certificate/certificate.pfx -CertStoreLocation Cert:\CurrentUser\My -Password (ConvertTo-SecureString -String $env:WINDOWS_PFX_PASSWORD -Force -AsPlainText)
+
       - name: install app dependencies
         # sometimes it fails downloading packages, so set a timeout https://github.com/yarnpkg/yarn/issues/4890
         run: yarn install --network-timeout 1000000
@@ -160,6 +155,7 @@ jobs:
           # echo "Stapling installer"
           # xcrun stapler staple ${{ env.PRODUCTION_TARGET }}/dmg/subspace-desktop_${{ github.ref_name }}_aarch64.dmg
           echo "Done!"
+
       - name: Sign Application (Windows)
         uses: skymatic/code-sign-action@v1.1.0
         with:
@@ -200,22 +196,18 @@ jobs:
           move ${{ env.PRODUCTION_TARGET }}/msi/subspace-desktop-opencl_${{ steps.extract_version.outputs.version }}_x64_en-US.msi executables/subspace-desktop-opencl_${{ steps.extract_version.outputs.version }}_${{ matrix.build.suffix }}.msi
         if: runner.os == 'Windows'
 
-      - name: Upload installers to artifacts
+      - name: Upload executables to artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: executables_${{ steps.extract_version.outputs.version }}_${{ matrix.build.suffix }}
+          name: executables-${{ matrix.build.suffix }}
           path: |
             executables/*
           if-no-files-found: error
 
-      - name: Create a release and Upload installers to assets
-        uses: softprops/action-gh-release@v1
+      - name: Upload executables to assets
+        uses: alexellis/upload-assets@0.3.0
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         with:
-          body: "See the assets to download this version and install. \n ⚠️ This version is not tested yet, please use the version with latest tag on it! ⚠️"
-          prerelease: true
-          draft: true
-          name: ${{ steps.extract_version.outputs.version }}
-          tag_name: ${{ steps.extract_version.outputs.version }}
-          fail_on_unmatched_files: true
-          files: executables/*
-# TODO: use the monorepo approach for publishing a release
+          asset_paths: '["executables/*"]'
+        if: github.event_name == 'push' && github.ref_type == 'tag'
