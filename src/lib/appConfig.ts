@@ -112,10 +112,6 @@ export const config: IConfig = {
   }: UpdateParams): Promise<void> {
     const newAppConfig = await this.read()
 
-    // if (rewardAddress) {
-    //   console.log('throwing error')
-    //   throw Error;
-    // }
     if (plot !== undefined) newAppConfig.plot = plot
     if (launchOnBoot !== undefined) newAppConfig.launchOnBoot = launchOnBoot
     if (rewardAddress !== undefined) newAppConfig.rewardAddress = rewardAddress
