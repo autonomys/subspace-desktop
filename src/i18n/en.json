@@ -126,7 +126,7 @@
       "readUp": "Read up about Subspace on"
     }
   },
-  "errorModal": {
+  "errorPage": {
     "restart": "Restart",
     "configUpdateFailed": "Failed to update config",
     "configReadFailed": "Failed to read config",

@@ -110,9 +110,9 @@ describe('Store', () => {
     await store.setNodeName(config, 'random node name');
 
     expect(store.error).toEqual({
-      title: 'errorModal.configUpdateFailed',
+      title: 'errorPage.configUpdateFailed',
       // TODO: replace default error message with specific one
-      message: 'errorModal.defaultErrorMessage',
+      message: 'errorPage.defaultErrorMessage',
     });
   });
 
@@ -156,9 +156,9 @@ describe('Store', () => {
     await store.updateFromConfig(blockStorageMock, config);
 
     expect(store.error).toEqual({
-      title: 'errorModal.configReadFailed',
+      title: 'errorPage.configReadFailed',
       // TODO: replace default error message with specific one
-      message: 'errorModal.defaultErrorMessage',
+      message: 'errorPage.defaultErrorMessage',
     });
   });
 
@@ -194,14 +194,14 @@ describe('Store', () => {
     await store.startNode(client, utilMock);
 
     expect(store.error).toEqual({
-      title: 'errorModal.startNodeFailed',
+      title: 'errorPage.startNodeFailed',
       // TODO: replace default error message with specific one
-      message: 'errorModal.defaultErrorMessage',
+      message: 'errorPage.defaultErrorMessage',
     });
   });
 
   it('startNode action should set error state if node name and plot directory are not set before', async () => {
-    const errorMessage = 'errorModal.startNodeMissingParams';
+    const errorMessage = 'errorPage.startNodeMissingParams';
 
     const store = useStore();
 
@@ -215,9 +215,9 @@ describe('Store', () => {
     await store.startNode(client, utilMock);
 
     expect(store.error).toEqual({
-      title: 'errorModal.startNodeFailed',
+      title: 'errorPage.startNodeFailed',
       // TODO: replace default error message with specific one
-      message: 'errorModal.defaultErrorMessage',
+      message: 'errorPage.defaultErrorMessage',
     });
   });
 
@@ -260,9 +260,9 @@ describe('Store', () => {
     await store.startFarmer(client, utilMock, blockStorageMock);
 
     expect(store.error).toEqual({
-      title: 'errorModal.startFarmerFailed',
+      title: 'errorPage.startFarmerFailed',
       // TODO: replace default error message with specific one
-      message: 'errorModal.defaultErrorMessage',
+      message: 'errorPage.defaultErrorMessage',
     });
   });
 
@@ -280,9 +280,9 @@ describe('Store', () => {
     await store.startFarmer(client, utilMock, blockStorageMock);
 
     expect(store.error).toEqual({
-      title: 'errorModal.startFarmerFailed',
+      title: 'errorPage.startFarmerFailed',
       // TODO: replace default error message with specific one
-      message: 'errorModal.defaultErrorMessage',
+      message: 'errorPage.defaultErrorMessage',
     });
   });
 
@@ -300,9 +300,9 @@ describe('Store', () => {
     await store.startFarmer(client, utilMock, blockStorageMock);
 
     expect(store.error).toEqual({
-      title: 'errorModal.startFarmerFailed',
+      title: 'errorPage.startFarmerFailed',
       // TODO: replace default error message with specific one
-      message: 'errorModal.defaultErrorMessage',
+      message: 'errorPage.defaultErrorMessage',
     });
   });
 
@@ -320,9 +320,9 @@ describe('Store', () => {
     await store.startFarmer(client, utilMock, blockStorageMock);
 
     expect(store.error).toEqual({
-      title: 'errorModal.startFarmerFailed',
+      title: 'errorPage.startFarmerFailed',
       // TODO: replace default error message with specific one
-      message: 'errorModal.defaultErrorMessage',
+      message: 'errorPage.defaultErrorMessage',
     });
   });
 
@@ -361,9 +361,9 @@ describe('Store', () => {
     await store.confirmPlottingSetup(config, utilMock);
 
     expect(store.error).toEqual({
-      title: 'errorModal.configUpdateFailed',
+      title: 'errorPage.configUpdateFailed',
       // TODO: replace default error message with specific one
-      message: 'errorModal.defaultErrorMessage',
+      message: 'errorPage.defaultErrorMessage',
     });
   });
 })

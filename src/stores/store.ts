@@ -158,10 +158,10 @@ export const useStore = defineStore('store', {
         await config.update({ nodeName: name });
       } catch (error) {
         this.setError({
-          title: 'errorModal.configUpdateFailed',
+          title: 'errorPage.configUpdateFailed',
           // TODO: replace default error message with specific one
-          message: 'errorModal.defaultErrorMessage',
-        })
+          message: 'errorPage.defaultErrorMessage',
+        });
       }
     },
     setSyncState(state: SyncState) {
@@ -188,10 +188,10 @@ export const useStore = defineStore('store', {
         });
       } catch (error) {
         this.setError({
-          title: 'errorModal.configUpdateFailed',
+          title: 'errorPage.configUpdateFailed',
           // TODO: replace default error message with specific one
-          message: 'errorModal.defaultErrorMessage',
-        })
+          message: 'errorPage.defaultErrorMessage',
+        });
       }
     },
     setRewardAddress(address: string) {
@@ -217,10 +217,10 @@ export const useStore = defineStore('store', {
         this.farmedBlocks = blockStorage.getStoredBlocks();
       } catch (error) {
         this.setError({
-          title: 'errorModal.configReadFailed',
+          title: 'errorPage.configReadFailed',
           // TODO: replace default error message with specific one
-          message: 'errorModal.defaultErrorMessage',
-        })
+          message: 'errorPage.defaultErrorMessage',
+        });
       }
     },
     setNetworkState(state: string) {
@@ -245,20 +245,20 @@ export const useStore = defineStore('store', {
           util.errorLogger("NODE START | node name and plot directory are required to start node");
           
           this.setError({
-            title: 'errorModal.startNodeFailed',
+            title: 'errorPage.startNodeFailed',
             // TODO: replace default error message with specific one
-            message: 'errorModal.defaultErrorMessage',
-          })
+            message: 'errorPage.defaultErrorMessage',
+          });
         }
       } catch (error) {
         // TODO: consider moving logging to client.ts
         util.errorLogger("NODE START | failed to start node");
 
         this.setError({
-          title: 'errorModal.startNodeFailed',
+          title: 'errorPage.startNodeFailed',
           // TODO: replace default error message with specific one
-          message: 'errorModal.defaultErrorMessage',
-        })
+          message: 'errorPage.defaultErrorMessage',
+        });
       }
     },
     async startFarmer(client: IClient, util: IUtil, blockStorage: IBlockStorage) {
@@ -305,10 +305,10 @@ export const useStore = defineStore('store', {
         // TODO: consider moving logging to client.ts
         util.errorLogger("PLOTTING PROGRESS | Farmer start error!")
         this.setError({
-          title: 'errorModal.startFarmerFailed',
+          title: 'errorPage.startFarmerFailed',
           // TODO: replace default error message with specific one
-          message: 'errorModal.defaultErrorMessage',
-        })
+          message: 'errorPage.defaultErrorMessage',
+        });
       }
     },
     setPlottingFinished(value: number) {

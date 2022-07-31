@@ -1,4 +1,3 @@
-import { Dialog, DialogChainObject } from "quasar"
 import { appName, errorLogger, toFixed } from "./util"
 import * as path from "@tauri-apps/api/path"
 import * as fs from "@tauri-apps/api/fs"
@@ -12,7 +11,6 @@ export interface IConfig {
   read: () => Promise<Config>;
   write: (config: Config) => Promise<void>;
   update: (params: UpdateParams) => Promise<void>;
-  showErrorModal: () => DialogChainObject;
 }
 
 export interface Plot {
@@ -113,6 +111,11 @@ export const config: IConfig = {
     nodeName,
   }: UpdateParams): Promise<void> {
     const newAppConfig = await this.read()
+
+    // if (rewardAddress) {
+    //   console.log('throwing error')
+    //   throw Error;
+    // }
     if (plot !== undefined) newAppConfig.plot = plot
     if (launchOnBoot !== undefined) newAppConfig.launchOnBoot = launchOnBoot
     if (rewardAddress !== undefined) newAppConfig.rewardAddress = rewardAddress
@@ -120,7 +123,4 @@ export const config: IConfig = {
     if (nodeName !== undefined) newAppConfig.nodeName = nodeName
     await this.write(newAppConfig)
   },
-  showErrorModal(): DialogChainObject {
-    return Dialog.create({ message: "Config file is corrupted, resetting..." })
-  }
 }

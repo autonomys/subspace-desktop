@@ -53,7 +53,6 @@ import * as process from 'process'
 import * as util from "../lib/util"
 import { config } from "../lib/appConfig"
 import MainMenu from "../components/mainMenu.vue"
-import errorModal from "../components/errorModal.vue";
 import { useStore } from '../stores/store';
 
 export default defineComponent({
@@ -75,12 +74,10 @@ export default defineComponent({
     this.appVersion = (process.env.APP_VERSION as string)
     util.infoLogger("Version: " + this.appVersion)
 
+    // if there is an error - redirect to error page
     watch(
       () => this.store.error.title,
-      async () => {
-        const { title, message } = this.store.error;
-        await util.showModal(errorModal, { title, message });
-      },
+      () => this.$router.push({ name: 'errorPage' }),
     )
   },
   methods: {

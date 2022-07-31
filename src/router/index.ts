@@ -37,8 +37,10 @@ export default route(function (/* { store, ssrContext } */) {
   // prevent route transition if there is an error
   router.beforeEach((to, from, next) => {
     const store = useStore();
-    if (!store.error.title) {
-      next() 
+    if (store.error.title && to.name !== 'errorPage') {
+      next({ name: 'errorPage' }) 
+    } else {
+      next();
     }
   })
 
