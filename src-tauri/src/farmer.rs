@@ -77,7 +77,7 @@ pub(crate) async fn farming(
         });
         return Ok("Successfully started the farmer in the backend".into());
     }
-    return Err("could not parse the reward address in the backend".into());
+    Err("could not parse the reward address in the backend".into())
 }
 
 /// Start farming by using plot in specified path and connecting to WebSocket server at specified
