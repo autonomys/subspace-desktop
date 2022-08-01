@@ -239,7 +239,10 @@ export const useStore = defineStore('store', {
       try {
         if (this.nodeName && this.plotDir) {
           this.setStatus('startingNode');
-          await client.startNode(this.plotDir, this.nodeName);
+
+          // TODO: remove variable assignment after backend (Rust) is updated
+          const hasStarted = await client.startNode(this.plotDir, this.nodeName);
+          if (!hasStarted) { throw Error; }
         } else {
           // TODO: consider moving logging to client.ts
           util.errorLogger("NODE START | node name and plot directory are required to start node");
@@ -269,7 +272,10 @@ export const useStore = defineStore('store', {
         this.setPlotMessage('dashboard.verifyingPlot');
         this.setNetworkMessage('dashboard.verifyingNet');
 
-        await client.startFarming(this.plotDir, this.plotSizeGB);
+        // TODO: remove variable assignment after backend (Rust) is updated
+        const isFarming = await client.startFarming(this.plotDir, this.plotSizeGB);
+        if (!isFarming) { throw Error; }
+
         // TODO: consider moving logging to client.ts
         util.infoLogger("PLOTTING PROGRESS | farmer started")
 
