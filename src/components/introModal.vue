@@ -64,13 +64,8 @@ q-dialog(@hide="onDialogHide" persistent ref="dialog")
 
 <script>
 import { defineComponent } from "vue"
-import saveKeys from "components/SaveKeys.vue"
-const component = defineComponent({
-  components: { saveKeys },
-  props: {
-    // ...your custom props
-  },
 
+const component = defineComponent({
   emits: [
     // REQUIRED
     "ok",
