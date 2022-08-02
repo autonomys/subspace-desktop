@@ -1,21 +1,21 @@
-import { ApiPromise, Keyring } from "@polkadot/api"
-import type { Vec } from "@polkadot/types/codec"
-import { mnemonicGenerate, cryptoWaitReady } from "@polkadot/util-crypto"
-import * as event from "@tauri-apps/api/event"
-import { invoke } from "@tauri-apps/api/tauri"
-import * as process from "process"
-import * as util from "../lib/util"
-import { config } from "./appConfig"
+import { ApiPromise, Keyring } from '@polkadot/api';
+import type { Vec } from '@polkadot/types/codec';
+import { mnemonicGenerate, cryptoWaitReady } from '@polkadot/util-crypto';
+import * as event from '@tauri-apps/api/event';
+import { invoke } from '@tauri-apps/api/tauri';
+import * as process from 'process';
+import * as util from '../lib/util';
+import { config } from './appConfig';
 import {
   FarmedBlock,
   SubPreDigest,
   SyncState,
-} from "../lib/types"
+} from '../lib/types';
 import type { EventRecord } from '@polkadot/types/interfaces/system';
-import { IU8a } from "@polkadot/types-codec/types"
+import { IU8a } from '@polkadot/types-codec/types';
 
-const tauri = { event, invoke }
-const SUNIT = 1000000000000000000n
+const tauri = { event, invoke };
+const SUNIT = 1000000000000000000n;
 
 export interface IClient {
   getPeersCount: () => Promise<number>;
@@ -51,14 +51,14 @@ export class Client implements IClient {
     const apiAt = await this.api.at(hash);
     const records = (await apiAt.query.system.events()) as Vec<EventRecord>;
     records.forEach((record) => {
-      const { section, method, data } = record.event
-      if (section === "rewards" && method === "BlockReward") {
-        const reward = this.api.registry.createType("u128", data[1]);
+      const { section, method, data } = record.event;
+      if (section === 'rewards' && method === 'BlockReward') {
+        const reward = this.api.registry.createType('u128', data[1]);
         blockReward = Number((reward.toBigInt() * 100n) / SUNIT) / 100;
-      } else if (section === "transactionFees") {
+      } else if (section === 'transactionFees') {
         // TODO: include storage and compute fees
       }
-    })
+    });
 
     return blockReward;
   }
@@ -72,7 +72,7 @@ export class Client implements IClient {
 
     this.unsubscribe = await this.api.rpc.chain.subscribeNewHeads(
       async ({ hash, number }) => {
-        const blockNum = number.toNumber()
+        const blockNum = number.toNumber();
         const header = await this.api.rpc.chain.getHeader(hash);
 
         // TODO: handle vote rewards: check VoteReward events and aggregate
@@ -92,38 +92,38 @@ export class Client implements IClient {
             feeReward: 0,
             // TODO: check if necessary to store address here since we only process blocks farmed by user
             rewardAddr: rewardAddress.toString(),
-          }
+          };
           handlers.farmedBlockHandler(block);
         }
         handlers.newBlockHandler(blockNum);
       }
-    )
+    );
 
-    process.on("beforeExit", this.stopSubscription)
-    window.addEventListener("unload", this.stopSubscription)
+    process.on('beforeExit', this.stopSubscription);
+    window.addEventListener('unload', this.stopSubscription);
     this.clearTauriDestroy = await tauri.event.once(
-      "tauri://destroyed",
-      () => console.log("Destroyed event!")
-    )
+      'tauri://destroyed',
+      () => console.log('Destroyed event!')
+    );
   }
 
   stopSubscription() {
-    util.infoLogger("block subscription stop triggered")
-    this.unsubscribe()
-    this.api.disconnect()
+    util.infoLogger('block subscription stop triggered');
+    this.unsubscribe();
+    this.api.disconnect();
     try {
-      this.clearTauriDestroy()
-      window.removeEventListener("unload", this.stopSubscription)
+      this.clearTauriDestroy();
+      window.removeEventListener('unload', this.stopSubscription);
     } catch (error) {
-      util.errorLogger(error)
+      util.errorLogger(error);
     }
   }
 
   public async connectApi(): Promise<void> {
     if (!this.api.isConnected) {
-      await this.api.connect()
+      await this.api.connect();
     }
-    await this.api.isReadyOrError
+    await this.api.isReadyOrError;
   }
 
   public async getSyncState(): Promise<SyncState> {
@@ -137,37 +137,37 @@ export class Client implements IClient {
 
   // TODO: method should return Promise<void>, update after backend is updated
   public async startNode(path: string, nodeName: string): Promise<boolean> {
-    const result = await tauri.invoke("start_node", { path, nodeName });
+    const result = await tauri.invoke('start_node', { path, nodeName });
     if (!result) { return false;}
 
     // TODO: workaround in case node takes some time to fully start.
-    await new Promise((resolve) => setTimeout(resolve, 7000))
-    await this.connectApi()
+    await new Promise((resolve) => setTimeout(resolve, 7000));
+    await this.connectApi();
 
     return true;
   }
 
   public async createRewardAddress(): Promise<{ rewardAddress: string, mnemonic: string }> {
-    const mnemonic = mnemonicGenerate()
-    const keyring = new Keyring({ type: 'sr25519', ss58Format: 2254 }) // 2254 is the prefix for subspace-testnet
+    const mnemonic = mnemonicGenerate();
+    const keyring = new Keyring({ type: 'sr25519', ss58Format: 2254 }); // 2254 is the prefix for subspace-testnet
     await cryptoWaitReady();
-    const pair = keyring.createFromUri(mnemonic)
+    const pair = keyring.createFromUri(mnemonic);
     return {
       rewardAddress: pair.address,
       mnemonic,
-    }
+    };
   }
 
   /* FARMER INTEGRATION */
   // TODO: method should return Promise<void>, update after backend is updated
   public async startFarming(path: string, plotSizeGB: number): Promise<boolean> {
     // convert GB to Bytes
-    const plotSize = Math.round(plotSizeGB * 1024 * 1024 * 1024)
+    const plotSize = Math.round(plotSizeGB * 1024 * 1024 * 1024);
     const { rewardAddress } = (await config.read());
-    if (rewardAddress === "") {
-      util.errorLogger("Tried to send empty reward address to backend!")
+    if (rewardAddress === '') {
+      util.errorLogger('Tried to send empty reward address to backend!');
     }
 
-    return tauri.invoke("farming", { path, rewardAddress, plotSize });
+    return tauri.invoke('farming', { path, rewardAddress, plotSize });
   }
 }

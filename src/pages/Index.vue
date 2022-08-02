@@ -27,12 +27,12 @@ q-page(padding)
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue"
-import { Notify } from "quasar"
+import { defineComponent } from 'vue';
+import { Notify } from 'quasar';
 
-import disclaimer from "../components/disclaimer.vue"
+import disclaimer from '../components/disclaimer.vue';
 import { useStore } from '../stores/store';
-import { config } from "../lib/appConfig";
+import { config } from '../lib/appConfig';
 import * as util from '../lib/util';
 import * as blockStorage from '../lib/blockStorage';
 
@@ -44,48 +44,48 @@ export default defineComponent({
   },
   async mounted() {
     try {
-      this.checkDev()
+      this.checkDev();
       if (await config.validate()) {
-        util.infoLogger("INDEX | NOT First Time RUN.")
+        util.infoLogger('INDEX | NOT First Time RUN.');
         await this.store.updateFromConfig(blockStorage, config);
         this.dashboard();
-        return
+        return;
       }
-      util.infoLogger("validate failed, we should start from scratch")
-      this.firstLoad()
+      util.infoLogger('validate failed, we should start from scratch');
+      this.firstLoad();
     } catch (e) {
-      util.infoLogger("config could not be read, starting from scratch")
-      this.firstLoad()
+      util.infoLogger('config could not be read, starting from scratch');
+      this.firstLoad();
     }
   },
   methods: {
     checkDev() {
-      if (util.CONTEXT_MENU === "OFF")
-        document.addEventListener("contextmenu", (event) =>
+      if (util.CONTEXT_MENU === 'OFF')
+        document.addEventListener('contextmenu', (event) =>
           event.preventDefault()
-        )
+        );
     },
     dashboard() {
-      this.$router.replace({ name: "dashboard" })
+      this.$router.replace({ name: 'dashboard' });
     },
     async firstLoad() {
-      util.infoLogger("INDEX | First Time RUN, resetting reward address")
+      util.infoLogger('INDEX | First Time RUN, resetting reward address');
       // reset node name in case there is a leftover from prev launch (restart due to error)
       this.store.setNodeName(config, '');
       const { launchOnBoot } = await config.read();
       if (launchOnBoot) {
         Notify.create({
-          message: "Subspace Desktop will be started on boot. You can disable this from settings (the gear icon on top-right).",
-          icon: "info"
-        })
+          message: 'Subspace Desktop will be started on boot. You can disable this from settings (the gear icon on top-right).',
+          icon: 'info'
+        });
       }
     },
     async viewDisclaimer(destination: string) {
-      const modal = await util.showModal(disclaimer)
+      const modal = await util.showModal(disclaimer);
       modal?.onDismiss(() => {
-        this.$router.replace({ name: destination })
-      })
+        this.$router.replace({ name: destination });
+      });
     }
   }
-})
+});
 </script>

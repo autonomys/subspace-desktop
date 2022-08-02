@@ -5,7 +5,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
       q-icon(color="red" name="error_outline" size="80px")
       h6.q-ml-md.text-red-10 {{ $t(store.error.title) }}
     .row.q-mb-md.q-mx-xl.q-mt-lg
-      p {{ $t(store.error.message) }}
+      p {{ $t(store.error?.message || 'errorPage.defaultErrorMessage') }}
   .row.justify-end.q-mt-sm.absolute-bottom.q-pb-md
     .col-auto
       q-btn(
@@ -19,12 +19,12 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue"
-import { relaunch } from "@tauri-apps/api/process"
+import { defineComponent } from 'vue';
+import { relaunch } from '@tauri-apps/api/process';
 import { useStore } from '../stores/store';
 
 export default defineComponent({
-  name: "ErrorPage",
+  name: 'ErrorPage',
   setup() {
     const store = useStore();
     return { store };
@@ -41,5 +41,5 @@ export default defineComponent({
       relaunch();
     }
   }
-})
+});
 </script>

@@ -1,8 +1,8 @@
-import { Dialog, DialogChainObject } from "quasar"
-import { Component } from "vue"
-import * as process from "process"
-import { ApiPromise, WsProvider } from "@polkadot/api"
-import { generateSlug } from "random-word-slugs"
+import { Dialog, DialogChainObject } from 'quasar';
+import { Component } from 'vue';
+import * as process from 'process';
+import { ApiPromise, WsProvider } from '@polkadot/api';
+import { generateSlug } from 'random-word-slugs';
 
 export interface IUtil {
   generateNodeName: () => string;
@@ -10,59 +10,59 @@ export interface IUtil {
   infoLogger: (str: string) => Promise<void>;
 }
 
-const nodeNameMaxLength = 64
+const nodeNameMaxLength = 64;
 
 export const random = (min: number, max: number): number =>
-  Math.floor(Math.random() * (max - min)) + min
+  Math.floor(Math.random() * (max - min)) + min;
 
 export async function showModal(
   component: Component,
   props: any = {}
 ): Promise<DialogChainObject | null> {
-  console.log("Show Modal")
+  console.log('Show Modal');
   return Dialog.create({
-    message: "Testing",
+    message: 'Testing',
     component,
     componentProps: {
       ...props
     }
-  })
+  });
 }
 
 // TODO: rethink about the signature of this function, it should be string instead, and refactor the codebase accordingly
 export function toFixed(num: number, precision: number): number {
-  if (!num) return 0
-  return parseFloat(num.toFixed(precision))
+  if (!num) return 0;
+  return parseFloat(num.toFixed(precision));
 }
 
 export function plotTimeMsEstimate(gb: number): number {
-  return gb * 5e4
+  return gb * 5e4;
 }
 
 export function formatMS(duration: number): string {
-  duration /= 1000
+  duration /= 1000;
   // Hours, minutes and seconds
-  const hrs = ~~(duration / 3600)
-  const mins = ~~((duration % 3600) / 60)
-  const secs = ~~duration % 60
+  const hrs = ~~(duration / 3600);
+  const mins = ~~((duration % 3600) / 60);
+  const secs = ~~duration % 60;
 
   // Output like "1:01" or "4:03:59" or "123:03:59"
-  let ret = ""
+  let ret = '';
 
   if (hrs > 0) {
-    ret += "" + hrs + ":" + (mins < 10 ? "0" : "")
+    ret += '' + hrs + ':' + (mins < 10 ? '0' : '');
   }
 
-  ret += "" + mins + ":" + (secs < 10 ? "0" : "")
-  ret += "" + secs
-  return ret
+  ret += '' + mins + ':' + (secs < 10 ? '0' : '');
+  ret += '' + secs;
+  return ret;
 }
 
 export function promiseTimeout<T>(ms: number, promise: Promise<T>): Promise<T> {
   // Create a promise that rejects in <ms> milliseconds
   const timeout = new Promise<never>((_, reject) => {
     setTimeout(() => {
-      reject('Timed out in ' + ms + 'ms.')
+      reject('Timed out in ' + ms + 'ms.');
     }, ms);
 
   });
@@ -76,18 +76,18 @@ export function promiseTimeout<T>(ms: number, promise: Promise<T>): Promise<T> {
 
 const apiTypes = {
   Solution: {
-    public_key: "AccountId32",
-    reward_address: "AccountId32"
+    public_key: 'AccountId32',
+    reward_address: 'AccountId32'
   },
   SubPreDigest: {
-    slot: "u64",
-    solution: "Solution"
+    slot: 'u64',
+    solution: 'Solution'
   }
-}
+};
 
-export const PIECE_SIZE = 4096
-export const GB = 1024 * 1024 * 1024
-export const CONTEXT_MENU = process.env.DEV || "OFF" // enables context menu only if DEV mode is on
+export const PIECE_SIZE = 4096;
+export const GB = 1024 * 1024 * 1024;
+export const CONTEXT_MENU = process.env.DEV || 'OFF'; // enables context menu only if DEV mode is on
 
 export function createApi(url: string | string[]): ApiPromise {
   return new ApiPromise({
@@ -98,19 +98,19 @@ export function createApi(url: string | string[]): ApiPromise {
 }
 
 export function generateNodeName(): string {
-  let nodeName = ""
+  let nodeName = '';
   do {
-    const slug = generateSlug(2)
+    const slug = generateSlug(2);
     const num = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
-    nodeName = slug + "-" + num.toString()
-  } while (nodeName.length > nodeNameMaxLength)
-  return nodeName
+    nodeName = slug + '-' + num.toString();
+  } while (nodeName.length > nodeNameMaxLength);
+  return nodeName;
 }
 
 export function getErrorMessage(error: unknown): string | undefined {
   if (error instanceof Error) {
     return error.message;
-  } else if (typeof error === "string") {
+  } else if (typeof error === 'string') {
     return error;
   } else {
     return;

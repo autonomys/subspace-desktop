@@ -2,8 +2,8 @@ import { defineStore } from 'pinia';
 
 import { SyncState, FarmedBlock } from '../lib/types';
 import { IClient } from '../lib/client';
-import { IUtil } from "../lib/util/util";
-import { IConfig } from "../lib/appConfig";
+import { IUtil } from '../lib/util/util';
+import { IConfig } from '../lib/appConfig';
 import { IBlockStorage } from '../lib/blockStorage';
 
 export type Status = 'idle' | 'startingNode' | 'syncing' | 'farming';
@@ -54,7 +54,7 @@ export const INITIAL_SYNC_STATE = {
   currentBlock: 0,
   startingBlock: 0,
   highestBlock: 0,
-}
+};
 
 export const useStore = defineStore('store', {
   state: (): State => ({
@@ -100,19 +100,19 @@ export const useStore = defineStore('store', {
     },
     blocksByAddress(state): FarmedBlock[] {
       return this.farmedBlocks
-        .filter(({ rewardAddr }: FarmedBlock) => rewardAddr === state.rewardAddress)
+        .filter(({ rewardAddr }: FarmedBlock) => rewardAddr === state.rewardAddress);
     },
     // TODO: include voting rewards
     totalEarned(): string {
       return this.blocksByAddress
         .reduce((agg: number, { blockReward, feeReward }) => blockReward + feeReward + agg, 0)
-        .toFixed(2)
+        .toFixed(2);
     },
     plottingFinished(): number {
-      return parseFloat(this.plotting.finishedGB.toFixed(2))
+      return parseFloat(this.plotting.finishedGB.toFixed(2));
     },
     plottingRemaining(): number {
-      return parseFloat((this.plotSizeGB - this.plotting.finishedGB).toFixed(2))
+      return parseFloat((this.plotSizeGB - this.plotting.finishedGB).toFixed(2));
     },
     // returned object is consumed by $t() from vue-i18n
     plottingStatus(): { string: string, values: Record<string, number> } {
@@ -123,7 +123,7 @@ export const useStore = defineStore('store', {
           currentBlock,
           highestBlock,
         }
-      }
+      };
     },
     // returned object is consumed by $t() from vue-i18n
     networkMessage(): { string: string, values: Record<string, number> } {
@@ -136,7 +136,7 @@ export const useStore = defineStore('store', {
           highestBlock,
           syncedAtNum,
         }
-      }
+      };
     },
   },
 
@@ -245,7 +245,7 @@ export const useStore = defineStore('store', {
           if (!hasStarted) { throw Error; }
         } else {
           // TODO: consider moving logging to client.ts
-          util.errorLogger("NODE START | node name and plot directory are required to start node");
+          util.errorLogger('NODE START | node name and plot directory are required to start node');
           
           this.setError({
             title: 'errorPage.startNodeFailed',
@@ -255,7 +255,7 @@ export const useStore = defineStore('store', {
         }
       } catch (error) {
         // TODO: consider moving logging to client.ts
-        util.errorLogger("NODE START | failed to start node");
+        util.errorLogger('NODE START | failed to start node');
 
         this.setError({
           title: 'errorPage.startNodeFailed',
@@ -277,14 +277,14 @@ export const useStore = defineStore('store', {
         if (!isFarming) { throw Error; }
 
         // TODO: consider moving logging to client.ts
-        util.infoLogger("PLOTTING PROGRESS | farmer started")
+        util.infoLogger('PLOTTING PROGRESS | farmer started');
 
         const syncState = await client.getSyncState();
         this.setSyncState(syncState);
         let isSyncing = await client.isSyncing();
 
         do {
-          await new Promise((resolve) => setTimeout(resolve, 3000))
+          await new Promise((resolve) => setTimeout(resolve, 3000));
           const syncState = await client.getSyncState();
           this.setSyncState(syncState);
           this.setPlotMessage('dashboard.plotActive');
@@ -306,10 +306,10 @@ export const useStore = defineStore('store', {
         });
 
         // TODO: consider moving logging to client.ts
-        util.infoLogger("PLOTTING PROGRESS | block subscription started")
+        util.infoLogger('PLOTTING PROGRESS | block subscription started');
       } catch (error) {
         // TODO: consider moving logging to client.ts
-        util.errorLogger("PLOTTING PROGRESS | Farmer start error!")
+        util.errorLogger('PLOTTING PROGRESS | Farmer start error!');
         this.setError({
           title: 'errorPage.startFarmerFailed',
           // TODO: replace default error message with specific one
