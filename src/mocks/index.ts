@@ -10,12 +10,12 @@ export {
 
 const configMockData = {
   plot: {
-    location: "/random_location",
+    location: '/random_location',
     sizeGB: 100
   },
-  rewardAddress: "random address",
-  nodeName: "random node name",
-}
+  rewardAddress: 'random address',
+  nodeName: 'random node name',
+};
 
 export const configMock = {
   configDir: jest.fn(),
@@ -27,12 +27,12 @@ export const configMock = {
   write: jest.fn(),
   update: jest.fn(),
   showErrorModal: jest.fn(),
-} as unknown as IConfig
+} as unknown as IConfig;
 
 export const blockStorageMock = {
   getStoredBlocks: jest.fn(),
   storeBlocks: jest.fn(),
-}
+};
 
 export const clientMock = {
   startNode: jest.fn(),
@@ -50,4 +50,4 @@ export const utilMock = {
   errorLogger: jest.fn(),
   infoLogger: jest.fn(),
   generateNodeName: jest.fn(() => 'random generated name'),
-} as unknown as IUtil
+} as unknown as IUtil;

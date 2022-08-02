@@ -31,7 +31,7 @@ q-layout(view="hHh lpr fFf")
               v-model="store.nodeName"
               @blur="saveName"
               @keyup.enter="saveName"
-              dense="dense"
+              dense
               outlined
               autofocus
             )
@@ -48,15 +48,15 @@ q-layout(view="hHh lpr fFf")
 </template>
 
 <script lang="ts">
-import { defineComponent, watch } from "vue"
-import * as process from 'process'
-import * as util from "../lib/util"
-import { config } from "../lib/appConfig"
-import MainMenu from "../components/mainMenu.vue"
+import { defineComponent, watch } from 'vue';
+import * as process from 'process';
+import * as util from '../lib/util';
+import { config } from '../lib/appConfig';
+import MainMenu from '../components/mainMenu.vue';
 import { useStore } from '../stores/store';
 
 export default defineComponent({
-  name: "MainLayout",
+  name: 'MainLayout',
   components: { MainMenu },
   setup() {
     const store = useStore();
@@ -64,21 +64,21 @@ export default defineComponent({
   },
   data() {
     return {
-      appVersion: "",
+      appVersion: '',
       util,
       isEdittingName: false,
-      oldNodeName: "",
-    }
+      oldNodeName: '',
+    };
   },
   mounted() {
-    this.appVersion = (process.env.APP_VERSION as string)
-    util.infoLogger("Version: " + this.appVersion)
+    this.appVersion = (process.env.APP_VERSION as string);
+    util.infoLogger('Version: ' + this.appVersion);
 
     // if there is an error - redirect to error page
     watch(
       () => this.store.error.title,
       () => this.$router.push({ name: 'errorPage' }),
-    )
+    );
   },
   methods: {
     onNameClick() {
@@ -89,16 +89,16 @@ export default defineComponent({
       this.setEditName(false);
       // if user left input empty - use prev name
       if (!this.store.nodeName) {
-        this.store.setNodeName(config, this.oldNodeName)
+        this.store.setNodeName(config, this.oldNodeName);
       // only restart if name has changed
       } else if (this.oldNodeName !== this.store.nodeName) {
         this.store.setNodeName(config, this.store.nodeName);
-        this.store.startNode(this.$client, util)
+        this.store.startNode(this.$client, util);
       }
     },
     setEditName(value: boolean) {
       this.isEdittingName = value;
     }
   }
-})
+});
 </script>

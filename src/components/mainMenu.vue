@@ -27,11 +27,11 @@ q-menu(auto-close)
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue"
-import { Dialog, Notify } from "quasar"
-import { relaunch } from "@tauri-apps/api/process"
-import * as util from "../lib/util"
-import { open as shellOpen } from '@tauri-apps/api/shell'
+import { defineComponent } from 'vue';
+import { Dialog, Notify } from 'quasar';
+import { relaunch } from '@tauri-apps/api/process';
+import * as util from '../lib/util';
+import { open as shellOpen } from '@tauri-apps/api/shell';
 
 export default defineComponent({
   data() {
@@ -39,40 +39,40 @@ export default defineComponent({
       util,
       launchOnStart: false,
       disableAutoLaunch: false
-    }
+    };
   },
   mounted() {
-    this.initMenu()
+    this.initMenu();
   },
   methods: {
     async toggleClicked() {
       if (this.disableAutoLaunch) {
         Notify.create({
           message: this.$t('menu.autoLaunchNotSupported'),
-          icon: "info"
-        })
-        return
+          icon: 'info'
+        });
+        return;
       }
-      console.log("toggle Clicked", this.launchOnStart)
+      console.log('toggle Clicked', this.launchOnStart);
       if (this.launchOnStart) {
         Notify.create({
           message: this.$t('menu.willAutoLaunch'),
-          icon: "info",
+          icon: 'info',
           group: 1,
-          badgeStyle: "visibility:hidden;"
-        })
+          badgeStyle: 'visibility:hidden;'
+        });
       } else {
         Notify.create({
           message: this.$t('menu.willNotAutoLaunch'),
-          icon: "info",
+          icon: 'info',
           group: 1,
-          badgeStyle: "visibility:hidden;"
-        })
+          badgeStyle: 'visibility:hidden;'
+        });
       }
       if (this.launchOnStart) {
-        await this.$autoLauncher.enable()
+        await this.$autoLauncher.enable();
       } else {
-        await this.$autoLauncher.disable()
+        await this.$autoLauncher.disable();
       }
     },
     reset() {
@@ -88,33 +88,33 @@ export default defineComponent({
         </p>
         `,
         html: true,
-        ok: { label: "reset", icon: "refresh", flat: true, color: "red" },
+        ok: { label: 'reset', icon: 'refresh', flat: true, color: 'red' },
         cancel: true
       }).onOk(async () => {
-        await util.resetAndClear()
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-        await relaunch()
-      })
+        await util.resetAndClear();
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await relaunch();
+      });
     },
     async exportLogs() {
       try {
-        const log_path = await util.getLogPath()
-        util.infoLogger("log path acquired:" + log_path)
-        await shellOpen(log_path)
+        const log_path = await util.getLogPath();
+        util.infoLogger('log path acquired:' + log_path);
+        await shellOpen(log_path);
       } catch(error) {
-        util.errorLogger(error)
+        util.errorLogger(error);
       }
     },
     async initMenu() {
       if (this.$autoLauncher.enabled !== undefined) {
-        this.launchOnStart = await this.$autoLauncher.enabled
+        this.launchOnStart = await this.$autoLauncher.enabled;
       } else {
-        this.launchOnStart = false
-        this.disableAutoLaunch = true
+        this.launchOnStart = false;
+        this.disableAutoLaunch = true;
       }
     }
   }
-})
+});
 </script>
 
 <style lang="scss">
