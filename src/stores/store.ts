@@ -2,11 +2,16 @@ import { defineStore } from 'pinia';
 
 import { SyncState, FarmedBlock } from '../lib/types';
 import { IClient } from '../lib/client';
-import { IUtil } from "../lib/util";
+import { IUtil } from "../lib/util/util";
 import { IConfig } from "../lib/appConfig";
 import { IBlockStorage } from '../lib/blockStorage';
 
 export type Status = 'idle' | 'startingNode' | 'syncing' | 'farming';
+
+interface Error {
+  title: string;
+  message?: string;
+}
 
 interface Network {
   peers: number;
@@ -38,6 +43,7 @@ interface State {
   network: Network;
   plot: Plot;
   plotting: Plotting;
+  error: Error;
 }
 
 // constants are also used in unit tests
@@ -79,7 +85,11 @@ export const useStore = defineStore('store', {
       finishedGB: 0,
       remainingGB: 0,
       status: 'plottingProgress.fetchingPlot',
-    }
+    },
+    error: {
+      title: '',
+      message: '',
+    },
   }),
 
   getters: {
@@ -133,6 +143,9 @@ export const useStore = defineStore('store', {
   // unfortunately Pinia currently does not allow DI, so it is necessary to provide client, util and blockStorage as parameters in order to make store testable
   // TODO: find more elegant solution
   actions: {
+    setError(error: Error) {
+      this.error = error;
+    },
     setPlotDir(dir: string) {
       this.plotDir = dir;
     },
@@ -140,8 +153,16 @@ export const useStore = defineStore('store', {
       this.plotSizeGB = size;
     },
     async setNodeName(config: IConfig, name: string) {
-      this.nodeName = name;
-      await config.update({ nodeName: name });
+      try {
+        this.nodeName = name;
+        await config.update({ nodeName: name });
+      } catch (error) {
+        this.setError({
+          title: 'errorPage.configUpdateFailed',
+          // TODO: replace default error message with specific one
+          message: 'errorPage.defaultErrorMessage',
+        });
+      }
     },
     setSyncState(state: SyncState) {
       this.syncState = state;
@@ -153,23 +174,28 @@ export const useStore = defineStore('store', {
       this.status = status;
     },
     async confirmPlottingSetup(config: IConfig, util: IUtil) {
-      const nodeName = util.generateNodeName();
-      this.setNodeName(config, nodeName);
+      try {
+        const nodeName = util.generateNodeName();
+        this.setNodeName(config, nodeName);
 
-      await config.update({
-        plot: {
-          location: this.plotDir,
-          sizeGB: this.plotSizeGB,
-        },
-        nodeName,
-      });
+        await config.update({
+          rewardAddress: this.rewardAddress,
+          plot: {
+            location: this.plotDir,
+            sizeGB: this.plotSizeGB,
+          },
+          nodeName,
+        });
+      } catch (error) {
+        this.setError({
+          title: 'errorPage.configUpdateFailed',
+          // TODO: replace default error message with specific one
+          message: 'errorPage.defaultErrorMessage',
+        });
+      }
     },
     setRewardAddress(address: string) {
       this.rewardAddress = address;
-    },
-    // we need a separate method, because we store address to config only after user confirmed (modal in SetupPlot.vue)
-    async confirmRewardAddress(config: IConfig) {
-      await config.update({ rewardAddress: this.rewardAddress });
     },
     setFirstLoad() {
       this.isFirstLoad = true;
@@ -182,12 +208,20 @@ export const useStore = defineStore('store', {
       this.network.syncedAtNum = blockNum;
     },
     async updateFromConfig(blockStorage: IBlockStorage, config: IConfig) {
-      const { plot, nodeName, rewardAddress } = await config.read();
-      this.plotSizeGB = plot.sizeGB;
-      this.plotDir = plot.location;
-      this.nodeName = nodeName;
-      this.rewardAddress = rewardAddress;
-      this.farmedBlocks = blockStorage.getStoredBlocks();
+      try {
+        const { plot, nodeName, rewardAddress } = await config.read();
+        this.plotSizeGB = plot.sizeGB;
+        this.plotDir = plot.location;
+        this.nodeName = nodeName;
+        this.rewardAddress = rewardAddress;
+        this.farmedBlocks = blockStorage.getStoredBlocks();
+      } catch (error) {
+        this.setError({
+          title: 'errorPage.configReadFailed',
+          // TODO: replace default error message with specific one
+          message: 'errorPage.defaultErrorMessage',
+        });
+      }
     },
     setNetworkState(state: string) {
       this.network.state = state;
@@ -202,58 +236,86 @@ export const useStore = defineStore('store', {
       this.plot.message = message;
     },
     async startNode(client: IClient, util: IUtil) {
-      if (this.nodeName && this.plotDir) {
-        this.setStatus('startingNode');
-        const nodeStarted = await client.startNode(this.plotDir, this.nodeName);
-        if (!nodeStarted) {
-          util.errorLogger("Node start error!")
+      try {
+        if (this.nodeName && this.plotDir) {
+          this.setStatus('startingNode');
+
+          // TODO: remove variable assignment after backend (Rust) is updated
+          const hasStarted = await client.startNode(this.plotDir, this.nodeName);
+          if (!hasStarted) { throw Error; }
+        } else {
+          // TODO: consider moving logging to client.ts
+          util.errorLogger("NODE START | node name and plot directory are required to start node");
+          
+          this.setError({
+            title: 'errorPage.startNodeFailed',
+            // TODO: replace default error message with specific one
+            message: 'errorPage.defaultErrorMessage',
+          });
         }
-        util.infoLogger("node started")
-      } else {
-        // TODO: create error state and update here
-        util.errorLogger("NODE START | node name and plot directory are required to start node");
+      } catch (error) {
+        // TODO: consider moving logging to client.ts
+        util.errorLogger("NODE START | failed to start node");
+
+        this.setError({
+          title: 'errorPage.startNodeFailed',
+          // TODO: replace default error message with specific one
+          message: 'errorPage.defaultErrorMessage',
+        });
       }
     },
     async startFarmer(client: IClient, util: IUtil, blockStorage: IBlockStorage) {
-      this.setStatus('syncing');
-      // TODO: consider refactoring statuses after Dashboard Plot component #294 is resolved
-      this.setNetworkState('verifying');
-      this.setPlotMessage('dashboard.verifyingPlot');
-      this.setNetworkMessage('dashboard.verifyingNet');
+      try {
+        this.setStatus('syncing');
+        // TODO: consider refactoring statuses after Dashboard Plot component #294 is resolved
+        this.setNetworkState('verifying');
+        this.setPlotMessage('dashboard.verifyingPlot');
+        this.setNetworkMessage('dashboard.verifyingNet');
 
-      const farmerStarted = await client.startFarming(this.plotDir, this.plotSizeGB);
-      if (!farmerStarted) {
-        util.errorLogger("Farmer start error!")
-      }
-      util.infoLogger("farmer started")
+        // TODO: remove variable assignment after backend (Rust) is updated
+        const isFarming = await client.startFarming(this.plotDir, this.plotSizeGB);
+        if (!isFarming) { throw Error; }
 
-      const syncState = await client.getSyncState();
-      this.setSyncState(syncState);
-      let isSyncing = await client.isSyncing();
+        // TODO: consider moving logging to client.ts
+        util.infoLogger("PLOTTING PROGRESS | farmer started")
 
-      do {
-        await new Promise((resolve) => setTimeout(resolve, 3000))
         const syncState = await client.getSyncState();
         this.setSyncState(syncState);
-        this.setPlotMessage('dashboard.plotActive');
-        this.setNetworkMessage('dashboard.syncingMsg');
-        this.setPlottingStatus('dashboard.syncingMsg');
-        this.setPlottingFinished((this.syncState.currentBlock * this.plotSizeGB) / this.syncState.highestBlock);
-        isSyncing = await client.isSyncing();
-      } while (isSyncing);
+        let isSyncing = await client.isSyncing();
 
-      this.setNetworkState('finished');
-      this.setNetworkMessage('dashboard.syncedAt');
-      this.setPlotState('finished');
-      this.setPlotMessage('dashboard.syncedMsg');
-      this.setStatus('farming');
+        do {
+          await new Promise((resolve) => setTimeout(resolve, 3000))
+          const syncState = await client.getSyncState();
+          this.setSyncState(syncState);
+          this.setPlotMessage('dashboard.plotActive');
+          this.setNetworkMessage('dashboard.syncingMsg');
+          this.setPlottingStatus('dashboard.syncingMsg');
+          this.setPlottingFinished((this.syncState.currentBlock * this.plotSizeGB) / this.syncState.highestBlock);
+          isSyncing = await client.isSyncing();
+        } while (isSyncing);
 
-      await client.startSubscription({
-        farmedBlockHandler: (block) => this.addFarmedBlock(blockStorage, block),
-        newBlockHandler: this.updateBlockNum,
-      });
+        this.setNetworkState('finished');
+        this.setNetworkMessage('dashboard.syncedAt');
+        this.setPlotState('finished');
+        this.setPlotMessage('dashboard.syncedMsg');
+        this.setStatus('farming');
 
-      util.infoLogger("block subscription started")
+        await client.startSubscription({
+          farmedBlockHandler: (block) => this.addFarmedBlock(blockStorage, block),
+          newBlockHandler: this.updateBlockNum,
+        });
+
+        // TODO: consider moving logging to client.ts
+        util.infoLogger("PLOTTING PROGRESS | block subscription started")
+      } catch (error) {
+        // TODO: consider moving logging to client.ts
+        util.errorLogger("PLOTTING PROGRESS | Farmer start error!")
+        this.setError({
+          title: 'errorPage.startFarmerFailed',
+          // TODO: replace default error message with specific one
+          message: 'errorPage.defaultErrorMessage',
+        });
+      }
     },
     setPlottingFinished(value: number) {
       this.plotting.finishedGB = value;

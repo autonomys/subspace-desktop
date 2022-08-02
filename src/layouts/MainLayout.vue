@@ -48,13 +48,12 @@ q-layout(view="hHh lpr fFf")
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue"
+import { defineComponent, watch } from "vue"
 import * as process from 'process'
 import * as util from "../lib/util"
 import { config } from "../lib/appConfig"
 import MainMenu from "../components/mainMenu.vue"
 import { useStore } from '../stores/store';
-import { client } from "websocket"
 
 export default defineComponent({
   name: "MainLayout",
@@ -74,6 +73,12 @@ export default defineComponent({
   mounted() {
     this.appVersion = (process.env.APP_VERSION as string)
     util.infoLogger("Version: " + this.appVersion)
+
+    // if there is an error - redirect to error page
+    watch(
+      () => this.store.error.title,
+      () => this.$router.push({ name: 'errorPage' }),
+    )
   },
   methods: {
     onNameClick() {

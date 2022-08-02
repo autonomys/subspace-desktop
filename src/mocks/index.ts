@@ -1,6 +1,6 @@
 import FarmedBlockMock from './FarmedBlock.json';
 import { IClient } from '../lib/client';
-import { IUtil } from '../lib/util';
+import { IUtil } from '../lib/util/util';
 import { IConfig } from '../lib/appConfig';
 
 export {
@@ -49,4 +49,5 @@ export const clientMock = {
 export const utilMock = {
   errorLogger: jest.fn(),
   infoLogger: jest.fn(),
+  generateNodeName: jest.fn(() => 'random generated name'),
 } as unknown as IUtil

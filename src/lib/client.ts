@@ -135,15 +135,16 @@ export class Client implements IClient {
     return isSyncing.isTrue;
   }
 
+  // TODO: method should return Promise<void>, update after backend is updated
   public async startNode(path: string, nodeName: string): Promise<boolean> {
-    const result = await tauri.invoke("start_node", { path, nodeName })
-    if (!result) {
-      return false
-    }
+    const result = await tauri.invoke("start_node", { path, nodeName });
+    if (!result) { return false;}
+
     // TODO: workaround in case node takes some time to fully start.
     await new Promise((resolve) => setTimeout(resolve, 7000))
     await this.connectApi()
-    return true
+
+    return true;
   }
 
   public async createRewardAddress(): Promise<{ rewardAddress: string, mnemonic: string }> {
@@ -158,6 +159,7 @@ export class Client implements IClient {
   }
 
   /* FARMER INTEGRATION */
+  // TODO: method should return Promise<void>, update after backend is updated
   public async startFarming(path: string, plotSizeGB: number): Promise<boolean> {
     // convert GB to Bytes
     const plotSize = Math.round(plotSizeGB * 1024 * 1024 * 1024)
@@ -165,6 +167,7 @@ export class Client implements IClient {
     if (rewardAddress === "") {
       util.errorLogger("Tried to send empty reward address to backend!")
     }
-    return await tauri.invoke("farming", { path, rewardAddress, plotSize })
+
+    return tauri.invoke("farming", { path, rewardAddress, plotSize });
   }
 }

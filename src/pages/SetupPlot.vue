@@ -261,10 +261,19 @@ export default defineComponent({
     },
     async startPlotting() {
       await appData.createCustomDataDir(this.store.plotDir)
-      util.infoLogger("SETUP PLOT | custom directory created")
-      await this.checkIdentity();
-      await this.store.confirmPlottingSetup(config, util);
-      this.$router.replace({ name: "plottingProgress" });
+      util.infoLogger("SETUP PLOT | custom directory created");
+
+      if (!this.store.rewardAddress) {
+        util.infoLogger("SETUP PLOT | reward address was empty, creating a new one");
+        await util.showModal(mnemonicModal, { handleConfirm: this.handleConfirm });
+      } else {
+        util.infoLogger("SETUP PLOT | reward address was initialized before, proceeding to plotting");
+        await this.handleConfirm();
+      }
+    },
+    async handleConfirm() {
+        await this.store.confirmPlottingSetup(config, util);
+        this.$router.replace({ name: "plottingProgress" });
     },
     async updateDriveStats() {
       const stats = await native.driveStats(this.store.plotDir)
@@ -282,29 +291,6 @@ export default defineComponent({
       }
       await this.updateDriveStats()
     },
-    async checkIdentity() {
-      if (this.store.rewardAddress === "") {
-        util.infoLogger("SETUP PLOT | reward address was empty, creating a new one")
-        try {
-          const { rewardAddress, mnemonic }  = await this.$client.createRewardAddress();
-          this.store.setRewardAddress(rewardAddress);
-          await this.viewMnemonic(mnemonic);
-        } catch (error) {
-          util.errorLogger(error);
-        }
-      } else {
-        util.infoLogger("SETUP PLOT | reward address was initialized before, proceeding to plotting")
-      }
-    },
-    async viewMnemonic(mnemonic: string): Promise<void> {
-      const modal = await util.showModal(mnemonicModal, { mnemonic });
-      return new Promise((resolve) => {
-        modal?.onDismiss(async () => {
-          await this.store.confirmRewardAddress(config);
-          resolve()
-        })
-      })
-    }
   }
 })
 </script>

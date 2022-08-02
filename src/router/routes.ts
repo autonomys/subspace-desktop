@@ -10,11 +10,8 @@ const routes: RouteRecordRaw[] = [
       { name: "plottingProgress", path: '/plottingProgress', component: (): RouteComponent => import('pages/PlottingProgress.vue') },
       { name: "setupPlot", path: '/setupPlot', component: (): RouteComponent => import('pages/SetupPlot.vue') },
       { name: "index", path: '', component: (): RouteComponent => import('pages/Index.vue') },
+      { name: "errorPage", path: '/errorPage', component: (): RouteComponent => import('pages/ErrorPage.vue') },
     ],
-  },
-  {
-    path: '/:catchAll(.*)*',
-    component: (): RouteComponent => import('pages/Error404.vue'),
   },
 ];
 
