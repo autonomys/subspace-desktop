@@ -34,7 +34,7 @@ interface Plotting {
 interface State {
   status: Status;
   plotSizeGB: number;
-  plotDir: string;
+  plotPath: string;
   farmedBlocks: FarmedBlock[];
   nodeName: string;
   syncState: SyncState;
@@ -60,7 +60,7 @@ export const useStore = defineStore('store', {
   state: (): State => ({
     status: INITIAL_STATUS,
     plotSizeGB: INITIAL_PLOT_SIZE,
-    plotDir: INITIAL_PLOT_DIR,
+    plotPath: INITIAL_PLOT_DIR,
     farmedBlocks: [],
     nodeName: '',
     syncState: INITIAL_SYNC_STATE,
@@ -146,8 +146,8 @@ export const useStore = defineStore('store', {
     setError(error: Error) {
       this.error = error;
     },
-    setPlotDir(dir: string) {
-      this.plotDir = dir;
+    setPlotPath(path: string) {
+      this.plotPath = path;
     },
     setPlotSize(size: number) {
       this.plotSizeGB = size;
@@ -181,7 +181,7 @@ export const useStore = defineStore('store', {
         await config.update({
           rewardAddress: this.rewardAddress,
           plot: {
-            location: this.plotDir,
+            location: this.plotPath,
             sizeGB: this.plotSizeGB,
           },
           nodeName,
@@ -211,7 +211,7 @@ export const useStore = defineStore('store', {
       try {
         const { plot, nodeName, rewardAddress } = await config.read();
         this.plotSizeGB = plot.sizeGB;
-        this.plotDir = plot.location;
+        this.plotPath = plot.location;
         this.nodeName = nodeName;
         this.rewardAddress = rewardAddress;
         this.farmedBlocks = blockStorage.getStoredBlocks();
@@ -237,9 +237,9 @@ export const useStore = defineStore('store', {
     },
     async startNode(client: IClient, util: IUtil) {
       try {
-        if (this.nodeName && this.plotDir) {
+        if (this.nodeName && this.plotPath) {
           this.setStatus('startingNode');
-          await client.startNode(this.plotDir, this.nodeName);
+          await client.startNode(this.plotPath, this.nodeName);
         } else {
           // TODO: consider moving logging to client.ts
           util.errorLogger('NODE START | node name and plot directory are required to start node');
@@ -269,7 +269,7 @@ export const useStore = defineStore('store', {
         this.setPlotMessage('dashboard.verifyingPlot');
         this.setNetworkMessage('dashboard.verifyingNet');
 
-        await client.startFarming(this.plotDir, this.plotSizeGB);
+        await client.startFarming(this.plotPath, this.plotSizeGB);
 
         // TODO: consider moving logging to client.ts
         util.infoLogger('PLOTTING PROGRESS | farmer started');
