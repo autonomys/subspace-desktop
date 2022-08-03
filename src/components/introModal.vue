@@ -63,60 +63,60 @@ q-dialog(@hide="onDialogHide" persistent ref="dialog")
 </template>
 
 <script>
-import { defineComponent } from "vue"
+import { defineComponent } from 'vue';
 
 const component = defineComponent({
   emits: [
     // REQUIRED
-    "ok",
-    "hide"
+    'ok',
+    'hide'
   ],
   data() {
     return {
       totalPages: 2,
       currentPage: 1,
-    }
+    };
   },
   watch: {
     currentPage(val) {
-      if (val > this.totalPages) this.hide()
+      if (val > this.totalPages) this.hide();
     }
   },
   methods: {
     // following method is REQUIRED
     // (don't change its name --> "show")
     show() {
-      this.$refs.dialog.show()
+      this.$refs.dialog.show();
     },
 
     // following method is REQUIRED
     // (don't change its name --> "hide")
     hide() {
-      this.$refs.dialog.hide()
+      this.$refs.dialog.hide();
     },
 
     onDialogHide() {
       // required to be emitted
       // when QDialog emits "hide" event
-      this.$emit("hide")
+      this.$emit('hide');
     },
 
     onOKClick() {
       // on OK, it is REQUIRED to
       // emit "ok" event (with optional payload)
       // before hiding the QDialog
-      this.$emit("ok")
+      this.$emit('ok');
       // or with payload: this.$emit('ok', { ... })
 
       // then hiding dialog
-      this.hide()
+      this.hide();
     },
 
     onCancelClick() {
       // we just need to hide the dialog
-      this.hide()
+      this.hide();
     }
   }
-})
-export default component
+});
+export default component;
 </script>

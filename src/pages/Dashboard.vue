@@ -23,13 +23,13 @@ q-page.q-pl-lg.q-pr-lg.q-pt-md
 </template>
 
 <script lang="ts">
-import { defineComponent, watch } from "vue"
-import { Notify } from "quasar"
+import { defineComponent, watch } from 'vue';
+import { Notify } from 'quasar';
 
-import farmedList from "../components/farmedList.vue"
-import netCard from "../components/netCard.vue"
-import plotCard from "../components/plotCard.vue"
-import { FarmedBlock } from "../lib/types"
+import farmedList from '../components/farmedList.vue';
+import netCard from '../components/netCard.vue';
+import plotCard from '../components/plotCard.vue';
+import { FarmedBlock } from '../lib/types';
 import { useStore } from '../stores/store';
 import * as util from '../lib/util';
 import * as blockStorage from '../lib/blockStorage';
@@ -45,7 +45,7 @@ export default defineComponent({
       expanded: false,
       util,
       peerInterval: 0,
-    }
+    };
   },
   async mounted() {
     // watch for farmed blocks
@@ -56,9 +56,9 @@ export default defineComponent({
           this.farmBlock(this.store.farmedBlocks[0]);
         }
       },
-    )
+    );
     if (!this.store.isFirstLoad) {
-      util.infoLogger("DASHBOARD | starting node");
+      util.infoLogger('DASHBOARD | starting node');
       await this.store.startNode(this.$client, util);
       await this.store.startFarmer(this.$client, util, blockStorage);
     }
@@ -68,7 +68,7 @@ export default defineComponent({
     this.peerInterval = window.setInterval(this.fetchPeersCount, 30000);
   },
   unmounted() {
-    clearInterval(this.peerInterval)
+    clearInterval(this.peerInterval);
   },
   methods: {
     async fetchPeersCount() {
@@ -76,17 +76,17 @@ export default defineComponent({
       this.store.setPeers(peers);
     },
     expand(val: boolean) {
-      this.expanded = val
+      this.expanded = val;
     },
     farmBlock(block: FarmedBlock) {
       Notify.create({
-        color: "green",
+        color: 'green',
         progress: true,
         // this is ugly, but will be removed in the new Dashboard design
         message: `${this.$t('dashboard.farmedBlock')}: ${block.blockNum} ${this.$t('dashboard.reward')} ${block.blockReward + block.feeReward} ${this.$t('dashboard.tokenName')}`,
-        position: "bottom-right"
-      })
+        position: 'bottom-right'
+      });
     }
   }
-})
+});
 </script>

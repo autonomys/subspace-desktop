@@ -3,5 +3,5 @@ import { createPinia } from 'pinia';
 
 export default store(async () => {
   const pinia = createPinia();
-  return pinia
-})
+  return pinia;
+});

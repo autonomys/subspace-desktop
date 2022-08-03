@@ -1,16 +1,16 @@
-import { boot } from 'quasar/wrappers'
-import VueApexCharts from "vue3-apexcharts";
-import { createI18n } from 'vue-i18n'
-import messages from '../i18n'
-import { Client } from "../lib/client"
+import { boot } from 'quasar/wrappers';
+import VueApexCharts from 'vue3-apexcharts';
+import { createI18n } from 'vue-i18n';
+import messages from '../i18n';
+import { Client } from '../lib/client';
 import { createApi } from '../lib/util';
-import { AutoLauncher } from "../lib/autoLauncher"
-import { config } from "../lib/appConfig";
+import { AutoLauncher } from '../lib/autoLauncher';
+import { config } from '../lib/appConfig';
 import { useStore } from '../stores/store';
 
-const LOCAL_RPC = process.env.LOCAL_API_WS || "ws://localhost:9947"
+const LOCAL_RPC = process.env.LOCAL_API_WS || 'ws://localhost:9947';
 
-declare module "@vue/runtime-core" {
+declare module '@vue/runtime-core' {
   export interface ComponentCustomProperties {
     $client: Client;
     $autoLauncher: AutoLauncher;
@@ -18,7 +18,7 @@ declare module "@vue/runtime-core" {
 }
 
 export default boot(async ({ app }) => {
-  await config.init()
+  await config.init();
   const { nodeName } = (await config.read());
   const store = useStore();
   store.setNodeName(config, nodeName);
@@ -28,7 +28,7 @@ export default boot(async ({ app }) => {
   await autoLauncher.init();
   app.config.globalProperties.$client = client;
   app.config.globalProperties.$autoLauncher = autoLauncher;
-  app.use(VueApexCharts)
+  app.use(VueApexCharts);
 
   const i18n = createI18n({
     locale: 'en-US',
@@ -36,4 +36,4 @@ export default boot(async ({ app }) => {
   });
 
   app.use(i18n);
-})
+});

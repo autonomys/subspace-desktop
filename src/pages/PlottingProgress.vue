@@ -119,14 +119,14 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue"
+import { defineComponent } from 'vue';
 
-import introModal from "../components/introModal.vue"
+import introModal from '../components/introModal.vue';
 import { useStore } from '../stores/store';
 import * as util from '../lib/util';
 import * as blockStorage from '../lib/blockStorage';
 
-let farmerTimer: number
+let farmerTimer: number;
 
 export default defineComponent({
   setup() {
@@ -137,57 +137,57 @@ export default defineComponent({
     return {
       elapsedms: 0,
       remainingms: 0,
-    }
+    };
   },
   computed: {
     progresspct(): number {
       const progress = parseFloat(
         ((this.store.syncState.currentBlock * 100) / this.store.syncState.highestBlock).toFixed(2)
-      )
-      return isNaN(progress) ? 0 : progress <= 100 ? progress : 100
+      );
+      return isNaN(progress) ? 0 : progress <= 100 ? progress : 100;
     },
     printRemainingTime(): string {
       const val =
         this.store.status === 'farming' || this.elapsedms === 0
           ? util.formatMS(0)
-          : util.formatMS(this.remainingms)
-      return val
+          : util.formatMS(this.remainingms);
+      return val;
     },
     printElapsedTime(): string {
-      return util.formatMS(this.elapsedms)
+      return util.formatMS(this.elapsedms);
     }
   },
   async mounted() {
-    util.infoLogger("PLOTTING PROGRESS | getting plot config")
+    util.infoLogger('PLOTTING PROGRESS | getting plot config');
     // TODO: probably can combine these two:
-    this.store.setFirstLoad()
+    this.store.setFirstLoad();
     this.store.setPlottingRemaining(this.store.plotSizeGB);
-    util.infoLogger("PLOTTING PROGRESS | starting node")
+    util.infoLogger('PLOTTING PROGRESS | starting node');
     await this.store.startNode(this.$client, util);
-    this.startTimers()
-    util.infoLogger("PLOTTING PROGRESS | starting plotting")
+    this.startTimers();
+    util.infoLogger('PLOTTING PROGRESS | starting plotting');
     await this.startFarmer();
   },
   unmounted() {
-    if (farmerTimer) clearInterval(farmerTimer)
+    if (farmerTimer) clearInterval(farmerTimer);
   },
   methods: {
     async startFarmer(): Promise<void> {
       await this.store.startFarmer(this.$client, util, blockStorage);
-      clearInterval(farmerTimer)
+      clearInterval(farmerTimer);
     },
     startTimers() {
       farmerTimer = window.setInterval(() => {
         this.elapsedms += 1000;
         const ms = (this.elapsedms * this.store.syncState.highestBlock) / (this.store.syncState.currentBlock || 1) - this.elapsedms;
         this.remainingms = util.toFixed(ms, 2);
-      }, 1000)
+      }, 1000);
     },
     async viewIntro() {
-      await util.showModal(introModal)
+      await util.showModal(introModal);
     }
   }
-})
+});
 </script>
 
 <style lang="sass">

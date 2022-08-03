@@ -25,8 +25,8 @@ q-dialog(@hide="onDialogHide" persistent ref="dialog")
 </template>
 
 <script>
-import { defineComponent } from "vue"
-import saveKeys from "components/SaveKeys.vue"
+import { defineComponent } from 'vue';
+import saveKeys from 'components/SaveKeys.vue';
 
 import { useStore } from '../stores/store';
 
@@ -40,8 +40,8 @@ const component = defineComponent({
   },
   emits: [
     // REQUIRED
-    "ok",
-    "hide"
+    'ok',
+    'hide'
   ],
   setup() {
     const store = useStore();
@@ -51,7 +51,7 @@ const component = defineComponent({
     return {
       userConfirmed: false,
       mnemonic: '',
-    }
+    };
   },
   async mounted() {
     const { rewardAddress, mnemonic }  = await this.$client.createRewardAddress();
@@ -60,31 +60,31 @@ const component = defineComponent({
   },
   methods: {
     userConfirm(val) {
-      this.userConfirmed = val
+      this.userConfirmed = val;
     },
     // following method is REQUIRED
     // (don't change its name --> "show")
     show() {
-      this.$refs.dialog.show()
+      this.$refs.dialog.show();
     },
 
     // following method is REQUIRED
     // (don't change its name --> "hide")
     hide() {
-      this.$refs.dialog.hide()
+      this.$refs.dialog.hide();
     },
 
     onDialogHide() {
       // required to be emitted
       // when QDialog emits "hide" event
-      this.$emit("hide")
+      this.$emit('hide');
     },
 
     async handleNextClick() {
-      this.hide()
+      this.hide();
       await this.handleConfirm();
     },
   }
-})
-export default component
+});
+export default component;
 </script>

@@ -98,7 +98,7 @@ describe('Store', () => {
       update() {
         return Promise.reject(errorMessage);
       }
-    }
+    };
 
     const store = useStore();
 
@@ -151,7 +151,7 @@ describe('Store', () => {
       read() {
         return Promise.reject(errorMessage);
       }
-    }
+    };
 
     await store.updateFromConfig(blockStorageMock, config);
 
@@ -189,7 +189,7 @@ describe('Store', () => {
       startNode() {
         return Promise.reject(errorMessage);
       }
-    }
+    };
 
     await store.startNode(client, utilMock);
 
@@ -210,7 +210,7 @@ describe('Store', () => {
       startNode() {
         return Promise.reject(errorMessage);
       }
-    }
+    };
 
     await store.startNode(client, utilMock);
 
@@ -253,7 +253,7 @@ describe('Store', () => {
       startFarming() {
         return Promise.reject(errorMessage);
       }
-    }
+    };
 
     const store = useStore();
 
@@ -273,7 +273,7 @@ describe('Store', () => {
       getSyncState() {
         return Promise.reject(errorMessage);
       }
-    }
+    };
 
     const store = useStore();
 
@@ -293,7 +293,7 @@ describe('Store', () => {
       isSyncing() {
         return Promise.reject(errorMessage);
       }
-    }
+    };
 
     const store = useStore();
 
@@ -313,7 +313,7 @@ describe('Store', () => {
       startSubscription() {
         return Promise.reject(errorMessage);
       }
-    }
+    };
 
     const store = useStore();
 
@@ -356,7 +356,7 @@ describe('Store', () => {
       update() {
         return Promise.reject(errorMessage);
       }
-    }
+    };
 
     await store.confirmPlottingSetup(config, utilMock);
 
@@ -366,4 +366,4 @@ describe('Store', () => {
       message: 'errorPage.defaultErrorMessage',
     });
   });
-})
+});

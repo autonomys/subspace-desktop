@@ -38,9 +38,9 @@ q-page(padding)
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue"
-import { decodeAddress, encodeAddress } from "@polkadot/keyring"
-import { hexToU8a, isHex } from "@polkadot/util"
+import { defineComponent } from 'vue';
+import { decodeAddress, encodeAddress } from '@polkadot/keyring';
+import { hexToU8a, isHex } from '@polkadot/util';
 
 import { useStore } from '../stores/store';
 
@@ -52,17 +52,17 @@ export default defineComponent({
   methods: {
     isValidSubstrateAddress(val: string): boolean {
       try {
-        encodeAddress(isHex(val) ? hexToU8a(val) : decodeAddress(val))
-        return true
+        encodeAddress(isHex(val) ? hexToU8a(val) : decodeAddress(val));
+        return true;
       } catch (error) {
-        return false
+        return false;
       }
     },
     async importKey() {
-      this.$router.replace({ name: "setupPlot" })
+      this.$router.replace({ name: 'setupPlot' });
     },
   }
-})
+});
 </script>
 
 

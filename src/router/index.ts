@@ -38,11 +38,11 @@ export default route(function (/* { store, ssrContext } */) {
   router.beforeEach((to, from, next) => {
     const store = useStore();
     if (store.error.title && to.name !== 'errorPage') {
-      next({ name: 'errorPage' }) 
+      next({ name: 'errorPage' }); 
     } else {
       next();
     }
-  })
+  });
 
   return router;
 });
