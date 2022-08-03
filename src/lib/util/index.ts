@@ -1,10 +1,7 @@
 export {
-  random,
   showModal,
   toFixed,
-  plotTimeMsEstimate,
   formatMS,
-  promiseTimeout,
   PIECE_SIZE,
   GB,
   CONTEXT_MENU,

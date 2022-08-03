@@ -102,6 +102,7 @@ export default defineComponent({
         util.infoLogger('log path acquired:' + log_path);
         await shellOpen(log_path);
       } catch(error) {
+        // TODO: add proper error handling - update store and show error page
         util.errorLogger(error);
       }
     },
