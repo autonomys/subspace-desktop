@@ -29,23 +29,35 @@ export interface IClient {
   startFarming: (path: string, plotSizeGB: number) => Promise<boolean>;
 }
 
+// TODO: implement unit tests
+/** Class responsible for interaction with local Subspace node using Polkadot.js API */
 export class Client implements IClient {
   protected clearTauriDestroy: event.UnlistenFn = () => null;
   protected unsubscribe: event.UnlistenFn = () => null;
-
   private api: ApiPromise;
-
+  /**
+   * Create Client instance
+   * @param {ApiPromise} api - Polkadot.js RPC API instance
+   */
   constructor(api: ApiPromise) {
     this.api = api;
   }
 
+  /**
+   * Get local node peers count
+   * @returns {number} - peers count
+   */
   async getPeersCount(): Promise<number> {
     const peers = await this.api.rpc.system.peers();
     return peers.length;
   }
 
-  // TODO: implement unit test
   // TODO: refactor using reduce
+  /**
+   * Get block rewards (farming, voting, fees, etc.)
+   * @param {IU8a} hash - block hash as IU8a
+   * @returns {number} - sum of SSC tokens
+   */
   async getBlockRewards(hash: IU8a): Promise<number> {
     let blockReward = 0;
     const apiAt = await this.api.at(hash);
@@ -64,6 +76,11 @@ export class Client implements IClient {
   }
 
   // TODO: handlers param is temporary - create better solution
+  /**
+   * Start subscription for Subspace blocks and process each block
+   * @param handlers.farmedBlockHandler - handle block if it was farmed by user
+   * @param handlers.newBlockHandler - handle regular block (was not farmed by user)
+   */
   async startSubscription(handlers: {
     farmedBlockHandler: (block: FarmedBlock) => void;
     newBlockHandler: (blockNum: number) => void;
@@ -107,6 +124,9 @@ export class Client implements IClient {
     );
   }
 
+  /**
+   * Stop subscription for Subspace blocks, close connection to RPC, destroy Tauri, etc.
+   */
   stopSubscription() {
     util.infoLogger('block subscription stop triggered');
     this.unsubscribe();
@@ -119,6 +139,9 @@ export class Client implements IClient {
     }
   }
 
+  /**
+   * Connect to local node RPC using Polkadot.js API
+   */
   public async connectApi(): Promise<void> {
     if (!this.api.isConnected) {
       await this.api.connect();
@@ -126,16 +149,29 @@ export class Client implements IClient {
     await this.api.isReadyOrError;
   }
 
+  /**
+   * Get sync state of the local node, which is displayed on PlottingProgress and Dashboard pages
+   * @returns {SyncState} - sync state object (starting block, current block and highest block)
+   */
   public async getSyncState(): Promise<SyncState> {
     return (await this.api.rpc.system.syncState()).toJSON() as unknown as SyncState;
   }
 
+  /**
+   * Utility method to determine if local node is syncing
+   * @returns {boolean}
+   */
   public async isSyncing(): Promise<boolean> {
     const { isSyncing } = await this.api.rpc.system.health();
     return isSyncing.isTrue;
   }
 
   // TODO: method should return Promise<void>, update after backend is updated
+  /**
+   * Wrapper for invoking backend method to start local node and connect to the RPC endpoint
+   * @param {string} path - folder location
+   * @param {string} nodeName - local node name
+   */
   public async startNode(path: string, nodeName: string): Promise<boolean> {
     const result = await tauri.invoke('start_node', { path, nodeName });
     if (!result) { return false;}
@@ -147,6 +183,16 @@ export class Client implements IClient {
     return true;
   }
 
+  
+  /**
+   * Create new reward address on first launch
+   * @returns {CreateRewardAddressResult} - result object
+   */
+  /**
+   * @typedef {CreateRewardAddressResult}
+   * @property {string} rewardAddress - created reward address
+   * @property {string} mnemonic - created mnemonic seed phrase (displayed once after being generated)
+   */
   public async createRewardAddress(): Promise<{ rewardAddress: string, mnemonic: string }> {
     const mnemonic = mnemonicGenerate();
     const keyring = new Keyring({ type: 'sr25519', ss58Format: 2254 }); // 2254 is the prefix for subspace-testnet
@@ -158,13 +204,17 @@ export class Client implements IClient {
     };
   }
 
-  /* FARMER INTEGRATION */
   // TODO: method should return Promise<void>, update after backend is updated
+  /**
+   * Wrapper for invoking backend method to start farmer
+   * @param {string} path - plot location
+   * @param {number} plotSizeGB - plot size (in GB)
+   */
   public async startFarming(path: string, plotSizeGB: number): Promise<boolean> {
     // convert GB to Bytes
     const plotSize = Math.round(plotSizeGB * 1024 * 1024 * 1024);
     const { rewardAddress } = (await config.read());
-    if (rewardAddress === '') {
+    if (!rewardAddress) {
       util.errorLogger('Tried to send empty reward address to backend!');
     }
 
