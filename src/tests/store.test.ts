@@ -21,6 +21,7 @@ describe('Store', () => {
   beforeEach(() => {
     // creates a fresh pinia and make it active so it's automatically picked
     setActivePinia(createPinia());
+    jest.clearAllMocks();
   });
 
   it('setPlotPath action should update directory', () => {
@@ -338,8 +339,13 @@ describe('Store', () => {
 
     await store.confirmPlottingSetup(configMock, utilMock);
 
-    expect(configMock.update).toHaveBeenLastCalledWith({
+    // first node name is set (separate method which is also used elsewhere)
+    expect(configMock.update).toHaveBeenNthCalledWith(1, {
       nodeName: 'random generated name',
+    });
+
+    // then set plot and reward address
+    expect(configMock.update).toHaveBeenLastCalledWith({
       plot: {
         location: plotPath,
         sizeGB: plotSize,

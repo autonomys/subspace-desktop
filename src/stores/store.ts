@@ -176,7 +176,7 @@ export const useStore = defineStore('store', {
     async confirmPlottingSetup(config: IConfig, util: IUtil) {
       try {
         const nodeName = util.generateNodeName();
-        this.setNodeName(config, nodeName);
+        await this.setNodeName(config, nodeName);
 
         await config.update({
           rewardAddress: this.rewardAddress,
@@ -184,7 +184,6 @@ export const useStore = defineStore('store', {
             location: this.plotPath,
             sizeGB: this.plotSizeGB,
           },
-          nodeName,
         });
       } catch (error) {
         this.setError({
@@ -243,7 +242,7 @@ export const useStore = defineStore('store', {
         } else {
           // TODO: consider moving logging to client.ts
           util.errorLogger('NODE START | node name and plot directory are required to start node');
-          
+
           this.setError({
             title: 'errorPage.startNodeFailed',
             // TODO: replace default error message with specific one
