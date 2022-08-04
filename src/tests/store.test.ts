@@ -16,6 +16,7 @@ import {
   clientMock,
   utilMock,
 } from '../mocks';
+import Config from '../lib/config';
 
 describe('Store', () => {
   beforeEach(() => {
@@ -98,7 +99,7 @@ describe('Store', () => {
       update() {
         return Promise.reject(errorMessage);
       }
-    };
+    } as unknown as Config;
 
     const store = useStore();
 
@@ -151,7 +152,7 @@ describe('Store', () => {
       read() {
         return Promise.reject(errorMessage);
       }
-    };
+    } as unknown as Config;
 
     await store.updateFromConfig(blockStorageMock, config);
 
@@ -356,7 +357,7 @@ describe('Store', () => {
       update() {
         return Promise.reject(errorMessage);
       }
-    };
+    } as unknown as Config;
 
     await store.confirmPlottingSetup(config, utilMock);
 

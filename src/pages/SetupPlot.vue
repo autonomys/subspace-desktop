@@ -120,11 +120,11 @@ import { ApexOptions } from 'apexcharts';
 
 import { ChartDataType, StatsType } from '../lib/types';
 import * as native from '../lib/native';
-import { appData, appDataDialog } from '../lib/appData';
+import * as plotDir from '../lib/plotDir';
 import mnemonicModal from '../components/mnemonicModal.vue';
 import { useStore } from '../stores/store';
 import * as util from '../lib/util';
-import { config } from '../lib/appConfig';
+import * as directoryDialogs from '../components/directoryDialogs';
 
 const chartOptions: ApexOptions = {
   legend: { show: false },
@@ -147,8 +147,6 @@ const chartOptions: ApexOptions = {
   tooltip: { enabled: false }
 };
 
-
-// TODO: implement error handling - Implement error pages for potential worst case scenarios #253 
 // TODO: consider moving client, tauri and native methods elsewhere - use store methods instead
 export default defineComponent({
   setup() {
@@ -262,25 +260,19 @@ export default defineComponent({
         if (files) {
           console.log('FILES ARE: :', files);
           if (files.length === 0 || (files.length === 1 && files.some(item => item.name === 'subspace-desktop.cfg'))) {
-            appDataDialog.existingDirectoryConfirm(
-              this.store.plotDir,
-              this.startPlotting
-            );
+            directoryDialogs.existingDirectoryConfirm(this.store.plotDir, this.startPlotting);
             // we are in FIRST TIME START, meaning there is are no existing plot
             // if there are some files in this folder, it's weird
           } else {
-            appDataDialog.notEmptyDirectoryInfo(this.store.plotDir);
+            directoryDialogs.notEmptyDirectoryInfo(this.store.plotDir);
           }
         }
       } else if (!dirExists) {
-        appDataDialog.newDirectoryConfirm(
-          this.store.plotDir,
-          this.startPlotting
-        );
+        directoryDialogs.newDirectoryConfirm(this.store.plotDir, this.startPlotting);
       }
     },
     async startPlotting() {
-      await appData.createCustomDataDir(this.store.plotDir);
+      await plotDir.createPlotDir(this.store.plotDir);
       util.infoLogger('SETUP PLOT | custom directory created');
 
       if (!this.store.rewardAddress) {
@@ -292,7 +284,7 @@ export default defineComponent({
       }
     },
     async handleConfirm() {
-      await this.store.confirmPlottingSetup(config, util);
+      await this.store.confirmPlottingSetup(this.$config, util);
       this.$router.replace({ name: 'plottingProgress' });
     },
     async updateDriveStats() {

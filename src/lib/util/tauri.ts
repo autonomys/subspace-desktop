@@ -3,8 +3,8 @@
 import { invoke } from '@tauri-apps/api/tauri';
 import { LocalStorage } from 'quasar';
 
-import { appData } from '../appData';
-import { config } from '../appConfig';
+import { IPlotDir } from '../plotDir';
+import Config from '../config';
 
 export const appName: string = process.env.APP_NAME || 'subspace-desktop';
 
@@ -45,8 +45,16 @@ export async function infoLogger(info: unknown): Promise<void> {
 /**
  * Utility to reset the application, removes files from local storage, as well as config file
  */
-export async function resetAndClear(): Promise<void> {
-  await LocalStorage.clear();
-  await appData.clearDataDir();
+export async function resetAndClear({ 
+  localStorage,
+  plotDir,
+  config,
+}: {
+  localStorage: LocalStorage;
+  plotDir: IPlotDir;
+  config: Config;
+}): Promise<void> {
+  await localStorage.clear();
+  await plotDir.removePlot(config);
   await config.remove();
 }

@@ -1,7 +1,7 @@
 import FarmedBlockMock from './FarmedBlock.json';
 import { IClient } from '../lib/client';
 import { IUtil } from '../lib/util/util';
-import { IConfig } from '../lib/appConfig';
+import Config from '../lib/config';
 
 export {
   FarmedBlockMock,
@@ -18,8 +18,8 @@ const configMockData = {
 };
 
 export const configMock = {
-  configDir: jest.fn(),
-  configFullPath: jest.fn(),
+  configDir: '/random-dir/',
+  configFullPath: '/this-is-full-path/to/config-file.cfg',
   init: jest.fn(),
   validate: jest.fn(),
   remove: jest.fn(),
@@ -27,7 +27,7 @@ export const configMock = {
   write: jest.fn(),
   update: jest.fn(),
   showErrorModal: jest.fn(),
-} as unknown as IConfig;
+} as unknown as Config;
 
 export const blockStorageMock = {
   getStoredBlocks: jest.fn(),

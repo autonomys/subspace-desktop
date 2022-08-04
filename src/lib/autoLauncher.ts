@@ -2,8 +2,8 @@ import { app, os, invoke, fs, path } from '@tauri-apps/api';
 
 import { AutoLaunchParams, ChildReturnData } from './types';
 import * as native from './native';
-import { config } from '../lib/appConfig';
 import { errorLogger, infoLogger } from './util';
+import Config from './config';
 
 type osAL = typeof macAL | typeof winAL | typeof linAL | typeof nullAL
 
@@ -146,6 +146,12 @@ export class AutoLauncher {
   protected appName = 'subspace-desktop';
   protected appPath = '';
   enabled = false;
+  private config: Config;
+
+  constructor(config: Config) {
+    this.config = config;
+  }
+
   async isEnabled(): Promise<boolean> {
     const result = await this.autoLauncher.isEnabled(this.appName);
     this.enabled = result;
@@ -157,7 +163,7 @@ export class AutoLauncher {
     if (!this.enabled) {
       errorLogger('ENABLE DID NOT WORK');
     } else {
-      await config.update({ launchOnBoot: true });
+      await this.config.update({ launchOnBoot: true });
     }
     return child;
   }
@@ -171,7 +177,7 @@ export class AutoLauncher {
       this.enabled = await this.isEnabled();
       trial += 1;
     } while (this.enabled && trial < 5);
-    await config.update({ launchOnBoot: false });
+    await this.config.update({ launchOnBoot: false });
     return child;
   }
   async init(): Promise<void> {
@@ -191,7 +197,7 @@ export class AutoLauncher {
       this.autoLauncher = linAL;
     }
 
-    const { launchOnBoot } = await config.read();
+    const { launchOnBoot } = await this.config.readConfigFile();
     if (launchOnBoot)
     {
       // the app may be initialized before, but then user may have decided to move the app to another directory

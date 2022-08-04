@@ -1,18 +1,18 @@
 import { ApiPromise, Keyring } from '@polkadot/api';
 import type { Vec } from '@polkadot/types/codec';
 import { mnemonicGenerate, cryptoWaitReady } from '@polkadot/util-crypto';
-import tauri from '@tauri-apps/api';
+import * as tauri from '@tauri-apps/api';
 import type { EventRecord } from '@polkadot/types/interfaces/system';
 import { IU8a } from '@polkadot/types-codec/types';
 
 import * as process from 'process';
 import * as util from '../lib/util';
-import { config } from './appConfig';
 import {
   FarmedBlock,
   SubPreDigest,
   SyncState,
 } from '../lib/types';
+import Config from './config';
 
 const SUNIT = 1000000000000000000n;
 
@@ -28,18 +28,28 @@ export interface IClient {
   startFarming: (path: string, plotSizeGB: number) => Promise<boolean>;
 }
 
+interface ClientParams {
+  api: ApiPromise;
+  config: Config;
+}
+
 // TODO: implement unit tests
 /** Class responsible for interaction with local Subspace node using Polkadot.js API */
 export class Client implements IClient {
   protected clearTauriDestroy: tauri.event.UnlistenFn = () => null;
   protected unsubscribe: tauri.event.UnlistenFn = () => null;
   private api: ApiPromise;
+  private config: Config;
   /**
    * Create Client instance
-   * @param {ApiPromise} api - Polkadot.js RPC API instance
+   * @param {ClientParams} params
+   * @param {ApiPromise} params.api - Polkadot.js RPC API instance
+   * @param {Config} params.config - Config class instance to interact with app config file
    */
-  constructor(api: ApiPromise) {
+  // TODO: provide config into constructor
+  constructor({ api, config }: ClientParams) {
     this.api = api;
+    this.config = config;
   }
 
   /**
@@ -84,7 +94,7 @@ export class Client implements IClient {
     farmedBlockHandler: (block: FarmedBlock) => void;
     newBlockHandler: (blockNum: number) => void;
   }): Promise<void> {
-    const rewardAddress: string = (await config.read()).rewardAddress;
+    const rewardAddress: string = (await this.config.readConfigFile()).rewardAddress;
 
     this.unsubscribe = await this.api.rpc.chain.subscribeNewHeads(
       async ({ hash, number }) => {
@@ -173,7 +183,7 @@ export class Client implements IClient {
    */
   public async startNode(path: string, nodeName: string): Promise<boolean> {
     const result = await tauri.invoke('start_node', { path, nodeName });
-    if (!result) { return false;}
+    if (!result) { return false; }
 
     // TODO: workaround in case node takes some time to fully start.
     await new Promise((resolve) => setTimeout(resolve, 7000));
@@ -182,7 +192,7 @@ export class Client implements IClient {
     return true;
   }
 
-  
+
   /**
    * Create new reward address on first launch
    * @returns {CreateRewardAddressResult} - result object
@@ -212,7 +222,7 @@ export class Client implements IClient {
   public async startFarming(path: string, plotSizeGB: number): Promise<boolean> {
     // convert GB to Bytes
     const plotSize = Math.round(plotSizeGB * 1024 * 1024 * 1024);
-    const { rewardAddress } = (await config.read());
+    const { rewardAddress } = (await this.config.readConfigFile());
     if (!rewardAddress) {
       util.errorLogger('Tried to send empty reward address to backend!');
     }

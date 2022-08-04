@@ -32,11 +32,9 @@ import { Notify } from 'quasar';
 
 import disclaimer from '../components/disclaimer.vue';
 import { useStore } from '../stores/store';
-import { config } from '../lib/appConfig';
 import * as util from '../lib/util';
 import * as blockStorage from '../lib/blockStorage';
 
-// TODO: consider removing appConfig from component and call store methods instead
 export default defineComponent({
   setup() {
     const store = useStore();
@@ -45,9 +43,9 @@ export default defineComponent({
   async mounted() {
     try {
       this.checkDev();
-      if (await config.validate()) {
+      if (await this.$config.validate()) {
         util.infoLogger('INDEX | NOT First Time RUN.');
-        await this.store.updateFromConfig(blockStorage, config);
+        await this.store.updateFromConfig(blockStorage, this.$config);
         this.dashboard();
         return;
       }
@@ -71,8 +69,8 @@ export default defineComponent({
     async firstLoad() {
       util.infoLogger('INDEX | First Time RUN, resetting reward address');
       // reset node name in case there is a leftover from prev launch (restart due to error)
-      this.store.setNodeName(config, '');
-      const { launchOnBoot } = await config.read();
+      this.store.setNodeName(this.$config, '');
+      const { launchOnBoot } = await this.$config.readConfigFile();
       if (launchOnBoot) {
         Notify.create({
           message: 'Subspace Desktop will be started on boot. You can disable this from settings (the gear icon on top-right).',
