@@ -43,7 +43,7 @@ pub(crate) async fn farming(
     path: String,
     reward_address: String,
     plot_size: u64,
-) -> Result<String, String> {
+) -> Result<(), String> {
     if let Ok(address) = parse_reward_address(&reward_address) {
         let farming_args = FarmingArgs {
             node_rpc_url: "ws://127.0.0.1:9947".to_string(),
@@ -57,15 +57,9 @@ pub(crate) async fn farming(
             dsn_sync: false,
         };
 
-        let farming_handle;
-        match farm(path.clone().into(), farming_args.clone()).await {
-            Err(error) => {
-                return Err(format!(
-                    "farm function failed to start, with error: {error}"
-                ))
-            }
-            Ok(handle) => farming_handle = handle,
-        }
+        let farming_handle = farm(path.clone().into(), farming_args.clone())
+            .await
+            .map_err(|error| format!("farm function failed to start, with error: {error}"))?;
 
         tokio::spawn(async move {
             match farming_handle.wait().await {
@@ -85,7 +79,7 @@ pub(crate) async fn farming(
             }
         });
 
-        return Ok("Successfully started the farmer in the backend".into());
+        return Ok(());
     }
     Err("could not parse the reward address in the backend".into())
 }
