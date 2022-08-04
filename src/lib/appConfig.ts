@@ -1,6 +1,7 @@
-import { appName, errorLogger, toFixed } from './util';
 import * as path from '@tauri-apps/api/path';
 import * as fs from '@tauri-apps/api/fs';
+
+import { appName, errorLogger, toFixed } from './util';
 
 export interface IConfig {
   configDir: () => Promise<string>;
@@ -10,7 +11,7 @@ export interface IConfig {
   remove: () => Promise<void>;
   read: () => Promise<Config>;
   write: (config: Config) => Promise<void>;
-  update: (params: UpdateParams) => Promise<void>;
+  update: (params: ConfigUpdate) => Promise<void>;
 }
 
 export interface Plot {
@@ -27,7 +28,7 @@ interface Config {
   nodeName: string,
 }
 
-interface UpdateParams {
+interface ConfigUpdate {
   plot?: Plot;
   launchOnBoot?: boolean;
   rewardAddress?: string;
@@ -43,17 +44,33 @@ const emptyConfig: Config = {
   nodeName: '',
 };
 
+// TODO: refactor as a class, add logger as dependency, add unit tests
 export const config: IConfig = {
+  // TODO: add this as a class property instead of method
+  /**
+   * Get config file directory
+   * @returns {string} - path to config directory
+   */
   async configDir(): Promise<string> {
     return (await path.configDir()) + appName;
   },
+  // TODO: add this as a class property instead of method
+  /**
+   * Get path to config file
+   * @returns {string} - path to config file
+   */
   async configFullPath(): Promise<string> {
     return (await path.configDir()) + appName + '/' + appName + '.cfg';
   },
+  // TODO: should be part of class constructor
+  /**
+   * Initialize config
+   */
   async init(): Promise<void> {
     try {
       await this.read();
     } catch {
+      // TODO: should propagate error, so it can be handled on UI
       // means there were no config file
       await fs.createDir(await this.configDir()).catch((error) => {
         if (!error.includes('exists')) {
@@ -63,6 +80,10 @@ export const config: IConfig = {
       await this.write(emptyConfig);
     }
   },
+  /**
+   * Check if config is valid - has plot properties, reward address and node name stored
+   * @returns {boolean}
+   */
   async validate(): Promise<boolean> {
     const config = await this.read();
     const { plot, rewardAddress, nodeName } = config;
@@ -76,12 +97,19 @@ export const config: IConfig = {
     }
     return false;
   },
+  // TODO: should propagate error, so it can be handled on UI
+  /**
+   * Remove config file from the file system. Used for reset
+   */
   async remove(): Promise<void> {
     await fs.removeFile(await this.configFullPath()).catch((error) => {
       errorLogger(error);
     });
   },
-
+  /**
+   * Read config file
+   * @returns {Config} - config object
+   */
   async read(): Promise<Config> {
     const result = await fs.readTextFile(await this.configFullPath());
     const config: Config = JSON.parse(result);
@@ -89,12 +117,18 @@ export const config: IConfig = {
     config.plot.sizeGB = toFixed(Number(config.plot.sizeGB), 2);
     return config;
   },
+  /**
+   * Write config file to the file system
+   * @param {Config} - config object to store as config file
+   */
   async write(config: Config): Promise<void> {
+    // TODO: should propagate error, so it can be handled on UI
     await fs.createDir(await this.configDir()).catch((error) => {
       if (!error.includes('exists')) {
         errorLogger(error);
       }
     });
+    // TODO: should propagate error, so it can be handled on UI
     await fs.writeFile({
       path: await this.configFullPath(),
       contents: JSON.stringify(config, null, 2)
@@ -103,15 +137,20 @@ export const config: IConfig = {
         errorLogger(error);
       });
   },
+  /**
+   * Update config file with given values
+   * @param {ConfigUpdate} - object with properties to update in the config file
+   */
   async update({
     plot,
     launchOnBoot,
     rewardAddress,
     version,
     nodeName,
-  }: UpdateParams): Promise<void> {
+  }: ConfigUpdate): Promise<void> {
     const newAppConfig = await this.read();
 
+    // TODO: refactor using object spread operator
     if (plot !== undefined) newAppConfig.plot = plot;
     if (launchOnBoot !== undefined) newAppConfig.launchOnBoot = launchOnBoot;
     if (rewardAddress !== undefined) newAppConfig.rewardAddress = rewardAddress;
