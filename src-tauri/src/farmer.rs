@@ -57,24 +57,34 @@ pub(crate) async fn farming(
             dsn_sync: false,
         };
 
+        let farming_handle;
+        match farm(path.clone().into(), farming_args.clone()).await {
+            Err(error) => {
+                return Err(format!(
+                    "farm function failed to start, with error: {error}"
+                ))
+            }
+            Ok(handle) => farming_handle = handle,
+        }
+
         tokio::spawn(async move {
+            match farming_handle.wait().await {
+                Err(error) => error!("farmer instance crashed with error: {error}"),
+                Ok(_) => debug!("Node should have been restarted, restarting farmer now"),
+            }
             loop {
                 match farm(path.clone().into(), farming_args.clone()).await {
-                    Err(err) => error!("farm function failed to start, with error: {err}"),
-                    Ok(farming_handle) => {
-                        let result = farming_handle.wait().await;
-                        match result {
-                            Err(error) => {
-                                error!("{error}");
-                            }
-                            Ok(_) => {
-                                debug!("Node should have been restarted, restarting farmer now");
-                            }
-                        }
+                    Err(error) => {
+                        error!("farm function failed to start, with error: {error}")
                     }
+                    Ok(handle) => match handle.wait().await {
+                        Err(error) => error!("farmer instance crashed with error: {error}"),
+                        Ok(_) => debug!("Node should have been restarted, restarting farmer now"),
+                    },
                 }
             }
         });
+
         return Ok("Successfully started the farmer in the backend".into());
     }
     Err("could not parse the reward address in the backend".into())
