@@ -3,7 +3,7 @@ import { Dialog } from 'quasar';
 import { config } from './appConfig';
 import { errorLogger } from './util';
 
-
+// TODO: consider merging these methods with Config into one class that interacts with file system
 export const appData = {
   async getDataDirPath(): Promise<string> {
     const { plot } = await config.read();
@@ -12,17 +12,20 @@ export const appData = {
   async clearDataDir(): Promise<void> {
     const dataDir = await this.getDataDirPath();
     if (dataDir === '') return;
+    // TODO: should propagate error, so it can be handled on UI
     await fs.removeDir(dataDir, { recursive: true }).catch((error) => {
       errorLogger(error);
     });
   },
   async createCustomDataDir(location: string): Promise<void> {
+    // TODO: should propagate error, so it can be handled on UI
     await fs.createDir(location).catch((error) => {
       errorLogger(error);
     });
   },
 };
 
+// TODO: move dialogs to components
 export const appDataDialog = {
   notEmptyDirectoryInfo(plotDirectory: string): void {
     Dialog.create({

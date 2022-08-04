@@ -1,8 +1,10 @@
 import { ApiPromise, Keyring } from '@polkadot/api';
 import type { Vec } from '@polkadot/types/codec';
 import { mnemonicGenerate, cryptoWaitReady } from '@polkadot/util-crypto';
-import * as event from '@tauri-apps/api/event';
-import { invoke } from '@tauri-apps/api/tauri';
+import tauri from '@tauri-apps/api';
+import type { EventRecord } from '@polkadot/types/interfaces/system';
+import { IU8a } from '@polkadot/types-codec/types';
+
 import * as process from 'process';
 import * as util from '../lib/util';
 import { config } from './appConfig';
@@ -11,10 +13,7 @@ import {
   SubPreDigest,
   SyncState,
 } from '../lib/types';
-import type { EventRecord } from '@polkadot/types/interfaces/system';
-import { IU8a } from '@polkadot/types-codec/types';
 
-const tauri = { event, invoke };
 const SUNIT = 1000000000000000000n;
 
 export interface IClient {
@@ -32,8 +31,8 @@ export interface IClient {
 // TODO: implement unit tests
 /** Class responsible for interaction with local Subspace node using Polkadot.js API */
 export class Client implements IClient {
-  protected clearTauriDestroy: event.UnlistenFn = () => null;
-  protected unsubscribe: event.UnlistenFn = () => null;
+  protected clearTauriDestroy: tauri.event.UnlistenFn = () => null;
+  protected unsubscribe: tauri.event.UnlistenFn = () => null;
   private api: ApiPromise;
   /**
    * Create Client instance

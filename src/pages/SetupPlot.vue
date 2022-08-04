@@ -115,10 +115,10 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { debounce } from 'quasar';
-import * as path from '@tauri-apps/api/path';
-import * as fs from '@tauri-apps/api/fs';
+import * as tauri  from '@tauri-apps/api';
+import { ApexOptions } from 'apexcharts';
 
-import { chartOptions, ChartDataType, StatsType } from '../lib/types';
+import { ChartDataType, StatsType } from '../lib/types';
 import * as native from '../lib/native';
 import { appData, appDataDialog } from '../lib/appData';
 import mnemonicModal from '../components/mnemonicModal.vue';
@@ -126,7 +126,27 @@ import { useStore } from '../stores/store';
 import * as util from '../lib/util';
 import { config } from '../lib/appConfig';
 
-const tauri = { path, fs };
+const chartOptions: ApexOptions = {
+  legend: { show: false },
+  colors: ['#E0E0E0', '#FFFFFF', '#2081F0'],
+  plotOptions: {
+    pie: {
+      startAngle: 0,
+      endAngle: 360,
+      expandOnClick: false,
+      donut: { size: '40px' }
+    }
+  },
+  dataLabels: { enabled: false },
+  labels: [],
+  states: {
+    active: { filter: { type: 'none' } },
+    hover: { filter: { type: 'none' } }
+  },
+  markers: { hover: { size: 0 } },
+  tooltip: { enabled: false }
+};
+
 
 // TODO: implement error handling - Implement error pages for potential worst case scenarios #253 
 // TODO: consider moving client, tauri and native methods elsewhere - use store methods instead

@@ -1,8 +1,5 @@
-import * as app from '@tauri-apps/api/app';
-import * as os from '@tauri-apps/api/os';
-import { invoke } from '@tauri-apps/api/tauri';
-import * as fs from '@tauri-apps/api/fs';
-import * as path from '@tauri-apps/api/path';
+import { app, os, invoke, fs, path } from '@tauri-apps/api';
+
 import { AutoLaunchParams, ChildReturnData } from './types';
 import * as native from './native';
 import { config } from '../lib/appConfig';

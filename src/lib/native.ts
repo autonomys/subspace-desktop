@@ -1,17 +1,9 @@
-import * as dialog from '@tauri-apps/api/dialog';
-import * as fs from '@tauri-apps/api/fs';
-import * as path from '@tauri-apps/api/path';
-import * as shell from '@tauri-apps/api/shell';
-import * as app from '@tauri-apps/api/app';
-import * as os from '@tauri-apps/api/os';
-import * as window from '@tauri-apps/api/window';
-import * as tProcess from '@tauri-apps/api/process';
-import { invoke } from '@tauri-apps/api/tauri';
+import * as tauri from '@tauri-apps/api';
+
 import { ChildReturnData } from './types';
 import * as applescript from './applescript';
 import { errorLogger } from './util';
 
-const tauri = { app, dialog, fs, path, invoke, shell, os, window, process: tProcess };
 export interface DriveStats {
   freeBytes: number
   totalBytes: number

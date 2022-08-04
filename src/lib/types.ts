@@ -1,4 +1,3 @@
-import { ApexOptions } from 'apexcharts';
 import type { AccountId32 } from '@polkadot/types/interfaces';
 import type { Struct, u64 } from '@polkadot/types';
 
@@ -30,27 +29,6 @@ export interface Block {
   reward: number
   fees: number
 }
-
-export const chartOptions: ApexOptions = {
-  legend: { show: false },
-  colors: ['#E0E0E0', '#FFFFFF', '#2081F0'],
-  plotOptions: {
-    pie: {
-      startAngle: 0,
-      endAngle: 360,
-      expandOnClick: false,
-      donut: { size: '40px' }
-    }
-  },
-  dataLabels: { enabled: false },
-  labels: [],
-  states: {
-    active: { filter: { type: 'none' } },
-    hover: { filter: { type: 'none' } }
-  },
-  markers: { hover: { size: 0 } },
-  tooltip: { enabled: false }
-};
 
 export type ChartDataType = number[]
 

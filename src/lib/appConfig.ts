@@ -1,5 +1,4 @@
-import * as path from '@tauri-apps/api/path';
-import * as fs from '@tauri-apps/api/fs';
+import { path, fs } from '@tauri-apps/api';
 
 import { appName, errorLogger, toFixed } from './util';
 
@@ -45,6 +44,7 @@ const emptyConfig: Config = {
 };
 
 // TODO: refactor as a class, add logger as dependency, add unit tests
+// TODO: consider adding methods to handle other files (not just config file) and rename
 export const config: IConfig = {
   // TODO: add this as a class property instead of method
   /**
