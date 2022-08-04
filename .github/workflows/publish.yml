@@ -15,19 +15,19 @@ jobs:
           # since releasing on arm-linux is not a priority, we skipped it for now
           - os: ubuntu-20.04
             target: x86_64-unknown-linux-gnu
-            suffix: ubuntu-x86_64
+            suffix: ubuntu-x86_64-${{ github.ref_name }}
             rustflags: ""
           - os: macos-12
             target: x86_64-apple-darwin
-            suffix: macos-x86_64
+            suffix: macos-x86_64-${{ github.ref_name }}
             rustflags: ""
           - os: macos-12
             target: aarch64-apple-darwin
-            suffix: macos-aarch64
+            suffix: macos-aarch64-${{ github.ref_name }}
             rustflags: ""
           - os: windows-2022
             target: x86_64-pc-windows-msvc
-            suffix: windows-x86_64
+            suffix: windows-x86_64-${{ github.ref_name }}
             rustflags: ""
 
     runs-on: ${{ matrix.build.os }}
@@ -45,10 +45,6 @@ jobs:
           sudo rm -rf "$AGENT_TOOLSDIRECTORY"
       - name: git checkout
         uses: actions/checkout@v2
-
-      - name: Extract version
-        id: extract_version
-        uses: Saionaro/extract-package-version@v1.0.6
 
       # For sloth256-189 Wasm support we need `llvm-ar`, which is not available by default
       - name: Install LLVM and Clang
@@ -82,11 +78,10 @@ jobs:
         run: Remove-Item -LiteralPath "C:\msys64\" -Force -Recurse
         if: runner.os == 'Windows'
 
-      # libayatana does not work for ubuntu20.04 -> https://github.com/subspace/subspace-desktop/runs/7581578859?check_suite_focus=true
-      - name: install webkit2gtk and libappindicator (Linux)
+      - name: install webkit2gtk and libayatana (Linux)
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.0-dev libappindicator3-dev
+          sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.0-dev libayatana-appindicator3-dev
         if: runner.os == 'Linux'
 
       # Imports PFX Certificate into keystore, allows Tauri to then sign the exe without being passed the private key.
@@ -119,12 +114,12 @@ jobs:
 
       - name: Rename OpenCL installer (Linux x86_64)
         run: |
-          mv ${{ env.PRODUCTION_TARGET }}/deb/subspace-desktop_${{ steps.extract_version.outputs.version }}_amd64.deb ${{ env.PRODUCTION_TARGET }}/deb/subspace-desktop-opencl_${{ steps.extract_version.outputs.version }}_amd64.deb
+          mv ${{ env.PRODUCTION_TARGET }}/deb/subspace-desktop*amd64.deb ${{ env.PRODUCTION_TARGET }}/deb/subspace-desktop-opencl_amd64.deb
         if: runner.os == 'Linux'
 
       - name: Rename OpenCL installer (Windows)
         run: |
-          move ${{ env.PRODUCTION_TARGET }}/msi/subspace-desktop_${{ steps.extract_version.outputs.version }}_x64_en-US.msi ${{ env.PRODUCTION_TARGET }}/msi/subspace-desktop-opencl_${{ steps.extract_version.outputs.version }}_x64_en-US.msi
+          move ${{ env.PRODUCTION_TARGET }}/msi/subspace-desktop*_x64_en-US.msi ${{ env.PRODUCTION_TARGET }}/msi/subspace-desktop-opencl_x64_en-US.msi
         if: runner.os == 'Windows'
 
       - name: Build (without OpenCL)
@@ -143,34 +138,34 @@ jobs:
       - name: Prepare installers for uploading (Ubuntu)
         run: |
           mkdir executables
-          mv ${{ env.PRODUCTION_TARGET }}/deb/subspace-desktop_${{ steps.extract_version.outputs.version }}_amd64.deb executables/subspace_desktop_${{ steps.extract_version.outputs.version }}_${{ matrix.build.suffix }}.deb
-          mv ${{ env.PRODUCTION_TARGET }}/deb/subspace-desktop-opencl_${{ steps.extract_version.outputs.version }}_amd64.deb executables/subspace-desktop-opencl_${{ steps.extract_version.outputs.version }}_${{ matrix.build.suffix }}.deb
+          mv ${{ env.PRODUCTION_TARGET }}/deb/subspace-desktop-opencl_amd64.deb executables/subspace-desktop-opencl_${{ matrix.build.suffix }}.deb
+          mv ${{ env.PRODUCTION_TARGET }}/deb/subspace-desktop*_amd64.deb executables/subspace-desktop_${{ matrix.build.suffix }}.deb
         if: runner.os == 'Linux'
+
+      - name: Prepare installers for uploading (Windows)
+        run: |
+          mkdir executables
+          move ${{ env.PRODUCTION_TARGET }}/msi/subspace-desktop-opencl_x64_en-US.msi executables/subspace-desktop-opencl_${{ matrix.build.suffix }}.msi
+          move ${{ env.PRODUCTION_TARGET }}/msi/subspace-desktop_x64*_en-US.msi executables/subspace-desktop_${{ matrix.build.suffix }}.msi
+        if: runner.os == 'Windows'
 
       - name: Prepare installers for uploading (macOS intel)
         run: |
           mkdir executables
-          mv ${{ env.PRODUCTION_TARGET }}/dmg/subspace-desktop_${{ steps.extract_version.outputs.version }}_x64.dmg executables/subspace-desktop_${{ steps.extract_version.outputs.version }}_${{ matrix.build.suffix }}.dmg
+          mv ${{ env.PRODUCTION_TARGET }}/dmg/subspace-desktop*_x64.dmg executables/subspace-desktop_${{ matrix.build.suffix }}.dmg
           # Zip it so that signature is not lost
-          ditto -c -k --rsrc executables/subspace-desktop_${{ steps.extract_version.outputs.version }}_${{ matrix.build.suffix }}.dmg executables/subspace-desktop_${{ steps.extract_version.outputs.version }}_${{ matrix.build.suffix }}.zip
-          rm executables/subspace-desktop_${{ steps.extract_version.outputs.version }}_${{ matrix.build.suffix }}.dmg
+          ditto -c -k --rsrc executables/subspace-desktop_${{ matrix.build.suffix }}.dmg executables/subspace-desktop_${{ matrix.build.suffix }}.zip
+          rm executables/subspace-desktop_${{ matrix.build.suffix }}.dmg
         if: matrix.build.target == 'x86_64-apple-darwin'
 
       - name: Prepare installers for uploading (macOS arm)
         run: |
           mkdir executables
-          mv ${{ env.PRODUCTION_TARGET }}/dmg/subspace-desktop_${{ steps.extract_version.outputs.version }}_aarch64.dmg executables/subspace-desktop_${{ steps.extract_version.outputs.version }}_${{ matrix.build.suffix }}.dmg
+          mv ${{ env.PRODUCTION_TARGET }}/dmg/subspace-desktop*_aarch64.dmg executables/subspace-desktop_${{ matrix.build.suffix }}.dmg
           # Zip it so that signature is not lost
-          ditto -c -k --rsrc executables/subspace-desktop_${{ steps.extract_version.outputs.version }}_${{ matrix.build.suffix }}.dmg executables/subspace-desktop_${{ steps.extract_version.outputs.version }}_${{ matrix.build.suffix }}.zip
-          rm executables/subspace-desktop_${{ steps.extract_version.outputs.version }}_${{ matrix.build.suffix }}.dmg
+          ditto -c -k --rsrc executables/subspace-desktop_${{ matrix.build.suffix }}.dmg executables/subspace-desktop_${{ matrix.build.suffix }}.zip
+          rm executables/subspace-desktop_${{ matrix.build.suffix }}.dmg
         if: matrix.build.target == 'aarch64-apple-darwin'
-
-      - name: Prepare installers for uploading (Windows)
-        run: |
-          mkdir executables
-          move ${{ env.PRODUCTION_TARGET }}/msi/subspace-desktop_${{ steps.extract_version.outputs.version }}_x64_en-US.msi executables/subspace-desktop_${{ steps.extract_version.outputs.version }}_${{ matrix.build.suffix }}.msi
-          move ${{ env.PRODUCTION_TARGET }}/msi/subspace-desktop-opencl_${{ steps.extract_version.outputs.version }}_x64_en-US.msi executables/subspace-desktop-opencl_${{ steps.extract_version.outputs.version }}_${{ matrix.build.suffix }}.msi
-        if: runner.os == 'Windows'
 
       - name: Upload executables to artifacts
         uses: actions/upload-artifact@v2
