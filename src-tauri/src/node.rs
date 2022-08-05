@@ -60,7 +60,7 @@ impl NativeExecutionDispatch for ExecutorDispatch {
 /// starts a new node instance
 /// if there is a node instance running previously,
 /// first it stops the previous instance, then starts a new instance
-pub(crate) async fn start_node(path: String, node_name: String) -> bool {
+pub(crate) async fn start_node(path: String, node_name: String) -> Result<String, String> {
     type FullClient<RuntimeApi, ExecutorDispatch> =
         sc_service::TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<ExecutorDispatch>>;
 
@@ -112,9 +112,9 @@ pub(crate) async fn start_node(path: String, node_name: String) -> bool {
         error!(
             "Previous instance is not terminating for 10 seconds, unable to start a new instance"
         );
-        return false;
+        return Err("Could not start a node instance in the backend!".into());
     }
-    true
+    Ok("Successfully started the node in the backend".into())
 }
 
 async fn init_node(

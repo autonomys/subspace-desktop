@@ -22,14 +22,15 @@ describe('Store', () => {
   beforeEach(() => {
     // creates a fresh pinia and make it active so it's automatically picked
     setActivePinia(createPinia());
+    jest.clearAllMocks();
   });
 
-  it('setPlotDir action should update directory', () => {
+  it('setPlotPath action should update directory', () => {
     const expected = '/random_dir';
     const store = useStore();
-    expect(store.plotDir).toBe(INITIAL_PLOT_DIR);
-    store.setPlotDir(expected);
-    expect(store.plotDir).toBe(expected);
+    expect(store.plotPath).toBe(INITIAL_PLOT_DIR);
+    store.setPlotPath(expected);
+    expect(store.plotPath).toBe(expected);
   });
 
   it('setPlotSize action should update plot size', () => {
@@ -130,14 +131,14 @@ describe('Store', () => {
     const store = useStore();
 
     expect(store.plotSizeGB).toBe(INITIAL_PLOT_SIZE);
-    expect(store.plotDir).toBe(INITIAL_PLOT_DIR);
+    expect(store.plotPath).toBe(INITIAL_PLOT_DIR);
     expect(store.nodeName).toBe('');
     expect(store.rewardAddress).toBe('');
 
     await store.updateFromConfig(blockStorageMock, configMock);
 
     expect(store.plotSizeGB).toBe(configMockData.plot.sizeGB);
-    expect(store.plotDir).toBe(configMockData.plot.location);
+    expect(store.plotPath).toBe(configMockData.plot.location);
     expect(store.nodeName).toBe(configMockData.nodeName);
     expect(store.rewardAddress).toBe(configMockData.rewardAddress);
 
@@ -169,7 +170,7 @@ describe('Store', () => {
     expect(store.status).toBe(INITIAL_STATUS);
 
     store.setNodeName(configMock, 'random node name');
-    store.setPlotDir('/random-dir');
+    store.setPlotPath('/random-dir');
 
     await store.startNode(clientMock, utilMock);
 
@@ -183,7 +184,7 @@ describe('Store', () => {
     const store = useStore();
 
     store.setNodeName(configMock, 'random node name');
-    store.setPlotDir('/random-dir');
+    store.setPlotPath('/random-dir');
 
     const client = {
       ...clientMock,
@@ -223,14 +224,14 @@ describe('Store', () => {
   });
 
   it('startFarmer action should update statuses and call relevant client methods', async () => {
-    const plotDir = '/random_dir';
+    const plotPath = '/random_dir';
     const plotSize = 100;
     const store = useStore();
     const setStatusSpy = jest.spyOn(store, 'setStatus');
 
     expect(store.status).toBe(INITIAL_STATUS);
 
-    store.setPlotDir(plotDir);
+    store.setPlotPath(plotPath);
     store.setPlotSize(plotSize);
 
     await store.startFarmer(clientMock, utilMock, blockStorageMock);
@@ -239,7 +240,7 @@ describe('Store', () => {
     expect(setStatusSpy).toHaveBeenNthCalledWith(1, 'syncing');
     expect(setStatusSpy).toHaveBeenNthCalledWith(2, 'farming');
 
-    expect(clientMock.startFarming).toHaveBeenCalledWith(plotDir, plotSize);
+    expect(clientMock.startFarming).toHaveBeenCalledWith(plotPath, plotSize);
     expect(clientMock.getSyncState).toHaveBeenCalled();
     expect(clientMock.isSyncing).toHaveBeenCalled();
     expect(clientMock.startSubscription).toHaveBeenCalled();
@@ -329,20 +330,25 @@ describe('Store', () => {
 
   it('confirmPlottingSetup action should call config update method', async () => {
     const plotSize = 10;
-    const plotDir = '/random_dir';
+    const plotPath = '/random_dir';
     const rewardAddress = 'random address';
 
     const store = useStore();
     store.setPlotSize(plotSize);
-    store.setPlotDir(plotDir);
+    store.setPlotPath(plotPath);
     store.setRewardAddress(rewardAddress);
 
     await store.confirmPlottingSetup(configMock, utilMock);
 
-    expect(configMock.update).toHaveBeenLastCalledWith({
+    // first node name is set (separate method which is also used elsewhere)
+    expect(configMock.update).toHaveBeenNthCalledWith(1, {
       nodeName: 'random generated name',
+    });
+
+    // then set plot and reward address
+    expect(configMock.update).toHaveBeenLastCalledWith({
       plot: {
-        location: plotDir,
+        location: plotPath,
         sizeGB: plotSize,
       },
       rewardAddress,

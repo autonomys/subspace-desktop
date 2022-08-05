@@ -16,7 +16,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
             dense
             input-class="setupPlotInput"
             outlined
-            v-model="store.plotDir"
+            v-model="store.plotPath"
           )
             template(v-slot:after)
               q-btn.shadow-0(
@@ -229,11 +229,11 @@ export default defineComponent({
   async mounted() {
     await this.updateDriveStats();
     const path = (await tauri.path.dataDir()) + util.appName;
-    this.store.setPlotDir(path);
+    this.store.setPlotPath(path);
   },
   async created() {
     this.$watch(
-      'store.plotDir',
+      'store.plotPath',
       debounce((val): null => {
         if (val.length === 0) {
           this.validPath = false;
@@ -247,12 +247,12 @@ export default defineComponent({
   },
   methods: {
     async confirmCreateDir() {
-      const dirExists = await native.dirExists(this.store.plotDir);
+      const dirExists = await native.dirExists(this.store.plotPath);
 
       if (dirExists) {
         util.infoLogger('SETUP PLOT | found the old plotting directory');
         const files = await tauri.fs
-          .readDir(this.store.plotDir)
+          .readDir(this.store.plotPath)
           .catch((error) => {
             util.errorLogger(error);
           });
@@ -260,19 +260,19 @@ export default defineComponent({
         if (files) {
           console.log('FILES ARE: :', files);
           if (files.length === 0 || (files.length === 1 && files.some(item => item.name === 'subspace-desktop.cfg'))) {
-            directoryDialogs.existingDirectoryConfirm(this.store.plotDir, this.startPlotting);
+            directoryDialogs.existingDirectoryConfirm(this.store.plotPath, this.startPlotting);
             // we are in FIRST TIME START, meaning there is are no existing plot
             // if there are some files in this folder, it's weird
           } else {
-            directoryDialogs.notEmptyDirectoryInfo(this.store.plotDir);
+            directoryDialogs.notEmptyDirectoryInfo(this.store.plotPath);
           }
         }
       } else if (!dirExists) {
-        directoryDialogs.newDirectoryConfirm(this.store.plotDir, this.startPlotting);
+        directoryDialogs.newDirectoryConfirm(this.store.plotPath, this.startPlotting);
       }
     },
     async startPlotting() {
-      await plotDir.createPlotDir(this.store.plotDir);
+      await plotDir.createPlotDir(this.store.plotPath);
       util.infoLogger('SETUP PLOT | custom directory created');
 
       if (!this.store.rewardAddress) {
@@ -288,18 +288,18 @@ export default defineComponent({
       this.$router.replace({ name: 'plottingProgress' });
     },
     async updateDriveStats() {
-      const stats = await native.driveStats(this.store.plotDir);
+      const stats = await native.driveStats(this.store.plotPath);
       util.infoLogger('Drive Stats -> free: ' + stats.freeBytes + '; total: ' + stats.totalBytes);
       this.driveStats = stats;
     },
     async selectDir() {
       const result = await native
-        .selectDir(this.store.plotDir)
+        .selectDir(this.store.plotPath)
         .catch((error: unknown) => {
           util.errorLogger(error);
         });
       if (result) {
-        this.store.setPlotDir(result);
+        this.store.setPlotPath(result);
       }
       await this.updateDriveStats();
     },

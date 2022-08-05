@@ -14,7 +14,7 @@ const configMockData = {
     sizeGB: 100
   },
   rewardAddress: 'random address',
-  nodeName: 'random node name',
+  nodeName: 'random generated name',
 };
 
 export const configMock = {

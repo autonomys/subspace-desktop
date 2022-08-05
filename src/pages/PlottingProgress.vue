@@ -14,7 +14,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
             input-class="plottingInput"
             outlined
             readonly
-            v-model="store.plotDir"
+            v-model="store.plotPath"
           )
       .row.items-center.q-gutter-md
         .col.relative-position
