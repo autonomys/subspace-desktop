@@ -56,7 +56,7 @@ export class Client implements IClient {
    * Get local node peers count
    * @returns {number} - peers count
    */
-  async getPeersCount(): Promise<number> {
+  public async getPeersCount(): Promise<number> {
     const peers = await this.api.rpc.system.peers();
     return peers.length;
   }
@@ -67,7 +67,7 @@ export class Client implements IClient {
    * @param {IU8a} hash - block hash as IU8a
    * @returns {number} - sum of SSC tokens
    */
-  async getBlockRewards(hash: IU8a): Promise<number> {
+  private async getBlockRewards(hash: IU8a): Promise<number> {
     let blockReward = 0;
     const apiAt = await this.api.at(hash);
     const records = (await apiAt.query.system.events()) as Vec<EventRecord>;
@@ -90,7 +90,7 @@ export class Client implements IClient {
    * @param handlers.farmedBlockHandler - handle block if it was farmed by user
    * @param handlers.newBlockHandler - handle regular block (was not farmed by user)
    */
-  async startSubscription(handlers: {
+  public async startSubscription(handlers: {
     farmedBlockHandler: (block: FarmedBlock) => void;
     newBlockHandler: (blockNum: number) => void;
   }): Promise<void> {
@@ -136,7 +136,7 @@ export class Client implements IClient {
   /**
    * Stop subscription for Subspace blocks, close connection to RPC, destroy Tauri, etc.
    */
-  stopSubscription() {
+  private stopSubscription() {
     util.infoLogger('block subscription stop triggered');
     this.unsubscribe();
     this.api.disconnect();
