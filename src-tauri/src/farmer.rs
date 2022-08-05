@@ -9,7 +9,6 @@ use subspace_farmer::single_plot_farm::PlotFactoryOptions;
 use subspace_farmer::{Identity, LegacyObjectMappings, NodeRpcClient, Plot, RpcClient};
 use subspace_networking::libp2p::{multiaddr::Protocol, Multiaddr};
 use subspace_networking::Config;
-use tokio::sync::mpsc::{channel, Receiver, Sender};
 use tokio::time::{sleep, timeout, Duration};
 use tracing::{debug, error, info, trace, warn};
 
@@ -18,7 +17,6 @@ struct FarmingArgs {
     node_rpc_url: String,
     reward_address: Option<PublicKey>,
     plot_size: u64,
-    error_sender: Sender<()>,
     listen_on: Vec<Multiaddr>,
     bootstrap_nodes: Vec<Multiaddr>,
     archiving: ArchivingFrom,
@@ -41,16 +39,16 @@ impl Default for ArchivingFrom {
 }
 
 #[tauri::command]
-pub(crate) async fn farming(path: String, reward_address: String, plot_size: u64) -> bool {
-    // create a channel to listen for farmer errors, and restart another farmer instance in case any error
-    let (error_sender, mut error_receiver): (Sender<()>, Receiver<()>) = channel(1);
-
+pub(crate) async fn farming(
+    path: String,
+    reward_address: String,
+    plot_size: u64,
+) -> Result<(), String> {
     if let Ok(address) = parse_reward_address(&reward_address) {
         let farming_args = FarmingArgs {
             node_rpc_url: "ws://127.0.0.1:9947".to_string(),
             reward_address: Some(address),
             plot_size,
-            error_sender: error_sender.clone(),
             listen_on: vec!["/ip4/127.0.0.1/tcp/40333"
                 .parse()
                 .expect("the address is hardcoded and correct")],
@@ -59,43 +57,43 @@ pub(crate) async fn farming(path: String, reward_address: String, plot_size: u64
             dsn_sync: false,
         };
 
-        if let Err(err) = farm(path.clone().into(), farming_args.clone()).await {
-            error!("farm function failed to start, with error: {err}");
-        }
+        let farming_handle = farm(path.clone().into(), farming_args.clone())
+            .await
+            .map_err(|error| format!("farm function failed to start, with error: {error}"))?;
 
-        // farmer started successfully, now listen in the background for errors
         tokio::spawn(async move {
-            // if there is an error, restart another farmer, and start listening again, in a loop
+            match farming_handle.wait().await {
+                Err(error) => error!("farmer instance crashed with error: {error}"),
+                Ok(_) => debug!("Node should have been restarted, restarting farmer now"),
+            }
             loop {
-                let result = error_receiver.recv().await;
-                match result {
-                    // we have received an error, let's restart the farmer
-                    Some(_) => {
-                        if let Err(err) = farm(path.clone().into(), farming_args.clone()).await {
-                            error!("farm function failed to start, with error: {err}");
-                        }
+                match farm(path.clone().into(), farming_args.clone()).await {
+                    Err(error) => {
+                        error!("farm function failed to start, with error: {error}")
                     }
-                    None => unreachable!(
-                        "sender should not have been dropped before sending an error message"
-                    ),
+                    Ok(handle) => match handle.wait().await {
+                        Err(error) => error!("farmer instance crashed with error: {error}"),
+                        Ok(_) => debug!("Node should have been restarted, restarting farmer now"),
+                    },
                 }
             }
         });
-        true
-    } else {
-        // reward address could not be parsed, and farmer did not start
-        false
+
+        return Ok(());
     }
+    Err("could not parse the reward address in the backend".into())
 }
 
 /// Start farming by using plot in specified path and connecting to WebSocket server at specified
 /// address.
-async fn farm(base_directory: PathBuf, farm_args: FarmingArgs) -> Result<(), anyhow::Error> {
+async fn farm(
+    base_directory: PathBuf,
+    farm_args: FarmingArgs,
+) -> Result<LegacyMultiPlotsFarm, anyhow::Error> {
     let FarmingArgs {
         node_rpc_url,
         reward_address,
         plot_size,
-        error_sender,
         listen_on,
         bootstrap_nodes,
         archiving,
@@ -205,25 +203,7 @@ async fn farm(base_directory: PathBuf, farm_args: FarmingArgs) -> Result<(), any
     )
     .await?;
 
-    tokio::spawn(async move {
-        let result = multi_plots_farm.wait().await;
-        match result {
-            Err(error) => {
-                error!("{error}");
-                error_sender.send(()).await.expect(
-                    "the receiver is defined in the `farming` function, it never stops listening",
-                );
-            }
-            Ok(_) => {
-                debug!("Node should be restarted");
-                error_sender.send(()).await.expect(
-                    "the receiver is defined in the `farming` function, it never stops listening",
-                );
-            }
-        }
-    });
-
-    Ok(())
+    Ok(multi_plots_farm)
 }
 
 fn parse_reward_address(s: &str) -> Result<PublicKey, sp_core::crypto::PublicError> {
