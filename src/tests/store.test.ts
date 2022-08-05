@@ -150,7 +150,7 @@ describe('Store', () => {
     const store = useStore();
     const config = {
       ...configMock,
-      read() {
+      readConfigFile() {
         return Promise.reject(errorMessage);
       }
     } as unknown as Config;

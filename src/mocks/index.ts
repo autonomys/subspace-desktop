@@ -23,7 +23,7 @@ export const configMock = {
   init: jest.fn(),
   validate: jest.fn(),
   remove: jest.fn(),
-  read: jest.fn(() => Promise.resolve(configMockData)),
+  readConfigFile: jest.fn(() => Promise.resolve(configMockData)),
   write: jest.fn(),
   update: jest.fn(),
   showErrorModal: jest.fn(),

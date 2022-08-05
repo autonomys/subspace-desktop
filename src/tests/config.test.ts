@@ -8,7 +8,7 @@ const tauriFsMock = {
   writeFile: jest.fn(),
 };
 
-describe.only('Config module', () => {
+describe('Config module', () => {
   const appName = 'random app name';
   const appDir = '/random-folder/';
   const params = {
@@ -25,6 +25,10 @@ describe.only('Config module', () => {
       sizeGB: 10,
     }
   };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   it('should create instance', () => {
     const config = new Config(params);
