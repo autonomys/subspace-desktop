@@ -269,15 +269,25 @@ export const useStore = defineStore('store', {
         this.setNetworkMessage('dashboard.verifyingNet');
 
         await client.startFarming(this.plotPath, this.plotSizeGB);
-
         // TODO: consider moving logging to client.ts
-        util.infoLogger('PLOTTING PROGRESS | farmer started');
+        util.infoLogger('Farmer started');
+      } catch (error) {
+        // TODO: consider moving logging to client.ts
+        util.errorLogger('Farmer start error!');
+        this.setError({
+          title: 'errorPage.startFarmerFailed',
+          // TODO: replace default error message with specific one
+          message: 'errorPage.defaultErrorMessage',
+        });
+        return
+      }
 
-        const syncState = await client.getSyncState();
-        this.setSyncState(syncState);
-        let isSyncing = await client.isSyncing();
+      const syncState = await client.getSyncState();
+      this.setSyncState(syncState);
+      let isSyncing = await client.isSyncing();
 
-        do {
+      do {
+        try {
           await new Promise((resolve) => setTimeout(resolve, 3000));
           const syncState = await client.getSyncState();
           this.setSyncState(syncState);
@@ -286,30 +296,25 @@ export const useStore = defineStore('store', {
           this.setPlottingStatus('dashboard.syncingMsg');
           this.setPlottingFinished((this.syncState.currentBlock * this.plotSizeGB) / this.syncState.highestBlock);
           isSyncing = await client.isSyncing();
-        } while (isSyncing);
+        } catch (error) {
+          util.infoLogger("cannot get the SyncState, probably farmer is restarting")
+        }
+      } while (isSyncing);
 
-        this.setNetworkState('finished');
-        this.setNetworkMessage('dashboard.syncedAt');
-        this.setPlotState('finished');
-        this.setPlotMessage('dashboard.syncedMsg');
-        this.setStatus('farming');
+      this.setNetworkState('finished');
+      this.setNetworkMessage('dashboard.syncedAt');
+      this.setPlotState('finished');
+      this.setPlotMessage('dashboard.syncedMsg');
+      this.setStatus('farming');
 
-        await client.startSubscription({
-          farmedBlockHandler: (block) => this.addFarmedBlock(blockStorage, block),
-          newBlockHandler: this.updateBlockNum,
-        });
+      await client.startSubscription({
+        farmedBlockHandler: (block) => this.addFarmedBlock(blockStorage, block),
+        newBlockHandler: this.updateBlockNum,
+      });
 
-        // TODO: consider moving logging to client.ts
-        util.infoLogger('PLOTTING PROGRESS | block subscription started');
-      } catch (error) {
-        // TODO: consider moving logging to client.ts
-        util.errorLogger('PLOTTING PROGRESS | Farmer start error!');
-        this.setError({
-          title: 'errorPage.startFarmerFailed',
-          // TODO: replace default error message with specific one
-          message: 'errorPage.defaultErrorMessage',
-        });
-      }
+      // TODO: consider moving logging to client.ts
+      util.infoLogger('PLOTTING PROGRESS | block subscription started');
+
     },
     setPlottingFinished(value: number) {
       this.plotting.finishedGB = value;
