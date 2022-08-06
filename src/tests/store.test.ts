@@ -10,9 +10,9 @@ import {
 import { SyncState } from '../lib/types';
 import {
   blockStorageMock,
-  configMock,
+  configClassMock,
   FarmedBlockMock,
-  configMockData,
+  configFileMock,
   clientMock,
   utilMock,
 } from '../mocks';
@@ -89,14 +89,14 @@ describe('Store', () => {
     const expected = 'random node name';
     const store = useStore();
     expect(store.nodeName).toBe('');
-    await store.setNodeName(configMock, expected);
+    await store.setNodeName(configClassMock, expected);
     expect(store.nodeName).toBe(expected);
   });
 
   it('setNodeName action should set error if config update fails', async () => {
     const errorMessage = 'random error message';
     const config = {
-      ...configMock,
+      ...configClassMock,
       update() {
         return Promise.reject(errorMessage);
       }
@@ -135,12 +135,12 @@ describe('Store', () => {
     expect(store.nodeName).toBe('');
     expect(store.rewardAddress).toBe('');
 
-    await store.updateFromConfig(blockStorageMock, configMock);
+    await store.updateFromConfig(blockStorageMock, configClassMock);
 
-    expect(store.plotSizeGB).toBe(configMockData.plot.sizeGB);
-    expect(store.plotPath).toBe(configMockData.plot.location);
-    expect(store.nodeName).toBe(configMockData.nodeName);
-    expect(store.rewardAddress).toBe(configMockData.rewardAddress);
+    expect(store.plotSizeGB).toBe(configFileMock.plot.sizeGB);
+    expect(store.plotPath).toBe(configFileMock.plot.location);
+    expect(store.nodeName).toBe(configFileMock.nodeName);
+    expect(store.rewardAddress).toBe(configFileMock.rewardAddress);
 
     // TODO: we plan to replace local storage - add assertion for farmed blocks if still relevant
   });
@@ -149,7 +149,7 @@ describe('Store', () => {
     const errorMessage = 'random error message';
     const store = useStore();
     const config = {
-      ...configMock,
+      ...configClassMock,
       readConfigFile() {
         return Promise.reject(errorMessage);
       }
@@ -169,7 +169,7 @@ describe('Store', () => {
 
     expect(store.status).toBe(INITIAL_STATUS);
 
-    store.setNodeName(configMock, 'random node name');
+    store.setNodeName(configClassMock, 'random node name');
     store.setPlotPath('/random-dir');
 
     await store.startNode(clientMock, utilMock);
@@ -183,7 +183,7 @@ describe('Store', () => {
 
     const store = useStore();
 
-    store.setNodeName(configMock, 'random node name');
+    store.setNodeName(configClassMock, 'random node name');
     store.setPlotPath('/random-dir');
 
     const client = {
@@ -338,15 +338,15 @@ describe('Store', () => {
     store.setPlotPath(plotPath);
     store.setRewardAddress(rewardAddress);
 
-    await store.confirmPlottingSetup(configMock, utilMock);
+    await store.confirmPlottingSetup(configClassMock, utilMock);
 
     // first node name is set (separate method which is also used elsewhere)
-    expect(configMock.update).toHaveBeenNthCalledWith(1, {
+    expect(configClassMock.update).toHaveBeenNthCalledWith(1, {
       nodeName: 'random generated name',
     });
 
     // then set plot and reward address
-    expect(configMock.update).toHaveBeenLastCalledWith({
+    expect(configClassMock.update).toHaveBeenLastCalledWith({
       plot: {
         location: plotPath,
         sizeGB: plotSize,
@@ -359,7 +359,7 @@ describe('Store', () => {
     const errorMessage = 'random error message';
     const store = useStore();
     const config = {
-      ...configMock,
+      ...configClassMock,
       update() {
         return Promise.reject(errorMessage);
       }

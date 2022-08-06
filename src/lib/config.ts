@@ -1,17 +1,9 @@
-import { FsDirOptions, FsOptions, FsTextFileOption } from '@tauri-apps/api/fs';
+import * as fs from '@tauri-apps/api/fs';
 
 import { toFixed } from './util/util';
 
-interface FS {
-  removeDir: (dir: string, options?: FsDirOptions) => Promise<void>
-  createDir: (dir: string, options?: FsDirOptions) => Promise<void>;
-  removeFile: (file: string, options?: FsOptions) => Promise<void>
-  readTextFile: (filePath: string, options?: FsOptions) => Promise<string>;
-  writeFile: (file: FsTextFileOption, options?: FsOptions) => Promise<void>;
-}
-
 interface FilesParams {
-  fs: FS;
+  fs: typeof fs;
   appDir: string;
   appName: string;
   errorLogger: (error: unknown) => Promise<void>;
@@ -50,7 +42,7 @@ export const emptyConfig: IConfig = {
  * Wrapper for tauri.fs methods to read, update or delete config file
  */
 class Config {
-  private fs: FS;
+  private fs: typeof fs;
   private configDir: string;
   private configFullPath: string;
   private errorLogger: (error: unknown) => Promise<void>;

@@ -46,7 +46,6 @@ export class Client implements IClient {
    * @param {ApiPromise} params.api - Polkadot.js RPC API instance
    * @param {Config} params.config - Config class instance to interact with app config file
    */
-  // TODO: provide config into constructor
   constructor({ api, config }: ClientParams) {
     this.api = api;
     this.config = config;

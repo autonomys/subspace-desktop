@@ -72,6 +72,7 @@ export default defineComponent({
       this.store.setNodeName(this.$config, '');
       const { launchOnBoot } = await this.$config.readConfigFile();
       if (launchOnBoot) {
+        // TODO: localise message
         Notify.create({
           message: 'Subspace Desktop will be started on boot. You can disable this from settings (the gear icon on top-right).',
           icon: 'info'

@@ -1,26 +1,7 @@
 import Config, { emptyConfig } from '../lib/config';
+import { tauriFsMock, configFileMock, appDir, appName } from '../mocks';
 
-const appName = 'random app name';
-const appDir = '/random-folder/';
-const nodeName = 'random node name';
 const configFullPath = `${appDir}${appName}/${appName}.cfg`;
-const configMock = {
-  ...emptyConfig,
-  rewardAddress: 'random reward address',
-  nodeName,
-  plot: {
-    location: `${appDir}${appName}`,
-    sizeGB: 10,
-  }
-};
-
-const tauriFsMock = {
-  removeDir: jest.fn(),
-  createDir: jest.fn().mockResolvedValue({}),
-  removeFile: jest.fn(),
-  readTextFile: jest.fn().mockResolvedValue(JSON.stringify(configMock)),
-  writeFile: jest.fn(),
-};
 
 const params = {
   fs: tauriFsMock,
@@ -33,7 +14,7 @@ const params = {
 // it will be nice to test with real files without mocking tauri.fs, 
 // but at the moment it does not work in testing environment. 
 // Investigate if there is way to make it work
-describe('Config module', () => {
+describe('Config', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -51,7 +32,7 @@ describe('Config module', () => {
   it('init method should read config if there is one', async () => {
     const config = new Config(params);
 
-    config.readConfigFile = jest.fn().mockResolvedValue(configMock);
+    config.readConfigFile = jest.fn().mockResolvedValue(configFileMock);
 
     await config.init();
 
@@ -73,7 +54,7 @@ describe('Config module', () => {
   it('validate method should return "true" if there is a valid config file', async () => {
     const config = new Config(params);
 
-    config.readConfigFile = jest.fn().mockResolvedValue(configMock);
+    config.readConfigFile = jest.fn().mockResolvedValue(configFileMock);
 
     const result = await config.validate();
 
@@ -106,7 +87,7 @@ describe('Config module', () => {
     const result = await config.readConfigFile();
 
     expect(tauriFsMock.readTextFile).toHaveBeenCalledWith(configFullPath);
-    expect(result).toEqual(configMock);
+    expect(result).toEqual(configFileMock);
   });
 
   it('update method should update given property/properties in the config file', async () => {
@@ -118,7 +99,7 @@ describe('Config module', () => {
     await config.update({ nodeName: newName });
 
     const expected = {
-      ...configMock,
+      ...configFileMock,
       nodeName: newName,
     };
 

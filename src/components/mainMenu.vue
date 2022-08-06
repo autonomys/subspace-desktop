@@ -110,8 +110,8 @@ export default defineComponent({
       }
     },
     async initMenu() {
-      if (this.$autoLauncher.enabled !== undefined) {
-        this.launchOnStart = await this.$autoLauncher.enabled;
+      if (await this.$autoLauncher.isEnabled()) {
+        this.launchOnStart = true;
       } else {
         this.launchOnStart = false;
         this.disableAutoLaunch = true;

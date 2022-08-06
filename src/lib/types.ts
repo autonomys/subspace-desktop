@@ -11,12 +11,6 @@ export interface FarmedBlock {
   rewardAddr: string
 }
 
-export interface AutoLaunchParams {
-  appName: string
-  appPath: string
-  minimized: boolean
-}
-
 export interface ChildReturnData {
   stdout: string[]
   stderr: string[]
