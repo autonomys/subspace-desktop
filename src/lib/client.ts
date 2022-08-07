@@ -19,14 +19,14 @@ const SUNIT = 1000000000000000000n;
 
 export interface IClient {
   getPeersCount: () => Promise<number>;
-  startNode: (path: string, nodeName: string) => Promise<boolean>;
+  startNode: (path: string, nodeName: string) => Promise<void>;
   startSubscription: (handlers: {
     farmedBlockHandler: (block: FarmedBlock) => void;
     newBlockHandler: (blockNum: number) => void;
   }) => Promise<void>;
   isSyncing: () => Promise<boolean>;
   getSyncState: () => Promise<SyncState>;
-  startFarming: (path: string, plotSizeGB: number) => Promise<boolean>;
+  startFarming: (path: string, plotSizeGB: number) => Promise<void>;
 }
 
 export class Client implements IClient {
@@ -135,16 +135,12 @@ export class Client implements IClient {
     return isSyncing.isTrue;
   }
 
-  // TODO: method should return Promise<void>, update after backend is updated
-  public async startNode(path: string, nodeName: string): Promise<boolean> {
-    const result = await tauri.invoke('start_node', { path, nodeName });
-    if (!result) { return false;}
+  public async startNode(path: string, nodeName: string): Promise<void> {
+    await tauri.invoke('start_node', { path, nodeName });
 
     // TODO: workaround in case node takes some time to fully start.
     await new Promise((resolve) => setTimeout(resolve, 7000));
     await this.connectApi();
-
-    return true;
   }
 
   public async createRewardAddress(): Promise<{ rewardAddress: string, mnemonic: string }> {
@@ -159,8 +155,7 @@ export class Client implements IClient {
   }
 
   /* FARMER INTEGRATION */
-  // TODO: method should return Promise<void>, update after backend is updated
-  public async startFarming(path: string, plotSizeGB: number): Promise<boolean> {
+  public async startFarming(path: string, plotSizeGB: number): Promise<void> {
     // convert GB to Bytes
     const plotSize = Math.round(plotSizeGB * 1024 * 1024 * 1024);
     const { rewardAddress } = (await config.read());
