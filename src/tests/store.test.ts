@@ -17,6 +17,7 @@ import {
   utilMock,
 } from '../mocks';
 import Config from '../lib/config';
+import { Client } from '../lib/client';
 
 describe('Store', () => {
   beforeEach(() => {
@@ -191,7 +192,7 @@ describe('Store', () => {
       startNode() {
         return Promise.reject(errorMessage);
       }
-    };
+    } as unknown as Client;
 
     await store.startNode(client, utilMock);
 
@@ -212,7 +213,7 @@ describe('Store', () => {
       startNode() {
         return Promise.reject(errorMessage);
       }
-    };
+    } as unknown as Client;
 
     await store.startNode(client, utilMock);
 
@@ -255,7 +256,7 @@ describe('Store', () => {
       startFarming() {
         return Promise.reject(errorMessage);
       }
-    };
+    } as unknown as Client;
 
     const store = useStore();
 
@@ -275,7 +276,7 @@ describe('Store', () => {
       getSyncState() {
         return Promise.reject(errorMessage);
       }
-    };
+    } as unknown as Client;
 
     const store = useStore();
 
@@ -295,7 +296,7 @@ describe('Store', () => {
       isSyncing() {
         return Promise.reject(errorMessage);
       }
-    };
+    } as unknown as Client;
 
     const store = useStore();
 
@@ -315,7 +316,7 @@ describe('Store', () => {
       startSubscription() {
         return Promise.reject(errorMessage);
       }
-    };
+    } as unknown as Client;
 
     const store = useStore();
 

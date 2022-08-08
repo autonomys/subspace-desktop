@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 
 import { SyncState, FarmedBlock } from '../lib/types';
-import { IClient } from '../lib/client';
+import { Client } from '../lib/client';
 import { IUtil } from '../lib/util/util';
 import Config from '../lib/config';
 import { IBlockStorage } from '../lib/blockStorage';
@@ -234,7 +234,7 @@ export const useStore = defineStore('store', {
     setPlotMessage(message: string) {
       this.plot.message = message;
     },
-    async startNode(client: IClient, util: IUtil) {
+    async startNode(client: Client, util: IUtil) {
       try {
         if (this.nodeName && this.plotPath) {
           this.setStatus('startingNode');
@@ -260,7 +260,7 @@ export const useStore = defineStore('store', {
         });
       }
     },
-    async startFarmer(client: IClient, util: IUtil, blockStorage: IBlockStorage) {
+    async startFarmer(client: Client, util: IUtil, blockStorage: IBlockStorage) {
       try {
         this.setStatus('syncing');
         // TODO: consider refactoring statuses after Dashboard Plot component #294 is resolved

@@ -4,7 +4,7 @@ import { toFixed } from './util/util';
 
 interface FilesParams {
   fs: typeof fs;
-  appDir: string;
+  configDir: string;
   appName: string;
   errorLogger: (error: unknown) => Promise<void>;
 }
@@ -43,14 +43,14 @@ export const emptyConfig: IConfig = {
  */
 class Config {
   private fs: typeof fs;
-  private configDir: string;
+  private configPath: string;
   private configFullPath: string;
   private errorLogger: (error: unknown) => Promise<void>;
 
-  constructor({ fs, appDir, appName, errorLogger }: FilesParams) {
+  constructor({ fs, configDir, appName, errorLogger }: FilesParams) {
     this.fs = fs;
-    this.configDir = `${appDir}${appName}`;
-    this.configFullPath = `${this.configDir}/${appName}.cfg`;
+    this.configPath = `${configDir}${appName}`;
+    this.configFullPath = `${this.configPath}/${appName}.cfg`;
     this.errorLogger = errorLogger;
   }
 
@@ -62,7 +62,7 @@ class Config {
       await this.readConfigFile();
     } catch {
       // means there were no config file
-      await this.fs.createDir(this.configDir)
+      await this.fs.createDir(this.configPath)
         // ignore error if folder exists
         .catch((error) => {
           if (!error.includes('exists')) {
@@ -115,7 +115,7 @@ class Config {
    * @param {IConfig} - config object to store as config file
    */
   private async write(config: IConfig): Promise<void> {
-    await this.fs.createDir(this.configDir)
+    await this.fs.createDir(this.configPath)
       // ignore error if folder exists
       .catch((error) => {
         if (!error.includes('exists')) {

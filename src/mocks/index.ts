@@ -1,14 +1,14 @@
 import * as fs from '@tauri-apps/api/fs';
 
 import FarmedBlockMock from './FarmedBlock.json';
-import { IClient } from '../lib/client';
+import { Client } from '../lib/client';
 import { IUtil } from '../lib/util/util';
 import Config,  { emptyConfig } from '../lib/config';
 
 export { FarmedBlockMock };
 
 export const appName = 'random app name';
-export const appDir = '/random-folder/';
+export const configDir = '/random-folder/';
 export const nodeName = 'random node name';
 
 export const configFileMock = {
@@ -16,7 +16,7 @@ export const configFileMock = {
   rewardAddress: 'random reward address',
   nodeName,
   plot: {
-    location: `${appDir}${appName}`,
+    location: `${configDir}${appName}`,
     sizeGB: 10,
   }
 };
@@ -48,7 +48,7 @@ export const clientMock = {
   })),
   isSyncing: jest.fn(() => false),
   startSubscription: jest.fn(),
-} as unknown as IClient;
+} as unknown as Client;
 
 export const utilMock = {
   errorLogger: jest.fn(),

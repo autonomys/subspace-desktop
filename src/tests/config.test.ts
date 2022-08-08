@@ -1,12 +1,12 @@
 import Config, { emptyConfig } from '../lib/config';
-import { tauriFsMock, configFileMock, appDir, appName } from '../mocks';
+import { tauriFsMock, configFileMock, configDir, appName } from '../mocks';
 
-const configFullPath = `${appDir}${appName}/${appName}.cfg`;
+const configFullPath = `${configDir}${appName}/${appName}.cfg`;
 
 const params = {
   fs: tauriFsMock,
   appName,
-  appDir,
+  configDir,
   errorLogger: jest.fn(),
 };
 
@@ -47,7 +47,7 @@ describe('Config', () => {
 
     await config.init();
 
-    expect(tauriFsMock.createDir).toHaveBeenCalledWith(config['configDir']);
+    expect(tauriFsMock.createDir).toHaveBeenCalledWith(config['configPath']);
     expect(config['write']).toHaveBeenCalledWith(emptyConfig);
   });
 

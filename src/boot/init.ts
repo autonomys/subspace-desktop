@@ -24,8 +24,8 @@ declare module '@vue/runtime-core' {
 
 export default boot(async ({ app }) => {
   // create Config instance and initialize it
-  const appDir = await tauri.path.configDir();
-  const config = new Config({ fs: tauri.fs, appName, appDir, errorLogger });
+  const configDir = await tauri.path.configDir();
+  const config = new Config({ fs: tauri.fs, appName, configDir, errorLogger });
   await config.init();
 
   // set node name from config (empty string is default value)
@@ -38,25 +38,21 @@ export default boot(async ({ app }) => {
   const client = new Client({ api, config });
 
   // create AutoLauncher instance and initialize it 
-  // TODO: probably duplicate of appName
-  const applicationName = (await tauri.app.getName()).toString();
   const osType = await tauri.os.type();
   infoLogger('OS TYPE: ' + osType);
-  // TODO: probably duplicate of appDir
-  const appPath = await tauri.invoke('get_this_binary') as string;
+  const appPath = await tauri.invoke('get_this_binary') as string; // this is not the same as appDir: appPath -> appDir
   infoLogger('get_this_binary : ' + appPath);
-  const configDir = await tauri.path.configDir();
 
   let osAutoLauncher;
 
   if (osType === 'Darwin') {
-    osAutoLauncher = new MacOSAutoLauncher({ appName: applicationName, appPath, native });
+    osAutoLauncher = new MacOSAutoLauncher({ appName, appPath, native });
   } else if (osType === 'Windows_NT') {
     // From Windows 11 Tests: get_this_binary returns a string with a prefix "\\?\" on C:\Users......". On boot, autostart can't locate "\\?\c:\DIR\subspace-desktop.exe
     const winAppPath = appPath.startsWith('\\\\?\\') ? appPath.replace('\\\\?\\', '') : appPath;
-    osAutoLauncher = new WindowsAutoLauncher({ appPath: winAppPath, appName: applicationName, native });
+    osAutoLauncher = new WindowsAutoLauncher({ appPath: winAppPath, appName, native });
   } else {
-    osAutoLauncher = new LinuxAutoLauncher({ appName: applicationName, appPath, configDir, fs: tauri.fs });
+    osAutoLauncher = new LinuxAutoLauncher({ appName, appPath, configDir, fs: tauri.fs });
   }
 
   const autoLauncher = new AutoLauncher({ config, osAutoLauncher });

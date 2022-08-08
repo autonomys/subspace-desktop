@@ -16,18 +16,6 @@ import Config from './config';
 
 const SUNIT = 1000000000000000000n;
 
-export interface IClient {
-  getPeersCount: () => Promise<number>;
-  startNode: (path: string, nodeName: string) => Promise<void>;
-  startSubscription: (handlers: {
-    farmedBlockHandler: (block: FarmedBlock) => void;
-    newBlockHandler: (blockNum: number) => void;
-  }) => Promise<void>;
-  isSyncing: () => Promise<boolean>;
-  getSyncState: () => Promise<SyncState>;
-  startFarming: (path: string, plotSizeGB: number) => Promise<void>;
-}
-
 interface ClientParams {
   api: ApiPromise;
   config: Config;
@@ -35,7 +23,7 @@ interface ClientParams {
 
 // TODO: implement unit tests
 /** Class responsible for interaction with local Subspace node using Polkadot.js API */
-export class Client implements IClient {
+export class Client {
   protected clearTauriDestroy: tauri.event.UnlistenFn = () => null;
   protected unsubscribe: tauri.event.UnlistenFn = () => null;
   private api: ApiPromise;
