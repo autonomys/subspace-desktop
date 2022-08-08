@@ -10,10 +10,10 @@ const osAutoLauncherParams = {
   configDir: '/random-dir/'
 };
 
-const osSpecificAutoLauncher = new LinuxAutoLauncher(osAutoLauncherParams);
+const osAutoLauncher = new LinuxAutoLauncher(osAutoLauncherParams);
 const params = {
   config: configClassMock,
-  osSpecificAutoLauncher,
+  osAutoLauncher,
 };
 
 // TODO: these tests and current AutoLauncher implementation require more refactoring
@@ -44,13 +44,13 @@ describe('AutoLauncher', () => {
   });
 
   it('isEnabled method should return "false" if auto launcher is disabled', async () => {
-    const osSpecificAutoLauncher = new LinuxAutoLauncher(osAutoLauncherParams);
+    const osAutoLauncher = new LinuxAutoLauncher(osAutoLauncherParams);
 
-    osSpecificAutoLauncher.isEnabled = jest.fn().mockResolvedValue(false);
+    osAutoLauncher.isEnabled = jest.fn().mockResolvedValue(false);
 
     const autoLauncher = new AutoLauncher({
       ...params,
-      osSpecificAutoLauncher
+      osAutoLauncher
     });
 
     const result = await autoLauncher.isEnabled();
@@ -70,19 +70,19 @@ describe('AutoLauncher', () => {
   });
 
   it('disable method should update "enabled" property and update config', async () => {
-    const osSpecificAutoLauncher = new LinuxAutoLauncher(osAutoLauncherParams);
+    const osAutoLauncher = new LinuxAutoLauncher(osAutoLauncherParams);
 
-    osSpecificAutoLauncher.disable = jest.fn().mockResolvedValue(null);
+    osAutoLauncher.disable = jest.fn().mockResolvedValue(null);
     
     const autoLauncher = new AutoLauncher({
       ...params,
-      osSpecificAutoLauncher
+      osAutoLauncher
     });
     
     await autoLauncher.enable();
     expect(autoLauncher['enabled']).toBe(true);
     
-    osSpecificAutoLauncher.isEnabled = jest.fn().mockResolvedValue(false);
+    osAutoLauncher.isEnabled = jest.fn().mockResolvedValue(false);
 
     await autoLauncher.disable();
     expect(autoLauncher['enabled']).toBe(false);
