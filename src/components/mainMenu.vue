@@ -30,8 +30,11 @@ q-menu(auto-close)
 import { defineComponent } from 'vue';
 import { Dialog, Notify } from 'quasar';
 import { relaunch } from '@tauri-apps/api/process';
-import * as util from '../lib/util';
 import { open as shellOpen } from '@tauri-apps/api/shell';
+import { LocalStorage as localStorage } from 'quasar';
+
+import * as plotDir from '../lib/plotDir';
+import * as util from '../lib/util';
 
 export default defineComponent({
   data() {
@@ -91,7 +94,7 @@ export default defineComponent({
         ok: { label: 'reset', icon: 'refresh', flat: true, color: 'red' },
         cancel: true
       }).onOk(async () => {
-        await util.resetAndClear();
+        await util.resetAndClear({ plotDir, localStorage, config: this.$config });
         await new Promise((resolve) => setTimeout(resolve, 1000));
         await relaunch();
       });
@@ -101,13 +104,14 @@ export default defineComponent({
         const log_path = await util.getLogPath();
         util.infoLogger('log path acquired:' + log_path);
         await shellOpen(log_path);
-      } catch(error) {
+      } catch (error) {
+        // TODO: add proper error handling - update store and show error page
         util.errorLogger(error);
       }
     },
     async initMenu() {
-      if (this.$autoLauncher.enabled !== undefined) {
-        this.launchOnStart = await this.$autoLauncher.enabled;
+      if (await this.$autoLauncher.isEnabled()) {
+        this.launchOnStart = true;
       } else {
         this.launchOnStart = false;
         this.disableAutoLaunch = true;

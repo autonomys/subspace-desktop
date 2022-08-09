@@ -115,20 +115,38 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { debounce } from 'quasar';
-import * as path from '@tauri-apps/api/path';
-import * as fs from '@tauri-apps/api/fs';
+import * as tauri  from '@tauri-apps/api';
+import { ApexOptions } from 'apexcharts';
 
-import { chartOptions, ChartDataType, StatsType } from '../lib/types';
+import { ChartDataType, StatsType } from '../lib/types';
 import * as native from '../lib/native';
-import { appData, appDataDialog } from '../lib/appData';
+import * as plotDir from '../lib/plotDir';
 import mnemonicModal from '../components/mnemonicModal.vue';
 import { useStore } from '../stores/store';
 import * as util from '../lib/util';
-import { config } from '../lib/appConfig';
+import * as directoryDialogs from '../components/directoryDialogs';
 
-const tauri = { path, fs };
+const chartOptions: ApexOptions = {
+  legend: { show: false },
+  colors: ['#E0E0E0', '#FFFFFF', '#2081F0'],
+  plotOptions: {
+    pie: {
+      startAngle: 0,
+      endAngle: 360,
+      expandOnClick: false,
+      donut: { size: '40px' }
+    }
+  },
+  dataLabels: { enabled: false },
+  labels: [],
+  states: {
+    active: { filter: { type: 'none' } },
+    hover: { filter: { type: 'none' } }
+  },
+  markers: { hover: { size: 0 } },
+  tooltip: { enabled: false }
+};
 
-// TODO: implement error handling - Implement error pages for potential worst case scenarios #253 
 // TODO: consider moving client, tauri and native methods elsewhere - use store methods instead
 export default defineComponent({
   setup() {
@@ -242,25 +260,19 @@ export default defineComponent({
         if (files) {
           console.log('FILES ARE: :', files);
           if (files.length === 0 || (files.length === 1 && files.some(item => item.name === 'subspace-desktop.cfg'))) {
-            appDataDialog.existingDirectoryConfirm(
-              this.store.plotPath,
-              this.startPlotting
-            );
+            directoryDialogs.existingDirectoryConfirm(this.store.plotPath, this.startPlotting);
             // we are in FIRST TIME START, meaning there is are no existing plot
             // if there are some files in this folder, it's weird
           } else {
-            appDataDialog.notEmptyDirectoryInfo(this.store.plotPath);
+            directoryDialogs.notEmptyDirectoryInfo(this.store.plotPath);
           }
         }
       } else if (!dirExists) {
-        appDataDialog.newDirectoryConfirm(
-          this.store.plotPath,
-          this.startPlotting
-        );
+        directoryDialogs.newDirectoryConfirm(this.store.plotPath, this.startPlotting);
       }
     },
     async startPlotting() {
-      await appData.createCustomDataDir(this.store.plotPath);
+      await plotDir.createPlotDir(this.store.plotPath);
       util.infoLogger('SETUP PLOT | custom directory created');
 
       if (!this.store.rewardAddress) {
@@ -272,7 +284,7 @@ export default defineComponent({
       }
     },
     async handleConfirm() {
-      await this.store.confirmPlottingSetup(config, util);
+      await this.store.confirmPlottingSetup(this.$config, util);
       this.$router.replace({ name: 'plottingProgress' });
     },
     async updateDriveStats() {

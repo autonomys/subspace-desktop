@@ -12,16 +12,17 @@ export interface IUtil {
 
 const nodeNameMaxLength = 64;
 
-export const random = (min: number, max: number): number =>
-  Math.floor(Math.random() * (max - min)) + min;
-
+/**
+ * Utility function to open modal using Quasar Dialog API
+ * @param {Component} component - Vue component representing modal, for example mnemonicModal.vue
+ * @param {object} props - optional component params
+ * @returns {DialogChainObject} - chainable object with methods that accept callbacks (onOk, onDismiss, etc.)
+ */
 export async function showModal(
   component: Component,
   props: any = {}
-): Promise<DialogChainObject | null> {
-  console.log('Show Modal');
+): Promise<DialogChainObject> {
   return Dialog.create({
-    message: 'Testing',
     component,
     componentProps: {
       ...props
@@ -35,10 +36,11 @@ export function toFixed(num: number, precision: number): number {
   return parseFloat(num.toFixed(precision));
 }
 
-export function plotTimeMsEstimate(gb: number): number {
-  return gb * 5e4;
-}
-
+/**
+ * Utility function to format time in HH:MM:SS format
+ * @param {number} duration - time in milliseconds
+ * @returns {string} - string representing time in HH:MM:SS format
+ */
 export function formatMS(duration: number): string {
   duration /= 1000;
   // Hours, minutes and seconds
@@ -58,22 +60,6 @@ export function formatMS(duration: number): string {
   return ret;
 }
 
-export function promiseTimeout<T>(ms: number, promise: Promise<T>): Promise<T> {
-  // Create a promise that rejects in <ms> milliseconds
-  const timeout = new Promise<never>((_, reject) => {
-    setTimeout(() => {
-      reject('Timed out in ' + ms + 'ms.');
-    }, ms);
-
-  });
-
-  // Returns a race between our timeout and the passed in promise
-  return Promise.race<T>([
-    promise,
-    timeout
-  ]);
-}
-
 const apiTypes = {
   Solution: {
     public_key: 'AccountId32',
@@ -89,6 +75,11 @@ export const PIECE_SIZE = 4096;
 export const GB = 1024 * 1024 * 1024;
 export const CONTEXT_MENU = process.env.DEV || 'OFF'; // enables context menu only if DEV mode is on
 
+/**
+ * Utility function for creation of Polkadot.js API instance
+ * @param {string | string[]} url - single or multiple RPC endpoints to connect
+ * @returns {ApiPromise} - Polkadot.js API instance
+ */
 export function createApi(url: string | string[]): ApiPromise {
   return new ApiPromise({
     provider: new WsProvider(url, false),
@@ -97,6 +88,10 @@ export function createApi(url: string | string[]): ApiPromise {
   });
 }
 
+/**
+ * Utility function to generate random name for local node name
+ * @returns {string} - generated node name
+ */
 export function generateNodeName(): string {
   let nodeName = '';
   do {
@@ -107,6 +102,11 @@ export function generateNodeName(): string {
   return nodeName;
 }
 
+/**
+ * Utility function to get error message from error
+ * @param {unknown} error - can be instance of Error object or string
+ * @returns {string} - error message
+ */
 export function getErrorMessage(error: unknown): string | undefined {
   if (error instanceof Error) {
     return error.message;

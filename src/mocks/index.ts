@@ -1,33 +1,37 @@
+import * as fs from '@tauri-apps/api/fs';
+
 import FarmedBlockMock from './FarmedBlock.json';
-import { IClient } from '../lib/client';
+import { Client } from '../lib/client';
 import { IUtil } from '../lib/util/util';
-import { IConfig } from '../lib/appConfig';
+import Config,  { emptyConfig } from '../lib/config';
 
-export {
-  FarmedBlockMock,
-  configMockData,
-};
+export { FarmedBlockMock };
 
-const configMockData = {
+export const appName = 'random app name';
+export const configDir = '/random-folder/';
+export const nodeName = 'random node name';
+
+export const configFileMock = {
+  ...emptyConfig,
+  rewardAddress: 'random reward address',
+  nodeName,
   plot: {
-    location: '/random_location',
-    sizeGB: 100
-  },
-  rewardAddress: 'random address',
-  nodeName: 'random generated name',
+    location: `${configDir}${appName}`,
+    sizeGB: 10,
+  }
 };
 
-export const configMock = {
-  configDir: jest.fn(),
-  configFullPath: jest.fn(),
+export const configClassMock = {
+  configDir: '/random-dir/',
+  configFullPath: '/this-is-full-path/to/config-file.cfg',
   init: jest.fn(),
   validate: jest.fn(),
   remove: jest.fn(),
-  read: jest.fn(() => Promise.resolve(configMockData)),
+  readConfigFile: jest.fn(() => Promise.resolve(configFileMock)),
   write: jest.fn(),
   update: jest.fn(),
   showErrorModal: jest.fn(),
-} as unknown as IConfig;
+} as unknown as Config;
 
 export const blockStorageMock = {
   getStoredBlocks: jest.fn(),
@@ -44,10 +48,19 @@ export const clientMock = {
   })),
   isSyncing: jest.fn(() => false),
   startSubscription: jest.fn(),
-} as unknown as IClient;
+} as unknown as Client;
 
 export const utilMock = {
   errorLogger: jest.fn(),
   infoLogger: jest.fn(),
   generateNodeName: jest.fn(() => 'random generated name'),
 } as unknown as IUtil;
+
+export const tauriFsMock = {
+  removeDir: jest.fn(),
+  createDir: jest.fn().mockResolvedValue({}),
+  removeFile: jest.fn(),
+  readTextFile: jest.fn().mockResolvedValue(JSON.stringify(configFileMock)),
+  writeFile: jest.fn().mockResolvedValue({}),
+  readDir: jest.fn().mockResolvedValue('/random-dir/'),
+} as unknown as typeof fs;

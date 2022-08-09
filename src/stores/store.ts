@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia';
 
 import { SyncState, FarmedBlock } from '../lib/types';
-import { IClient } from '../lib/client';
+import { Client } from '../lib/client';
 import { IUtil } from '../lib/util/util';
-import { IConfig } from '../lib/appConfig';
+import Config from '../lib/config';
 import { IBlockStorage } from '../lib/blockStorage';
 
 export type Status = 'idle' | 'startingNode' | 'syncing' | 'farming';
@@ -152,7 +152,7 @@ export const useStore = defineStore('store', {
     setPlotSize(size: number) {
       this.plotSizeGB = size;
     },
-    async setNodeName(config: IConfig, name: string) {
+    async setNodeName(config: Config, name: string) {
       try {
         this.nodeName = name;
         await config.update({ nodeName: name });
@@ -173,7 +173,7 @@ export const useStore = defineStore('store', {
     setStatus(status: Status) {
       this.status = status;
     },
-    async confirmPlottingSetup(config: IConfig, util: IUtil) {
+    async confirmPlottingSetup(config: Config, util: IUtil) {
       try {
         const nodeName = util.generateNodeName();
         await this.setNodeName(config, nodeName);
@@ -206,9 +206,9 @@ export const useStore = defineStore('store', {
     updateBlockNum(blockNum: number) {
       this.network.syncedAtNum = blockNum;
     },
-    async updateFromConfig(blockStorage: IBlockStorage, config: IConfig) {
+    async updateFromConfig(blockStorage: IBlockStorage, config: Config) {
       try {
-        const { plot, nodeName, rewardAddress } = await config.read();
+        const { plot, nodeName, rewardAddress } = await config.readConfigFile();
         this.plotSizeGB = plot.sizeGB;
         this.plotPath = plot.location;
         this.nodeName = nodeName;
@@ -234,7 +234,7 @@ export const useStore = defineStore('store', {
     setPlotMessage(message: string) {
       this.plot.message = message;
     },
-    async startNode(client: IClient, util: IUtil) {
+    async startNode(client: Client, util: IUtil) {
       try {
         if (this.nodeName && this.plotPath) {
           this.setStatus('startingNode');
@@ -260,7 +260,7 @@ export const useStore = defineStore('store', {
         });
       }
     },
-    async startFarmer(client: IClient, util: IUtil, blockStorage: IBlockStorage) {
+    async startFarmer(client: Client, util: IUtil, blockStorage: IBlockStorage) {
       try {
         this.setStatus('syncing');
         // TODO: consider refactoring statuses after Dashboard Plot component #294 is resolved
