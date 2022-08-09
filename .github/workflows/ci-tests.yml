@@ -163,8 +163,11 @@ jobs:
         env:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+      
+      - name: run unit tests
+        run: yarn test
 
-      - name:
+      - name: build UI
         run: yarn quasar build -m pwa
 
       - name: fmt
