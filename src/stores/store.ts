@@ -345,7 +345,9 @@ export const useStore = defineStore('store', {
           this.setPlotMessage('dashboard.plotActive');
           this.setNetworkMessage('dashboard.syncingMsg');
           this.setPlottingStatus('dashboard.syncingMsg');
-          this.setPlottingFinished((this.syncState.currentBlock * this.plotSizeGB) / this.syncState.highestBlock);
+          // adding 1 as fallback, because syncState.currentBlock and syncState.highestBlock can be 0, which may result in NaN
+          const finishedGB = ((this.syncState.currentBlock || 1) * this.plotSizeGB) / (this.syncState.highestBlock || 1);
+          this.setPlottingFinished(finishedGB);
           isSyncing = await client.isSyncing();
         } while (isSyncing);
 
