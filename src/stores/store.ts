@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import pRetry from 'p-retry';
+import pRetry, { FailedAttemptError } from 'p-retry';
 
 import { SyncState, FarmedBlock } from '../lib/types';
 import { Client } from '../lib/client';
@@ -334,11 +334,9 @@ export const useStore = defineStore('store', {
           // API requests will fail, because RPC is not available until node has restarted
           // TODO: replace do-while loop with subscription, which can be terminated before restarting node
           const syncState = await pRetry(() => client.getSyncState(), {
-            onFailedAttempt(error) {
+            onFailedAttempt(error: FailedAttemptError) {
               console.log(`store.startFarmer: inside loop client.getSyncState retry error. Attempt ${error.attemptNumber} failed. ${error.retriesLeft} retries left.`);
             },
-            retries: 5,
-            minTimeout: 2000,
           });
 
           this.setSyncState(syncState);
