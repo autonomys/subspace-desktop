@@ -320,46 +320,39 @@ export const useStore = defineStore('store', {
 
         await client.startFarming(this.plotPath, this.plotSizeGB);
 
-        // TODO: consider moving logging to client.ts
-        util.infoLogger('farmer started');
+        await client.startSyncStateSubscription();
 
-        const syncState = await client.getSyncState();
-        this.setSyncState(syncState);
-        let isSyncing = await client.isSyncing();
+        // // TODO: consider moving logging to client.ts
+        // util.infoLogger('PLOTTING PROGRESS | farmer started');
 
-        do {
-          await new Promise((resolve) => setTimeout(resolve, 3000));
-          // using pRetry as a workaround,
-          // because loop will keep executing in case of node restart,
-          // API requests will fail, because RPC is not available until node has restarted
-          // TODO: replace do-while loop with subscription, which can be terminated before restarting node
-          const syncState = await pRetry(() => client.getSyncState(), {
-            onFailedAttempt(error: FailedAttemptError) {
-              console.log(`store.startFarmer: inside loop client.getSyncState retry error. Attempt ${error.attemptNumber} failed. ${error.retriesLeft} retries left.`);
-            },
-          });
+        // const syncState = await client.getSyncState();
+        // this.setSyncState(syncState);
+        // let isSyncing = await client.isSyncing();
 
-          this.setSyncState(syncState);
-          this.setPlotMessage('dashboard.plotActive');
-          this.setNetworkMessage('dashboard.syncingMsg');
-          this.setPlottingStatus('dashboard.syncingMsg');
-          this.setPlottingFinished((this.syncState.currentBlock * this.plotSizeGB) / this.syncState.highestBlock);
-          isSyncing = await client.isSyncing();
-        } while (isSyncing);
+        // do {
+        //   await new Promise((resolve) => setTimeout(resolve, 3000));
+        //   const syncState = await client.getSyncState();
+        //   this.setSyncState(syncState);
+        //   this.setPlotMessage('dashboard.plotActive');
+        //   this.setNetworkMessage('dashboard.syncingMsg');
+        //   this.setPlottingStatus('dashboard.syncingMsg');
+        //   this.setPlottingFinished((this.syncState.currentBlock * this.plotSizeGB) / this.syncState.highestBlock);
+        //   isSyncing = await client.isSyncing();
+        // } while (isSyncing);
 
-        this.setNetworkState('finished');
-        this.setNetworkMessage('dashboard.syncedAt');
-        this.setPlotState('finished');
-        this.setPlotMessage('dashboard.syncedMsg');
-        this.setStatus('farming');
+        // this.setNetworkState('finished');
+        // this.setNetworkMessage('dashboard.syncedAt');
+        // this.setPlotState('finished');
+        // this.setPlotMessage('dashboard.syncedMsg');
+        // this.setStatus('farming');
 
-        await client.startSubscription({
-          farmedBlockHandler: (block) => this.addFarmedBlock(blockStorage, block),
-          newBlockHandler: this.updateBlockNum,
-        });
+        // await client.startSubscription({
+        //   farmedBlockHandler: (block) => this.addFarmedBlock(blockStorage, block),
+        //   newBlockHandler: this.updateBlockNum,
+        // });
 
-        // TODO: consider moving logging to client.ts
-        util.infoLogger('block subscription started');
+        // // TODO: consider moving logging to client.ts
+        // util.infoLogger('PLOTTING PROGRESS | block subscription started');
       } catch (error) {
         // TODO: consider moving logging to client.ts
         util.errorLogger('Farmer start error: ' + error as string);

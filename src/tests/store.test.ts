@@ -252,7 +252,7 @@ describe('Store', () => {
     expect(clientMock.startFarming).toHaveBeenCalledWith(plotPath, plotSize);
     expect(clientMock.getSyncState).toHaveBeenCalled();
     expect(clientMock.isSyncing).toHaveBeenCalled();
-    expect(clientMock.startSubscription).toHaveBeenCalled();
+    expect(clientMock.startBlockSubscription).toHaveBeenCalled();
 
     // TODO: If relevant add assertions for Plot and Network statuses after Dashboard Plot component #294 is resolved
   });
@@ -317,11 +317,11 @@ describe('Store', () => {
     });
   });
 
-  it('startFarmer action should set error if client.startSubscription throws error', async () => {
+  it('startFarmer action should set error if client.startBlockSubscription throws error', async () => {
     const errorMessage = 'random error message';
     const client = {
       ...clientMock,
-      startSubscription() {
+      startBlockSubscription() {
         return Promise.reject(errorMessage);
       }
     } as unknown as Client;

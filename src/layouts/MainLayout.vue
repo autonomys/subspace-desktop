@@ -1,6 +1,7 @@
 <template lang="pug">
 q-layout(view="hHh lpr fFf")
   q-header.bg-white.text-black(bordered)
+    p store.status {{ store.status }}
     q-toolbar.app-toolbar
       q-img(no-spinner src="subspacelogo.png" width="150px")
       q-toolbar-title
@@ -53,6 +54,7 @@ import * as process from 'process';
 import * as util from '../lib/util';
 import MainMenu from '../components/mainMenu.vue';
 import { useStore } from '../stores/store';
+// import { relaunch } from '@tauri-apps/api/process';
 
 export default defineComponent({
   name: 'MainLayout',

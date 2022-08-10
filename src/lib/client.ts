@@ -16,16 +16,24 @@ import Config from './config';
 
 const SUNIT = 1000000000000000000n;
 
-interface ClientParams {
-  api: ApiPromise;
-  config: Config;
+export interface IClient {
+  getPeersCount: () => Promise<number>;
+  startNode: (path: string, nodeName: string) => Promise<void>;
+  startBlockSubscription: (handlers: {
+    farmedBlockHandler: (block: FarmedBlock) => void;
+    newBlockHandler: (blockNum: number) => void;
+  }) => Promise<void>;
+  isSyncing: () => Promise<boolean>;
+  getSyncState: () => Promise<SyncState>;
+  startFarming: (path: string, plotSizeGB: number) => Promise<void>;
+  startSyncStateSubscription: () => Promise<void>;
 }
 
-// TODO: implement unit tests
-/** Class responsible for interaction with local Subspace node using Polkadot.js API */
-export class Client {
-  protected clearTauriDestroy: tauri.event.UnlistenFn = () => null;
-  protected unsubscribe: tauri.event.UnlistenFn = () => null;
+export class Client implements IClient {
+  private clearTauriDestroy: event.UnlistenFn = () => null;
+  private unsubscribeBlocks: event.UnlistenFn = () => null;
+  private unsubscribeSyncState: event.UnlistenFn = () => null;
+
   private api: ApiPromise;
   private config: Config;
   /**
@@ -72,18 +80,13 @@ export class Client {
   }
 
   // TODO: handlers param is temporary - create better solution
-  /**
-   * Start subscription for Subspace blocks and process each block
-   * @param handlers.farmedBlockHandler - handle block if it was farmed by user
-   * @param handlers.newBlockHandler - handle regular block (was not farmed by user)
-   */
-  public async startSubscription(handlers: {
+  async startBlockSubscription(handlers: {
     farmedBlockHandler: (block: FarmedBlock) => void;
     newBlockHandler: (blockNum: number) => void;
   }): Promise<void> {
     const rewardAddress: string = (await this.config.readConfigFile()).rewardAddress;
 
-    this.unsubscribe = await this.api.rpc.chain.subscribeNewHeads(
+    this.unsubscribeBlocks = await this.api.rpc.chain.subscribeNewHeads(
       async ({ hash, number }) => {
         const blockNum = number.toNumber();
         const header = await this.api.rpc.chain.getHeader(hash);
@@ -125,7 +128,7 @@ export class Client {
    */
   private stopSubscription() {
     util.infoLogger('block subscription stop triggered');
-    this.unsubscribe();
+    this.unsubscribeBlocks();
     this.api.disconnect();
     try {
       this.clearTauriDestroy();
@@ -153,10 +156,13 @@ export class Client {
     return (await this.api.rpc.system.syncState()).toJSON() as unknown as SyncState;
   }
 
-  /**
-   * Utility method to determine if local node is syncing
-   * @returns {boolean}
-   */
+  public async startSyncStateSubscription():Promise<void> {
+    this.unsubscribeSyncState = await this.api.rpc.system.syncState((response) => {
+      const syncState = response.toJSON();
+      console.log(syncState);
+    });
+  }
+
   public async isSyncing(): Promise<boolean> {
     const { isSyncing } = await this.api.rpc.system.health();
     return isSyncing.isTrue;
