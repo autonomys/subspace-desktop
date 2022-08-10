@@ -88,11 +88,11 @@ export default defineComponent({
       this.setEditName(false);
       // if user left input empty - use prev name
       if (!this.store.nodeName) {
-        this.store.setNodeName(this.$config, this.oldNodeName);
+        await this.store.setNodeName(this.$config, this.oldNodeName);
       // only restart if name has changed
       } else if (this.oldNodeName !== this.store.nodeName) {
-        this.store.setNodeName(this.$config, this.store.nodeName);
-        this.store.startNode(this.$client, util);
+        await this.store.setNodeName(this.$config, this.store.nodeName);
+        await this.store.startNode(this.$client, util);
       }
     },
     setEditName(value: boolean) {

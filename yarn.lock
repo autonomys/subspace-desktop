@@ -3212,6 +3212,11 @@
   resolved "https://registry.yarnpkg.com/@types/retry/-/retry-0.12.0.tgz#2b35eccfcee7d38cd72ad99232fbd58bffb3c84d"
   integrity sha512-wWKOClTTiizcZhXnPY4wikVAwmdYHp8q6DmC+EJUzAMsycb7HB32Kh9RN4+0gExjmPmZSAQjgURXIGATPegAvA==
 
+"@types/retry@^0.12.0":
+  version "0.12.2"
+  resolved "https://registry.yarnpkg.com/@types/retry/-/retry-0.12.2.tgz#ed279a64fa438bb69f2480eda44937912bb7480a"
+  integrity sha512-XISRgDJ2Tc5q4TRqvgJtzsRkFYNJzZrhTdtMoGVBttwzzQJkPnS3WWTFc7kuDRoPtPakl+T+OfdEUjYJj7Jbow==
+
 "@types/serve-index@^1.9.1":
   version "1.9.1"
   resolved "https://registry.yarnpkg.com/@types/serve-index/-/serve-index-1.9.1.tgz#1b5e85370a192c01ec6cec4735cf2917337a6278"
@@ -8245,6 +8250,14 @@ p-locate@^5.0.0:
   integrity sha512-LaNjtRWUBY++zB5nE/NwcaoMylSPk+S+ZHNB1TzdbMJMny6dynpAGt7X/tl/QYq3TIeE6nxHppbo2LGymrG5Pw==
   dependencies:
     p-limit "^3.0.2"
+
+p-retry@4.6.1:
+  version "4.6.1"
+  resolved "https://registry.yarnpkg.com/p-retry/-/p-retry-4.6.1.tgz#8fcddd5cdf7a67a0911a9cf2ef0e5df7f602316c"
+  integrity sha512-e2xXGNhZOZ0lfgR9kL34iGlU8N/KO0xZnQxVEwdeOvpqNDQfdnxIYizvWtK8RglUa3bGqI8g0R/BdfzLMxRkiA==
+  dependencies:
+    "@types/retry" "^0.12.0"
+    retry "^0.13.1"
 
 p-retry@^4.5.0:
   version "4.6.2"
