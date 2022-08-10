@@ -33,6 +33,7 @@ import { FarmedBlock } from '../lib/types';
 import { useStore } from '../stores/store';
 import * as util from '../lib/util';
 import * as blockStorage from '../lib/blockStorage';
+import { getCurrent } from '@tauri-apps/api/window';
 
 export default defineComponent({
   components: { farmedList, netCard, plotCard },
@@ -59,11 +60,12 @@ export default defineComponent({
     );
     if (!this.store.isFirstLoad) {
       util.infoLogger('DASHBOARD | starting node');
-      await this.store.startNode(this.$client, util);
-      await this.store.startFarmer(this.$client, util, blockStorage);
+      const window = getCurrent();
+      await this.store.startNode(this.$client, util, window);
+      await this.store.startFarmer(this.$client, util, blockStorage, window);
     }
 
-    // TODO: consider moving fetching peers into store 
+    // TODO: consider moving fetching peers into store
     this.fetchPeersCount(); // fetch initial peers count value
     this.peerInterval = window.setInterval(this.fetchPeersCount, 30000);
   },

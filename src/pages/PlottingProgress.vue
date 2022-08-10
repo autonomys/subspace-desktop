@@ -125,6 +125,7 @@ import introModal from '../components/introModal.vue';
 import { useStore } from '../stores/store';
 import * as util from '../lib/util';
 import * as blockStorage from '../lib/blockStorage';
+import { getCurrent, WebviewWindow } from '@tauri-apps/api/window';
 
 let farmerTimer: number;
 
@@ -163,17 +164,21 @@ export default defineComponent({
     this.store.setFirstLoad();
     this.store.setPlottingRemaining(this.store.plotSizeGB);
     util.infoLogger('PLOTTING PROGRESS | starting node');
-    await this.store.startNode(this.$client, util);
+    const window = getCurrent();
+    await window.listen('restarted', (event) => {
+      console.log("EVENT RECEIVED: ", event.payload);
+    });
+    await this.store.startNode(this.$client, util, window);
     this.startTimers();
     util.infoLogger('PLOTTING PROGRESS | starting plotting');
-    await this.startFarmer();
+    await this.startFarmer(window);
   },
   unmounted() {
     if (farmerTimer) clearInterval(farmerTimer);
   },
   methods: {
-    async startFarmer(): Promise<void> {
-      await this.store.startFarmer(this.$client, util, blockStorage);
+    async startFarmer(window: WebviewWindow): Promise<void> {
+      await this.store.startFarmer(this.$client, util, blockStorage, window);
       clearInterval(farmerTimer);
     },
     startTimers() {

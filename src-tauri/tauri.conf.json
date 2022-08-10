@@ -91,7 +91,8 @@
         ]
       },
       "window": {
-        "all": true
+        "all": true,
+        "create": true
       }
     },
     "windows": [

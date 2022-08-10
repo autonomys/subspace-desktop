@@ -13,13 +13,14 @@ import {
 } from '../lib/types';
 import type { EventRecord } from '@polkadot/types/interfaces/system';
 import { IU8a } from '@polkadot/types-codec/types';
+import { WebviewWindow } from '@tauri-apps/api/window';
 
 const tauri = { event, invoke };
 const SUNIT = 1000000000000000000n;
 
 export interface IClient {
   getPeersCount: () => Promise<number>;
-  startNode: (path: string, nodeName: string) => Promise<void>;
+  startNode: (path: string, nodeName: string, window: WebviewWindow) => Promise<void>;
   startSubscription: (handlers: {
     farmedBlockHandler: (block: FarmedBlock) => void;
     newBlockHandler: (blockNum: number) => void;
@@ -135,8 +136,8 @@ export class Client implements IClient {
     return isSyncing.isTrue;
   }
 
-  public async startNode(path: string, nodeName: string): Promise<void> {
-    await tauri.invoke('start_node', { path, nodeName });
+  public async startNode(path: string, nodeName: string, window: WebviewWindow): Promise<void> {
+    await tauri.invoke('start_node', { path, nodeName, window });
 
     // TODO: workaround in case node takes some time to fully start.
     await new Promise((resolve) => setTimeout(resolve, 7000));

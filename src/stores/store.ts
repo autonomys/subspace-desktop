@@ -5,6 +5,7 @@ import { IClient } from '../lib/client';
 import { IUtil } from '../lib/util/util';
 import { IConfig } from '../lib/appConfig';
 import { IBlockStorage } from '../lib/blockStorage';
+import { WebviewWindow } from '@tauri-apps/api/window';
 
 export type Status = 'idle' | 'startingNode' | 'syncing' | 'farming';
 
@@ -234,11 +235,11 @@ export const useStore = defineStore('store', {
     setPlotMessage(message: string) {
       this.plot.message = message;
     },
-    async startNode(client: IClient, util: IUtil) {
+    async startNode(client: IClient, util: IUtil, window: WebviewWindow) {
       try {
         if (this.nodeName && this.plotPath) {
           this.setStatus('startingNode');
-          await client.startNode(this.plotPath, this.nodeName);
+          await client.startNode(this.plotPath, this.nodeName, window);
         } else {
           // TODO: consider moving logging to client.ts
           util.errorLogger('NODE START | node name and plot directory are required to start node');
@@ -260,7 +261,7 @@ export const useStore = defineStore('store', {
         });
       }
     },
-    async startFarmer(client: IClient, util: IUtil, blockStorage: IBlockStorage) {
+    async startFarmer(client: IClient, util: IUtil, blockStorage: IBlockStorage, window: WebviewWindow) {
       try {
         this.setStatus('syncing');
         // TODO: consider refactoring statuses after Dashboard Plot component #294 is resolved

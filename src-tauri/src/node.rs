@@ -24,6 +24,7 @@ use subspace_fraud_proof::VerifyFraudProof;
 use subspace_runtime::{GenesisConfig as ConsensusGenesisConfig, RuntimeApi};
 use subspace_runtime_primitives::opaque::Block;
 use subspace_service::{FullClient, NewFull, SubspaceConfiguration};
+use tauri::Window;
 use tokio::time::{sleep, timeout, Duration};
 use tokio::{runtime::Handle, sync::Mutex, task::JoinHandle};
 use tracing::{error, warn};
@@ -56,11 +57,29 @@ impl NativeExecutionDispatch for ExecutorDispatch {
     }
 }
 
+#[derive(Clone, serde::Serialize)]
+struct Payload {
+    started: bool,
+}
+
 #[tauri::command]
 /// starts a new node instance
 /// if there is a node instance running previously,
 /// first it stops the previous instance, then starts a new instance
-pub(crate) async fn start_node(path: String, node_name: String) -> Result<String, String> {
+pub(crate) async fn start_node(
+    path: String,
+    node_name: String,
+    window: Window,
+) -> Result<String, String> {
+    // testing events
+    window
+        .emit("restarted", Payload { started: true })
+        .map_err(|err| format!("backend failed to emit event with error: {err}"))?;
+    println!("AAAAAAAAAAAAAAAAAAAAAAA");
+    println!("AAAAAAAAAAAAAAAAAAAAAAA");
+    println!("node event emitted from backend!");
+    println!("***********************");
+    println!("***********************");
     type FullClient<RuntimeApi, ExecutorDispatch> =
         sc_service::TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<ExecutorDispatch>>;
 
@@ -114,6 +133,10 @@ pub(crate) async fn start_node(path: String, node_name: String) -> Result<String
         );
         return Err("Could not start a node instance in the backend!".into());
     }
+    // window
+    //     .emit("node-restarted", Payload { started: true })
+    //     .map_err(|err| format!("backend failed to emit event with error: {err}"))?;
+
     Ok("Successfully started the node in the backend".into())
 }
 

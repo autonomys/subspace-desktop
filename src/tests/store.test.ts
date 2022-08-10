@@ -16,6 +16,7 @@ import {
   clientMock,
   utilMock,
 } from '../mocks';
+import { getCurrent } from '@tauri-apps/api/window';
 
 describe('Store', () => {
   beforeEach(() => {
@@ -171,7 +172,8 @@ describe('Store', () => {
     store.setNodeName(configMock, 'random node name');
     store.setPlotPath('/random-dir');
 
-    await store.startNode(clientMock, utilMock);
+    const window = getCurrent();
+    await store.startNode(clientMock, utilMock, window);
 
     expect(store.status).toBe('startingNode');
     expect(clientMock.startNode).toHaveBeenCalled();
@@ -192,7 +194,8 @@ describe('Store', () => {
       }
     };
 
-    await store.startNode(client, utilMock);
+    const window = getCurrent();
+    await store.startNode(client, utilMock, window);
 
     expect(store.error).toEqual({
       title: 'errorPage.startNodeFailed',
@@ -213,7 +216,8 @@ describe('Store', () => {
       }
     };
 
-    await store.startNode(client, utilMock);
+    const window = getCurrent();
+    await store.startNode(client, utilMock, window);
 
     expect(store.error).toEqual({
       title: 'errorPage.startNodeFailed',

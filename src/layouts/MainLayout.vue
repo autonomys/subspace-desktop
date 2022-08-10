@@ -54,6 +54,7 @@ import * as util from '../lib/util';
 import { config } from '../lib/appConfig';
 import MainMenu from '../components/mainMenu.vue';
 import { useStore } from '../stores/store';
+import { getCurrent } from '@tauri-apps/api/window';
 
 export default defineComponent({
   name: 'MainLayout',
@@ -93,7 +94,8 @@ export default defineComponent({
       // only restart if name has changed
       } else if (this.oldNodeName !== this.store.nodeName) {
         this.store.setNodeName(config, this.store.nodeName);
-        this.store.startNode(this.$client, util);
+        const window = getCurrent();
+        this.store.startNode(this.$client, util, window);
       }
     },
     setEditName(value: boolean) {
