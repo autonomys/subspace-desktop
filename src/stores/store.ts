@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import pRetry from 'p-retry';
 
 import { SyncState, FarmedBlock } from '../lib/types';
 import { Client } from '../lib/client';
@@ -93,16 +94,26 @@ export const useStore = defineStore('store', {
   }),
 
   getters: {
+    /**
+     * Get trimmed node name so it won't break header layout
+     */
     trimmedName(): string {
       return this.nodeName.length > 20
         ? `${this.nodeName.slice(0, 20)}...`
         : this.nodeName;
     },
+    /**
+     * Get farmed blocks by current user address.
+     * We have to filter, because block storage may contain blocks farmed by different reward address in case user has updated config manully
+     */
     blocksByAddress(state): FarmedBlock[] {
       return this.farmedBlocks
         .filter(({ rewardAddr }: FarmedBlock) => rewardAddr === state.rewardAddress);
     },
     // TODO: include voting rewards
+    /**
+     * Total reward for current reward address
+     */
     totalEarned(): string {
       return this.blocksByAddress
         .reduce((agg: number, { blockReward, feeReward }) => blockReward + feeReward + agg, 0)
@@ -114,7 +125,10 @@ export const useStore = defineStore('store', {
     plottingRemaining(): number {
       return parseFloat((this.plotSizeGB - this.plotting.finishedGB).toFixed(2));
     },
-    // returned object is consumed by $t() from vue-i18n
+    /**
+     * Get plotting status as an object, which is consumed by $t() from vue-i18n and returns localised string
+     * Used on Dashboard screen
+     */
     plottingStatus(): { string: string, values: Record<string, number> } {
       const { currentBlock, highestBlock } = this.syncState;
       return {
@@ -125,7 +139,10 @@ export const useStore = defineStore('store', {
         }
       };
     },
-    // returned object is consumed by $t() from vue-i18n
+    /**
+     * Get network message as an object, which is consumed by $t() from vue-i18n and returns localised string
+     * Used on Dashboard screen
+     */
     networkMessage(): { string: string, values: Record<string, number> } {
       const { currentBlock, highestBlock } = this.syncState;
       const { message, syncedAtNum } = this.network;
@@ -152,6 +169,12 @@ export const useStore = defineStore('store', {
     setPlotSize(size: number) {
       this.plotSizeGB = size;
     },
+    /**
+     * Set node name value in store and config file.
+     * Update store 'error' property in case of failure
+     * @param {Config} config - instance of Config class
+     * @param {string} name - node name (generated or provided by user)
+     */
     async setNodeName(config: Config, name: string) {
       try {
         this.nodeName = name;
@@ -173,6 +196,12 @@ export const useStore = defineStore('store', {
     setStatus(status: Status) {
       this.status = status;
     },
+    /**
+     * Generate node name and save plot setup to config file
+     * Update store 'error' property in case of failure
+     * @param {Config} config - instance of Config class
+     * @param {IUtil} util - utilities module
+     */
     async confirmPlottingSetup(config: Config, util: IUtil) {
       try {
         const nodeName = util.generateNodeName();
@@ -206,6 +235,12 @@ export const useStore = defineStore('store', {
     updateBlockNum(blockNum: number) {
       this.network.syncedAtNum = blockNum;
     },
+    /**
+     * Populate store with values from config file on app restart
+     * Update store 'error' property in case of failure
+     * @param {IBlockStorage} blockStorage - local storage where farmed blocks are saved
+     * @param {Config} config - instance of Config class
+     */
     async updateFromConfig(blockStorage: IBlockStorage, config: Config) {
       try {
         const { plot, nodeName, rewardAddress } = await config.readConfigFile();
@@ -234,11 +269,19 @@ export const useStore = defineStore('store', {
     setPlotMessage(message: string) {
       this.plot.message = message;
     },
+    /**
+     * Start node and update app status
+     * Update store 'error' property in case of failure
+     * @param {Client} client - instance of Client class
+     * @param {IUtil} util - utilities module
+     */
     async startNode(client: Client, util: IUtil) {
       try {
         if (this.nodeName && this.plotPath) {
           this.setStatus('startingNode');
           await client.startNode(this.plotPath, this.nodeName);
+          // TODO: move back to startFarmer method below after restart workaround is removed (loop is replaced by subscription)
+          this.setStatus('syncing');
         } else {
           // TODO: consider moving logging to client.ts
           util.errorLogger('NODE START | node name and plot directory are required to start node');
@@ -260,9 +303,16 @@ export const useStore = defineStore('store', {
         });
       }
     },
+    /**
+     * Start farmer and update app status along the way:
+     * First 'syncing', then 'farming'
+     * Update store 'error' property in case of failure
+     * @param {Client} client - instance of Client class
+     * @param {IUtil} util - utilities module
+     * @param {IBlockStorage} blockStorage - local storage where farmed blocks are saved
+     */
     async startFarmer(client: Client, util: IUtil, blockStorage: IBlockStorage) {
       try {
-        this.setStatus('syncing');
         // TODO: consider refactoring statuses after Dashboard Plot component #294 is resolved
         this.setNetworkState('verifying');
         this.setPlotMessage('dashboard.verifyingPlot');
@@ -279,7 +329,18 @@ export const useStore = defineStore('store', {
 
         do {
           await new Promise((resolve) => setTimeout(resolve, 3000));
-          const syncState = await client.getSyncState();
+          // using pRetry as a workaround, 
+          // because loop will keep executing in case of node restart, 
+          // API requests will fail, because RPC is not available until node has restarted
+          // TODO: replace do-while loop with subscription, which can be terminated before restarting node
+          const syncState = await pRetry(() => client.getSyncState(), {
+            onFailedAttempt(error) {
+              console.log(`store.startFarmer: inside loop client.getSyncState retry error. Attempt ${error.attemptNumber} failed. ${error.retriesLeft} retries left.`);
+            },
+            retries: 5,
+            minTimeout: 2000,
+          });
+
           this.setSyncState(syncState);
           this.setPlotMessage('dashboard.plotActive');
           this.setNetworkMessage('dashboard.syncingMsg');
