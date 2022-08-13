@@ -29,11 +29,11 @@ export interface IClient {
   startSyncStateSubscription: () => Promise<void>;
 }
 
-export class Client implements IClient {
-  private clearTauriDestroy: event.UnlistenFn = () => null;
-  private unsubscribeBlocks: event.UnlistenFn = () => null;
-  private unsubscribeSyncState: event.UnlistenFn = () => null;
-
+// TODO: implement unit tests
+/** Class responsible for interaction with local Subspace node using Polkadot.js API */
+export class Client {
+  private clearTauriDestroy: tauri.event.UnlistenFn = () => null;
+  private unsubscribeBlocks: tauri.event.UnlistenFn = () => null;
   private api: ApiPromise;
   private config: Config;
   /**
@@ -152,14 +152,27 @@ export class Client implements IClient {
    * Get sync state of the local node, which is displayed on PlottingProgress and Dashboard pages
    * @returns {SyncState} - sync state object (starting block, current block and highest block)
    */
+  // TODO: make private
   public async getSyncState(): Promise<SyncState> {
     return (await this.api.rpc.system.syncState()).toJSON() as unknown as SyncState;
   }
 
-  public async startSyncStateSubscription():Promise<void> {
-    this.unsubscribeSyncState = await this.api.rpc.system.syncState((response) => {
-      const syncState = response.toJSON();
-      console.log(syncState);
+  public async startSyncStateSubscription(handleSyncState: (syncState: SyncState) => void): Promise<void> {
+    return new Promise((resolve, reject) => {
+      let unsub: () => void;
+      this.api.rpc.chain.subscribeNewHeads(async () => {
+        const syncState = await this.getSyncState();
+        handleSyncState(syncState);
+
+        const isSyncing = await this.isSyncing();
+        
+        if (!isSyncing) {
+          unsub();
+          resolve();
+        }
+      })
+        .then((unsubLocal) => { unsub = unsubLocal; })
+        .catch((e) => reject(e));
     });
   }
 

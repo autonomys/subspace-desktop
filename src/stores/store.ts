@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia';
-import pRetry, { FailedAttemptError } from 'p-retry';
 
 import { SyncState, FarmedBlock } from '../lib/types';
 import { Client } from '../lib/client';
@@ -320,39 +319,32 @@ export const useStore = defineStore('store', {
 
         await client.startFarming(this.plotPath, this.plotSizeGB);
 
-        await client.startSyncStateSubscription();
+        await client.startSyncStateSubscription(async (syncState) => {
+          // syncState.highestBlock can be null, use currentBlock as fallback value
+          if (!syncState.highestBlock) {
+            syncState.highestBlock = syncState.currentBlock;
+          }
+          this.setSyncState(syncState);
+          const finishedGB = (this.syncState.currentBlock * this.plotSizeGB) / (this.syncState.highestBlock);
+          this.setPlottingFinished(finishedGB);
+        });
 
-        // // TODO: consider moving logging to client.ts
-        // util.infoLogger('PLOTTING PROGRESS | farmer started');
+        // TODO: consider moving logging to client.ts
+        util.infoLogger('PLOTTING PROGRESS | farmer started');
 
-        // const syncState = await client.getSyncState();
-        // this.setSyncState(syncState);
-        // let isSyncing = await client.isSyncing();
+        this.setNetworkState('finished');
+        this.setNetworkMessage('dashboard.syncedAt');
+        this.setPlotState('finished');
+        this.setPlotMessage('dashboard.syncedMsg');
+        this.setStatus('farming');
 
-        // do {
-        //   await new Promise((resolve) => setTimeout(resolve, 3000));
-        //   const syncState = await client.getSyncState();
-        //   this.setSyncState(syncState);
-        //   this.setPlotMessage('dashboard.plotActive');
-        //   this.setNetworkMessage('dashboard.syncingMsg');
-        //   this.setPlottingStatus('dashboard.syncingMsg');
-        //   this.setPlottingFinished((this.syncState.currentBlock * this.plotSizeGB) / this.syncState.highestBlock);
-        //   isSyncing = await client.isSyncing();
-        // } while (isSyncing);
+        await client.startBlockSubscription({
+          farmedBlockHandler: (block) => this.addFarmedBlock(blockStorage, block),
+          newBlockHandler: this.updateBlockNum,
+        });
 
-        // this.setNetworkState('finished');
-        // this.setNetworkMessage('dashboard.syncedAt');
-        // this.setPlotState('finished');
-        // this.setPlotMessage('dashboard.syncedMsg');
-        // this.setStatus('farming');
-
-        // await client.startSubscription({
-        //   farmedBlockHandler: (block) => this.addFarmedBlock(blockStorage, block),
-        //   newBlockHandler: this.updateBlockNum,
-        // });
-
-        // // TODO: consider moving logging to client.ts
-        // util.infoLogger('PLOTTING PROGRESS | block subscription started');
+        // TODO: consider moving logging to client.ts
+        util.infoLogger('PLOTTING PROGRESS | block subscription started');
       } catch (error) {
         // TODO: consider moving logging to client.ts
         util.errorLogger('Farmer start error: ' + error as string);
