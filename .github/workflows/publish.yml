@@ -60,7 +60,7 @@ jobs:
       - name: install Rust nightly
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly-2022-07-22
+          toolchain: nightly-2022-08-12
           target: ${{ matrix.build.target }}
           components: rust-src
           override: true
