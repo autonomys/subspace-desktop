@@ -250,8 +250,7 @@ describe('Store', () => {
     expect(setStatusSpy).toHaveBeenNthCalledWith(1, 'farming');
 
     expect(clientMock.startFarming).toHaveBeenCalledWith(plotPath, plotSize);
-    expect(clientMock.getSyncState).toHaveBeenCalled();
-    expect(clientMock.isSyncing).toHaveBeenCalled();
+    expect(clientMock.startSyncStateSubscription).toHaveBeenCalled();
     expect(clientMock.startBlockSubscription).toHaveBeenCalled();
 
     // TODO: If relevant add assertions for Plot and Network statuses after Dashboard Plot component #294 is resolved
@@ -281,27 +280,7 @@ describe('Store', () => {
     const errorMessage = 'random error message';
     const client = {
       ...clientMock,
-      getSyncState() {
-        return Promise.reject(errorMessage);
-      }
-    } as unknown as Client;
-
-    const store = useStore();
-
-    await store.startFarmer(client, utilMock, blockStorageMock);
-
-    expect(store.error).toEqual({
-      title: 'errorPage.startFarmerFailed',
-      // TODO: replace default error message with specific one
-      message: 'errorPage.defaultErrorMessage',
-    });
-  });
-
-  it('startFarmer action should set error if client.isSyncing throws error', async () => {
-    const errorMessage = 'random error message';
-    const client = {
-      ...clientMock,
-      isSyncing() {
+      startSyncStateSubscription() {
         return Promise.reject(errorMessage);
       }
     } as unknown as Client;
