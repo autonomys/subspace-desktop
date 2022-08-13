@@ -12,8 +12,8 @@ use sc_service::config::{
     OffchainWorkerConfig,
 };
 use sc_service::{
-    BasePath, BlocksPruning, Configuration, DatabaseSource, PruningMode, Role,
-    RpcMethods, TracingReceiver,
+    BasePath, BlocksPruning, Configuration, DatabaseSource, PruningMode, Role, RpcMethods,
+    TracingReceiver,
 };
 use sc_subspace_chain_specs::ConsensusChainSpec;
 use sp_core::crypto::Ss58AddressFormat;
