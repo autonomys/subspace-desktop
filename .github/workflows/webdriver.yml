@@ -41,13 +41,14 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
+          args: --manifest-path src-tauri/Cargo.toml
 
       # build a release build of our application to be used during our WebdriverIO tests
       - name: Cargo build
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --release
+          args: --release --manifest-path src-tauri/Cargo.toml
 
       # install the latest stable node version at the time of writing
       - name: Node v16
