@@ -18,6 +18,11 @@ jobs:
       # checkout the code on the workflow runner
       - uses: actions/checkout@v2
 
+      - name: Install LLVM and Clang
+        uses: KyleMayes/install-llvm-action@v1
+        with:
+          version: "14.0"
+
       - name: install Rust nightly
         uses: actions-rs/toolchain@v1
         with:
