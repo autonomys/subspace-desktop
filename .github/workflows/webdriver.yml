@@ -18,6 +18,12 @@ jobs:
       # checkout the code on the workflow runner
       - uses: actions/checkout@v2
 
+      # install the latest stable node version at the time of writing
+      - name: Node v16
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+
       - name: Install LLVM and Clang
         uses: KyleMayes/install-llvm-action@v1
         with:
@@ -42,24 +48,12 @@ jobs:
           webkit2gtk-driver
           xvfb
 
-      # install the latest Rust stable
-      - name: Rust stable
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-
-      # build a release build of our application to be used during our WebdriverIO tests
-      - name: Cargo build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --manifest-path src-tauri/Cargo.toml
-
-      # install the latest stable node version at the time of writing
-      - name: Node v16
-        uses: actions/setup-node@v2
-        with:
-          node-version: 16.x
+      - name: install app dependencies and build it
+        # sometimes it fails downloading packages, so set a timeout https://github.com/yarnpkg/yarn/issues/4890
+        run: yarn install --network-timeout 1000000 && yarn build
+        env:
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
 
       # install our Node.js dependencies with Yarn
       - name: Yarn install
