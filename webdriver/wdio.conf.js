@@ -12,7 +12,7 @@ exports.config = {
     {
       maxInstances: 1,
       'tauri:options': {
-        application: '../../target/release/hello-tauri-webdriver',
+        application: '../../target/release/subspace-desktop',
       },
     },
   ],
