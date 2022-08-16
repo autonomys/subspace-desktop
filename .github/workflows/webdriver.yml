@@ -72,4 +72,7 @@ jobs:
       # display server which allows our application to run headless without any changes to the code
       - name: WebdriverIO
         run: xvfb-run yarn test
+        env:
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
         working-directory: webdriver
