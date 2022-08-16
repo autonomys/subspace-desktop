@@ -12,7 +12,7 @@ exports.config = {
     {
       maxInstances: 1,
       'tauri:options': {
-        application: '../../target/release/subspace-desktop',
+        application: '../../target/release/',
       },
     },
   ],

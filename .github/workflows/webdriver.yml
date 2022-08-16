@@ -55,8 +55,7 @@ jobs:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
 
-      # install our Node.js dependencies with Yarn
-      - name: Yarn install
+      - name: install e2e tests dependencies
         run: yarn install
         working-directory: webdriver
 
