@@ -45,6 +45,7 @@ interface State {
   plot: Plot;
   plotting: Plotting;
   error: Error;
+  hasNewUpdate: boolean;
 }
 
 // constants are also used in unit tests
@@ -91,6 +92,7 @@ export const useStore = defineStore('store', {
       title: '',
       message: '',
     },
+    hasNewUpdate: false,
   }),
 
   getters: {
@@ -378,6 +380,9 @@ export const useStore = defineStore('store', {
     },
     setPlottingStatus(status: string) {
       this.plotting.status = status;
+    },
+    setHasNewUpdate() {
+      this.hasNewUpdate = true;
     }
   }
 });

@@ -25,11 +25,6 @@ declare module '@vue/runtime-core' {
 }
 
 export default boot(async ({ app }) => {
-  // check for newer version every day
-  const DAY_MS = 24 * 60 * 60 * 1000;
-  setInterval(() => tauriEvents.emit('tauri://update'), DAY_MS);
-  // update app state to reflect that newer version is available
-  tauriEvents.listen('tauri://update-available', globalState.setHasNewUpdate);
   // create Config instance and initialize it
   const configDir = await tauri.path.configDir();
   const config = new Config({ fs: tauri.fs, appName, configDir, errorLogger });
@@ -39,6 +34,12 @@ export default boot(async ({ app }) => {
   const { nodeName } = (await config.readConfigFile());
   const store = useStore();
   store.setNodeName(config, nodeName);
+
+  // check for newer version every day
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  setInterval(() => tauriEvents.emit('tauri://update'), DAY_MS);
+  // update app state to reflect that newer version is available
+  tauriEvents.listen('tauri://update-available', store.setHasNewUpdate);
 
   // create Client instance
   const api = createApi(LOCAL_RPC);

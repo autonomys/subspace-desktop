@@ -12,7 +12,7 @@ q-menu(auto-close)
         .col
           p.text-grey(v-if="!launchOnStart") {{ $t('menu.autoStart') }}
           p.text-black(v-else) {{ $t('menu.autoStart') }}
-    q-item(@click="installNewUpdate()" clickable v-if="hasNewUpdate")
+    q-item(@click="installNewUpdate()" clickable v-if="store.hasNewUpdate")
       .row.items-center
         .col-auto.q-mr-md
           q-icon(color="green" name="upload")
@@ -41,11 +41,15 @@ import { LocalStorage as localStorage } from 'quasar';
 
 import * as plotDir from '../lib/plotDir';
 import * as util from '../lib/util';
+import { useStore } from '../stores/store';
 
 export default defineComponent({
+  setup() {
+    const store = useStore();
+    return { store };
+  },
   data() {
     return {
-      hasNewUpdate: global.data.hasNewUpdate,
       util,
       launchOnStart: false,
       disableAutoLaunch: false
@@ -123,6 +127,9 @@ export default defineComponent({
         this.launchOnStart = false;
         this.disableAutoLaunch = true;
       }
+    },
+    installNewUpdate() {
+      console.log('installNewUpdate');
     }
   }
 });
