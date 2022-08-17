@@ -1,5 +1,5 @@
 {
-  "extends": "@quasar/app/tsconfig-preset",
+  "extends": "@quasar/app-webpack/tsconfig-preset",
   "experimentalDecorators": true,
   "compilerOptions": {
     "target": "ESNext",
@@ -10,5 +10,8 @@
     "strictNullChecks": true,
     "experimentalDecorators": true,
     "noImplicitReturns": true
-  }
+  },
+  "include": [
+    "src"
+  ]
 }

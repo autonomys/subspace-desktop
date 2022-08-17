@@ -27,55 +27,64 @@ q-page(padding)
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue"
-import { Notify } from "quasar"
-import * as util from "../lib/util"
-import { appConfig } from "../lib/appConfig"
-import disclaimer from "../components/disclaimer.vue"
+import { defineComponent } from 'vue';
+import { Notify } from 'quasar';
+
+import disclaimer from '../components/disclaimer.vue';
+import { useStore } from '../stores/store';
+import * as util from '../lib/util';
+import * as blockStorage from '../lib/blockStorage';
 
 export default defineComponent({
+  setup() {
+    const store = useStore();
+    return { store };
+  },
   async mounted() {
     try {
-      this.checkDev()
-      if (await appConfig.validate()) {
-        util.infoLogger("INDEX | NOT First Time RUN.")
-        this.dashboard()
-        return
+      this.checkDev();
+      if (await this.$config.validate()) {
+        util.infoLogger('INDEX | NOT First Time RUN.');
+        await this.store.updateFromConfig(blockStorage, this.$config);
+        this.dashboard();
+        return;
       }
-      util.infoLogger("validate failed, we should start from scratch")
-      this.firstLoad()
+      util.infoLogger('validate failed, we should start from scratch');
+      this.firstLoad();
     } catch (e) {
-      util.infoLogger("config could not be read, starting from scratch")
-      this.firstLoad()
+      util.infoLogger('config could not be read, starting from scratch');
+      this.firstLoad();
     }
   },
   methods: {
     checkDev() {
-      if (util.CONTEXT_MENU === "OFF")
-        document.addEventListener("contextmenu", (event) =>
+      if (util.CONTEXT_MENU === 'OFF')
+        document.addEventListener('contextmenu', (event) =>
           event.preventDefault()
-        )
+        );
     },
     dashboard() {
-      this.$router.replace({ name: "dashboard" })
+      this.$router.replace({ name: 'dashboard' });
     },
     async firstLoad() {
-      util.infoLogger("INDEX | First Time RUN, resetting reward address")
-      await appConfig.update({ rewardAddress: "" })
-      const config = await appConfig.read()
-      if (config.launchOnBoot) {
+      util.infoLogger('INDEX | First Time RUN, resetting reward address');
+      // reset node name in case there is a leftover from prev launch (restart due to error)
+      this.store.setNodeName(this.$config, '');
+      const { launchOnBoot } = await this.$config.readConfigFile();
+      if (launchOnBoot) {
+        // TODO: localise message
         Notify.create({
-          message: "Subspace Desktop will be started on boot. You can disable this from settings (the gear icon on top-right).",
-          icon: "info"
-        })
+          message: 'Subspace Desktop will be started on boot. You can disable this from settings (the gear icon on top-right).',
+          icon: 'info'
+        });
       }
     },
     async viewDisclaimer(destination: string) {
-      const modal = await util.showModal(disclaimer)
+      const modal = await util.showModal(disclaimer);
       modal?.onDismiss(() => {
-        this.$router.replace({ name: destination })
-      })
+        this.$router.replace({ name: destination });
+      });
     }
   }
-})
+});
 </script>

@@ -64,7 +64,6 @@
     "verifyingNet": "Verifying network data...",
     "plotActive": "Plot active",
     "syncedMsg": "Synced and farming",
-    "searchPeers": "Searching for peers...",
     "synced": "Synced and connected",
     "farmedBlock": "Farmed Block",
     "reward": "Reward",
@@ -79,8 +78,7 @@
     "loadingMsg": "Connecting to client...",
     "loadingStatus": "loading...",
     "syncingMsg": "Syncing node {currentBlock} of {highestBlock} Blocks",
-    "nodeIsSynced": "Node is synced at block: {currentBlock}",
-    "syncedAt": "Synced at Block # {blockNumber}",
+    "syncedAt": "Synced at Block # {syncedAtNum}",
     "blockNum": "Block #"
   },
   "importKey": {
@@ -128,5 +126,15 @@
       "visitUs": "Visit us on",
       "readUp": "Read up about Subspace on"
     }
+  },
+  "errorPage": {
+    "restart": "Restart",
+    "configUpdateFailed": "Failed to update config",
+    "configReadFailed": "Failed to read config",
+    "startNodeFailed": "Failed to start node",
+    "startNodeMissingParams": "Node name and plot directory are required to start node",
+    "startFarmerFailed": "Failed to start farmer",
+    "defaultErrorMessage": "Please, make sure you have an Internet connection and enough disk space in order to proceed. If the problem persists, you can reach out to our team",
+    "defaultErrorTitle": "Something went wrong"
   }
 }

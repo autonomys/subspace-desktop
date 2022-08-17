@@ -1,18 +1,48 @@
 name: "publish"
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "*"
 
 jobs:
   publish-tauri:
     strategy:
       fail-fast: false
-      matrix: # Windows-2022 has been temporarily removed. We are unable to build 2x windows installs at the same name due to naming convention issues. Issue made upstream here: https://github.com/tauri-apps/tauri-action/issues/215
-        os:
-          - ubuntu-latest
-          - macos-latest
-          - windows-2022
+      matrix:
+        build:
+          # for ubuntu with arch, we need more testing with cross compilation libraries
+          # since releasing on arm-linux is not a priority, we skipped it for now
+          - os: ubuntu-20.04
+            target: x86_64-unknown-linux-gnu
+            suffix: ubuntu-x86_64-${{ github.ref_name }}
+            rustflags: ""
+          - os: macos-12
+            target: x86_64-apple-darwin
+            suffix: macos-x86_64-${{ github.ref_name }}
+            rustflags: ""
+          - os: macos-12
+            target: aarch64-apple-darwin
+            suffix: macos-aarch64-${{ github.ref_name }}
+            rustflags: ""
+          - os: windows-2022
+            target: x86_64-pc-windows-msvc
+            suffix: windows-x86_64-${{ github.ref_name }}
+            rustflags: ""
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.build.os }}
+
+    env:
+      PRODUCTION_TARGET: src-tauri/target/${{ matrix.build.target }}/release/bundle
+      RUSTFLAGS: ${{ matrix.build.rustflags }}
+
     steps:
+      - name: Maximize build space
+        if: runner.os == 'Linux'
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
       - name: git checkout
         uses: actions/checkout@v2
 
@@ -27,24 +57,32 @@ jobs:
         with:
           node-version: 16
 
-      # TODO: when https://github.com/rust-lang/rust/issues/95267 and https://github.com/briansmith/ring/issues/1469
-      # are resolved, revert back to `nightly`
       - name: install Rust nightly
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly-2022-02-15
+          toolchain: nightly-2022-07-22
+          target: ${{ matrix.build.target }}
+          components: rust-src
           override: true
 
-        # Workaround to resolve link error with C:\msys64\mingw64\bin\libclang.dll
+      - name: CUDA toolchain
+        uses: Jimver/cuda-toolkit@v0.2.6
+        if: runner.os == 'Linux' || runner.os == 'Windows'
+
+      - name: install libdbus-1-dev and pkg-config (Linux)
+        run: sudo apt -y --no-install-recommends install libdbus-1-dev pkg-config
+        if: runner.os == 'Linux'
+
+      # Workaround to resolve link error with C:\msys64\mingw64\bin\libclang.dll
       - name: Remove msys64
         run: Remove-Item -LiteralPath "C:\msys64\" -Force -Recurse
         if: runner.os == 'Windows'
 
-      - name: install webkit2gtk (ubuntu only)
-        if: matrix.os == 'ubuntu-latest'
+      - name: install webkit2gtk and libayatana (Linux)
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.0-dev libappindicator3-dev
+          sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.0-dev libayatana-appindicator3-dev
+        if: runner.os == 'Linux'
 
       # Imports PFX Certificate into keystore, allows Tauri to then sign the exe without being passed the private key.
       - name: import windows certificate
@@ -59,16 +97,36 @@ jobs:
           Remove-Item –path certificate -include tempCert.txt
           Import-PfxCertificate -FilePath certificate/certificate.pfx -CertStoreLocation Cert:\CurrentUser\My -Password (ConvertTo-SecureString -String $env:WINDOWS_PFX_PASSWORD -Force -AsPlainText)
 
-      - name: install app dependencies and build it
+      - name: install app dependencies
         # sometimes it fails downloading packages, so set a timeout https://github.com/yarnpkg/yarn/issues/4890
-        run: yarn install --network-timeout 1000000 && yarn build
+        run: yarn install --network-timeout 1000000
+
+      - name: OpenCL (Linux x86_64)
+        run: sudo apt-get install -y --no-install-recommends ocl-icd-opencl-dev
+        if: runner.os == 'Linux'
+
+      - name: Build (Ubuntu or Windows with OpenCL)
+        run: yarn build -c ./src-tauri/tauri.opencl.conf.json -- --target ${{ matrix.build.target }}
+        if: (runner.os == 'Linux' || runner.os == 'Windows')
         env:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
 
-      - name: tauri run
-        uses: tauri-apps/tauri-action@v0.3
+      - name: Rename OpenCL installer (Linux x86_64)
+        run: |
+          mv ${{ env.PRODUCTION_TARGET }}/deb/subspace-desktop*amd64.deb ${{ env.PRODUCTION_TARGET }}/deb/subspace-desktop-opencl_amd64.deb
+        if: runner.os == 'Linux'
+
+      - name: Rename OpenCL installer (Windows)
+        run: |
+          move ${{ env.PRODUCTION_TARGET }}/msi/subspace-desktop*_x64_en-US.msi ${{ env.PRODUCTION_TARGET }}/msi/subspace-desktop-opencl_x64_en-US.msi
+        if: runner.os == 'Windows'
+
+      - name: Build (without OpenCL)
+        run: yarn build -- --target ${{ matrix.build.target }}
         env:
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ENABLE_CODE_SIGNING: ${{ secrets.MACOS_CERTIFICATE }}
           APPLE_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
@@ -76,11 +134,51 @@ jobs:
           APPLE_SIGNING_IDENTITY: ${{ secrets.MACOS_IDENTITY_ID }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
-          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+
+      - name: Prepare installers for uploading (Ubuntu)
+        run: |
+          mkdir executables
+          mv ${{ env.PRODUCTION_TARGET }}/deb/subspace-desktop-opencl_amd64.deb executables/subspace-desktop-opencl_${{ matrix.build.suffix }}.deb
+          mv ${{ env.PRODUCTION_TARGET }}/deb/subspace-desktop*_amd64.deb executables/subspace-desktop_${{ matrix.build.suffix }}.deb
+        if: runner.os == 'Linux'
+
+      - name: Prepare installers for uploading (Windows)
+        run: |
+          mkdir executables
+          move ${{ env.PRODUCTION_TARGET }}/msi/subspace-desktop-opencl_x64_en-US.msi executables/subspace-desktop-opencl_${{ matrix.build.suffix }}.msi
+          move ${{ env.PRODUCTION_TARGET }}/msi/subspace-desktop_x64*_en-US.msi executables/subspace-desktop_${{ matrix.build.suffix }}.msi
+        if: runner.os == 'Windows'
+
+      - name: Prepare installers for uploading (macOS intel)
+        run: |
+          mkdir executables
+          mv ${{ env.PRODUCTION_TARGET }}/dmg/subspace-desktop*_x64.dmg executables/subspace-desktop_${{ matrix.build.suffix }}.dmg
+          # Zip it so that signature is not lost
+          ditto -c -k --rsrc executables/subspace-desktop_${{ matrix.build.suffix }}.dmg executables/subspace-desktop_${{ matrix.build.suffix }}.zip
+          rm executables/subspace-desktop_${{ matrix.build.suffix }}.dmg
+        if: matrix.build.target == 'x86_64-apple-darwin'
+
+      - name: Prepare installers for uploading (macOS arm)
+        run: |
+          mkdir executables
+          mv ${{ env.PRODUCTION_TARGET }}/dmg/subspace-desktop*_aarch64.dmg executables/subspace-desktop_${{ matrix.build.suffix }}.dmg
+          # Zip it so that signature is not lost
+          ditto -c -k --rsrc executables/subspace-desktop_${{ matrix.build.suffix }}.dmg executables/subspace-desktop_${{ matrix.build.suffix }}.zip
+          rm executables/subspace-desktop_${{ matrix.build.suffix }}.dmg
+        if: matrix.build.target == 'aarch64-apple-darwin'
+
+      - name: Upload executables to artifacts
+        uses: actions/upload-artifact@v2
         with:
-          tagName: __VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
-          releaseName: "__VERSION__"
-          releaseBody: "See the assets to download this version and install."
-          releaseDraft: false
-          prerelease: true
+          name: executables-${{ matrix.build.suffix }}
+          path: |
+            executables/*
+          if-no-files-found: error
+
+      - name: Upload executables to assets
+        uses: alexellis/upload-assets@0.3.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          asset_paths: '["executables/*"]'
+        if: github.event_name == 'push' && github.ref_type == 'tag'

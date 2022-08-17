@@ -11,12 +11,12 @@ q-dialog(@hide="onDialogHide" persistent ref="dialog")
           .row.justify-center.q-mb-md
             .col
               .row.q-mb-md
-                saveKeys(@userConfirm="userConfirm")
+                saveKeys(@userConfirm="userConfirm", :mnemonic="mnemonic")
         .absolute-bottom.q-pa-md
           .row.justify-end
             q-btn(
               :disabled="!userConfirmed"
-              @click="hide"
+              @click="handleNextClick"
               :label="$t('plottingProgress.next')"
               outline
               size="lg"
@@ -25,58 +25,66 @@ q-dialog(@hide="onDialogHide" persistent ref="dialog")
 </template>
 
 <script>
-import { defineComponent } from "vue"
-import saveKeys from "components/SaveKeys.vue"
+import { defineComponent } from 'vue';
+import saveKeys from 'components/SaveKeys.vue';
+
+import { useStore } from '../stores/store';
+
 const component = defineComponent({
   components: { saveKeys },
+  props: {
+    handleConfirm: {
+      type: Function,
+      required: true,
+    }
+  },
   emits: [
     // REQUIRED
-    "ok",
-    "hide"
+    'ok',
+    'hide'
   ],
+  setup() {
+    const store = useStore();
+    return { store };
+  },
   data() {
     return {
-      userConfirmed: false
-    }
+      userConfirmed: false,
+      mnemonic: '',
+    };
+  },
+  async mounted() {
+    const { rewardAddress, mnemonic }  = await this.$client.createRewardAddress();
+    this.store.setRewardAddress(rewardAddress);
+    this.mnemonic = mnemonic;
   },
   methods: {
     userConfirm(val) {
-      this.userConfirmed = val
+      this.userConfirmed = val;
     },
     // following method is REQUIRED
     // (don't change its name --> "show")
     show() {
-      this.$refs.dialog.show()
+      this.$refs.dialog.show();
     },
 
     // following method is REQUIRED
     // (don't change its name --> "hide")
     hide() {
-      this.$refs.dialog.hide()
+      this.$refs.dialog.hide();
     },
 
     onDialogHide() {
       // required to be emitted
       // when QDialog emits "hide" event
-      this.$emit("hide")
+      this.$emit('hide');
     },
 
-    onOKClick() {
-      // on OK, it is REQUIRED to
-      // emit "ok" event (with optional payload)
-      // before hiding the QDialog
-      this.$emit("ok")
-      // or with payload: this.$emit('ok', { ... })
-
-      // then hiding dialog
-      this.hide()
+    async handleNextClick() {
+      this.hide();
+      await this.handleConfirm();
     },
-
-    onCancelClick() {
-      // we just need to hide the dialog
-      this.hide()
-    }
   }
-})
-export default component
+});
+export default component;
 </script>

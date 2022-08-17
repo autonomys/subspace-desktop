@@ -45,45 +45,47 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue"
-import { QInput, Notify } from "quasar"
+import { defineComponent } from 'vue';
+import { QInput, Notify } from 'quasar';
 
 // @vue/component
 export default defineComponent({
-  name: "SaveKeys",
-  emits: ["userConfirm"],
+  name: 'SaveKeys',
+  props: {
+    mnemonic: { 
+      type: String,
+      required: true,
+    }
+  },
+  emits: ['userConfirm'],
   data() {
-    const userConfirm = false
-    const mnemonic = this.$client.getMnemonic()
-    const revealKey = false
-    return { revealKey, userConfirm, mnemonic }
+    const userConfirm = false;
+    const revealKey = false;
+    return { revealKey, userConfirm };
   },
   watch: {
     userConfirm(val) {
-      this.$emit("userConfirm", val)
+      this.$emit('userConfirm', val);
     }
-  },
-  unmounted() {
-    this.$client.clearMnemonic()
   },
   methods: {
     copyMnemonic() {
-      const displayMnemonic = this.$refs["mnemonicDisplay"] as QInput
-      const previousState = this.revealKey
-      this.revealKey = true
+      const displayMnemonic = this.$refs['mnemonicDisplay'] as QInput;
+      const previousState = this.revealKey;
+      this.revealKey = true;
       this.$nextTick(() => {
-        displayMnemonic.focus()
-        displayMnemonic.select()
-        var successful = document.execCommand("copy")
-        var msg = successful ? "successful" : "unsuccessful"
-        console.log(msg)
-        this.revealKey = previousState
-        Notify.create({ message: this.$t('saveKeys.saved'), icon: "content_copy" })
-      })
-      return 3
+        displayMnemonic.focus();
+        displayMnemonic.select();
+        var successful = document.execCommand('copy');
+        var msg = successful ? 'successful' : 'unsuccessful';
+        console.log(msg);
+        this.revealKey = previousState;
+        Notify.create({ message: this.$t('saveKeys.saved'), icon: 'content_copy' });
+      });
+      return 3;
     }
   }
-})
+});
 </script>
 
 <style lang="sass">

@@ -1,68 +1,91 @@
-import { ApiPromise, Keyring } from "@polkadot/api"
-import type { Vec } from "@polkadot/types/codec"
-import { mnemonicGenerate, cryptoWaitReady } from "@polkadot/util-crypto"
-import * as event from "@tauri-apps/api/event"
-import { invoke } from "@tauri-apps/api/tauri"
-import { reactive } from "vue"
-import * as process from "process"
-import * as util from "../lib/util"
-import { appConfig } from "./appConfig"
-import { getStoredBlocks, storeBlocks } from "./blockStorage"
+import { ApiPromise, Keyring } from '@polkadot/api';
+import type { Vec } from '@polkadot/types/codec';
+import { mnemonicGenerate, cryptoWaitReady } from '@polkadot/util-crypto';
+import * as tauri from '@tauri-apps/api';
+import type { EventRecord } from '@polkadot/types/interfaces/system';
+import { IU8a } from '@polkadot/types-codec/types';
+
+import * as process from 'process';
+import * as util from '../lib/util';
 import {
-  emptyClientData,
   FarmedBlock,
-  SubPreDigest
-} from "../lib/types"
-import type { SyncState, EventRecord } from '@polkadot/types/interfaces/system';
-import { IU8a } from "@polkadot/types-codec/types"
+  SubPreDigest,
+  SyncState,
+} from '../lib/types';
+import Config from './config';
 
-const tauri = { event, invoke }
-const SUNIT = 1000000000000000000n
+const SUNIT = 1000000000000000000n;
 
+interface ClientParams {
+  api: ApiPromise;
+  config: Config;
+}
+
+// TODO: implement unit tests
+/** Class responsible for interaction with local Subspace node using Polkadot.js API */
 export class Client {
-  protected firstLoad = false
-  protected mnemonic = ""
-  protected farmed: FarmedBlock[] = []
-  protected clearTauriDestroy: event.UnlistenFn = () => null;
-  protected unsubscribe: event.UnlistenFn = () => null;
-
+  protected clearTauriDestroy: tauri.event.UnlistenFn = () => null;
+  protected unsubscribe: tauri.event.UnlistenFn = () => null;
   private api: ApiPromise;
-
-  constructor(api: ApiPromise) {
+  private config: Config;
+  /**
+   * Create Client instance
+   * @param {ClientParams} params
+   * @param {ApiPromise} params.api - Polkadot.js RPC API instance
+   * @param {Config} params.config - Config class instance to interact with app config file
+   */
+  constructor({ api, config }: ClientParams) {
     this.api = api;
+    this.config = config;
   }
 
-  data = reactive(emptyClientData)
-  async getPeersCount(): Promise<number> {
+  /**
+   * Get local node peers count
+   * @returns {number} - peers count
+   */
+  public async getPeersCount(): Promise<number> {
     const peers = await this.api.rpc.system.peers();
     return peers.length;
   }
 
-  // TODO: implement unit test
   // TODO: refactor using reduce
-  async getBlockRewards(hash: IU8a): Promise<number> {
+  /**
+   * Get block rewards (farming, voting, fees, etc.)
+   * @param {IU8a} hash - block hash as IU8a
+   * @returns {number} - sum of SSC tokens
+   */
+  private async getBlockRewards(hash: IU8a): Promise<number> {
     let blockReward = 0;
     const apiAt = await this.api.at(hash);
     const records = (await apiAt.query.system.events()) as Vec<EventRecord>;
     records.forEach((record) => {
-      const { section, method, data } = record.event
-      if (section === "rewards" && method === "BlockReward") {
-        const reward = this.api.registry.createType("u128", data[1]);
+      const { section, method, data } = record.event;
+      if (section === 'rewards' && method === 'BlockReward') {
+        const reward = this.api.registry.createType('u128', data[1]);
         blockReward = Number((reward.toBigInt() * 100n) / SUNIT) / 100;
-      } else if (section === "transactionFees") {
+      } else if (section === 'transactionFees') {
         // TODO: include storage and compute fees
       }
-    })
+    });
 
     return blockReward;
   }
 
-  async startSubscription(): Promise<void> {
-    const rewardAddress: string = (await appConfig.read()).rewardAddress;
+  // TODO: handlers param is temporary - create better solution
+  /**
+   * Start subscription for Subspace blocks and process each block
+   * @param handlers.farmedBlockHandler - handle block if it was farmed by user
+   * @param handlers.newBlockHandler - handle regular block (was not farmed by user)
+   */
+  public async startSubscription(handlers: {
+    farmedBlockHandler: (block: FarmedBlock) => void;
+    newBlockHandler: (blockNum: number) => void;
+  }): Promise<void> {
+    const rewardAddress: string = (await this.config.readConfigFile()).rewardAddress;
 
     this.unsubscribe = await this.api.rpc.chain.subscribeNewHeads(
       async ({ hash, number }) => {
-        const blockNum = number.toNumber()
+        const blockNum = number.toNumber();
         const header = await this.api.rpc.chain.getHeader(hash);
 
         // TODO: handle vote rewards: check VoteReward events and aggregate
@@ -75,116 +98,117 @@ export class Client {
           const block: FarmedBlock = {
             id: hash.toString(),
             time: Date.now(),
-            // TODO: remove, transactions count is not displayed anywhere   
+            // TODO: remove, transactions count is not displayed anywhere
             transactions: 0,
             blockNum,
             blockReward,
             feeReward: 0,
             // TODO: check if necessary to store address here since we only process blocks farmed by user
             rewardAddr: rewardAddress.toString(),
-          }
-          this.data.farming.farmed = [block, ...this.data.farming.farmed];
-          storeBlocks(this.data.farming.farmed)
-          this.data.farming.events.emit("farmedBlock", block)
+          };
+          handlers.farmedBlockHandler(block);
         }
-        this.data.farming.events.emit("newBlock", blockNum)
+        handlers.newBlockHandler(blockNum);
       }
-    )
+    );
 
-    process.on("beforeExit", this.stopSubscription)
-    window.addEventListener("unload", this.stopSubscription)
+    process.on('beforeExit', this.stopSubscription);
+    window.addEventListener('unload', this.stopSubscription);
     this.clearTauriDestroy = await tauri.event.once(
-      "tauri://destroyed",
-      () => {
-        console.log("Destroyed event!")
-        storeBlocks(this.data.farming.farmed)
-      }
-    )
+      'tauri://destroyed',
+      () => console.log('Destroyed event!')
+    );
   }
 
-  stopSubscription() {
-    util.infoLogger("block subscription stop triggered")
-    this.unsubscribe()
-    this.api.disconnect()
+  /**
+   * Stop subscription for Subspace blocks, close connection to RPC, destroy Tauri, etc.
+   */
+  private stopSubscription() {
+    util.infoLogger('block subscription stop triggered');
+    this.unsubscribe();
+    this.api.disconnect();
     try {
-      this.clearTauriDestroy()
-      storeBlocks(this.data.farming.farmed)
-      window.removeEventListener("unload", this.stopSubscription)
+      this.clearTauriDestroy();
+      window.removeEventListener('unload', this.stopSubscription);
     } catch (error) {
-      util.errorLogger(error)
+      util.errorLogger(error);
     }
   }
 
-  /* To be called ONLY from plotting progress */
-  public setFirstLoad(): void {
-    this.firstLoad = true
-  }
-  /* To be called from dashboard, if isFirstLoad dashboard will not start NODE or FARMER as plottingProgress page already done this and also started block subscriptions. */
-  public isFirstLoad(): boolean {
-    return this.firstLoad
-  }
-
+  /**
+   * Connect to local node RPC using Polkadot.js API
+   */
   public async connectApi(): Promise<void> {
     if (!this.api.isConnected) {
-      await this.api.connect()
+      await this.api.connect();
     }
-    await this.api.isReadyOrError
+    await this.api.isReadyOrError;
   }
 
+  /**
+   * Get sync state of the local node, which is displayed on PlottingProgress and Dashboard pages
+   * @returns {SyncState} - sync state object (starting block, current block and highest block)
+   */
   public async getSyncState(): Promise<SyncState> {
-    return this.api.rpc.system.syncState();
+    return (await this.api.rpc.system.syncState()).toJSON() as unknown as SyncState;
   }
 
+  /**
+   * Utility method to determine if local node is syncing
+   * @returns {boolean}
+   */
   public async isSyncing(): Promise<boolean> {
     const { isSyncing } = await this.api.rpc.system.health();
     return isSyncing.isTrue;
   }
 
+  /**
+   * Wrapper for invoking backend method to start local node and connect to the RPC endpoint
+   * @param {string} path - folder location
+   * @param {string} nodeName - local node name
+   */
   public async startNode(path: string, nodeName: string): Promise<void> {
-    await tauri.invoke("start_node", { path, nodeName })
-    if (!this.firstLoad) {
-      this.loadStoredBlocks()
-    }
+    await tauri.invoke('start_node', { path, nodeName });
+
     // TODO: workaround in case node takes some time to fully start.
-    await new Promise((resolve) => setTimeout(resolve, 7000))
-    await this.connectApi()
+    await new Promise((resolve) => setTimeout(resolve, 7000));
+    await this.connectApi();
   }
 
-  private loadStoredBlocks(): void {
-    this.farmed = getStoredBlocks()
-    this.data.farming.farmed = this.farmed
+
+  /**
+   * Create new reward address on first launch
+   * @returns {CreateRewardAddressResult} - result object
+   */
+  /**
+   * @typedef {CreateRewardAddressResult}
+   * @property {string} rewardAddress - created reward address
+   * @property {string} mnemonic - created mnemonic seed phrase (displayed once after being generated)
+   */
+  public async createRewardAddress(): Promise<{ rewardAddress: string, mnemonic: string }> {
+    const mnemonic = mnemonicGenerate();
+    const keyring = new Keyring({ type: 'sr25519', ss58Format: 2254 }); // 2254 is the prefix for subspace-testnet
+    await cryptoWaitReady();
+    const pair = keyring.createFromUri(mnemonic);
+    return {
+      rewardAddress: pair.address,
+      mnemonic,
+    };
   }
 
-  public async createRewardAddress(): Promise<string> {
-    try {
-      const mnemonic = mnemonicGenerate()
-      const keyring = new Keyring({ type: 'sr25519', ss58Format: 2254 }) // 2254 is the prefix for subspace-testnet
-      await cryptoWaitReady();
-      const pair = keyring.createFromUri(mnemonic)
-      this.mnemonic = mnemonic
-      return pair.address
-    } catch (error) {
-      util.errorLogger(error)
-      return ""
-    }
-  }
-
-  /* FARMER INTEGRATION */
-  public async startFarming(path: string, plotSizeGB: number): Promise<boolean> {
+  /**
+   * Wrapper for invoking backend method to start farmer
+   * @param {string} path - plot location
+   * @param {number} plotSizeGB - plot size (in GB)
+   */
+  public async startFarming(path: string, plotSizeGB: number): Promise<void> {
     // convert GB to Bytes
-    const plotSize = Math.round(plotSizeGB * 1024 * 1024 * 1024)
-    const rewardAddress: string = (await appConfig.read()).rewardAddress
-    if (rewardAddress === "") {
-      util.errorLogger("Tried to send empty reward address to backend!")
+    const plotSize = Math.round(plotSizeGB * 1024 * 1024 * 1024);
+    const { rewardAddress } = (await this.config.readConfigFile());
+    if (!rewardAddress) {
+      util.errorLogger('Tried to send empty reward address to backend!');
     }
-    return await tauri.invoke("farming", { path, rewardAddress, plotSize })
-  }
 
-  /* MNEMONIC displayed only FIRST LOAD on SaveKeys Modal. */
-  public getMnemonic(): string {
-    return this.mnemonic
-  }
-  public clearMnemonic(): void {
-    this.mnemonic = ""
+    return tauri.invoke('farming', { path, rewardAddress, plotSize });
   }
 }

@@ -33,14 +33,14 @@ q-menu(auto-close)
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue"
-import { Dialog, Notify } from "quasar"
-import { relaunch } from "@tauri-apps/api/process"
-import { open as shellOpen } from '@tauri-apps/api/shell'
-import { installUpdate } from '@tauri-apps/api/updater';
+import { defineComponent } from 'vue';
+import { Dialog, Notify } from 'quasar';
+import { relaunch } from '@tauri-apps/api/process';
+import { open as shellOpen } from '@tauri-apps/api/shell';
+import { LocalStorage as localStorage } from 'quasar';
 
-import * as util from "../lib/util";
-import { globalState as global } from "../lib/global";
+import * as plotDir from '../lib/plotDir';
+import * as util from '../lib/util';
 
 export default defineComponent({
   data() {
@@ -49,40 +49,40 @@ export default defineComponent({
       util,
       launchOnStart: false,
       disableAutoLaunch: false
-    }
+    };
   },
   mounted() {
-    this.initMenu()
+    this.initMenu();
   },
   methods: {
     async toggleClicked() {
       if (this.disableAutoLaunch) {
         Notify.create({
           message: this.$t('menu.autoLaunchNotSupported'),
-          icon: "info"
-        })
-        return
+          icon: 'info'
+        });
+        return;
       }
-      console.log("toggle Clicked", this.launchOnStart)
+      console.log('toggle Clicked', this.launchOnStart);
       if (this.launchOnStart) {
         Notify.create({
           message: this.$t('menu.willAutoLaunch'),
-          icon: "info",
+          icon: 'info',
           group: 1,
-          badgeStyle: "visibility:hidden;"
-        })
+          badgeStyle: 'visibility:hidden;'
+        });
       } else {
         Notify.create({
           message: this.$t('menu.willNotAutoLaunch'),
-          icon: "info",
+          icon: 'info',
           group: 1,
-          badgeStyle: "visibility:hidden;"
-        })
+          badgeStyle: 'visibility:hidden;'
+        });
       }
       if (this.launchOnStart) {
-        await this.$autoLauncher.enable()
+        await this.$autoLauncher.enable();
       } else {
-        await this.$autoLauncher.disable()
+        await this.$autoLauncher.disable();
       }
     },
     reset() {
@@ -98,42 +98,34 @@ export default defineComponent({
         </p>
         `,
         html: true,
-        ok: { label: "reset", icon: "refresh", flat: true, color: "red" },
+        ok: { label: 'reset', icon: 'refresh', flat: true, color: 'red' },
         cancel: true
       }).onOk(async () => {
-        await util.resetAndClear()
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-        await relaunch()
-      })
-    },
-    async installNewUpdate() {
-      try {
-        await installUpdate();
+        await util.resetAndClear({ plotDir, localStorage, config: this.$config });
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         await relaunch();
-      } catch (error) {
-        // TODO: handle error
-        console.log(error);
-      }
+      });
     },
     async exportLogs() {
       try {
-        const log_path = await util.getLogPath()
-        util.infoLogger("log path acquired:" + log_path)
-        await shellOpen(log_path)
-      } catch(error) {
-        util.errorLogger(error)
+        const log_path = await util.getLogPath();
+        util.infoLogger('log path acquired:' + log_path);
+        await shellOpen(log_path);
+      } catch (error) {
+        // TODO: add proper error handling - update store and show error page
+        util.errorLogger(error);
       }
     },
     async initMenu() {
-      if (this.$autoLauncher.enabled !== undefined) {
-        this.launchOnStart = await this.$autoLauncher.enabled
+      if (await this.$autoLauncher.isEnabled()) {
+        this.launchOnStart = true;
       } else {
-        this.launchOnStart = false
-        this.disableAutoLaunch = true
+        this.launchOnStart = false;
+        this.disableAutoLaunch = true;
       }
     }
   }
-})
+});
 </script>
 
 <style lang="scss">
