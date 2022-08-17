@@ -32,12 +32,15 @@ enum ArchivingFrom {
     Dsn,
 }
 
+/// the default strategy for syncing
 impl Default for ArchivingFrom {
     fn default() -> Self {
         Self::Rpc
     }
 }
 
+/// manages the `farm` process
+/// waits on the `farm` handle, and restarts the `farm` process if needed
 #[tauri::command]
 pub(crate) async fn farming(
     path: String,
