@@ -1,8 +1,6 @@
 import { boot } from 'quasar/wrappers';
 import VueApexCharts from 'vue3-apexcharts';
 import { createI18n } from 'vue-i18n';
-import * as tauriEvents from '@tauri-apps/api/event';
-
 import * as tauri from '@tauri-apps/api';
 
 import messages from '../i18n';
@@ -13,6 +11,7 @@ import Config from '../lib/config';
 import { useStore } from '../stores/store';
 import { appName, errorLogger, infoLogger } from '../lib/util';
 import * as native from '../lib/native';
+import { initUpdater } from '../lib/updater';
 
 const LOCAL_RPC = process.env.LOCAL_API_WS || 'ws://localhost:9947';
 
@@ -35,11 +34,7 @@ export default boot(async ({ app }) => {
   const store = useStore();
   store.setNodeName(config, nodeName);
 
-  // check for newer version every day
-  const DAY_MS = 24 * 60 * 60 * 1000;
-  setInterval(() => tauriEvents.emit('tauri://update'), DAY_MS);
-  // update app state to reflect that newer version is available
-  tauriEvents.listen('tauri://update-available', store.setHasNewUpdate);
+  await initUpdater(tauri, store.setHasNewUpdate);
 
   // create Client instance
   const api = createApi(LOCAL_RPC);
