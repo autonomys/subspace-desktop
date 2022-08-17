@@ -35,8 +35,7 @@ q-menu(auto-close)
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { Dialog, Notify } from 'quasar';
-import { relaunch } from '@tauri-apps/api/process';
-import { open as shellOpen } from '@tauri-apps/api/shell';
+import { process, shell, event } from '@tauri-apps/api';
 import { LocalStorage as localStorage } from 'quasar';
 
 import * as plotDir from '../lib/plotDir';
@@ -107,14 +106,14 @@ export default defineComponent({
       }).onOk(async () => {
         await util.resetAndClear({ plotDir, localStorage, config: this.$config });
         await new Promise((resolve) => setTimeout(resolve, 1000));
-        await relaunch();
+        await process.relaunch();
       });
     },
     async exportLogs() {
       try {
         const log_path = await util.getLogPath();
         util.infoLogger('log path acquired:' + log_path);
-        await shellOpen(log_path);
+        await shell.open(log_path);
       } catch (error) {
         // TODO: add proper error handling - update store and show error page
         util.errorLogger(error);
@@ -128,8 +127,8 @@ export default defineComponent({
         this.disableAutoLaunch = true;
       }
     },
-    installNewUpdate() {
-      console.log('installNewUpdate');
+    async installNewUpdate() {
+      await event.emit('tauri://update');
     }
   }
 });

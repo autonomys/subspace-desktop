@@ -34,7 +34,7 @@ export default boot(async ({ app }) => {
   const store = useStore();
   store.setNodeName(config, nodeName);
 
-  await initUpdater(tauri, store.setHasNewUpdate);
+  await initUpdater(tauri, store.setHasNewUpdate, errorLogger);
 
   // create Client instance
   const api = createApi(LOCAL_RPC);

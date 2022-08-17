@@ -1,11 +1,17 @@
 import * as tauri from '@tauri-apps/api';
 
+/**
+ * Emit and listen for update events, show dialog and update store if there is an update
+ * @param tauri 
+ * @param handleStoreUpdate - store method to update state in order to show 'Install update' menu item
+ * @param errorLogger 
+ */
 export async function initUpdater(
   { event, dialog, process }: typeof tauri,
-  handleStoreUpdate: () => void
+  handleStoreUpdate: () => void,
+  errorLogger: (error: unknown) => void,
 ) {
   try {
-
     // emit update event on launch: will check for existing newer version and show dialog
     await event.emit('tauri://update');
 
@@ -25,13 +31,12 @@ export async function initUpdater(
       if (yes) {
         await event.emit('tauri://update-install');
         await process.relaunch();
-        console.log('after installing update');
       } else {
-        // if user rejects update app state to display that newer version is available (menu item)
+        // if user rejects update state to display that newer version is available (menu item)
         handleStoreUpdate();
       }
     });
   } catch (error) {
-    console.log(error);
+    errorLogger(error);
   }
 }
