@@ -1,6 +1,4 @@
 use anyhow::{anyhow, Result};
-use jsonrpsee::ws_server::WsServerBuilder;
-use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::sync::Arc;
 use subspace_core_primitives::PublicKey;
@@ -8,11 +6,9 @@ use subspace_farmer::legacy_multi_plots_farm::{
     LegacyMultiPlotsFarm, Options as MultiFarmingOptions,
 };
 use subspace_farmer::single_plot_farm::PlotFactoryOptions;
-use subspace_farmer::ws_rpc_server::{RpcServer, RpcServerImpl};
 use subspace_farmer::{LegacyObjectMappings, NodeRpcClient, Plot, RpcClient};
 use subspace_networking::libp2p::{multiaddr::Protocol, Multiaddr};
 use subspace_networking::{Config, RelayMode};
-use subspace_rpc_primitives::FarmerProtocolInfo;
 use tokio::time::{sleep, timeout, Duration};
 use tracing::{debug, error, info, trace, warn};
 
@@ -25,30 +21,6 @@ struct FarmingArgs {
     bootstrap_nodes: Vec<Multiaddr>,
     archiving: ArchivingFrom,
     dsn_sync: bool,
-    ws_server_listen_addr: SocketAddr,
-}
-
-struct CallOnDrop<F>(Option<F>)
-where
-    F: FnOnce() + Send + 'static;
-
-impl<F> Drop for CallOnDrop<F>
-where
-    F: FnOnce() + Send + 'static,
-{
-    fn drop(&mut self) {
-        let callback = self.0.take().expect("Only removed on drop; qed");
-        callback();
-    }
-}
-
-impl<F> CallOnDrop<F>
-where
-    F: FnOnce() + Send + 'static,
-{
-    fn new(callback: F) -> Self {
-        Self(Some(callback))
-    }
 }
 
 #[allow(dead_code)] // Dsn is not active now, will be enabled later. Wanted to keep the struct as it is in monorepo
@@ -83,7 +55,6 @@ pub(crate) async fn farming(
             bootstrap_nodes: vec![],
             archiving: ArchivingFrom::Rpc,
             dsn_sync: false,
-            ws_server_listen_addr: "127.0.0.1:9955".parse().expect("hardcoded value is true"),
         };
 
         let farming_handle = farm(path.clone().into(), farming_args.clone())
@@ -123,7 +94,6 @@ async fn farm(
         bootstrap_nodes,
         listen_on,
         node_rpc_url,
-        mut ws_server_listen_addr,
         reward_address,
         plot_size,
         dsn_sync,
@@ -162,12 +132,6 @@ async fn farm(
         .farmer_protocol_info()
         .await
         .map_err(|error| anyhow!(error))?;
-
-    let FarmerProtocolInfo {
-        record_size,
-        recorded_history_segment_size,
-        ..
-    } = farmer_protocol_info;
 
     info!("Opening object mapping");
     let object_mappings = tokio::task::spawn_blocking({
@@ -233,48 +197,6 @@ async fn farm(
         },
     )
     .await?;
-
-    // Start RPC server
-    let ws_server = match WsServerBuilder::default()
-        .build(ws_server_listen_addr)
-        .await
-    {
-        Ok(ws_server) => ws_server,
-        Err(jsonrpsee::core::Error::Transport(error)) => {
-            warn!(
-                address = %ws_server_listen_addr,
-                %error,
-                "Failed to start WebSocket RPC server on, trying random port"
-            );
-            ws_server_listen_addr.set_port(0);
-            WsServerBuilder::default()
-                .build(ws_server_listen_addr)
-                .await?
-        }
-        Err(error) => {
-            return Err(error.into());
-        }
-    };
-    let ws_server_addr = ws_server.local_addr()?;
-    let rpc_server = RpcServerImpl::new(
-        record_size.get(),
-        recorded_history_segment_size,
-        Arc::new(multi_plots_farm.piece_getter()),
-        Arc::new(vec![]),
-        Arc::new(vec![object_mappings]),
-    );
-    let _ws_server_guard = CallOnDrop::new({
-        let ws_server = ws_server.start(rpc_server.into_rpc())?;
-        let tokio_handle = tokio::runtime::Handle::current();
-
-        move || {
-            if let Ok(waiter) = ws_server.stop() {
-                tokio::task::block_in_place(move || tokio_handle.block_on(waiter));
-            }
-        }
-    });
-
-    info!("WS RPC server listening on {ws_server_addr}");
 
     Ok(multi_plots_farm)
 }

@@ -323,16 +323,6 @@ export const useStore = defineStore('store', {
         // TODO: consider moving logging to client.ts
         util.infoLogger('farmer started');
 
-      } catch (error) {
-        // TODO: consider moving logging to client.ts
-        util.errorLogger('Farmer start error: ' + error as string);
-        this.setError({
-          title: 'errorPage.startFarmerFailed',
-          // TODO: replace default error message with specific one
-          message: 'errorPage.defaultErrorMessage',
-        });
-      }
-      try {
         const syncState = await client.getSyncState();
         this.setSyncState(syncState);
         let isSyncing = await client.isSyncing();
@@ -372,11 +362,11 @@ export const useStore = defineStore('store', {
         util.infoLogger('block subscription started');
       } catch (error) {
         // TODO: consider moving logging to client.ts
-        util.errorLogger('Sync error: ' + error as string);
+        util.errorLogger('Farmer start error: ' + error as string);
         this.setError({
-          title: 'errorPage.startFarmerFailed', // TODO: make a page for sync error
+          title: 'errorPage.startFarmerFailed',
           // TODO: replace default error message with specific one
-          message: 'errorPage.defaultErrorMessage', // TODO: make a an error message for sync
+          message: 'errorPage.defaultErrorMessage',
         });
       }
     },
