@@ -90,9 +90,6 @@ export class Client {
       async ({ hash, number }) => {
         const blockNum = number.toNumber();
         const header = await this.api.rpc.chain.getHeader(hash);
-
-        // TODO: handle vote rewards: check VoteReward events and aggregate
-        // TODO: extract farmed block rewards logic
         const preRuntimeLog = header.digest.logs.find((digestItem) => digestItem.isPreRuntime)?.asPreRuntime[1];
         const preRuntime: SubPreDigest = this.api.registry.createType('SubPreDigest', preRuntimeLog);
 
@@ -189,7 +186,7 @@ export class Client {
   public async startNode(path: string, nodeName: string): Promise<void> {
     await tauri.invoke('start_node', { path, nodeName });
 
-    // TODO: workaround in case node takes some time to fully start.
+    // TODO: workaround in case node takes some time to fully start, should be replaced with tauri events
     await new Promise((resolve) => setTimeout(resolve, 7000));
     await this.connectApi();
   }

@@ -1,7 +1,6 @@
 <template lang="pug">
 q-layout(view="hHh lpr fFf")
   q-header.bg-white.text-black(bordered)
-    p store.status {{ store.status }}
     q-toolbar.app-toolbar
       q-img(no-spinner src="subspacelogo.png" width="150px")
       q-toolbar-title

@@ -5,6 +5,7 @@ import { LocalStorage } from 'quasar';
 
 import { IPlotDir } from '../plotDir';
 import Config from '../config';
+import { getErrorMessage } from './';
 
 export const appName: string = process.env.APP_NAME || 'subspace-desktop';
 
@@ -16,36 +17,28 @@ export async function getLogPath(): Promise<string> {
   return await invoke('custom_log_dir', { id: appName });
 }
 
-// TODO: refactor using getErrorMessage from utils.ts
 /**
  * Utility wrapper for logging errors
  */
 export async function errorLogger(error: unknown): Promise<void> {
-  if (error instanceof Error) {
-    const message = error.message;
-    await invoke('frontend_error_logger', { message });
-  } else if (typeof error === 'string') {
-    await invoke('frontend_error_logger', { message: error });
-  }
+  console.log('errorLogger');
+  const message = getErrorMessage(error);
+  await invoke('frontend_error_logger', { message });
 }
 
-// TODO: refactor using getErrorMessage from utils.ts
 /**
  * Utility wrapper for regular logging
  */
 export async function infoLogger(info: unknown): Promise<void> {
-  if (info instanceof Error) {
-    const message = info.message;
-    await invoke('frontend_info_logger', { message });
-  } else if (typeof info === 'string') {
-    await invoke('frontend_info_logger', { message: info });
-  }
+  console.log('infoLogger');
+  const message = getErrorMessage(info);
+  await invoke('frontend_info_logger', { message });
 }
 
 /**
  * Utility to reset the application, removes files from local storage, as well as config file
  */
-export async function resetAndClear({ 
+export async function resetAndClear({
   localStorage,
   plotDir,
   config,

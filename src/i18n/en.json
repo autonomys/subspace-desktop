@@ -3,7 +3,8 @@
     "pageTitle": "Let's setup your subspace farm!",
     "quickStart": "This is my first time farming",
     "subtitle": "Pledge free space on your computer and earn rewards for helping to secure the Subspace Network",
-    "advanced": "I've run a farmer before and still have my keys"
+    "advanced": "I've run a farmer before and still have my keys",
+    "autoLaunchNote": "Subspace Desktop will be started on boot. You can disable this from settings (the gear icon on top-right)."
   },
   "saveKeys": {
     "pageTitle": "Backup Seed Phrase",
