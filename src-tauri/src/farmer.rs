@@ -1,4 +1,6 @@
 use anyhow::{anyhow, Result};
+use jsonrpsee::ws_server::WsServerBuilder;
+use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::sync::Arc;
 use subspace_core_primitives::PublicKey;
@@ -6,21 +8,47 @@ use subspace_farmer::legacy_multi_plots_farm::{
     LegacyMultiPlotsFarm, Options as MultiFarmingOptions,
 };
 use subspace_farmer::single_plot_farm::PlotFactoryOptions;
-use subspace_farmer::{Identity, LegacyObjectMappings, NodeRpcClient, Plot, RpcClient};
+use subspace_farmer::ws_rpc_server::{RpcServer, RpcServerImpl};
+use subspace_farmer::{LegacyObjectMappings, NodeRpcClient, Plot, RpcClient};
 use subspace_networking::libp2p::{multiaddr::Protocol, Multiaddr};
-use subspace_networking::Config;
+use subspace_networking::{Config, RelayMode};
+use subspace_rpc_primitives::FarmerProtocolInfo;
 use tokio::time::{sleep, timeout, Duration};
 use tracing::{debug, error, info, trace, warn};
 
 #[derive(Clone)]
 struct FarmingArgs {
     node_rpc_url: String,
-    reward_address: Option<PublicKey>,
+    reward_address: PublicKey,
     plot_size: u64,
     listen_on: Vec<Multiaddr>,
     bootstrap_nodes: Vec<Multiaddr>,
     archiving: ArchivingFrom,
     dsn_sync: bool,
+    ws_server_listen_addr: SocketAddr,
+}
+
+struct CallOnDrop<F>(Option<F>)
+where
+    F: FnOnce() + Send + 'static;
+
+impl<F> Drop for CallOnDrop<F>
+where
+    F: FnOnce() + Send + 'static,
+{
+    fn drop(&mut self) {
+        let callback = self.0.take().expect("Only removed on drop; qed");
+        callback();
+    }
+}
+
+impl<F> CallOnDrop<F>
+where
+    F: FnOnce() + Send + 'static,
+{
+    fn new(callback: F) -> Self {
+        Self(Some(callback))
+    }
 }
 
 #[allow(dead_code)] // Dsn is not active now, will be enabled later. Wanted to keep the struct as it is in monorepo
@@ -55,6 +83,7 @@ pub(crate) async fn farming(
             bootstrap_nodes: vec![],
             archiving: ArchivingFrom::Rpc,
             dsn_sync: false,
+            ws_server_listen_addr: "127.0.0.1:9955".parse().expect("hardcoded value is true"),
         };
 
         let farming_handle = farm(path.clone().into(), farming_args.clone())
@@ -97,11 +126,8 @@ async fn farm(
         mut ws_server_listen_addr,
         reward_address,
         plot_size,
-        max_plot_size,
-        disk_concurrency: _,
         dsn_sync,
         archiving,
-        disable_farming,
     } = farm_args;
 
     if plot_size < 1024 * 1024 {
@@ -130,12 +156,10 @@ async fn farm(
     let archiving_client = NodeRpcClient::new(&node_rpc_url).await?;
     let farming_client = NodeRpcClient::new(&node_rpc_url).await?;
 
-    let mut farmer_protocol_info = farming_client
+    let farmer_protocol_info = farming_client
         .farmer_protocol_info()
         .await
         .map_err(|error| anyhow!(error))?;
-
-    let max_plot_size = farmer_protocol_info.max_plot_size;
 
     let FarmerProtocolInfo {
         record_size,
@@ -247,6 +271,8 @@ async fn farm(
             }
         }
     });
+
+    info!("WS RPC server listening on {ws_server_addr}");
 
     Ok(multi_plots_farm)
 }
