@@ -130,6 +130,8 @@ async fn farm(
         archiving,
     } = farm_args;
 
+    raise_fd_limit();
+
     if plot_size < 1024 * 1024 {
         return Err(anyhow::anyhow!(
             "Plot size is too low ({0} bytes). Did you mean {0}G or {0}T?",
@@ -275,6 +277,25 @@ async fn farm(
     info!("WS RPC server listening on {ws_server_addr}");
 
     Ok(multi_plots_farm)
+}
+
+fn raise_fd_limit() {
+    match std::panic::catch_unwind(fdlimit::raise_fd_limit) {
+        Ok(Some(limit)) => {
+            info!("Increase file limit from soft to hard (limit is {limit})")
+        }
+        Ok(None) => debug!("Failed to increase file limit"),
+        Err(err) => {
+            let err = if let Some(err) = err.downcast_ref::<&str>() {
+                *err
+            } else if let Some(err) = err.downcast_ref::<String>() {
+                err
+            } else {
+                unreachable!("Should be unreachable as `fdlimit` uses panic macro, which should return either `&str` or `String`.")
+            };
+            warn!("Failed to increase file limit: {err}")
+        }
+    }
 }
 
 fn parse_reward_address(s: &str) -> Result<PublicKey, sp_core::crypto::PublicError> {
