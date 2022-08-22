@@ -21,7 +21,6 @@ export async function getLogPath(): Promise<string> {
  * Utility wrapper for logging errors
  */
 export async function errorLogger(error: unknown): Promise<void> {
-  console.log('errorLogger');
   const message = getErrorMessage(error);
   await invoke('frontend_error_logger', { message });
 }
@@ -30,7 +29,6 @@ export async function errorLogger(error: unknown): Promise<void> {
  * Utility wrapper for regular logging
  */
 export async function infoLogger(info: unknown): Promise<void> {
-  console.log('infoLogger');
   const message = getErrorMessage(info);
   await invoke('frontend_info_logger', { message });
 }

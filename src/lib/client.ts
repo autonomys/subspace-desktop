@@ -16,17 +16,9 @@ import Config from './config';
 
 const SUNIT = 1000000000000000000n;
 
-export interface IClient {
-  getPeersCount: () => Promise<number>;
-  startNode: (path: string, nodeName: string) => Promise<void>;
-  startBlockSubscription: (handlers: {
-    farmedBlockHandler: (block: FarmedBlock) => void;
-    newBlockHandler: (blockNum: number) => void;
-  }) => Promise<void>;
-  isSyncing: () => Promise<boolean>;
-  getSyncState: () => Promise<SyncState>;
-  startFarming: (path: string, plotSizeGB: number) => Promise<void>;
-  startSyncStateSubscription: () => Promise<void>;
+interface ClientParams {
+  api: ApiPromise;
+  config: Config;
 }
 
 // TODO: implement unit tests
@@ -80,6 +72,11 @@ export class Client {
   }
 
   // TODO: handlers param is temporary - create better solution
+  /**
+   * Start subscription for Subspace blocks and process each block
+   * @param handlers.farmedBlockHandler - handle block if it was farmed by user
+   * @param handlers.newBlockHandler - handle regular block (was not farmed by user)
+   */
   async startBlockSubscription(handlers: {
     farmedBlockHandler: (block: FarmedBlock) => void;
     newBlockHandler: (blockNum: number) => void;
