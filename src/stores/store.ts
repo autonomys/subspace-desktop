@@ -321,16 +321,26 @@ export const useStore = defineStore('store', {
         await client.startFarming(this.plotPath, this.plotSizeGB);
 
         // TODO: consider moving logging to client.ts
-        util.infoLogger('PLOTTING PROGRESS | farmer started');
+        util.infoLogger('farmer started');
 
+      } catch (error) {
+        // TODO: consider moving logging to client.ts
+        util.errorLogger('Farmer start error: ' + error as string);
+        this.setError({
+          title: 'errorPage.startFarmerFailed',
+          // TODO: replace default error message with specific one
+          message: 'errorPage.defaultErrorMessage',
+        });
+      }
+      try {
         const syncState = await client.getSyncState();
         this.setSyncState(syncState);
         let isSyncing = await client.isSyncing();
 
         do {
           await new Promise((resolve) => setTimeout(resolve, 3000));
-          // using pRetry as a workaround, 
-          // because loop will keep executing in case of node restart, 
+          // using pRetry as a workaround,
+          // because loop will keep executing in case of node restart,
           // API requests will fail, because RPC is not available until node has restarted
           // TODO: replace do-while loop with subscription, which can be terminated before restarting node
           const syncState = await pRetry(() => client.getSyncState(), {
@@ -359,14 +369,14 @@ export const useStore = defineStore('store', {
         });
 
         // TODO: consider moving logging to client.ts
-        util.infoLogger('PLOTTING PROGRESS | block subscription started');
+        util.infoLogger('block subscription started');
       } catch (error) {
         // TODO: consider moving logging to client.ts
-        util.errorLogger('PLOTTING PROGRESS | Farmer start error!');
+        util.errorLogger('Sync error: ' + error as string);
         this.setError({
-          title: 'errorPage.startFarmerFailed',
+          title: 'errorPage.startFarmerFailed', // TODO: make a page for sync error
           // TODO: replace default error message with specific one
-          message: 'errorPage.defaultErrorMessage',
+          message: 'errorPage.defaultErrorMessage', // TODO: make a an error message for sync
         });
       }
     },
