@@ -312,7 +312,7 @@ export const useStore = defineStore('store', {
      */
     async startFarmer(client: Client, util: IUtil, blockStorage: IBlockStorage) {
       try {
-        // TODO: consider refactoring statuses after Dashboard Plot component #294 is resolved
+        // TODO: refactor status updates after Dashboard Plot component #294 is resolved
         this.setNetworkState('verifying');
         this.setPlotMessage('dashboard.verifyingPlot');
         this.setNetworkMessage('dashboard.verifyingNet');
@@ -320,21 +320,24 @@ export const useStore = defineStore('store', {
         await client.startFarming(this.plotPath, this.plotSizeGB);
 
         await client.startSyncStateSubscription(async (syncState) => {
-          // syncState.highestBlock can be null, use currentBlock as fallback value
-          if (!syncState.highestBlock) {
-            syncState.highestBlock = syncState.currentBlock;
-          }
+          // TODO: refactor status updates after Dashboard Plot component #294 is resolved
           this.setSyncState(syncState);
-          const finishedGB = (this.syncState.currentBlock * this.plotSizeGB) / (this.syncState.highestBlock);
+          this.setPlotMessage('dashboard.plotActive');
+          this.setNetworkMessage('dashboard.syncingMsg');
+          this.setPlottingStatus('dashboard.syncingMsg');
+          // adding 1 as fallback, because syncState.currentBlock and syncState.highestBlock can be 0, which may result in NaN
+          const finishedGB = ((this.syncState.currentBlock || 1) * this.plotSizeGB) / (this.syncState.highestBlock || 1);
           this.setPlottingFinished(finishedGB);
         });
 
         // TODO: consider moving logging to client.ts
         util.infoLogger('PLOTTING PROGRESS | farmer started');
 
+        // TODO: refactor status updates after Dashboard Plot component #294 is resolved
         this.setNetworkState('finished');
         this.setNetworkMessage('dashboard.syncedAt');
         this.setPlotState('finished');
+        this.setPlottingStatus('dashboard.syncedMsg');
         this.setPlotMessage('dashboard.syncedMsg');
         this.setStatus('farming');
 
