@@ -47,7 +47,7 @@ pub(crate) async fn farming(
     if let Ok(address) = parse_reward_address(&reward_address) {
         let farming_args = FarmingArgs {
             node_rpc_url: "ws://127.0.0.1:9947".to_string(),
-            reward_address: Some(address),
+            reward_address: address,
             plot_size,
             listen_on: vec!["/ip4/127.0.0.1/tcp/40333"
                 .parse()
@@ -91,23 +91,18 @@ async fn farm(
     farm_args: FarmingArgs,
 ) -> Result<LegacyMultiPlotsFarm, anyhow::Error> {
     let FarmingArgs {
+        bootstrap_nodes,
+        listen_on,
         node_rpc_url,
+        mut ws_server_listen_addr,
         reward_address,
         plot_size,
-        listen_on,
-        bootstrap_nodes,
-        archiving,
+        max_plot_size,
+        disk_concurrency: _,
         dsn_sync,
+        archiving,
+        disable_farming,
     } = farm_args;
-
-    raise_fd_limit();
-
-    let reward_address = if let Some(reward_address) = reward_address {
-        reward_address
-    } else {
-        let identity = Identity::open_or_create(&base_directory)?;
-        identity.public_key().to_bytes().into()
-    };
 
     if plot_size < 1024 * 1024 {
         return Err(anyhow::anyhow!(
@@ -131,13 +126,22 @@ async fn farm(
         error!("Node is not responding for 10 seconds, farmer is unable to start");
         return Err(anyhow!(error));
     }
+
     let archiving_client = NodeRpcClient::new(&node_rpc_url).await?;
     let farming_client = NodeRpcClient::new(&node_rpc_url).await?;
 
-    let farmer_protocol_info = farming_client
+    let mut farmer_protocol_info = farming_client
         .farmer_protocol_info()
         .await
         .map_err(|error| anyhow!(error))?;
+
+    let max_plot_size = farmer_protocol_info.max_plot_size;
+
+    let FarmerProtocolInfo {
+        record_size,
+        recorded_history_segment_size,
+        ..
+    } = farmer_protocol_info;
 
     info!("Opening object mapping");
     let object_mappings = tokio::task::spawn_blocking({
@@ -151,6 +155,7 @@ async fn farm(
     let (relay_server_node, mut relay_node_runner) = subspace_networking::create(Config {
         listen_on,
         allow_non_globals_in_dht: true,
+        relay_mode: RelayMode::Server,
         ..Config::with_generated_keypair()
     })
     .await?;
@@ -184,11 +189,11 @@ async fn farm(
             object_mappings: object_mappings.clone(),
             reward_address,
             bootstrap_nodes,
+            listen_on: vec![],
             enable_dsn_archiving: matches!(archiving, ArchivingFrom::Dsn),
             enable_dsn_sync: dsn_sync,
             enable_farming: true,
-            listen_on: vec![],
-            relay_server_node: Some(relay_server_node),
+            relay_server_node: Some(relay_server_node.clone()),
         },
         usable_space,
         move |options: PlotFactoryOptions<'_>| {
@@ -203,31 +208,52 @@ async fn farm(
     )
     .await?;
 
+    // Start RPC server
+    let ws_server = match WsServerBuilder::default()
+        .build(ws_server_listen_addr)
+        .await
+    {
+        Ok(ws_server) => ws_server,
+        Err(jsonrpsee::core::Error::Transport(error)) => {
+            warn!(
+                address = %ws_server_listen_addr,
+                %error,
+                "Failed to start WebSocket RPC server on, trying random port"
+            );
+            ws_server_listen_addr.set_port(0);
+            WsServerBuilder::default()
+                .build(ws_server_listen_addr)
+                .await?
+        }
+        Err(error) => {
+            return Err(error.into());
+        }
+    };
+    let ws_server_addr = ws_server.local_addr()?;
+    let rpc_server = RpcServerImpl::new(
+        record_size.get(),
+        recorded_history_segment_size,
+        Arc::new(multi_plots_farm.piece_getter()),
+        Arc::new(vec![]),
+        Arc::new(vec![object_mappings]),
+    );
+    let _ws_server_guard = CallOnDrop::new({
+        let ws_server = ws_server.start(rpc_server.into_rpc())?;
+        let tokio_handle = tokio::runtime::Handle::current();
+
+        move || {
+            if let Ok(waiter) = ws_server.stop() {
+                tokio::task::block_in_place(move || tokio_handle.block_on(waiter));
+            }
+        }
+    });
+
     Ok(multi_plots_farm)
 }
 
 fn parse_reward_address(s: &str) -> Result<PublicKey, sp_core::crypto::PublicError> {
     s.parse::<sp_core::sr25519::Public>()
         .map(|key| PublicKey::from(key.0))
-}
-
-fn raise_fd_limit() {
-    match std::panic::catch_unwind(fdlimit::raise_fd_limit) {
-        Ok(Some(limit)) => {
-            info!("Increase file limit from soft to hard (limit is {limit})")
-        }
-        Ok(None) => debug!("Failed to increase file limit"),
-        Err(err) => {
-            let err = if let Some(err) = err.downcast_ref::<&str>() {
-                *err
-            } else if let Some(err) = err.downcast_ref::<String>() {
-                err
-            } else {
-                unreachable!("Should be unreachable as `fdlimit` uses panic macro, which should return either `&str` or `String`.")
-            };
-            warn!("Failed to increase file limit: {err}")
-        }
-    }
 }
 
 fn get_usable_plot_space(allocated_space: u64) -> u64 {
