@@ -4,8 +4,8 @@ import { mnemonicGenerate, cryptoWaitReady } from '@polkadot/util-crypto';
 import * as tauri from '@tauri-apps/api';
 import type { EventRecord } from '@polkadot/types/interfaces/system';
 import { IU8a } from '@polkadot/types-codec/types';
-
 import * as process from 'process';
+
 import * as util from '../lib/util';
 import {
   FarmedBlock,
@@ -28,6 +28,10 @@ export class Client {
   private unsubscribeBlocks: tauri.event.UnlistenFn = () => null;
   private api: ApiPromise;
   private config: Config;
+  /**
+   * unsubscribe from sync state updates, for example when node is restarting
+   */
+  public unsubscribeSyncState: tauri.event.UnlistenFn = () => null;
   /**
    * Create Client instance
    * @param {ClientParams} params
@@ -109,8 +113,8 @@ export class Client {
       }
     );
 
-    process.on('beforeExit', this.stopSubscription);
-    window.addEventListener('unload', this.stopSubscription);
+    process.on('beforeExit', this.stopBlockSubscription);
+    window.addEventListener('unload', this.stopBlockSubscription);
     this.clearTauriDestroy = await tauri.event.once(
       'tauri://destroyed',
       () => console.log('Destroyed event!')
@@ -120,13 +124,13 @@ export class Client {
   /**
    * Stop subscription for Subspace blocks, close connection to RPC, destroy Tauri, etc.
    */
-  private stopSubscription() {
+  private stopBlockSubscription() {
     util.infoLogger('block subscription stop triggered');
     this.unsubscribeBlocks();
     this.api.disconnect();
     try {
       this.clearTauriDestroy();
-      window.removeEventListener('unload', this.stopSubscription);
+      window.removeEventListener('unload', this.stopBlockSubscription);
     } catch (error) {
       util.errorLogger(error);
     }
@@ -146,8 +150,7 @@ export class Client {
    * Get sync state of the local node, which is displayed on PlottingProgress and Dashboard pages
    * @returns {SyncState} - sync state object (starting block, current block and highest block)
    */
-  // TODO: make private
-  public async getSyncState(): Promise<SyncState> {
+  private async getSyncState(): Promise<SyncState> {
     return (await this.api.rpc.system.syncState()).toJSON() as unknown as SyncState;
   }
 
@@ -165,12 +168,15 @@ export class Client {
           resolve();
         }
       })
-        .then((unsubLocal) => { unsub = unsubLocal; })
+        .then((unsubLocal) => { 
+          unsub = unsubLocal; 
+          this.unsubscribeSyncState = unsubLocal;
+        })
         .catch((e) => reject(e));
     });
   }
 
-  public async isSyncing(): Promise<boolean> {
+  private async isSyncing(): Promise<boolean> {
     const { isSyncing } = await this.api.rpc.system.health();
     return isSyncing.isTrue;
   }

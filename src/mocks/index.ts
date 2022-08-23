@@ -46,9 +46,9 @@ export const clientMock = {
     startingBlock: 0,
     highestBlock: 1000,
   })),
-  isSyncing: jest.fn(() => false),
   startBlockSubscription: jest.fn().mockResolvedValue({}),
   startSyncStateSubscription: jest.fn().mockResolvedValue({}),
+  unsubscribeSyncState: jest.fn(),
 } as unknown as Client;
 
 export const utilMock = {
