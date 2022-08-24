@@ -38,7 +38,7 @@
         "entitlements": "entitlements.plist"
       },
       "windows": {
-        "certificateThumbprint": "00A427587B911908F59B6C42BA2863109C599C1C",
+        "certificateThumbprint": "FCA030AC3840FAED48ADC5A8F734ACFCC857DF37",
         "digestAlgorithm": "sha256",
         "timestampUrl": "http://timestamp.comodoca.com"
       }
