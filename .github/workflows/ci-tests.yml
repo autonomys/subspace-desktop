@@ -4,10 +4,12 @@ on:
     paths-ignore:
       - "**.md"
       - "**/publish.yml"
+      - "**/discord.yml"
   pull_request:
     paths-ignore:
       - "**.md"
       - "**/publish.yml"
+      - "**/discord.yml"
 
 env:
   # Not needed in CI, should make things a bit faster
@@ -163,7 +165,7 @@ jobs:
         env:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
-      
+
       - name: run unit tests
         run: yarn test
 
