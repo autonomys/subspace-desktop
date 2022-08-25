@@ -56,10 +56,10 @@ impl NativeExecutionDispatch for ExecutorDispatch {
     }
 }
 
-#[tauri::command]
-/// starts a new node instance
+/// starts a new node instance via calling `init_node()`
 /// if there is a node instance running previously,
 /// first it stops the previous instance, then starts a new instance
+#[tauri::command]
 pub(crate) async fn start_node(path: String, node_name: String) -> Result<String, String> {
     type FullClient<RuntimeApi, ExecutorDispatch> =
         sc_service::TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<ExecutorDispatch>>;

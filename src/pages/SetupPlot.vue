@@ -64,7 +64,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
                 outlined
                 suffix="GB"
                 v-model.number="store.plotSizeGB"
-                :rules="[val => val > 0 || $t('setupPlot.allocatedErrorMsg')]"
+                :rules="[val => val > 0 || $t('setupPlot.allocatedErrorMsg'), val => val <= 100 || $t('setupPlot.plotSizeLimitErrorMsg')]"
               )
                 q-tooltip.q-pa-sm
                   p {{ $t('setupPlot.allocatedSpace') }}
@@ -100,7 +100,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
     .col-expand
     .col-auto
       q-btn(
-        :disable="(!validPath || store.plotSizeGB <= 0)"
+        :disable="(!validPath || store.plotSizeGB <= 0 || store.plotSizeGB > 100)"
         @click="confirmCreateDir()"
         color="blue-8"
         icon-right="downloading"
