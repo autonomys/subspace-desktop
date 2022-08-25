@@ -23,11 +23,12 @@ use tracing_subscriber::{fmt, fmt::format::FmtSpan, EnvFilter};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let ctx = tauri::generate_context!();
+    let ctx = tauri::generate_context!(); // context is necessary to get bundle id
     let id = &ctx.config().tauri.bundle.identifier;
     let log_dir = utils::custom_log_dir(id);
     create_dir_all(log_dir.clone()).expect("path creation should always succeed");
 
+    // filter for logging
     let filter = || {
         EnvFilter::builder()
             .with_default_directive(LevelFilter::INFO.into())
@@ -54,6 +55,7 @@ async fn main() -> Result<()> {
         )
         .init();
 
+    // building the application
     let app = tauri::Builder::default()
         .setup(|app| {
             #[cfg(debug_assertions)] // only include this code on debug builds
@@ -118,6 +120,7 @@ async fn main() -> Result<()> {
         .build(ctx)
         .expect("error while running tauri application");
 
+    // running the application
     app.run(|app_handle, e| match e {
         RunEvent::WindowEvent {
             label,
