@@ -33,7 +33,8 @@
     "estimatingSpace": "Requesting the blockchain size from the network.",
     "plotsDirectory": "Plots Directory",
     "start": "Start Plotting",
-    "allocatedErrorMsg": "Value should be a positive number"
+    "allocatedErrorMsg": "Value should be a positive number",
+    "plotSizeLimitErrorMsg": "Max plot size for Gemini II testnet is 100 GB"
   },
   "plottingProgress": {
     "startingFarmer": "Starting the farmer ...",
