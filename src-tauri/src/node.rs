@@ -12,7 +12,7 @@ use sc_service::config::{
     OffchainWorkerConfig,
 };
 use sc_service::{
-    BasePath, Configuration, DatabaseSource, KeepBlocks, PruningMode, Role, RpcMethods,
+    BasePath, BlocksPruning, Configuration, DatabaseSource, PruningMode, Role, RpcMethods,
     TracingReceiver,
 };
 use sc_subspace_chain_specs::ConsensusChainSpec;
@@ -290,8 +290,8 @@ fn create_configuration<CS: ChainSpec + 'static>(
             state_cache_size: 67_108_864,
             state_cache_child_ratio: None,
             // TODO: Change to constrained eventually (need DSN for this)
-            state_pruning: Some(PruningMode::keep_blocks(1024)),
-            keep_blocks: KeepBlocks::Some(1024),
+            state_pruning: Some(PruningMode::blocks_pruning(1024)),
+            blocks_pruning: BlocksPruning::Some(1024),
             wasm_method: WasmExecutionMethod::Compiled {
                 instantiation_strategy: WasmtimeInstantiationStrategy::PoolingCopyOnWrite,
             },

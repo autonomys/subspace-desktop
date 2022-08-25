@@ -6,16 +6,16 @@ use subspace_farmer::legacy_multi_plots_farm::{
     LegacyMultiPlotsFarm, Options as MultiFarmingOptions,
 };
 use subspace_farmer::single_plot_farm::PlotFactoryOptions;
-use subspace_farmer::{Identity, LegacyObjectMappings, NodeRpcClient, Plot, RpcClient};
+use subspace_farmer::{LegacyObjectMappings, NodeRpcClient, Plot, RpcClient};
 use subspace_networking::libp2p::{multiaddr::Protocol, Multiaddr};
-use subspace_networking::Config;
+use subspace_networking::{Config, RelayMode};
 use tokio::time::{sleep, timeout, Duration};
 use tracing::{debug, error, info, trace, warn};
 
 #[derive(Clone)]
 struct FarmingArgs {
     node_rpc_url: String,
-    reward_address: Option<PublicKey>,
+    reward_address: PublicKey,
     plot_size: u64,
     listen_on: Vec<Multiaddr>,
     bootstrap_nodes: Vec<Multiaddr>,
@@ -50,7 +50,7 @@ pub(crate) async fn farming(
     if let Ok(address) = parse_reward_address(&reward_address) {
         let farming_args = FarmingArgs {
             node_rpc_url: "ws://127.0.0.1:9947".to_string(),
-            reward_address: Some(address),
+            reward_address: address,
             plot_size,
             listen_on: vec!["/ip4/127.0.0.1/tcp/40333"
                 .parse()
@@ -94,23 +94,16 @@ async fn farm(
     farm_args: FarmingArgs,
 ) -> Result<LegacyMultiPlotsFarm, anyhow::Error> {
     let FarmingArgs {
+        bootstrap_nodes,
+        listen_on,
         node_rpc_url,
         reward_address,
         plot_size,
-        listen_on,
-        bootstrap_nodes,
-        archiving,
         dsn_sync,
+        archiving,
     } = farm_args;
 
     raise_fd_limit();
-
-    let reward_address = if let Some(reward_address) = reward_address {
-        reward_address
-    } else {
-        let identity = Identity::open_or_create(&base_directory)?;
-        identity.public_key().to_bytes().into()
-    };
 
     if plot_size < 1024 * 1024 {
         return Err(anyhow::anyhow!(
@@ -134,6 +127,7 @@ async fn farm(
         error!("Node is not responding for 10 seconds, farmer is unable to start");
         return Err(anyhow!(error));
     }
+
     let archiving_client = NodeRpcClient::new(&node_rpc_url).await?;
     let farming_client = NodeRpcClient::new(&node_rpc_url).await?;
 
@@ -154,6 +148,7 @@ async fn farm(
     let (relay_server_node, mut relay_node_runner) = subspace_networking::create(Config {
         listen_on,
         allow_non_globals_in_dht: true,
+        relay_mode: RelayMode::Server,
         ..Config::with_generated_keypair()
     })
     .await?;
@@ -187,11 +182,11 @@ async fn farm(
             object_mappings: object_mappings.clone(),
             reward_address,
             bootstrap_nodes,
+            listen_on: vec![],
             enable_dsn_archiving: matches!(archiving, ArchivingFrom::Dsn),
             enable_dsn_sync: dsn_sync,
             enable_farming: true,
-            listen_on: vec![],
-            relay_server_node: Some(relay_server_node),
+            relay_server_node: Some(relay_server_node.clone()),
         },
         usable_space,
         move |options: PlotFactoryOptions<'_>| {
@@ -207,11 +202,6 @@ async fn farm(
     .await?;
 
     Ok(multi_plots_farm)
-}
-
-fn parse_reward_address(s: &str) -> Result<PublicKey, sp_core::crypto::PublicError> {
-    s.parse::<sp_core::sr25519::Public>()
-        .map(|key| PublicKey::from(key.0))
 }
 
 fn raise_fd_limit() {
@@ -231,6 +221,11 @@ fn raise_fd_limit() {
             warn!("Failed to increase file limit: {err}")
         }
     }
+}
+
+fn parse_reward_address(s: &str) -> Result<PublicKey, sp_core::crypto::PublicError> {
+    s.parse::<sp_core::sr25519::Public>()
+        .map(|key| PublicKey::from(key.0))
 }
 
 fn get_usable_plot_space(allocated_space: u64) -> u64 {
