@@ -15,6 +15,7 @@ pub fn get_tray_menu() -> SystemTray {
 }
 
 pub fn get_menu() -> Menu {
+    // we don't need menu for Windows and Linux (without a menu, keyboard shortcuts doesn't work on macOS)
     #[cfg(target_os = "macos")]
     {
         let my_app_menu = Menu::new()
@@ -41,6 +42,7 @@ pub fn get_menu() -> Menu {
             .add_submenu(Submenu::new("Edit", edit_menu))
             .add_submenu(Submenu::new("Window", window_menu))
     }
+    // return an empty menu for Windows and Linux
     #[cfg(not(target_os = "macos"))]
     {
         Menu::new()
