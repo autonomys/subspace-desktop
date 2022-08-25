@@ -33,7 +33,7 @@
       "macOS": {
         "frameworks": [],
         "minimumSystemVersion": "",
-        "exceptionDomain": "",
+        "exceptionDomain": "http://localhost:3009",
         "signingIdentity": null,
         "entitlements": "entitlements.plist"
       },
@@ -48,7 +48,7 @@
       "endpoints": [
         "https://tauri-updater.subspace.network/v1/{{target}}/{{arch}}/{{current_version}}"
       ],
-      "dialog": true,
+      "dialog": false,
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDU4OTU2Qjc2QUFERTE4RjcKUldUM0dONnFkbXVWV0huTEN1bEZveUpZb1pXd0NOOFd1OXYvSUk2RjJRRnR6QUltelNaZXl2MTQK"
     },
     "allowlist": {

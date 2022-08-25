@@ -11,6 +11,7 @@ import Config from '../lib/config';
 import { useStore } from '../stores/store';
 import { appName, errorLogger, infoLogger } from '../lib/util';
 import * as native from '../lib/native';
+import { initUpdater } from '../lib/updater';
 
 const LOCAL_RPC = process.env.LOCAL_API_WS || 'ws://localhost:9947';
 
@@ -32,6 +33,8 @@ export default boot(async ({ app }) => {
   const { nodeName } = (await config.readConfigFile());
   const store = useStore();
   store.setNodeName(config, nodeName);
+
+  await initUpdater(tauri, store.setHasNewUpdate, errorLogger);
 
   // create Client instance
   const api = createApi(LOCAL_RPC);

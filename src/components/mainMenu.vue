@@ -12,6 +12,12 @@ q-menu(auto-close)
         .col
           p.text-grey(v-if="!launchOnStart") {{ $t('menu.autoStart') }}
           p.text-black(v-else) {{ $t('menu.autoStart') }}
+    q-item(@click="installNewUpdate()" clickable v-if="store.hasNewUpdate")
+      .row.items-center
+        .col-auto.q-mr-md
+          q-icon(color="green" name="upload")
+        .col
+          p {{ $t('menu.updateAvailable') }}
     q-item(@click="exportLogs()" clickable)
       .row.items-center
         .col-auto.q-mr-md
@@ -29,14 +35,18 @@ q-menu(auto-close)
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { Dialog, Notify } from 'quasar';
-import { relaunch } from '@tauri-apps/api/process';
-import { open as shellOpen } from '@tauri-apps/api/shell';
+import { process, shell, event } from '@tauri-apps/api';
 import { LocalStorage as localStorage } from 'quasar';
 
 import * as plotDir from '../lib/plotDir';
 import * as util from '../lib/util';
+import { useStore } from '../stores/store';
 
 export default defineComponent({
+  setup() {
+    const store = useStore();
+    return { store };
+  },
   data() {
     return {
       util,
@@ -96,14 +106,14 @@ export default defineComponent({
       }).onOk(async () => {
         await util.resetAndClear({ plotDir, localStorage, config: this.$config });
         await new Promise((resolve) => setTimeout(resolve, 1000));
-        await relaunch();
+        await process.relaunch();
       });
     },
     async exportLogs() {
       try {
         const log_path = await util.getLogPath();
         util.infoLogger('log path acquired:' + log_path);
-        await shellOpen(log_path);
+        await shell.open(log_path);
       } catch (error) {
         // TODO: add proper error handling - update store and show error page
         util.errorLogger(error);
@@ -116,6 +126,9 @@ export default defineComponent({
         this.launchOnStart = false;
         this.disableAutoLaunch = true;
       }
+    },
+    async installNewUpdate() {
+      await event.emit('tauri://update');
     }
   }
 });
