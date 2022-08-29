@@ -34,7 +34,7 @@ export async function dirExists(dir: string): Promise<boolean> {
   return (await tauri.fs.readDir(dir, { recursive: false }).catch(console.error)) ? true : false;
 }
 
-// TODO: consider adding this as a method for SetuPlot (not used anywhere else)
+// TODO: consider adding this as a method for SetupPlot (not used anywhere else)
 /**
  * Utility function to get drive stats (free space, total space)
  * @param {string} dir - directory to check
