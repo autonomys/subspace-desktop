@@ -12,7 +12,7 @@ mod node;
 mod utils;
 
 use anyhow::Result;
-use std::fs::{create_dir_all, File};
+use std::fs::create_dir_all;
 use tauri::SystemTrayEvent;
 use tauri::{Manager, RunEvent, WindowEvent};
 use tracing::level_filters::LevelFilter;
@@ -21,12 +21,17 @@ use tracing_subscriber::prelude::*;
 use tracing_subscriber::Layer;
 use tracing_subscriber::{fmt, fmt::format::FmtSpan, EnvFilter};
 
+const KEEP_LAST_N_DAYS: usize = 7;
+
 #[tokio::main]
 async fn main() -> Result<()> {
     let ctx = tauri::generate_context!(); // context is necessary to get bundle id
     let id = &ctx.config().tauri.bundle.identifier;
     let log_dir = utils::custom_log_dir(id);
     create_dir_all(log_dir.clone()).expect("path creation should always succeed");
+
+    let mut file_appender = tracing_appender::rolling::daily(log_dir, "subspace-desktop.log");
+    file_appender.keep_last_n_logs(KEEP_LAST_N_DAYS); // keep the logs of last 5 days only
 
     // filter for logging
     let filter = || {
@@ -45,13 +50,9 @@ async fn main() -> Result<()> {
                 .with_filter(filter()),
         )
         .with(
-            BunyanFormattingLayer::new(
-                "subspace-desktop".to_owned(),
-                File::create(log_dir.join(format!("{}.log", id)))
-                    .expect("Failed to create log file"),
-            )
-            .and_then(JsonStorageLayer)
-            .with_filter(filter()),
+            BunyanFormattingLayer::new("subspace-desktop".to_owned(), file_appender)
+                .and_then(JsonStorageLayer)
+                .with_filter(filter()),
         )
         .init();
 

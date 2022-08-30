@@ -16,10 +16,8 @@ anyhow = "1.0.58"
 cirrus-runtime = { git = "https://github.com/subspace/subspace", rev = "efbead79c291ff731c7687d2704e82513ecc196a" }
 dirs = "4.0.0"
 dotenv = "0.15.0"
-event-listener-primitives = "2.0.1"
 fdlimit = "0.2.1"
 fs2 = "0.4.3"
-hex = "0.4.3"
 sc-chain-spec = { version = "4.0.0-dev", git = "https://github.com/subspace/substrate", rev = "6b8553511112afd5ae7e8e6877dc2f467850f155" }
 sc-client-api = { version = "4.0.0-dev", git = "https://github.com/subspace/substrate", rev = "6b8553511112afd5ae7e8e6877dc2f467850f155" }
 sc-consensus-slots = { version = "0.10.0-dev", git = "https://github.com/subspace/substrate", rev = "6b8553511112afd5ae7e8e6877dc2f467850f155" }
@@ -41,6 +39,7 @@ subspace-service = { git = "https://github.com/subspace/subspace", rev = "efbead
 subspace-solving = { git = "https://github.com/subspace/subspace", rev = "efbead79c291ff731c7687d2704e82513ecc196a" }
 tokio = { version = "1.11.0", features = ["macros", "rt-multi-thread"] }
 tracing = "0.1.31"
+tracing-appender = "0.2"
 tracing-bunyan-formatter = "0.3.2"
 tracing-subscriber = { version = "0.3.11", features = ["env-filter"] }
 
@@ -71,3 +70,7 @@ codegen-units = 1
 # TODO: Remove once chacha20poly1305 0.10 appears in libp2p's dependencies
 chacha20poly1305 = { git = "https://github.com/RustCrypto/AEADs", rev = "06dbfb5571687fd1bbe9d3c9b2193a1ba17f8e99" }
 libp2p = { git = "https://github.com/subspace/rust-libp2p", branch = "subspace-v3" }
+tracing = { git = "https://github.com/ozgunozerk/tracing-keep-last-n-logs", branch = "v0.1.x" }
+tracing-core = { git = "https://github.com/ozgunozerk/tracing-keep-last-n-logs", branch = "v0.1.x" }
+tracing-appender = { git = "https://github.com/ozgunozerk/tracing-keep-last-n-logs", branch = "v0.1.x" }
+tracing-subscriber = { git = "https://github.com/ozgunozerk/tracing-keep-last-n-logs", branch = "v0.1.x" }
