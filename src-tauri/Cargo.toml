@@ -70,7 +70,9 @@ codegen-units = 1
 # TODO: Remove once chacha20poly1305 0.10 appears in libp2p's dependencies
 chacha20poly1305 = { git = "https://github.com/RustCrypto/AEADs", rev = "06dbfb5571687fd1bbe9d3c9b2193a1ba17f8e99" }
 libp2p = { git = "https://github.com/subspace/rust-libp2p", branch = "subspace-v3" }
-tracing = { git = "https://github.com/ozgunozerk/tracing-keep-last-n-logs", branch = "v0.1.x" }
-tracing-core = { git = "https://github.com/ozgunozerk/tracing-keep-last-n-logs", branch = "v0.1.x" }
-tracing-appender = { git = "https://github.com/ozgunozerk/tracing-keep-last-n-logs", branch = "v0.1.x" }
-tracing-subscriber = { git = "https://github.com/ozgunozerk/tracing-keep-last-n-logs", branch = "v0.1.x" }
+# if https://github.com/tokio-rs/tracing/pull/2284 merges, we can get rid of the below
+# we need these, since tracing does not have keep-last-n-logs feature yet
+tracing = { git = "https://github.com/subspace/tracing-keep-last-n-logs", branch = "v0.1.x" }
+tracing-core = { git = "https://github.com/subspace/tracing-keep-last-n-logs", branch = "v0.1.x" }
+tracing-appender = { git = "https://github.com/subspace/tracing-keep-last-n-logs", branch = "v0.1.x" }
+tracing-subscriber = { git = "https://github.com/subspace/tracing-keep-last-n-logs", branch = "v0.1.x" }
