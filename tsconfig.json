@@ -9,7 +9,8 @@
     "allowJs": false,
     "strictNullChecks": true,
     "experimentalDecorators": true,
-    "noImplicitReturns": true
+    "noImplicitReturns": true,
+    "skipLibCheck": true
   },
   "include": [
     "src"
