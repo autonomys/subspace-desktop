@@ -9,7 +9,7 @@ edition = "2021"
 
 [build-dependencies]
 substrate-build-script-utils = { version = "3.0.0", git = "https://github.com/subspace/substrate", rev = "1a7c28721fa77ecce9632ad9ce473f2d3cf1a598" }
-tauri-build = { version = "1.0.0-rc.9", features = [] }
+tauri-build = { version = "1.0.4", features = [] }
 
 [dependencies]
 anyhow = "1.0.58"
@@ -51,8 +51,8 @@ openssl = { version = "0.10.40", features = ["vendored"] }
 winreg = "0.10.1"
 
 [dependencies.tauri]
-features = ["clipboard-all", "dialog-all", "fs-all", "global-shortcut-all", "gtk-tray", "notification-all", "os-all", "path-all", "process-exit", "process-relaunch", "shell-all", "system-tray", "updater", "window-all"]
-version = "1.0.0-rc.11"
+features = ["clipboard-all", "dialog-all", "fs-all", "global-shortcut-all", "notification-all", "os-all", "path-all", "process-exit", "process-relaunch", "shell-all", "system-tray", "updater", "window-all"]
+version = "1.0.5"
 
 [features]
 default = [ "custom-protocol" ]
