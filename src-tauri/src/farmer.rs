@@ -1,26 +1,43 @@
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, Error, Result};
+use futures::stream::FuturesUnordered;
+use futures::StreamExt;
+use std::future::Future;
 use std::path::PathBuf;
 use std::sync::Arc;
 use subspace_core_primitives::PublicKey;
-use subspace_farmer::legacy_multi_plots_farm::{
-    LegacyMultiPlotsFarm, Options as MultiFarmingOptions,
-};
+use subspace_farmer::single_disk_farm::{SingleDiskFarm, SingleDiskFarmOptions};
 use subspace_farmer::single_plot_farm::PlotFactoryOptions;
-use subspace_farmer::{LegacyObjectMappings, NodeRpcClient, Plot, RpcClient};
+use subspace_farmer::{NodeRpcClient, Plot, RpcClient};
 use subspace_networking::libp2p::{multiaddr::Protocol, Multiaddr};
 use subspace_networking::{Config, RelayMode};
 use tokio::time::{sleep, timeout, Duration};
 use tracing::{debug, error, info, trace, warn};
 
+const LAMDA_2513_GENESIS_HASH: [u8; 32] = [
+    0x1e, 0xd9, 0x7c, 0x4e, 0x41, 0xd2, 0x44, 0x43, 0x1e, 0x29, 0x88, 0xaf, 0xfa, 0x66, 0x75, 0x47,
+    0x76, 0x80, 0x62, 0xc1, 0x90, 0xc1, 0xd0, 0xf5, 0xf3, 0x59, 0x8e, 0xb0, 0xc7, 0x84, 0x00, 0x2d,
+];
+// 100GiB
+const LAMDA_2513_MAX_ALLOCATED_SIZE: u64 = 100 * 1024 * 1024 * 1024;
+
 #[derive(Clone)]
 struct FarmingArgs {
     node_rpc_url: String,
     reward_address: PublicKey,
-    plot_size: u64,
     listen_on: Vec<Multiaddr>,
     bootstrap_nodes: Vec<Multiaddr>,
     archiving: ArchivingFrom,
     dsn_sync: bool,
+}
+
+#[derive(Debug, Clone)]
+struct DiskFarm {
+    /// Path to directory where plots are stored, typically HDD.
+    plot_directory: PathBuf,
+    /// Path to directory for storing metadata, typically SSD.
+    metadata_directory: PathBuf,
+    /// How much space in bytes can farm use for plots (metadata space is not included)
+    allocated_plotting_space: u64,
 }
 
 #[allow(dead_code)] // Dsn is not active now, will be enabled later. Wanted to keep the struct as it is in monorepo
@@ -51,7 +68,6 @@ pub(crate) async fn farming(
         let farming_args = FarmingArgs {
             node_rpc_url: "ws://127.0.0.1:9947".to_string(),
             reward_address: address,
-            plot_size,
             listen_on: vec!["/ip4/127.0.0.1/tcp/40333"
                 .parse()
                 .expect("the address is hardcoded and correct")],
@@ -60,23 +76,33 @@ pub(crate) async fn farming(
             dsn_sync: false,
         };
 
-        let farming_handle = farm(path.clone().into(), farming_args.clone())
+        let disk_farms = vec![DiskFarm {
+            plot_directory: path.clone().into(),
+            metadata_directory: path.clone().into(),
+            allocated_plotting_space: get_usable_plot_space(plot_size),
+        }];
+
+        let mut farming_handle = farm(disk_farms.clone(), farming_args.clone())
             .await
             .map_err(|error| format!("farm function failed to start, with error: {error}"))?;
 
         tokio::spawn(async move {
-            match farming_handle.wait().await {
-                Err(error) => error!("farmer instance crashed with error: {error}"),
-                Ok(_) => debug!("Node should have been restarted, restarting farmer now"),
+            match farming_handle.next().await {
+                Some(Err(error)) => error!("farmer instance crashed with error: {error}"),
+                Some(Ok(_)) => debug!("Node should have been restarted, restarting farmer now"),
+                _ => unreachable!("there should be at least one farming"),
             }
             loop {
-                match farm(path.clone().into(), farming_args.clone()).await {
+                match farm(disk_farms.clone(), farming_args.clone()).await {
                     Err(error) => {
                         error!("farm function failed to start, with error: {error}")
                     }
-                    Ok(handle) => match handle.wait().await {
-                        Err(error) => error!("farmer instance crashed with error: {error}"),
-                        Ok(_) => debug!("Node should have been restarted, restarting farmer now"),
+                    Ok(mut handle) => match handle.next().await {
+                        Some(Err(error)) => error!("farmer instance crashed with error: {error}"),
+                        Some(Ok(_)) => {
+                            debug!("Node should have been restarted, restarting farmer now")
+                        }
+                        _ => unreachable!("there should be at least one farming"),
                     },
                 }
             }
@@ -90,29 +116,21 @@ pub(crate) async fn farming(
 /// Start farming by using plot in specified path and connecting to WebSocket server at specified
 /// address.
 async fn farm(
-    base_directory: PathBuf,
-    farm_args: FarmingArgs,
-) -> Result<LegacyMultiPlotsFarm, anyhow::Error> {
+    disk_farms: Vec<DiskFarm>,
+    farming_args: FarmingArgs,
+) -> Result<FuturesUnordered<impl Future<Output = Result<(), Error>>>, anyhow::Error> {
+    raise_fd_limit();
+
     let FarmingArgs {
         bootstrap_nodes,
         listen_on,
         node_rpc_url,
         reward_address,
-        plot_size,
         dsn_sync,
         archiving,
-    } = farm_args;
+    } = farming_args;
 
-    raise_fd_limit();
-
-    if plot_size < 1024 * 1024 {
-        return Err(anyhow::anyhow!(
-            "Plot size is too low ({0} bytes). Did you mean {0}G or {0}T?",
-            plot_size
-        ));
-    }
-
-    info!("Connecting to node at {}", node_rpc_url);
+    // ping node to discover whether it is listening
     if let Err(error) = timeout(Duration::from_secs(10), async {
         loop {
             if NodeRpcClient::new(&node_rpc_url).await.is_ok() {
@@ -128,21 +146,13 @@ async fn farm(
         return Err(anyhow!(error));
     }
 
-    let archiving_client = NodeRpcClient::new(&node_rpc_url).await?;
-    let farming_client = NodeRpcClient::new(&node_rpc_url).await?;
+    let mut single_disk_farms = Vec::with_capacity(disk_farms.len());
+    let mut record_size = None;
+    let mut recorded_history_segment_size = None;
 
-    let farmer_protocol_info = farming_client
-        .farmer_protocol_info()
-        .await
-        .map_err(|error| anyhow!(error))?;
-
-    info!("Opening object mapping");
-    let object_mappings = tokio::task::spawn_blocking({
-        let path = base_directory.join("object-mappings");
-
-        move || LegacyObjectMappings::open_or_create(path)
-    })
-    .await??;
+    if disk_farms.is_empty() {
+        return Err(anyhow!("There must be a disk farm provided"));
+    }
 
     // Starting the relay server node.
     let (relay_server_node, mut relay_node_runner) = subspace_networking::create(Config {
@@ -172,36 +182,83 @@ async fn farm(
 
     trace!(node_id = %relay_server_node.id(), "Relay Node started");
 
-    let usable_space = get_usable_plot_space(plot_size);
-    let multi_plots_farm = LegacyMultiPlotsFarm::new(
-        MultiFarmingOptions {
-            base_directory,
+    // TODO: Check plot and metadata sizes to ensure there is enough space for farmer to not
+    //  fail later (note that multiple farms can use the same location for metadata)
+    for (farm_index, mut disk_farm) in disk_farms.into_iter().enumerate() {
+        if disk_farm.allocated_plotting_space < 1024 * 1024 {
+            return Err(anyhow::anyhow!(
+                "Plot size is too low ({0} bytes). Did you mean {0}G or {0}T?",
+                disk_farm.allocated_plotting_space
+            ));
+        }
+
+        info!("Connecting to node at {}", node_rpc_url);
+        let archiving_client = NodeRpcClient::new(&node_rpc_url).await?;
+        let farming_client = NodeRpcClient::new(&node_rpc_url).await?;
+
+        info!("Connecting to node at {}", node_rpc_url);
+
+        let farmer_protocol_info = farming_client
+            .farmer_protocol_info()
+            .await
+            .map_err(|error| anyhow!(error))?;
+
+        if farmer_protocol_info.genesis_hash == LAMDA_2513_GENESIS_HASH {
+            if farm_index > 0 {
+                warn!("This chain only supports one disk farm");
+                break;
+            }
+
+            if disk_farm.allocated_plotting_space > LAMDA_2513_MAX_ALLOCATED_SIZE {
+                warn!(
+                    "This chain only supports up to 100GiB of allocated space, force-limiting \
+                    allocated space to 100GiB"
+                );
+
+                disk_farm.allocated_plotting_space = LAMDA_2513_MAX_ALLOCATED_SIZE;
+            }
+        }
+
+        record_size.replace(farmer_protocol_info.record_size);
+        recorded_history_segment_size.replace(farmer_protocol_info.recorded_history_segment_size);
+
+        let single_disk_farm = SingleDiskFarm::new(SingleDiskFarmOptions {
+            plot_directory: disk_farm.plot_directory,
+            metadata_directory: disk_farm.metadata_directory,
+            allocated_plotting_space: disk_farm.allocated_plotting_space,
             farmer_protocol_info,
+            disk_concurrency: std::num::NonZeroU16::new(2).expect("hard-coded value is correct"),
             archiving_client,
             farming_client,
-            object_mappings: object_mappings.clone(),
             reward_address,
-            bootstrap_nodes,
+            bootstrap_nodes: bootstrap_nodes.clone(),
             listen_on: vec![],
             enable_dsn_archiving: matches!(archiving, ArchivingFrom::Dsn),
             enable_dsn_sync: dsn_sync,
             enable_farming: true,
+            plot_factory: move |options: PlotFactoryOptions<'_>| {
+                Plot::open_or_create(
+                    options.single_plot_farm_id,
+                    options.plot_directory,
+                    options.metadata_directory,
+                    options.public_key,
+                    options.max_plot_size,
+                )
+            },
             relay_server_node: Some(relay_server_node.clone()),
-        },
-        usable_space,
-        move |options: PlotFactoryOptions<'_>| {
-            Plot::open_or_create(
-                options.single_plot_farm_id,
-                options.plot_directory,
-                options.metadata_directory,
-                options.public_key,
-                options.max_plot_size,
-            )
-        },
-    )
-    .await?;
+        })
+        .await?;
 
-    Ok(multi_plots_farm)
+        single_disk_farms.push(single_disk_farm);
+    }
+
+    let single_disk_farms_stream = single_disk_farms
+        .into_iter()
+        .map(|single_disk_farm| single_disk_farm.wait())
+        .collect::<FuturesUnordered<_>>();
+
+    //Ok(single_disk_farms_stream)
+    Ok(single_disk_farms_stream)
 }
 
 fn raise_fd_limit() {
