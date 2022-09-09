@@ -4,7 +4,20 @@
   "chainType": {
     "Custom": "Subspace Gemini 2a"
   },
-  "bootNodes": [],
+  "bootNodes": [
+    "/dns/bootstrap-0.gemini-2a.subspace.network/tcp/30333/p2p/12D3KooWFhLGQWC2Fbgu4HXhFy5Gpv9WKHb9Ve4FYEsMb221cfyo",
+    "/dns/bootstrap-1.gemini-2a.subspace.network/tcp/30333/p2p/12D3KooWPBzmEmEiW87qMkroa6DJunbUe5LnCNSQaiaJpJJN266F",
+    "/dns/bootstrap-2.gemini-2a.subspace.network/tcp/30333/p2p/12D3KooWPiumwCZN91fVkPyJ2qvdPbiKPWbD1isK9iECCA1U3LaZ",
+    "/dns/bootstrap-3.gemini-2a.subspace.network/tcp/30333/p2p/12D3KooWE5AdCVbrnRUmBkMwhikFR9wmjuUgm8CsRQZht4oi2VPg",
+    "/dns/bootstrap-4.gemini-2a.subspace.network/tcp/30333/p2p/12D3KooWMBeJyaYXKZyAjEytdGkqSoQnaVsX1yUoMKxX8F3P5CSa",
+    "/dns/bootstrap-5.gemini-2a.subspace.network/tcp/30333/p2p/12D3KooWEGgPiMM9WEBCZFNo8EkMDF3p1B47peSeECnrXWmdd3AY",
+    "/dns/bootstrap-6.gemini-2a.subspace.network/tcp/30333/p2p/12D3KooWMFz2P5k1UBeHSLq8UGKMJHwMn5zbehZeiEF6AfxjVbNX",
+    "/dns/bootstrap-7.gemini-2a.subspace.network/tcp/30333/p2p/12D3KooWDettGb2jviLBc5qmk67pGshGX2a22dtwD2xz3P6TAkCV",
+    "/dns/bootstrap-8.gemini-2a.subspace.network/tcp/30333/p2p/12D3KooWChmG2Ab7ogeBZhAnUFcgr1BPKQNFmYgFNG83W3ZoFDpq",
+    "/dns/bootstrap-9.gemini-2a.subspace.network/tcp/30333/p2p/12D3KooWNGn1ejdum5xr8xY3kqnEmZqWYmiGxwv5ZcPwjhgzQaDj",
+    "/dns/bootstrap-10.gemini-2a.subspace.network/tcp/30333/p2p/12D3KooWE83ffAfnQgtkC86LdbwUDQjpJdWSNRCYqt493TmFXver",
+    "/dns/bootstrap-11.gemini-2a.subspace.network/tcp/30333/p2p/12D3KooWENiAuwtJiQVZBrAanqNrwppGXwhhV9YTVKqsasSG2wCv"
+  ],
   "telemetryEndpoints": [
     [
       "/dns/telemetry.polkadot.io/tcp/443/x-parity-wss/%2Fsubmit%2F",
