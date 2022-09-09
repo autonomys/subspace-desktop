@@ -13,12 +13,12 @@ use subspace_networking::{Config, RelayMode};
 use tokio::time::{sleep, timeout, Duration};
 use tracing::{debug, error, info, trace, warn};
 
-const LAMDA_2513_GENESIS_HASH: [u8; 32] = [
-    0x1e, 0xd9, 0x7c, 0x4e, 0x41, 0xd2, 0x44, 0x43, 0x1e, 0x29, 0x88, 0xaf, 0xfa, 0x66, 0x75, 0x47,
-    0x76, 0x80, 0x62, 0xc1, 0x90, 0xc1, 0xd0, 0xf5, 0xf3, 0x59, 0x8e, 0xb0, 0xc7, 0x84, 0x00, 0x2d,
+const GEMINI_2A_GENESIS_HASH: [u8; 32] = [
+    0x43, 0xd1, 0x0f, 0xfd, 0x50, 0x99, 0x03, 0x80, 0xff, 0xe6, 0xc9, 0x39, 0x21, 0x45, 0x43, 0x1d,
+    0x63, 0x0a, 0xe6, 0x7e, 0x89, 0xdb, 0xc9, 0xc0, 0x14, 0xca, 0xc2, 0xa4, 0x17, 0x75, 0x91, 0x01,
 ];
 // 100GiB
-const LAMDA_2513_MAX_ALLOCATED_SIZE: u64 = 100 * 1024 * 1024 * 1024;
+const GEMINI_2A_MAX_ALLOCATED_SIZE: u64 = 100 * 1024 * 1024 * 1024;
 
 #[derive(Clone)]
 struct FarmingArgs {
@@ -191,31 +191,27 @@ async fn farm(
                 disk_farm.allocated_plotting_space
             ));
         }
-
         info!("Connecting to node at {}", node_rpc_url);
         let archiving_client = NodeRpcClient::new(&node_rpc_url).await?;
         let farming_client = NodeRpcClient::new(&node_rpc_url).await?;
-
-        info!("Connecting to node at {}", node_rpc_url);
-
         let farmer_protocol_info = farming_client
             .farmer_protocol_info()
             .await
             .map_err(|error| anyhow!(error))?;
 
-        if farmer_protocol_info.genesis_hash == LAMDA_2513_GENESIS_HASH {
+        if farmer_protocol_info.genesis_hash == GEMINI_2A_GENESIS_HASH {
             if farm_index > 0 {
                 warn!("This chain only supports one disk farm");
                 break;
             }
 
-            if disk_farm.allocated_plotting_space > LAMDA_2513_MAX_ALLOCATED_SIZE {
+            if disk_farm.allocated_plotting_space > GEMINI_2A_MAX_ALLOCATED_SIZE {
                 warn!(
                     "This chain only supports up to 100GiB of allocated space, force-limiting \
                     allocated space to 100GiB"
                 );
 
-                disk_farm.allocated_plotting_space = LAMDA_2513_MAX_ALLOCATED_SIZE;
+                disk_farm.allocated_plotting_space = GEMINI_2A_MAX_ALLOCATED_SIZE;
             }
         }
 
