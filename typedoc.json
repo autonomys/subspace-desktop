@@ -1,0 +1,6 @@
+{
+  "entryPoints": ["src/lib", "src/stores"],
+  "entryPointStrategy": "expand",
+  "out": "docs",
+  "excludeExternals": true
+}
