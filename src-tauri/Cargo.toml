@@ -13,7 +13,7 @@ tauri-build = { version = "1.0.4", features = [] }
 
 [dependencies]
 anyhow = "1.0.58"
-cirrus-runtime = { git = "https://github.com/subspace/subspace", rev = "b9fd537cb5cb08fc00e117ca44354ae2a78ca062" }
+cirrus-runtime = { git = "https://github.com/subspace/subspace", rev = "b30ca37d34da30148f370dc16f93cc606f19c40d" }
 dirs = "4.0.0"
 dotenv = "0.15.0"
 fdlimit = "0.2.1"
@@ -25,19 +25,19 @@ sc-consensus-slots = { version = "0.10.0-dev", git = "https://github.com/subspac
 sc-executor = { version = "0.10.0-dev", git = "https://github.com/subspace/substrate", rev = "1a7c28721fa77ecce9632ad9ce473f2d3cf1a598", features = ["wasmtime"] }
 sc-network = { version = "0.10.0-dev", git = "https://github.com/subspace/substrate", rev = "1a7c28721fa77ecce9632ad9ce473f2d3cf1a598" }
 sc-service = { version = "0.10.0-dev", git = "https://github.com/subspace/substrate", rev = "1a7c28721fa77ecce9632ad9ce473f2d3cf1a598", features = ["wasmtime"] }
-sc-subspace-chain-specs = { git = "https://github.com/subspace/subspace", rev = "b9fd537cb5cb08fc00e117ca44354ae2a78ca062" }
-serde_json = "1.0.82"
+sc-subspace-chain-specs = { git = "https://github.com/subspace/subspace", rev = "b30ca37d34da30148f370dc16f93cc606f19c40d" }
 serde = { version = "1.0.143", features = [ "derive" ] }
+serde_json = "1.0.83"
 sp-core = { version = "6.0.0", git = "https://github.com/subspace/substrate", rev = "1a7c28721fa77ecce9632ad9ce473f2d3cf1a598" }
 sp-panic-handler = { version = "4.0.0", git = "https://github.com/subspace/substrate", rev = "1a7c28721fa77ecce9632ad9ce473f2d3cf1a598" }
-subspace-core-primitives = { git = "https://github.com/subspace/subspace", rev = "b9fd537cb5cb08fc00e117ca44354ae2a78ca062" }
-subspace-farmer = { git = "https://github.com/subspace/subspace", rev = "b9fd537cb5cb08fc00e117ca44354ae2a78ca062" }
-subspace-fraud-proof = { git = "https://github.com/subspace/subspace", rev = "b9fd537cb5cb08fc00e117ca44354ae2a78ca062" }
-subspace-networking = { git = "https://github.com/subspace/subspace", rev = "b9fd537cb5cb08fc00e117ca44354ae2a78ca062" }
-subspace-runtime = { git = "https://github.com/subspace/subspace", rev = "b9fd537cb5cb08fc00e117ca44354ae2a78ca062" }
-subspace-runtime-primitives = { git = "https://github.com/subspace/subspace", rev = "b9fd537cb5cb08fc00e117ca44354ae2a78ca062" }
-subspace-service = { git = "https://github.com/subspace/subspace", rev = "b9fd537cb5cb08fc00e117ca44354ae2a78ca062" }
-subspace-solving = { git = "https://github.com/subspace/subspace", rev = "b9fd537cb5cb08fc00e117ca44354ae2a78ca062" }
+subspace-core-primitives = { git = "https://github.com/subspace/subspace", rev = "b30ca37d34da30148f370dc16f93cc606f19c40d" }
+subspace-farmer = { git = "https://github.com/subspace/subspace", rev = "b30ca37d34da30148f370dc16f93cc606f19c40d" }
+subspace-fraud-proof = { git = "https://github.com/subspace/subspace", rev = "b30ca37d34da30148f370dc16f93cc606f19c40d" }
+subspace-networking = { git = "https://github.com/subspace/subspace", rev = "b30ca37d34da30148f370dc16f93cc606f19c40d" }
+subspace-runtime = { git = "https://github.com/subspace/subspace", rev = "b30ca37d34da30148f370dc16f93cc606f19c40d" }
+subspace-runtime-primitives = { git = "https://github.com/subspace/subspace", rev = "b30ca37d34da30148f370dc16f93cc606f19c40d" }
+subspace-service = { git = "https://github.com/subspace/subspace", rev = "b30ca37d34da30148f370dc16f93cc606f19c40d" }
+subspace-solving = { git = "https://github.com/subspace/subspace", rev = "b30ca37d34da30148f370dc16f93cc606f19c40d" }
 tokio = { version = "1.11.0", features = ["macros", "rt-multi-thread"] }
 tracing = "0.1.31"
 tracing-appender = "0.2"
@@ -71,8 +71,6 @@ codegen-units = 1
 # TODO: Remove once chacha20poly1305 0.10 appears in libp2p's dependencies
 chacha20poly1305 = { git = "https://github.com/RustCrypto/AEADs", rev = "06dbfb5571687fd1bbe9d3c9b2193a1ba17f8e99" }
 libp2p = { git = "https://github.com/subspace/rust-libp2p", branch = "subspace-v3" }
-# TODO: Remove once parity-db 0.3.17 will be released (see https://github.com/paritytech/parity-db/issues/89)
-parity-db = { git = "https://github.com/paritytech/parity-db/", rev = "d324a26daabda11a2307de607d0a614a567b44ba" }
 # if https://github.com/tokio-rs/tracing/pull/2284 merges, we can get rid of the below
 # we need these, since tracing does not have keep-last-n-logs feature yet
 tracing = { git = "https://github.com/subspace/tracing-keep-last-n-logs", branch = "v0.1.x" }
