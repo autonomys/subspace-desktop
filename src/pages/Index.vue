@@ -42,7 +42,7 @@ export default defineComponent({
   },
   async mounted() {
     try {
-      this.checkDev();
+      this.checkDevAndDisableContextMenu();
       if (await this.$config.validate()) {
         util.infoLogger('INDEX | NOT First Time RUN.');
         await this.store.updateFromConfig(blockStorage, this.$config);
@@ -57,7 +57,7 @@ export default defineComponent({
     }
   },
   methods: {
-    checkDev() {
+    checkDevAndDisableContextMenu() {
       if (util.CONTEXT_MENU === 'OFF')
         document.addEventListener('contextmenu', (event) =>
           event.preventDefault()
