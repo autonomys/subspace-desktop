@@ -28,7 +28,7 @@ Page components often contain other components which are registered here. Check 
 Contains utility functions for communicating with the native OS such as reading/writing files and device metadata.
 
 ### [`/stores`](src/stores)
-TODO: serge can you fill this?
+Enables state sharing across components and pages. Check the [Pinia Documentation](https://pinia.vuejs.org/introduction.html) for further details.
 
 ### [`/lib/client.ts`](src/lib/client.ts)
 Wrapper logic around `polkadotjs` which handles communication with the Subspace client. There is wrapper function for getting information about blocks, peers and other data. This library has to be initialized async using a websocket connection and will hang if the connection is unable to establish.
