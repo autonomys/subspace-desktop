@@ -86,10 +86,9 @@
   "importKey": {
     "tooltip": "Please provide a valid Reward Address to proceed.",
     "pageTitle": "Import Reward Address",
-    "rewardAddress": "Please enter your Reward Address in SS58 format (it should start with the letters \"st\")",
+    "rewardAddress": "Please enter your Reward Address in SS58 format!",
     "continue": "continue",
-    "cancel": "Cancel",
-    "addressErrorMsg": "Invalid address"
+    "cancel": "Cancel"
   },
   "header": {
     "IncentivizedLabel": "Incentivized Testnet",
