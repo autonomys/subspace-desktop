@@ -86,7 +86,7 @@
   "importKey": {
     "tooltip": "Please provide a valid Reward Address to proceed.",
     "pageTitle": "Import Reward Address",
-    "rewardAddress": "Please enter your Reward Address in SS58 format!",
+    "rewardAddress": "Please use a proper wallet address from Subwallet or Polkadot.js extension",
     "continue": "continue",
     "cancel": "Cancel"
   },

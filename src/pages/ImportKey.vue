@@ -57,7 +57,7 @@ export default defineComponent({
   methods: {
     async isValidSubstrateAddress(addr: string): Promise<boolean|string> {
       try {
-        let result: boolean = await tauri.invoke("validate_reward_address", { addr });
+        const result: boolean = await tauri.invoke("validate_reward_address", { addr });
         this.validAddress = result;
         return (result || this.$t('importKey.rewardAddress'));
       } catch (error) {
@@ -66,7 +66,7 @@ export default defineComponent({
       }
     },
     async importKey() {
-      this.store.rewardAddress = this.rewardAddress
+      this.store.setRewardAddress(this.rewardAddress);
       this.$router.replace({ name: 'setupPlot' });
     }
   },
