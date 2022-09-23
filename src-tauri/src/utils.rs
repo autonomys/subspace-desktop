@@ -1,5 +1,6 @@
 use serde::Serialize;
 use std::path::PathBuf;
+use std::process::Command;
 use tauri::{api, Env};
 use tracing::{debug, error, info};
 
@@ -7,6 +8,27 @@ use tracing::{debug, error, info};
 pub(crate) struct DiskStats {
     free_bytes: u64,
     total_bytes: u64,
+}
+
+#[tauri::command]
+pub(crate) fn open_folder(dir: String) {
+    #[cfg(target_os = "windows")]
+    Command::new("explorer")
+        .arg(dir)
+        .spawn()
+        .expect("could not open to specified directory");
+
+    #[cfg(target_os = "macos")]
+    Command::new("open")
+        .arg(dir)
+        .spawn()
+        .expect("could not open to specified directory");
+
+    #[cfg(target_os = "linux")]
+    Command::new("xdg-open")
+        .arg(dir)
+        .spawn()
+        .expect("could not open to specified directory");
 }
 
 #[tauri::command]

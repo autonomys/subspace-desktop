@@ -115,13 +115,6 @@ class Config {
    * @param {IConfig} - config object to store as config file
    */
   private async write(config: IConfig): Promise<void> {
-    await this.fs.createDir(this.configPath)
-      // ignore error if folder exists
-      .catch((error) => {
-        if (!error.includes('exists')) {
-          this.errorLogger(error);
-        }
-      });
     await this.fs.writeFile({
       path: this.configFullPath,
       contents: JSON.stringify(config, null, 2)
