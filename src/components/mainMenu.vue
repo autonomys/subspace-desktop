@@ -35,7 +35,7 @@ q-menu(auto-close)
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { Dialog, Notify } from 'quasar';
-import { process, shell, event } from '@tauri-apps/api';
+import { process, event, tauri } from '@tauri-apps/api';
 import { LocalStorage as localStorage } from 'quasar';
 
 import * as plotDir from '../lib/plotDir';
@@ -113,7 +113,7 @@ export default defineComponent({
       try {
         const log_path = await util.getLogPath();
         util.infoLogger('log path acquired:' + log_path);
-        await shell.open(log_path);
+        tauri.invoke("open_folder", {dir: log_path});
       } catch (error) {
         // TODO: add proper error handling - update store and show error page
         util.errorLogger(error);
