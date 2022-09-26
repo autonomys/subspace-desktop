@@ -228,7 +228,7 @@ export default defineComponent({
   },
   async mounted() {
     await this.updateDriveStats();
-    const path = (await tauri.path.dataDir()) + util.appName;
+    const path = (await tauri.path.dataDir()) + util.appName + '/plots';
     this.store.setPlotPath(path);
   },
   async created() {
@@ -248,6 +248,8 @@ export default defineComponent({
   methods: {
     async confirmCreateDir() {
       const dirExists = await native.dirExists(this.store.plotPath);
+      console.log('🚀 ~ file: SetupPlot.vue ~ line 251 ~ confirmCreateDir ~ this.store.plotPath', this.store.plotPath);
+      console.log('🚀 ~ file: SetupPlot.vue ~ line 251 ~ confirmCreateDir ~ dirExists', dirExists);
 
       if (dirExists) {
         util.infoLogger('SETUP PLOT | found the old plotting directory');
@@ -258,6 +260,7 @@ export default defineComponent({
           });
 
         if (files) {
+          console.log('🚀 ~ file: SetupPlot.vue ~ line 262 ~ confirmCreateDir ~ files', files);
           console.log('FILES ARE: :', files);
           if (files.length === 0 || (files.length === 1 && files.some(item => item.name === 'subspace-desktop.cfg'))) {
             directoryDialogs.existingDirectoryConfirm(this.store.plotPath, this.startPlotting);
