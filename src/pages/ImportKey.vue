@@ -9,9 +9,10 @@ q-page(padding)
       outlined
       dense
       class="reward-address"
-      v-model="rewardAddress"
+      v-model="store.rewardAddress"
       input-class="text-center"
-      :rules="[isValidSubstrateAddress]"
+      :error="!!store.rewardAddress && !isValidAddress"
+      :error-message="$t('importKey.rewardAddress')"
     )
   .row.justify-center.q-mt-sm
   .row.justify-end.items-center.q-mt-lg.absolute-bottom.q-pa-lg
@@ -26,19 +27,19 @@ q-page(padding)
     q-space
     .col-auto
       q-btn(
-        :disable="!validAddress"
+        :disable="!isValidAddress"
         :label="$t('importKey.continue')"
         @click="importKey()"
         icon-right="arrow_forward"
         outline
         size="lg"
       )
-      q-tooltip.q-pa-md(v-if="!validAddress")
+      q-tooltip.q-pa-md(v-if="!isValidAddress")
         p.q-mb-lg {{ $t('importKey.tooltip') }}
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, watch } from 'vue';
 import * as tauri from '@tauri-apps/api';
 import { useStore } from '../stores/store';
 import { errorLogger } from '../lib/util';
@@ -50,29 +51,29 @@ export default defineComponent({
   },
   data() {
     return {
-      rewardAddress: "",
-      validAddress: false,
+      isValidAddress: false,
     };
   },
+  mounted() {
+    watch(
+      () => this.store.rewardAddress,
+      async () => {
+        this.isValidAddress = await this.validateAddress(this.store.rewardAddress);
+      },
+    );
+  },
   methods: {
-    async isValidSubstrateAddress(addr: string): Promise<boolean|string> {
+    async validateAddress(addr: string): Promise<boolean> {
       try {
-        const result: boolean = await tauri.invoke("validate_reward_address", { addr });
-        this.validAddress = result;
-        return (result || this.$t('importKey.rewardAddress'));
+        const result: boolean = await tauri.invoke('validate_reward_address', { addr });
+        return result;
       } catch (error) {
         errorLogger(error);
-        return (false || this.$t('importKey.rewardAddress'));
+        return false;
       }
     },
     async importKey() {
-      this.store.setRewardAddress(this.rewardAddress);
       this.$router.replace({ name: 'setupPlot' });
-    }
-  },
-  watch: {
-    rewardAddress(val) {
-      this.isValidSubstrateAddress(val)
     }
   }
 });
