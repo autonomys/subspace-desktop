@@ -5,6 +5,7 @@ export {
   PIECE_SIZE,
   GB,
   CONTEXT_MENU,
+  PLOT_FOLDER,
   createApi,
   generateNodeName,
   getErrorMessage,
