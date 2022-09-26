@@ -31,7 +31,7 @@ async fn main() -> Result<()> {
     create_dir_all(log_dir.clone()).expect("path creation should always succeed");
 
     let mut file_appender = tracing_appender::rolling::daily(log_dir, "subspace-desktop.log");
-    file_appender.keep_last_n_logs(KEEP_LAST_N_DAYS); // keep the logs of last 5 days only
+    file_appender.keep_last_n_logs(KEEP_LAST_N_DAYS); // keep the logs of last 7 days only
 
     // filter for logging
     let filter = || {
@@ -96,28 +96,30 @@ async fn main() -> Result<()> {
         .invoke_handler(
             #[cfg(not(target_os = "windows"))]
             tauri::generate_handler![
-                utils::get_disk_stats,
-                utils::get_this_binary,
                 farmer::farming,
                 farmer::validate_reward_address,
                 node::start_node,
                 utils::frontend_error_logger,
                 utils::frontend_info_logger,
-                utils::custom_log_dir
+                utils::custom_log_dir,
+                utils::open_folder,
+                utils::get_disk_stats,
+                utils::get_this_binary,
             ],
             #[cfg(target_os = "windows")]
             tauri::generate_handler![
                 windows::winreg_get,
                 windows::winreg_set,
                 windows::winreg_delete,
-                utils::get_disk_stats,
-                utils::get_this_binary,
                 farmer::farming,
                 farmer::validate_reward_address,
                 node::start_node,
                 utils::frontend_error_logger,
                 utils::frontend_info_logger,
-                utils::custom_log_dir
+                utils::custom_log_dir,
+                utils::get_disk_stats,
+                utils::get_this_binary,
+                utils::open_folder,
             ],
         )
         .build(ctx)

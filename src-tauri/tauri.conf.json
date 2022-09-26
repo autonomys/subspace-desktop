@@ -79,9 +79,8 @@
         "all": true
       },
       "shell": {
-        "all": true,
         "execute": true,
-        "open": "[/subspace\\-desktop/]",
+        "open": false,
         "scope": [
           {
             "name": "run-osascript",

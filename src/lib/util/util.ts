@@ -96,7 +96,7 @@ export function generateNodeName(): string {
   let nodeName = '';
   do {
     const slug = generateSlug(2);
-    const num = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
+    const num = Math.floor(Math.random() * (9000)) + 1000;
     nodeName = slug + '-' + num.toString();
   } while (nodeName.length > nodeNameMaxLength);
   return nodeName;
