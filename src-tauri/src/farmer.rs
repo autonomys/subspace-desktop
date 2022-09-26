@@ -56,6 +56,11 @@ impl Default for ArchivingFrom {
     }
 }
 
+#[tauri::command]
+pub(crate) fn validate_reward_address(addr: &str) -> bool {
+    parse_reward_address(addr).is_ok()
+}
+
 /// manages the `farm` process
 /// waits on the `farm` handle, and restarts the `farm` process if needed
 #[tauri::command]
