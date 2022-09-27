@@ -97,6 +97,7 @@ async fn main() -> Result<()> {
             #[cfg(not(target_os = "windows"))]
             tauri::generate_handler![
                 farmer::farming,
+                farmer::validate_reward_address,
                 node::start_node,
                 utils::frontend_error_logger,
                 utils::frontend_info_logger,
@@ -111,6 +112,7 @@ async fn main() -> Result<()> {
                 windows::winreg_set,
                 windows::winreg_delete,
                 farmer::farming,
+                farmer::validate_reward_address,
                 node::start_node,
                 utils::frontend_error_logger,
                 utils::frontend_info_logger,

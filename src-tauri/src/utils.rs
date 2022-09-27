@@ -16,19 +16,19 @@ pub(crate) fn open_folder(dir: String) {
     Command::new("explorer")
         .arg(dir)
         .spawn()
-        .expect("could not open to specified directory");
+        .expect("could not open the specified directory");
 
     #[cfg(target_os = "macos")]
     Command::new("open")
         .arg(dir)
         .spawn()
-        .expect("could not open to specified directory");
+        .expect("could not open the specified directory");
 
     #[cfg(target_os = "linux")]
     Command::new("xdg-open")
         .arg(dir)
         .spawn()
-        .expect("could not open to specified directory");
+        .expect("could not open the specified directory");
 }
 
 #[tauri::command]
