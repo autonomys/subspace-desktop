@@ -230,6 +230,7 @@ export default defineComponent({
     await this.updateDriveStats();
     const path = (await tauri.path.dataDir()) + util.appName + util.PLOT_FOLDER;
     this.store.setPlotPath(path);
+    this.createDefaultPlotDir();
   },
   async created() {
     this.$watch(
@@ -301,16 +302,12 @@ export default defineComponent({
       if (result) {
         this.store.setPlotPath(result);
       }
-
-      const dirExists = await native.dirExists(this.store.plotPath);
-
-      if (!dirExists) {
-        await tauri.fs.createDir(this.store.plotPath).catch((error) => {
-          util.errorLogger(error);
-        });
-      }
-
       await this.updateDriveStats();
+    },
+    async createDefaultPlotDir() {
+      await tauri.fs.createDir(this.store.plotPath).catch((error) => {
+        util.errorLogger(error);
+      });
     },
   }
 });
