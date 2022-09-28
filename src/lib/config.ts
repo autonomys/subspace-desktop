@@ -113,11 +113,10 @@ class Config {
    * @param {IConfig} - config object to store as config file
    */
   private async write(config: IConfig): Promise<void> {
-    await this.fs.writeFile({
+    return this.fs.writeFile({
       path: this.configFullPath,
       contents: JSON.stringify(config, null, 2)
-    })
-      .catch((error) => this.errorLogger(error));
+    });
   }
 
   /**
