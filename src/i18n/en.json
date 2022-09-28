@@ -136,6 +136,10 @@
     "startNodeMissingParams": "Node name and plot directory are required to start node",
     "startFarmerFailed": "Failed to start farmer",
     "defaultErrorMessage": "Please, make sure you have an Internet connection and enough disk space in order to proceed. If the problem persists, you can reach out to our team",
-    "defaultErrorTitle": "Something went wrong"
+    "defaultErrorTitle": "Something went wrong",
+    "initAutoLauncherFailed": "Failed to initialize autolauncher",
+    "initUpdaterFailed": "Failed to initialize updater",
+    "enableAutoLauncherFailed": "Failed enabling autolauncher",
+    "disableAutoLauncherFailed": "Failed disabling autolauncher"
   }
 }
