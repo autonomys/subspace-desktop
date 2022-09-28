@@ -259,7 +259,7 @@ export default defineComponent({
 
         if (files) {
           console.log('FILES ARE: :', files);
-          if (files.length === 0 || (files.length === 1 && files.some(item => item.name === 'subspace-desktop.cfg'))) {
+          if (files.length === 0) {
             directoryDialogs.existingDirectoryConfirm(this.store.plotPath, this.startPlotting);
             // we are in FIRST TIME START, meaning there is are no existing plot
             // if there are some files in this folder, it's weird
@@ -288,6 +288,14 @@ export default defineComponent({
       this.$router.replace({ name: 'plottingProgress' });
     },
     async updateDriveStats() {
+      const dirExists = await native.dirExists(this.store.plotPath);
+
+      if (!dirExists) {
+        await tauri.fs.createDir(this.store.plotPath).catch((error) => {
+          util.errorLogger(error);
+        });
+      }
+
       const stats = await native.driveStats(this.store.plotPath);
       util.infoLogger('Drive Stats -> free: ' + stats.freeBytes + '; total: ' + stats.totalBytes);
       this.driveStats = stats;
