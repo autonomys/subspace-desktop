@@ -59,9 +59,7 @@ export class LinuxAutoLauncher {
   public async isEnabled(): Promise<boolean> {
     try {
       const autostartAppFile = await this.getAutostartFilePath();
-      await this.fs.readTextFile(autostartAppFile).catch((error) => {
-        errorLogger(error);
-      });
+      await this.fs.readTextFile(autostartAppFile);
       return true;
     } catch (error) {
       errorLogger(error);
