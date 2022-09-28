@@ -112,9 +112,13 @@ export default defineComponent({
         ok: { label: 'reset', icon: 'refresh', flat: true, color: 'red' },
         cancel: true
       }).onOk(async () => {
-        await util.resetAndClear({ plotDir, localStorage, config: this.$config });
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        await process.relaunch();
+        try {
+          await util.resetAndClear({ plotDir, localStorage, config: this.$config });
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          await process.relaunch();
+        } catch (error) {
+          this.store.setError({ title: 'erroPage.resetFailed' });
+        }
       });
     },
     async exportLogs() {

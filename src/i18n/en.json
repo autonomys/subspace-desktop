@@ -142,6 +142,8 @@
     "enableAutoLauncherFailed": "Failed enabling autolauncher",
     "disableAutoLauncherFailed": "Failed disabling autolauncher",
     "getLogsFailed": "Failed to get logs",
-    "initConfigFailed": "Failed to initialize config"
+    "initConfigFailed": "Failed to initialize config",
+    "resetFailed": "Failed to reset the application",
+    "startPlottingFailed": "Failed to start plotting"
   }
 }

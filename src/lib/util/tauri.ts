@@ -45,12 +45,8 @@ export async function resetAndClear({
   plotDir: IPlotDir;
   config: Config;
 }): Promise<void> {
-  try {
-    await localStorage.clear();
-    await plotDir.removePlot(config);
-    // this may throw error that file does not exist if config file is in the same directory as plot files (removed on the line above)
-    await config.remove();
-  } catch (error) {
-    errorLogger(error);
-  }
+  await localStorage.clear();
+  await plotDir.removePlot(config);
+  // this may throw error that file does not exist if config file is in the same directory as plot files (removed on the line above)
+  await config.remove();
 }
