@@ -123,8 +123,7 @@ export default defineComponent({
         util.infoLogger('log path acquired:' + log_path);
         await tauri.invoke('open_folder', { dir: log_path });
       } catch (error) {
-        // TODO: add proper error handling - update store and show error page
-        util.errorLogger(error);
+        this.store.setError({ title: 'errorPage.getLogsFailed' });
       }
     },
     async initMenu() {

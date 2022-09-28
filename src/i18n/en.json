@@ -140,6 +140,7 @@
     "initAutoLauncherFailed": "Failed to initialize autolauncher",
     "initUpdaterFailed": "Failed to initialize updater",
     "enableAutoLauncherFailed": "Failed enabling autolauncher",
-    "disableAutoLauncherFailed": "Failed disabling autolauncher"
+    "disableAutoLauncherFailed": "Failed disabling autolauncher",
+    "getLogsFailed": "Failed to get logs"
   }
 }
