@@ -203,7 +203,7 @@ export class Client {
     const plotSize = Math.round(plotSizeGB * 1024 * 1024 * 1024);
     const { rewardAddress } = (await this.config.readConfigFile());
     if (!rewardAddress) {
-      util.errorLogger('Tried to send empty reward address to backend!');
+      throw new Error('Tried to send empty reward address to backend!');
     }
 
     return tauri.invoke('farming', { path, rewardAddress, plotSize });
