@@ -1,6 +1,6 @@
 import * as fs from '@tauri-apps/api/fs';
 
-import { toFixed } from './util/util';
+import { toFixed, getErrorMessage } from './util/util';
 
 interface FilesParams {
   fs: typeof fs;
@@ -63,9 +63,11 @@ class Config {
     } catch {
       // means there were no config file
       await this.fs.createDir(this.configPath)
-        // ignore error if folder exists
+        // ignore error if folder exists otherwise throw error
         .catch((error) => {
-          if (!error.includes('exists')) throw error;
+          const message = getErrorMessage(error);
+          if (message && message.includes('exists')) return;
+          throw error;
         });
       await this.write(emptyConfig);
     }
