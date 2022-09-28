@@ -83,9 +83,17 @@ export default defineComponent({
         });
       }
       if (this.launchOnStart) {
-        await this.$autoLauncher.enable();
+        try {
+          await this.$autoLauncher.enable();
+        } catch (error) {
+          this.store.setError({ title: 'errorPage.enableAutoLauncherFailed' });
+        }
       } else {
-        await this.$autoLauncher.disable();
+        try {
+          await this.$autoLauncher.disable();
+        } catch (error) {
+          this.store.setError({ title: 'errorPage.disableAutoLauncherFailed' });
+        }
       }
     },
     reset() {
@@ -113,7 +121,7 @@ export default defineComponent({
       try {
         const log_path = await util.getLogPath();
         util.infoLogger('log path acquired:' + log_path);
-        await tauri.invoke("open_folder", {dir: log_path});
+        await tauri.invoke('open_folder', { dir: log_path });
       } catch (error) {
         // TODO: add proper error handling - update store and show error page
         util.errorLogger(error);
@@ -135,4 +143,5 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
+
 </style>

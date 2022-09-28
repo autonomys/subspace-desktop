@@ -43,9 +43,7 @@ export class LinuxAutoLauncher {
       Exec=${this.appPath}${hiddenArg}
       Icon=${this.appName}
     `;
-    await this.fs.writeFile({ contents, path: autostartAppFile }).catch((error) => {
-      errorLogger(error);
-    });
+    await this.fs.writeFile({ contents, path: autostartAppFile });
     response.stdout.push('success');
     return response;
   }
@@ -53,9 +51,7 @@ export class LinuxAutoLauncher {
   public async disable(): Promise<ChildReturnData> {
     const autostartAppFile = await this.getAutostartFilePath();
     const response: ChildReturnData = { stderr: [], stdout: [] };
-    await this.fs.removeFile(autostartAppFile).catch((error) => {
-      errorLogger(error);
-    });
+    await this.fs.removeFile(autostartAppFile);
     response.stdout.push('success');
     return response;
   }
@@ -80,13 +76,9 @@ export class LinuxAutoLauncher {
 
   private async createAutostartDir(): Promise<string> {
     const autostartDirectory = this.configDir + 'autostart/';
-    const existDir = await this.fs.readDir(autostartDirectory).catch((error) => {
-      errorLogger(error);
-    });
+    const existDir = await this.fs.readDir(autostartDirectory);
     if (!existDir) {
-      await this.fs.createDir(autostartDirectory).catch((error) => {
-        errorLogger(error);
-      });
+      await this.fs.createDir(autostartDirectory);
     }
     return autostartDirectory + this.appName + '.desktop';
   }
