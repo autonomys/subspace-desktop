@@ -288,14 +288,6 @@ export default defineComponent({
       this.$router.replace({ name: 'plottingProgress' });
     },
     async updateDriveStats() {
-      const dirExists = await native.dirExists(this.store.plotPath);
-
-      if (!dirExists) {
-        await tauri.fs.createDir(this.store.plotPath).catch((error) => {
-          util.errorLogger(error);
-        });
-      }
-
       const stats = await native.driveStats(this.store.plotPath);
       util.infoLogger('Drive Stats -> free: ' + stats.freeBytes + '; total: ' + stats.totalBytes);
       this.driveStats = stats;
@@ -309,6 +301,15 @@ export default defineComponent({
       if (result) {
         this.store.setPlotPath(result);
       }
+
+      const dirExists = await native.dirExists(this.store.plotPath);
+
+      if (!dirExists) {
+        await tauri.fs.createDir(this.store.plotPath).catch((error) => {
+          util.errorLogger(error);
+        });
+      }
+
       await this.updateDriveStats();
     },
   }
