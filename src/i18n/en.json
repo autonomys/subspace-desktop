@@ -141,6 +141,7 @@
     "initUpdaterFailed": "Failed to initialize updater",
     "enableAutoLauncherFailed": "Failed enabling autolauncher",
     "disableAutoLauncherFailed": "Failed disabling autolauncher",
-    "getLogsFailed": "Failed to get logs"
+    "getLogsFailed": "Failed to get logs",
+    "initConfigFailed": "Failed to initialize config"
   }
 }

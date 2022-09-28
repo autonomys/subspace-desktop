@@ -65,9 +65,7 @@ class Config {
       await this.fs.createDir(this.configPath)
         // ignore error if folder exists
         .catch((error) => {
-          if (!error.includes('exists')) {
-            this.errorLogger(error);
-          }
+          if (!error.includes('exists')) throw error;
         });
       await this.write(emptyConfig);
     }

@@ -24,16 +24,22 @@ declare module '@vue/runtime-core' {
 }
 
 export default boot(async ({ app }) => {
+  const store = useStore();
+  
   // create Config instance and initialize it
   const configDir = await tauri.path.configDir();
   const config = new Config({ fs: tauri.fs, appName, configDir, errorLogger });
-  await config.init();
-  // make config available as global prop
-  app.config.globalProperties.$config = config;
+
+  try {
+    await config.init();
+    // make config available as global prop
+    app.config.globalProperties.$config = config;
+  } catch (error) {
+    store.setError({ title: 'errorPage.initConfigFailed' });
+  }
 
   // set node name from config (empty string is default value)
   const { nodeName } = (await config.readConfigFile());
-  const store = useStore();
   store.setNodeName(config, nodeName);
 
   try {
