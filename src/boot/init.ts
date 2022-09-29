@@ -9,7 +9,7 @@ import { createApi } from '../lib/util';
 import AutoLauncher, { MacOSAutoLauncher, LinuxAutoLauncher, WindowsAutoLauncher } from '../lib/autoLauncher';
 import Config from '../lib/config';
 import { useStore } from '../stores/store';
-import { appName, errorLogger, infoLogger } from '../lib/util';
+import { appName, errorLogger, infoLogger, writeFile } from '../lib/util';
 import * as native from '../lib/native';
 import { initUpdater } from '../lib/updater';
 
@@ -26,7 +26,7 @@ declare module '@vue/runtime-core' {
 export default boot(async ({ app }) => {
   // create Config instance and initialize it
   const configDir = await tauri.path.configDir();
-  const config = new Config({ fs: tauri.fs, appName, configDir, errorLogger });
+  const config = new Config({ fs: tauri.fs, appName, configDir, errorLogger, writeFile });
   await config.init();
 
   // set node name from config (empty string is default value)

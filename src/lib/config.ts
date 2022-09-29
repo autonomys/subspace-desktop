@@ -7,6 +7,7 @@ interface FilesParams {
   configDir: string;
   appName: string;
   errorLogger: (error: unknown) => Promise<void>;
+  writeFile: (configFullPath: string, config: IConfig) => Promise<void>;
 }
 
 export interface Plot {
@@ -14,7 +15,7 @@ export interface Plot {
   sizeGB: number
 }
 
-interface IConfig {
+export interface IConfig {
   plot: Plot
   rewardAddress: string,
   launchOnBoot: boolean,
@@ -46,12 +47,14 @@ class Config {
   private configPath: string;
   private configFullPath: string;
   private errorLogger: (error: unknown) => Promise<void>;
+  private writeFile: (configFullPath: string, config: IConfig) => Promise<void>;
 
-  constructor({ fs, configDir, appName, errorLogger }: FilesParams) {
+  constructor({ fs, configDir, appName, errorLogger, writeFile }: FilesParams) {
     this.fs = fs;
     this.configPath = `${configDir}${appName}`;
     this.configFullPath = `${this.configPath}/${appName}.cfg`;
     this.errorLogger = errorLogger;
+    this.writeFile = writeFile;
   }
 
   /**
@@ -115,10 +118,7 @@ class Config {
    * @param {IConfig} - config object to store as config file
    */
   private async write(config: IConfig): Promise<void> {
-    await this.fs.writeFile({
-      path: this.configFullPath,
-      contents: JSON.stringify(config, null, 2)
-    })
+    await this.writeFile(this.configFullPath,config)
       .catch((error) => this.errorLogger(error));
   }
 

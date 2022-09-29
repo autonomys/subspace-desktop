@@ -1,6 +1,9 @@
 use serde::Serialize;
 use std::path::PathBuf;
 use std::process::Command;
+use std::fs::File;
+use std::io::prelude::*;
+use std::os::unix::fs::PermissionsExt;
 use tauri::{api, Env};
 use tracing::{debug, error, info};
 
@@ -76,4 +79,17 @@ pub(crate) fn custom_log_dir(id: &str) -> PathBuf {
     // evaluates to: `C:/Users/Username/AppData/Local/${bundle_name}/logs/
 
     path.expect("log path generation should succeed")
+}
+
+// TODO: current implementation works only on unix like systems
+#[tauri::command]
+pub(crate) fn create_file(path: &str, content: String) {
+    let mut file = File::create(path).expect("can't create file");
+    file.write_all(content.as_bytes())
+        .expect("couldn't write file");
+    let metadata = file.metadata().expect("can't get metadata");
+    let mut permissions = metadata.permissions();
+
+    permissions.set_mode(0o644); // Read/write for owner and read for others.
+    assert_eq!(permissions.mode(), 0o644);
 }
