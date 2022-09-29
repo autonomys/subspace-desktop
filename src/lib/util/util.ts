@@ -116,3 +116,5 @@ export function getErrorMessage(error: unknown): string | undefined {
     return;
   }
 }
+
+export const PLOT_FOLDER = '/plots';
