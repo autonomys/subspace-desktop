@@ -230,7 +230,7 @@ export default defineComponent({
     await this.updateDriveStats();
     const path = (await tauri.path.dataDir()) + util.appName + util.PLOT_FOLDER;
     this.store.setPlotPath(path);
-    this.createDefaultPlotDir();
+    await this.createDefaultPlotDir();
   },
   async created() {
     this.$watch(
