@@ -167,7 +167,7 @@ async fn create_full_client<CS: ChainSpec + 'static>(
         set_default_ss58_version(&chain_spec);
 
         sp_panic_handler::set(
-            "https://discord.gg/vhKF9w3x",
+            "https://forum.subspace.network/",
             env!("SUBSTRATE_CLI_IMPL_VERSION"),
         );
 
@@ -209,7 +209,11 @@ async fn create_full_client<CS: ChainSpec + 'static>(
             let workaround_file = config_dir.join("network").join("gemini_1b_workaround");
             if !workaround_file.exists() {
                 let _ = std::fs::write(workaround_file, &[]);
-                let _ = std::fs::remove_file(config_dir.join("network").join("secret_ed25519"));
+                let _ = std::fs::remove_file(
+                    config_dir
+                        .join(DEFAULT_NETWORK_CONFIG_PATH)
+                        .join(NODE_KEY_ED25519_FILE),
+                );
                 return Err(anyhow!(
                     "Applied workaround for upgrade from gemini-1b-2022-jun-08, \
                                     please restart this node"
