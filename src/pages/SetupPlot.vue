@@ -228,8 +228,9 @@ export default defineComponent({
   },
   async mounted() {
     await this.updateDriveStats();
-    const path = (await tauri.path.dataDir()) + util.appName;
+    const path = (await tauri.path.dataDir()) + util.appName + util.PLOT_FOLDER;
     this.store.setPlotPath(path);
+    await this.createDefaultPlotDir();
   },
   async created() {
     this.$watch(
@@ -259,7 +260,7 @@ export default defineComponent({
 
         if (files) {
           console.log('FILES ARE: :', files);
-          if (files.length === 0 || (files.length === 1 && files.some(item => item.name === 'subspace-desktop.cfg'))) {
+          if (files.length === 0) {
             directoryDialogs.existingDirectoryConfirm(this.store.plotPath, this.startPlotting);
             // we are in FIRST TIME START, meaning there is are no existing plot
             // if there are some files in this folder, it's weird
@@ -306,6 +307,11 @@ export default defineComponent({
         this.store.setPlotPath(result);
       }
       await this.updateDriveStats();
+    },
+    async createDefaultPlotDir() {
+      await tauri.fs.createDir(this.store.plotPath).catch((error) => {
+        util.errorLogger(error);
+      });
     },
   }
 });
