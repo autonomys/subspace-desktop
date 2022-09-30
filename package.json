@@ -46,7 +46,6 @@
     "@types/vue": "^2.0.0",
     "@typescript-eslint/eslint-plugin": "^5.23.0",
     "@typescript-eslint/parser": "^5.23.0",
-    "dotenv": "^16.0.0",
     "eslint": "^8.15.0",
     "eslint-plugin-vue": "^7.18.0",
     "jest": "^28.1.3",

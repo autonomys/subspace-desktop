@@ -162,8 +162,6 @@ async fn create_full_client<CS: ChainSpec + 'static>(
 > {
     // This must only be initialized once
     INITIALIZE_SUBSTRATE.call_once(|| {
-        dotenv::dotenv().ok();
-
         set_default_ss58_version(&chain_spec);
 
         sp_panic_handler::set(

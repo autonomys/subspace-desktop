@@ -15,7 +15,6 @@ tauri-build = { version = "1.0.4", features = [] }
 anyhow = "1.0.58"
 cirrus-runtime = { git = "https://github.com/subspace/subspace", rev = "b30ca37d34da30148f370dc16f93cc606f19c40d" }
 dirs = "4.0.0"
-dotenv = "0.15.0"
 fdlimit = "0.2.1"
 fs2 = "0.4.3"
 futures = "0.3.21"
@@ -51,7 +50,7 @@ openssl = { version = "0.10.40", features = ["vendored"] }
 winreg = "0.10.1"
 
 [dependencies.tauri]
-features = [ "clipboard-all", "dialog-all", "fs-all", "global-shortcut-all", "notification-all", "os-all", "path-all", "process-exit", "process-relaunch", "shell-execute", "system-tray", "updater", "window-all"]
+features = ["clipboard-all", "dialog-all", "fs-all", "global-shortcut-all", "notification-all", "os-all", "path-all", "process-exit", "process-relaunch", "shell-execute", "system-tray", "updater", "window-all"]
 version = "1.0.5"
 
 [features]
