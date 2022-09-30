@@ -167,7 +167,7 @@ async fn create_full_client<CS: ChainSpec + 'static>(
         set_default_ss58_version(&chain_spec);
 
         sp_panic_handler::set(
-            "https://discord.gg/vhKF9w3x",
+            "https://forum.subspace.network/",
             env!("SUBSTRATE_CLI_IMPL_VERSION"),
         );
 
