@@ -1,9 +1,9 @@
 use serde::Serialize;
-use std::path::PathBuf;
-use std::process::Command;
 use std::fs::File;
 use std::io::prelude::*;
 use std::os::unix::fs::PermissionsExt;
+use std::path::PathBuf;
+use std::process::Command;
 use tauri::{api, Env};
 use tracing::{debug, error, info};
 
