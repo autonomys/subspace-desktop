@@ -35,6 +35,7 @@ export default boot(async ({ app }) => {
     // make config available as global prop
     app.config.globalProperties.$config = config;
   } catch (error) {
+    errorLogger(error);
     store.setError({ title: 'errorPage.initConfigFailed' });
   }
 
@@ -45,6 +46,7 @@ export default boot(async ({ app }) => {
   try {
     await initUpdater(tauri, store.setHasNewUpdate);
   } catch (error) {
+    errorLogger(error);
     store.setError({ title: 'errorPage.initUpdaterFailed' });
   }
 
@@ -79,6 +81,7 @@ export default boot(async ({ app }) => {
     // make autoLauncher available as global prop
     app.config.globalProperties.$autoLauncher = autoLauncher;
   } catch (error) {
+    errorLogger(error);
     store.setError({ title: 'errorPage.initAutoLauncherFailed' });
   }
 

@@ -86,12 +86,14 @@ export default defineComponent({
         try {
           await this.$autoLauncher.enable();
         } catch (error) {
+          util.errorLogger(error);
           this.store.setError({ title: 'errorPage.enableAutoLauncherFailed' });
         }
       } else {
         try {
           await this.$autoLauncher.disable();
         } catch (error) {
+          util.errorLogger(error);
           this.store.setError({ title: 'errorPage.disableAutoLauncherFailed' });
         }
       }
@@ -117,6 +119,7 @@ export default defineComponent({
           await new Promise((resolve) => setTimeout(resolve, 1000));
           await process.relaunch();
         } catch (error) {
+          util.errorLogger(error);
           this.store.setError({ title: 'erroPage.resetFailed' });
         }
       });
@@ -127,6 +130,7 @@ export default defineComponent({
         util.infoLogger('log path acquired:' + log_path);
         await tauri.invoke('open_folder', { dir: log_path });
       } catch (error) {
+        util.errorLogger(error);
         this.store.setError({ title: 'errorPage.getLogsFailed' });
       }
     },

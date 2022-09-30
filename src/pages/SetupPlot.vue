@@ -285,6 +285,7 @@ export default defineComponent({
           await this.handleConfirm();
         }
       } catch (error) {
+        util.errorLogger(error);
         this.store.setError({ title: 'erroPage.startPlottingFailed' });
       }
     },
