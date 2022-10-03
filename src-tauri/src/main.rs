@@ -121,6 +121,7 @@ async fn main() -> Result<()> {
                 utils::get_disk_stats,
                 utils::get_this_binary,
                 utils::open_folder,
+                utils::create_file,
             ],
         )
         .build(ctx)
