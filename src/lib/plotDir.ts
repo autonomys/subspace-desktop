@@ -1,7 +1,6 @@
 import * as fs from '@tauri-apps/api/fs';
 
 import Config from './config';
-import { errorLogger } from './util';
 
 export interface IPlotDir {
   removePlot: (config: Config) => Promise<void>;
@@ -18,9 +17,7 @@ export async function removePlot(config: Config): Promise<void> {
   const { plot } = await config.readConfigFile();
   if (plot.location === '') return;
 
-  await fs.removeDir(plot.location, { recursive: true }).catch((error) => {
-    errorLogger(error);
-  });
+  return fs.removeDir(plot.location, { recursive: true });
 }
 
 /**
@@ -28,9 +25,7 @@ export async function removePlot(config: Config): Promise<void> {
  * @param {string} location - plot location
  */
 export async function createPlotDir(location: string): Promise<void> {
-  await fs.createDir(location).catch((error) => {
-    errorLogger(error);
-  });
+  return fs.createDir(location);
 }
 
 
