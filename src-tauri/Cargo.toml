@@ -51,7 +51,7 @@ openssl = { version = "0.10.40", features = ["vendored"] }
 winreg = "0.10.1"
 
 [dependencies.tauri]
-features = [ "clipboard-all", "dialog-all", "fs-all", "global-shortcut-all", "notification-all", "os-all", "path-all", "process-exit", "process-relaunch", "shell-execute", "system-tray", "updater", "window-all"]
+features = ["clipboard-all", "dialog-all", "fs-all", "global-shortcut-all", "notification-all", "os-all", "path-all", "process-exit", "process-relaunch", "shell-execute", "system-tray", "updater", "window-all"]
 version = "1.0.5"
 
 [features]
