@@ -327,7 +327,7 @@ export const useStore = defineStore('store', {
 
         const syncState = await client.getSyncState();
         this.setSyncState(syncState);
-        let isSyncing = await client.isSyncing();
+        let isSyncing;
 
         do {
           await new Promise((resolve) => setTimeout(resolve, 3000));
