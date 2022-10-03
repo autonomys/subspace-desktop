@@ -81,15 +81,22 @@ pub(crate) fn custom_log_dir(id: &str) -> PathBuf {
     path.expect("log path generation should succeed")
 }
 
-// TODO: current implementation works only on unix like systems
 #[tauri::command]
 pub(crate) fn create_file(path: &str, content: String) {
     let mut file = File::create(path).expect("can't create file");
     file.write_all(content.as_bytes())
         .expect("couldn't write file");
-    let metadata = file.metadata().expect("can't get metadata");
-    let mut permissions = metadata.permissions();
 
-    permissions.set_mode(0o644); // Read/write for owner and read for others.
-    assert_eq!(permissions.mode(), 0o644);
+    // config file is created under the current user's folder, in Windows, other users do not have read/write access to these
+    #[cfg(not(target_os = "windows"))]
+    {
+        let mut perms = file
+            .metadata()
+            .expect("could not get metadata")
+            .permissions();
+        perms.set_mode(0o600);
+
+        file.set_permissions(perms)
+            .expect("failed to set permissions for the config");
+    }
 }
