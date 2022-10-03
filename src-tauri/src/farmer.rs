@@ -124,7 +124,18 @@ async fn farm(
     disk_farms: Vec<DiskFarm>,
     farming_args: FarmingArgs,
 ) -> Result<FuturesUnordered<impl Future<Output = Result<(), Error>>>, anyhow::Error> {
-    raise_fd_limit();
+    if disk_farms.is_empty() {
+        return Err(anyhow!("There must be a disk farm provided"));
+    }
+
+    for disk_farm in disk_farms.iter() {
+        if disk_farm.allocated_plotting_space < 1024 * 1024 {
+            return Err(anyhow::anyhow!(
+                "Plot size is too low ({0} bytes). Did you mean {0}G or {0}T?",
+                disk_farm.allocated_plotting_space
+            ));
+        }
+    }
 
     let FarmingArgs {
         bootstrap_nodes,
@@ -151,13 +162,11 @@ async fn farm(
         return Err(anyhow!(error));
     }
 
+    raise_fd_limit();
+
     let mut single_disk_farms = Vec::with_capacity(disk_farms.len());
     let mut record_size = None;
     let mut recorded_history_segment_size = None;
-
-    if disk_farms.is_empty() {
-        return Err(anyhow!("There must be a disk farm provided"));
-    }
 
     // Starting the relay server node.
     let (relay_server_node, mut relay_node_runner) = subspace_networking::create(Config {
@@ -190,12 +199,6 @@ async fn farm(
     // TODO: Check plot and metadata sizes to ensure there is enough space for farmer to not
     //  fail later (note that multiple farms can use the same location for metadata)
     for (farm_index, mut disk_farm) in disk_farms.into_iter().enumerate() {
-        if disk_farm.allocated_plotting_space < 1024 * 1024 {
-            return Err(anyhow::anyhow!(
-                "Plot size is too low ({0} bytes). Did you mean {0}G or {0}T?",
-                disk_farm.allocated_plotting_space
-            ));
-        }
         info!("Connecting to node at {}", node_rpc_url);
         let archiving_client = NodeRpcClient::new(&node_rpc_url).await?;
         let farming_client = NodeRpcClient::new(&node_rpc_url).await?;
