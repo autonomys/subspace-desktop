@@ -1,11 +1,13 @@
 use serde::Serialize;
 use std::fs::File;
 use std::io::prelude::*;
-use std::os::unix::fs::PermissionsExt;
 use std::path::PathBuf;
 use std::process::Command;
 use tauri::{api, Env};
 use tracing::{debug, error, info};
+
+#[cfg(not(target_os = "windows"))]
+use std::os::unix::fs::PermissionsExt;
 
 #[derive(Serialize)]
 pub(crate) struct DiskStats {
