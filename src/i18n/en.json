@@ -135,7 +135,7 @@
     "startNodeFailed": "Failed to start node",
     "startNodeMissingParams": "Node name and plot directory are required to start node",
     "startFarmerFailed": "Failed to start farmer",
-    "defaultErrorMessage": "Please, make sure you have an Internet connection and enough disk space in order to proceed. If the problem persists, you can reach out to our team",
+    "defaultErrorMessage": "Subspace Desktop has encountered an error. Please try restarting the application. If it continues, please reach out to the team in our support forums",
     "defaultErrorTitle": "Something went wrong",
     "initAutoLauncherFailed": "Failed to initialize autolauncher",
     "initUpdaterFailed": "Failed to initialize updater",
