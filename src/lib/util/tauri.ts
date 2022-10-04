@@ -58,5 +58,5 @@ export async function writeFile(
   await invoke('create_file', {
     path: configFullPath,
     content: JSON.stringify(config, null, 2)
-  }).catch((error) => errorLogger(error));
+  });
 }
