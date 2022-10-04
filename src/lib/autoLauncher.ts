@@ -168,8 +168,8 @@ interface AutoLauncherParams {
   osAutoLauncher: MacOSAutoLauncher | WindowsAutoLauncher | LinuxAutoLauncher;
 }
 
-/** 
- * AutoLauncher class responsible for enabling and disabling auto launch for particular OS 
+/**
+ * AutoLauncher class responsible for enabling and disabling auto launch for particular OS
  */
 class AutoLauncher {
   private osAutoLauncher: MacOSAutoLauncher | WindowsAutoLauncher | LinuxAutoLauncher;
