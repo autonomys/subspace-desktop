@@ -83,9 +83,19 @@ export default defineComponent({
         });
       }
       if (this.launchOnStart) {
-        await this.$autoLauncher.enable();
+        try {
+          await this.$autoLauncher.enable();
+        } catch (error) {
+          util.errorLogger(error);
+          this.store.setError({ title: 'errorPage.enableAutoLauncherFailed' });
+        }
       } else {
-        await this.$autoLauncher.disable();
+        try {
+          await this.$autoLauncher.disable();
+        } catch (error) {
+          util.errorLogger(error);
+          this.store.setError({ title: 'errorPage.disableAutoLauncherFailed' });
+        }
       }
     },
     reset() {
@@ -104,19 +114,24 @@ export default defineComponent({
         ok: { label: 'reset', icon: 'refresh', flat: true, color: 'red' },
         cancel: true
       }).onOk(async () => {
-        await util.resetAndClear({ plotDir, localStorage, config: this.$config });
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        await process.relaunch();
+        try {
+          await util.resetAndClear({ plotDir, localStorage, config: this.$config });
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          await process.relaunch();
+        } catch (error) {
+          util.errorLogger(error);
+          this.store.setError({ title: 'erroPage.resetFailed' });
+        }
       });
     },
     async exportLogs() {
       try {
         const log_path = await util.getLogPath();
         util.infoLogger('log path acquired:' + log_path);
-        await tauri.invoke('open_folder', {dir: log_path});
+        await tauri.invoke('open_folder', { dir: log_path });
       } catch (error) {
-        // TODO: add proper error handling - update store and show error page
         util.errorLogger(error);
+        this.store.setError({ title: 'errorPage.getLogsFailed' });
       }
     },
     async initMenu() {
@@ -135,4 +150,5 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
+
 </style>

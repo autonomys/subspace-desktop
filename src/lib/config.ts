@@ -1,12 +1,11 @@
 import * as fs from '@tauri-apps/api/fs';
 
-import { toFixed } from './util/util';
+import { toFixed, getErrorMessage } from './util/util';
 
 interface FilesParams {
   fs: typeof fs;
   configDir: string;
   appName: string;
-  errorLogger: (error: unknown) => Promise<void>;
   writeFile: (configFullPath: string, config: IConfig) => Promise<void>;
 }
 
@@ -46,14 +45,12 @@ class Config {
   private fs: typeof fs;
   private configPath: string;
   private configFullPath: string;
-  private errorLogger: (error: unknown) => Promise<void>;
   private writeFile: (configFullPath: string, config: IConfig) => Promise<void>;
 
-  constructor({ fs, configDir, appName, errorLogger, writeFile }: FilesParams) {
+  constructor({ fs, configDir, appName, writeFile }: FilesParams) {
     this.fs = fs;
     this.configPath = `${configDir}${appName}`;
     this.configFullPath = `${this.configPath}/${appName}.cfg`;
-    this.errorLogger = errorLogger;
     this.writeFile = writeFile;
   }
 
@@ -66,11 +63,11 @@ class Config {
     } catch {
       // means there were no config file
       await this.fs.createDir(this.configPath)
-        // ignore error if folder exists
+        // ignore error if folder exists otherwise throw error
         .catch((error) => {
-          if (!error.includes('exists')) {
-            this.errorLogger(error);
-          }
+          const message = getErrorMessage(error);
+          if (message && message.includes('exists')) return;
+          throw error;
         });
       await this.write(emptyConfig);
     }
@@ -118,8 +115,7 @@ class Config {
    * @param {IConfig} - config object to store as config file
    */
   private async write(config: IConfig): Promise<void> {
-    await this.writeFile(this.configFullPath,config)
-      .catch((error) => this.errorLogger(error));
+    return this.writeFile(this.configFullPath, config);
   }
 
   /**

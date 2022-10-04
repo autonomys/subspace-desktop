@@ -52,6 +52,20 @@ describe('Config', () => {
     expect(config['write']).toHaveBeenCalledWith(emptyConfig);
   });
 
+  it('init method should throw error when failed to read config file and create config folder', async () => {
+    const error = 'cannot create folder';
+    const config = new Config({
+      ...params, fs: {
+        ...tauriFsMock,
+        createDir: jest.fn().mockRejectedValue(error),
+      }
+    });
+
+    config.readConfigFile = jest.fn().mockRejectedValue(new Error);
+
+    await expect(config.init()).rejects.toEqual(error);
+  });
+
   it('validate method should return "true" if there is a valid config file', async () => {
     const config = new Config(params);
 
@@ -94,7 +108,7 @@ describe('Config', () => {
   it('update method should update given property/properties in the config file', async () => {
     const config = new Config(params);
     const newName = 'new node name';
-    
+
     config['write'] = jest.fn().mockResolvedValue(null);
 
     await config.update({ nodeName: newName });

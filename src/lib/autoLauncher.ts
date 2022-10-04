@@ -43,29 +43,23 @@ export class LinuxAutoLauncher {
       Exec=${this.appPath}${hiddenArg}
       Icon=${this.appName}
     `;
-    await this.fs.writeFile({ contents, path: autostartAppFile }).catch((error) => {
-      errorLogger(error);
-    });
+    await this.fs.writeFile({ contents, path: autostartAppFile });
     response.stdout.push('success');
     return response;
   }
 
   public async disable(): Promise<ChildReturnData> {
-    const autostartAppFile = await this.getAutostartFilePath();
+    const autostartAppFile = this.getAutostartFilePath();
     const response: ChildReturnData = { stderr: [], stdout: [] };
-    await this.fs.removeFile(autostartAppFile).catch((error) => {
-      errorLogger(error);
-    });
+    await this.fs.removeFile(autostartAppFile);
     response.stdout.push('success');
     return response;
   }
 
   public async isEnabled(): Promise<boolean> {
     try {
-      const autostartAppFile = await this.getAutostartFilePath();
-      await this.fs.readTextFile(autostartAppFile).catch((error) => {
-        errorLogger(error);
-      });
+      const autostartAppFile = this.getAutostartFilePath();
+      await this.fs.readTextFile(autostartAppFile);
       return true;
     } catch (error) {
       errorLogger(error);
@@ -73,20 +67,16 @@ export class LinuxAutoLauncher {
     }
   }
 
-  private async getAutostartFilePath(): Promise<string> {
+  private getAutostartFilePath(): string {
     const autostartAppFile = this.configDir + 'autostart/' + this.appName + '.desktop';
     return autostartAppFile;
   }
 
   private async createAutostartDir(): Promise<string> {
     const autostartDirectory = this.configDir + 'autostart/';
-    const existDir = await this.fs.readDir(autostartDirectory).catch((error) => {
-      errorLogger(error);
-    });
+    const existDir = await this.fs.readDir(autostartDirectory);
     if (!existDir) {
-      await this.fs.createDir(autostartDirectory).catch((error) => {
-        errorLogger(error);
-      });
+      await this.fs.createDir(autostartDirectory);
     }
     return autostartDirectory + this.appName + '.desktop';
   }
@@ -233,7 +223,7 @@ class AutoLauncher {
     // to remove the previous entries for older versions
     // try at maximum 5 times to prevent infinite loop
     do {
-      child = this.osAutoLauncher.disable();
+      child = await this.osAutoLauncher.disable();
       this.enabled = await this.isEnabled();
       trial += 1;
     } while (this.enabled && trial < 5);

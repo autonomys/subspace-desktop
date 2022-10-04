@@ -115,7 +115,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { debounce } from 'quasar';
-import * as tauri  from '@tauri-apps/api';
+import * as tauri from '@tauri-apps/api';
 import { ApexOptions } from 'apexcharts';
 
 import { ChartDataType, StatsType } from '../lib/types';
@@ -157,7 +157,7 @@ export default defineComponent({
     return {
       revealKey: false,
       validPath: true,
-      driveStats: <native.DriveStats>{ freeBytes: 0, totalBytes: 0 },
+      driveStats: { freeBytes: 0, totalBytes: 0 },
       chartOptions,
     };
   },
@@ -273,15 +273,20 @@ export default defineComponent({
       }
     },
     async startPlotting() {
-      await plotDir.createPlotDir(this.store.plotPath);
-      util.infoLogger('SETUP PLOT | custom directory created');
+      try {
+        await plotDir.createPlotDir(this.store.plotPath);
+        util.infoLogger('SETUP PLOT | custom directory created');
 
-      if (!this.store.rewardAddress) {
-        util.infoLogger('SETUP PLOT | reward address was empty, creating a new one');
-        await util.showModal(mnemonicModal, { handleConfirm: this.handleConfirm });
-      } else {
-        util.infoLogger('SETUP PLOT | reward address was initialized before, proceeding to plotting');
-        await this.handleConfirm();
+        if (!this.store.rewardAddress) {
+          util.infoLogger('SETUP PLOT | reward address was empty, creating a new one');
+          await util.showModal(mnemonicModal, { handleConfirm: this.handleConfirm });
+        } else {
+          util.infoLogger('SETUP PLOT | reward address was initialized before, proceeding to plotting');
+          await this.handleConfirm();
+        }
+      } catch (error) {
+        util.errorLogger(error);
+        this.store.setError({ title: 'erroPage.startPlottingFailed' });
       }
     },
     async handleConfirm() {

@@ -24,47 +24,66 @@ declare module '@vue/runtime-core' {
 }
 
 export default boot(async ({ app }) => {
+  const store = useStore();
+
   // create Config instance and initialize it
   const configDir = await tauri.path.configDir();
-  const config = new Config({ fs: tauri.fs, appName, configDir, errorLogger, writeFile });
-  await config.init();
+  const config = new Config({ fs: tauri.fs, appName, configDir, writeFile });
+
+  try {
+    await config.init();
+    // make config available as global prop
+    app.config.globalProperties.$config = config;
+  } catch (error) {
+    errorLogger(error);
+    store.setError({ title: 'errorPage.initConfigFailed' });
+  }
 
   // set node name from config (empty string is default value)
   const { nodeName } = (await config.readConfigFile());
-  const store = useStore();
   store.setNodeName(config, nodeName);
 
-  await initUpdater(tauri, store.setHasNewUpdate, errorLogger);
+  try {
+    await initUpdater(tauri, store.setHasNewUpdate);
+  } catch (error) {
+    errorLogger(error);
+    store.setError({ title: 'errorPage.initUpdaterFailed' });
+  }
 
   // create Client instance
   const api = createApi(LOCAL_RPC);
   const client = new Client({ api, config });
-
-  // create AutoLauncher instance and initialize it 
-  const osType = await tauri.os.type();
-  infoLogger('OS TYPE: ' + osType);
-  const appPath = await tauri.invoke('get_this_binary') as string; // this is not the same as appDir: appPath -> appDir
-  infoLogger('get_this_binary : ' + appPath);
-
-  let osAutoLauncher;
-
-  if (osType === 'Darwin') {
-    osAutoLauncher = new MacOSAutoLauncher({ appName, appPath, native });
-  } else if (osType === 'Windows_NT') {
-    // From Windows 11 Tests: get_this_binary returns a string with a prefix "\\?\" on C:\Users......". On boot, autostart can't locate "\\?\c:\DIR\subspace-desktop.exe
-    const winAppPath = appPath.startsWith('\\\\?\\') ? appPath.replace('\\\\?\\', '') : appPath;
-    osAutoLauncher = new WindowsAutoLauncher({ appPath: winAppPath, appName, native });
-  } else {
-    osAutoLauncher = new LinuxAutoLauncher({ appName, appPath, configDir, fs: tauri.fs });
-  }
-
-  const autoLauncher = new AutoLauncher({ config, osAutoLauncher });
-  await autoLauncher.init();
-
-  // make client, autoLauncher and config available as global props
+  // make client available as global prop
   app.config.globalProperties.$client = client;
-  app.config.globalProperties.$autoLauncher = autoLauncher;
-  app.config.globalProperties.$config = config;
+
+  // create AutoLauncher instance and initialize it
+  try {
+    const osType = await tauri.os.type();
+    infoLogger('OS TYPE: ' + osType);
+    const appPath = await tauri.invoke('get_this_binary') as string; // this is not the same as appDir: appPath -> appDir
+    infoLogger('get_this_binary : ' + appPath);
+
+    let osAutoLauncher;
+
+    if (osType === 'Darwin') {
+      osAutoLauncher = new MacOSAutoLauncher({ appName, appPath, native });
+    } else if (osType === 'Windows_NT') {
+      // From Windows 11 Tests: get_this_binary returns a string with a prefix "\\?\" on C:\Users......". On boot, autostart can't locate "\\?\c:\DIR\subspace-desktop.exe
+      const winAppPath = appPath.startsWith('\\\\?\\') ? appPath.replace('\\\\?\\', '') : appPath;
+      osAutoLauncher = new WindowsAutoLauncher({ appPath: winAppPath, appName, native });
+    } else {
+      osAutoLauncher = new LinuxAutoLauncher({ appName, appPath, configDir, fs: tauri.fs });
+    }
+
+    const autoLauncher = new AutoLauncher({ config, osAutoLauncher });
+    await autoLauncher.init();
+
+    // make autoLauncher available as global prop
+    app.config.globalProperties.$autoLauncher = autoLauncher;
+  } catch (error) {
+    errorLogger(error);
+    store.setError({ title: 'errorPage.initAutoLauncherFailed' });
+  }
 
   app.use(VueApexCharts);
 

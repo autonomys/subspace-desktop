@@ -38,7 +38,7 @@ describe('AutoLauncher', () => {
     expect(autoLauncher['enabled']).toBe(false);
 
     const result = await autoLauncher.isEnabled();
-    
+
     expect(autoLauncher['enabled']).toBe(true);
     expect(result).toBe(true); // configFileMock.launchOnBoot is true by default
   });
@@ -69,11 +69,24 @@ describe('AutoLauncher', () => {
     expect(configClassMock.update).toHaveBeenCalledWith({ launchOnBoot: true });
   });
 
+  it('enable method should throw error if osAutoLauncher throws error ', async () => {
+    const error = new Error('OS autolauncher failed to enable');
+    const osAutoLauncher = new LinuxAutoLauncher(osAutoLauncherParams);
+    osAutoLauncher.enable = jest.fn().mockRejectedValue(error);
+
+    const autoLauncher = new AutoLauncher({
+      ...params,
+      osAutoLauncher,
+    });
+
+    await expect(autoLauncher.enable()).rejects.toEqual(error);
+  });
+
   it('disable method should update "enabled" property and update config', async () => {
     const osAutoLauncher = new LinuxAutoLauncher(osAutoLauncherParams);
 
     osAutoLauncher.disable = jest.fn().mockResolvedValue(null);
-    
+
     const autoLauncher = new AutoLauncher({
       ...params,
       osAutoLauncher
@@ -81,11 +94,24 @@ describe('AutoLauncher', () => {
     
     await autoLauncher.enable();
     expect(autoLauncher['enabled']).toBe(true);
-    
+
     osAutoLauncher.isEnabled = jest.fn().mockResolvedValue(false);
 
     await autoLauncher.disable();
     expect(autoLauncher['enabled']).toBe(false);
     expect(configClassMock.update).toHaveBeenCalledWith({ launchOnBoot: false });
+  });
+
+  it('disable method should throw error if osAutoLauncher throws error ', async () => {
+    const error = new Error('OS autolauncher failed to disable');
+    const osAutoLauncher = new LinuxAutoLauncher(osAutoLauncherParams);
+    osAutoLauncher.disable = jest.fn().mockRejectedValue(error);
+
+    const autoLauncher = new AutoLauncher({
+      ...params,
+      osAutoLauncher,
+    });
+
+    await expect(autoLauncher.disable()).rejects.toEqual(error);
   });
 });
