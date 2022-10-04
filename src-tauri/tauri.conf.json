@@ -85,7 +85,7 @@
           {
             "name": "run-osascript",
             "cmd": "osascript",
-            "args": true
+            "args": ["-e", { "validator": "tell application \"System Events\" to (get the name of every login item|delete login item \\S+|make login item at end with properties \\{path:\\S+, hidden:\\S+, name:\\S+\\})" }]
           }
         ]
       },

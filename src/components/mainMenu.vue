@@ -50,8 +50,7 @@ export default defineComponent({
   data() {
     return {
       util,
-      launchOnStart: false,
-      disableAutoLaunch: false
+      launchOnStart: false
     };
   },
   mounted() {
@@ -59,13 +58,6 @@ export default defineComponent({
   },
   methods: {
     async toggleClicked() {
-      if (this.disableAutoLaunch) {
-        Notify.create({
-          message: this.$t('menu.autoLaunchNotSupported'),
-          icon: 'info'
-        });
-        return;
-      }
       console.log('toggle Clicked', this.launchOnStart);
       if (this.launchOnStart) {
         Notify.create({
@@ -115,7 +107,11 @@ export default defineComponent({
         cancel: true
       }).onOk(async () => {
         try {
-          await util.resetAndClear({ plotDir, localStorage, config: this.$config });
+          await util.resetAndClear({
+            plotDir,
+            localStorage,
+            config: this.$config
+          });
           await new Promise((resolve) => setTimeout(resolve, 1000));
           await process.relaunch();
         } catch (error) {
@@ -135,12 +131,7 @@ export default defineComponent({
       }
     },
     async initMenu() {
-      if (await this.$autoLauncher.isEnabled()) {
-        this.launchOnStart = true;
-      } else {
-        this.launchOnStart = false;
-        this.disableAutoLaunch = true;
-      }
+      this.launchOnStart = await this.$autoLauncher.isEnabled();
     },
     async installNewUpdate() {
       await event.emit('tauri://update');
@@ -150,5 +141,4 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-
 </style>

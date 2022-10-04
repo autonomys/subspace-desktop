@@ -99,7 +99,6 @@
     "reset": "Reset Node!",
     "autoStart": "Start on Boot",
     "export_log": "Show Logs",
-    "autoLaunchNotSupported": "Launch on Boot is not supported on this system.",
     "willAutoLaunch": "Subspace will launch automatically during boot",
     "willNotAutoLaunch": "Subspace will not launch automatically during boot",
     "reset_heading": "Are you sure you want to reset and start from scratch?",
