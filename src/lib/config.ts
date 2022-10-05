@@ -115,9 +115,7 @@ class Config {
    * @param {IConfig} - config object to store as config file
    */
   private async write(config: IConfig): Promise<void> {
-    return await this.writeFile(this.configFullPath, config).catch(error => {
-      throw error;
-    });
+    return this.writeFile(this.configFullPath, config);
   }
 
   /**
