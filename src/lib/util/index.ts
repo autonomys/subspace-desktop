@@ -17,4 +17,5 @@ export {
   errorLogger,
   infoLogger,
   resetAndClear,
+  writeFile,
 } from './tauri';

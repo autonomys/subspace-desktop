@@ -1,8 +1,13 @@
 use serde::Serialize;
+use std::fs::File;
+use std::io::prelude::*;
 use std::path::PathBuf;
 use std::process::Command;
 use tauri::{api, Env};
 use tracing::{debug, error, info};
+
+#[cfg(not(target_os = "windows"))]
+use std::os::unix::fs::PermissionsExt;
 
 #[derive(Serialize)]
 pub(crate) struct DiskStats {
@@ -76,4 +81,24 @@ pub(crate) fn custom_log_dir(id: &str) -> PathBuf {
     // evaluates to: `C:/Users/Username/AppData/Local/${bundle_name}/logs/
 
     path.expect("log path generation should succeed")
+}
+
+#[tauri::command]
+pub(crate) fn create_file(path: &str, content: String) {
+    let mut file = File::create(path).expect("can't create file");
+    file.write_all(content.as_bytes())
+        .expect("couldn't write file");
+
+    // config file is created under the current user's folder, in Windows, other users do not have read/write access to these
+    #[cfg(not(target_os = "windows"))]
+    {
+        let mut perms = file
+            .metadata()
+            .expect("could not get metadata")
+            .permissions();
+        perms.set_mode(0o600);
+
+        file.set_permissions(perms)
+            .expect("failed to set permissions for the config");
+    }
 }

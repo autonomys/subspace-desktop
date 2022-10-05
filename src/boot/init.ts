@@ -9,7 +9,7 @@ import { createApi } from '../lib/util';
 import AutoLauncher, { MacOSAutoLauncher, LinuxAutoLauncher, WindowsAutoLauncher } from '../lib/autoLauncher';
 import Config from '../lib/config';
 import { useStore } from '../stores/store';
-import { appName, errorLogger, infoLogger } from '../lib/util';
+import { appName, errorLogger, infoLogger, writeFile } from '../lib/util';
 import * as native from '../lib/native';
 import { initUpdater } from '../lib/updater';
 
@@ -25,10 +25,10 @@ declare module '@vue/runtime-core' {
 
 export default boot(async ({ app }) => {
   const store = useStore();
-  
+
   // create Config instance and initialize it
   const configDir = await tauri.path.configDir();
-  const config = new Config({ fs: tauri.fs, appName, configDir, errorLogger });
+  const config = new Config({ fs: tauri.fs, appName, configDir, writeFile });
 
   try {
     await config.init();
@@ -56,15 +56,15 @@ export default boot(async ({ app }) => {
   // make client available as global prop
   app.config.globalProperties.$client = client;
 
-  // create AutoLauncher instance and initialize it 
+  // create AutoLauncher instance and initialize it
   try {
     const osType = await tauri.os.type();
     infoLogger('OS TYPE: ' + osType);
     const appPath = await tauri.invoke('get_this_binary') as string; // this is not the same as appDir: appPath -> appDir
     infoLogger('get_this_binary : ' + appPath);
-  
+
     let osAutoLauncher;
-  
+
     if (osType === 'Darwin') {
       osAutoLauncher = new MacOSAutoLauncher({ appName, appPath, native });
     } else if (osType === 'Windows_NT') {
@@ -74,10 +74,10 @@ export default boot(async ({ app }) => {
     } else {
       osAutoLauncher = new LinuxAutoLauncher({ appName, appPath, configDir, fs: tauri.fs });
     }
-  
+
     const autoLauncher = new AutoLauncher({ config, osAutoLauncher });
     await autoLauncher.init();
-  
+
     // make autoLauncher available as global prop
     app.config.globalProperties.$autoLauncher = autoLauncher;
   } catch (error) {

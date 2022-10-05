@@ -8,6 +8,7 @@ const params = {
   appName,
   configDir,
   errorLogger: jest.fn(),
+  writeFile: jest.fn(),
 };
 
 // TODO: 

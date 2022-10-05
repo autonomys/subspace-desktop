@@ -4,7 +4,7 @@ import { invoke } from '@tauri-apps/api/tauri';
 import { LocalStorage } from 'quasar';
 
 import { IPlotDir } from '../plotDir';
-import Config from '../config';
+import Config, { IConfig } from '../config';
 import { getErrorMessage } from './';
 
 export const appName: string = process.env.APP_NAME || 'subspace-desktop';
@@ -49,4 +49,14 @@ export async function resetAndClear({
   await plotDir.removePlot(config);
   // this may throw error that file does not exist if config file is in the same directory as plot files (removed on the line above)
   await config.remove();
+}
+
+export async function writeFile(
+  configFullPath: string,
+  config: IConfig
+): Promise<void> {
+  await invoke('create_file', {
+    path: configFullPath,
+    content: JSON.stringify(config, null, 2)
+  });
 }
