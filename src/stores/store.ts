@@ -284,7 +284,6 @@ export const useStore = defineStore('store', {
           // TODO: move back to startFarmer method below after restart workaround is removed (loop is replaced by subscription)
           this.setStatus('syncing');
         } else {
-          // TODO: consider moving logging to client.ts
           tauri.errorLogger('NODE START | node name and plot directory are required to start node');
 
           this.setError({
@@ -294,7 +293,6 @@ export const useStore = defineStore('store', {
           });
         }
       } catch (error) {
-        // TODO: consider moving logging to client.ts
         tauri.errorLogger('NODE START | failed to start node');
 
         this.setError({
@@ -320,8 +318,6 @@ export const useStore = defineStore('store', {
         this.setNetworkMessage('dashboard.verifyingNet');
 
         await client.startFarming(this.plotPath, this.plotSizeGB);
-
-        // TODO: consider moving logging to client.ts
         tauri.infoLogger('farmer started');
 
         const syncState = await client.getSyncState();
