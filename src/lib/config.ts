@@ -1,5 +1,5 @@
 import TauriInvoker from './tauri';
-import { toFixed, getErrorMessage } from './util/util';
+import { toFixed, getErrorMessage } from './util';
 
 interface FilesParams {
   configDir: string;

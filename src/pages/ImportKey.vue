@@ -64,6 +64,7 @@ export default defineComponent({
   methods: {
     async validateAddress(addr: string): Promise<boolean> {
       try {
+        // TODO: consider moving inside TauriInvoker
         const result: boolean = await tauri.invoke('validate_reward_address', { addr });
         return result;
       } catch (error) {

@@ -81,7 +81,7 @@ export async function winregDelete(subKey: string, setKey: string): Promise<stri
  * @param {string} command - command to execute, for example get, set or remove login item
  * @returns {ChildReturnData} - output object
  */
-export async function execApplescriptCommand(command: string): Promise<ChildReturnData> {
-  const result = applescript.execString(`tell application "System Events" to ${command}`);
+export async function execApplescriptCommand(command: string, tauri: TauriInvoker): Promise<ChildReturnData> {
+  const result = applescript.execString(`tell application "System Events" to ${command}`, tauri);
   return result;
 }

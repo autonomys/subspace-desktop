@@ -124,6 +124,7 @@ import mnemonicModal from '../components/mnemonicModal.vue';
 import { useStore } from '../stores/store';
 import * as util from '../lib/util';
 import * as directoryDialogs from '../components/directoryDialogs';
+import { APP_NAME, PLOT_FOLDER } from '../lib/constants';
 
 const chartOptions: ApexOptions = {
   legend: { show: false },
@@ -227,7 +228,7 @@ export default defineComponent({
   },
   async mounted() {
     await this.updateDriveStats();
-    const path = (await tauri.path.dataDir()) + util.appName + util.PLOT_FOLDER;
+    const path = (await tauri.path.dataDir()) + APP_NAME + PLOT_FOLDER;
     this.store.setPlotPath(path);
     await this.createDefaultPlotDir();
   },

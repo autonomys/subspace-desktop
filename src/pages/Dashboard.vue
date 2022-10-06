@@ -59,8 +59,8 @@ export default defineComponent({
     );
     if (!this.store.isFirstLoad) {
       this.$tauri.infoLogger('DASHBOARD | starting node');
-      await this.store.startNode(this.$client, util);
-      await this.store.startFarmer(this.$client, util, blockStorage);
+      await this.store.startNode(this.$client, this.$tauri);
+      await this.store.startFarmer(this.$client, this.$tauri, blockStorage);
     }
 
     // TODO: consider moving fetching peers into store 

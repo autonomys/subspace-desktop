@@ -5,10 +5,8 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 import { generateSlug } from 'random-word-slugs';
 import { LocalStorage } from 'quasar';
 
-import Config from '../config';
-import TauriInvoker from '../tauri';
-
-const nodeNameMaxLength = 64;
+import Config from './config';
+import TauriInvoker from './tauri';
 
 /**
  * Utility function to open modal using Quasar Dialog API
@@ -86,6 +84,7 @@ export function createApi(url: string | string[]): ApiPromise {
   });
 }
 
+const NODE_NAME_MAX_LENGTH = 64;
 /**
  * Utility function to generate random name for local node name
  * @returns {string} - generated node name
@@ -96,7 +95,7 @@ export function generateNodeName(): string {
     const slug = generateSlug(2);
     const num = Math.floor(Math.random() * (9000)) + 1000;
     nodeName = slug + '-' + num.toString();
-  } while (nodeName.length > nodeNameMaxLength);
+  } while (nodeName.length > NODE_NAME_MAX_LENGTH);
   return nodeName;
 }
 
@@ -114,8 +113,6 @@ export function getErrorMessage(error: unknown): string | undefined {
     return;
   }
 }
-
-export const PLOT_FOLDER = '/plots';
 
 /**
  * Utility to reset the application, removes files from local storage, as well as config file

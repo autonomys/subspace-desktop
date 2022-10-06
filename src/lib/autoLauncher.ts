@@ -7,6 +7,7 @@ interface WinOrMacAutoLauncherProps {
   appName: string,
   appPath: string,
   native: typeof native;
+  tauri: TauriInvoker;
 }
 
 interface LinuxAutoLauncherProps {
@@ -83,11 +84,13 @@ export class MacOSAutoLauncher {
   private appName: string;
   private appPath: string;
   private native: typeof native;
+  private tauri: TauriInvoker;
 
-  constructor({ appName, appPath, native }: WinOrMacAutoLauncherProps) {
+  constructor({ appName, appPath, native, tauri }: WinOrMacAutoLauncherProps) {
     this.appName = appName;
     this.appPath = appPath;
     this.native = native;
+    this.tauri = tauri;
   }
 
   public async enable(minimized: boolean): Promise<ChildReturnData> {
@@ -97,15 +100,15 @@ export class MacOSAutoLauncher {
     const path = this.appPath.split('/Contents')[0];
     const isHiddenValue = minimized ? 'true' : 'false';
     const properties = `{path:"${path}", hidden:${isHiddenValue}, name:"${this.appName}"}`;
-    return this.native.execApplescriptCommand(`make login item at end with properties ${properties}`);
+    return this.native.execApplescriptCommand(`make login item at end with properties ${properties}`, this.tauri);
   }
 
   public async disable(): Promise<ChildReturnData> {
-    return this.native.execApplescriptCommand(`delete login item "${this.appName}"`);
+    return this.native.execApplescriptCommand(`delete login item "${this.appName}"`, this.tauri);
   }
 
   public async isEnabled(): Promise<boolean> {
-    const response: ChildReturnData = await this.native.execApplescriptCommand('get the name of every login item');
+    const response: ChildReturnData = await this.native.execApplescriptCommand('get the name of every login item', this.tauri);
     const loginList = response?.stdout[0]?.split(', ') || [];
     const exists = loginList.includes(this.appName);
     console.log('login Item Exists:', exists);

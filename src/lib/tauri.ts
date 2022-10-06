@@ -1,10 +1,8 @@
 import * as tauri from '@tauri-apps/api/tauri';
 
 import { IConfig } from './config';
-import { getErrorMessage } from './util/util';
-
-// TODO: move elsewhere
-export const appName: string = process.env.APP_NAME || 'subspace-desktop';
+import { getErrorMessage } from './util';
+import { APP_NAME } from './constants';
 
 // TODO: add doc comments
 class TauriInvoker {
@@ -77,7 +75,7 @@ class TauriInvoker {
    * @returns {string} path - logs location
    */
   async getLogPath(): Promise<string> {
-    return this.invoke('custom_log_dir', { id: appName });
+    return this.invoke('custom_log_dir', { id: APP_NAME });
   }
 }
 
