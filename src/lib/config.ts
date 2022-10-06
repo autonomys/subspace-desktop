@@ -42,7 +42,7 @@ export const emptyConfig: IConfig = {
 class Config {
   private configPath: string;
   private configFullPath: string;
-  private tauri: TauriInvoker; 
+  private tauri: TauriInvoker;
 
   constructor({ configDir, appName, tauri }: FilesParams) {
 

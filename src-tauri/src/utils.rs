@@ -85,43 +85,60 @@ pub(crate) fn custom_log_dir(id: &str) -> PathBuf {
 }
 
 #[tauri::command]
-pub(crate) fn create_config(path: &str, content: String) {
-    let mut file = File::create(path).expect("can't create file");
-    file.write_all(content.as_bytes())
-        .expect("couldn't write file");
+pub(crate) fn create_config(path: &str, content: String) -> Result<(), String> {
+    match File::create(path) {
+        Ok(mut file) => {
+            file.write_all(content.as_bytes())
+                .expect("couldn't write file");
 
-    // config file is created under the current user's folder, in Windows, other users do not have read/write access to these
-    #[cfg(not(target_os = "windows"))]
-    {
-        let mut perms = file
-            .metadata()
-            .expect("could not get metadata")
-            .permissions();
-        perms.set_mode(0o600);
+            // config file is created under the current user's folder, in Windows, other users do not have read/write access to these
+            #[cfg(not(target_os = "windows"))]
+            {
+                let mut perms = file
+                    .metadata()
+                    .expect("could not get metadata")
+                    .permissions();
+                perms.set_mode(0o600);
 
-        file.set_permissions(perms)
-            .expect("failed to set permissions for the config");
+                file.set_permissions(perms)
+                    .expect("failed to set permissions for the config");
+            }
+            Ok(())
+        }
+        Err(why) => Err(format!("couldn't create config because: {why}").into()),
     }
 }
 
 #[tauri::command]
-pub(crate) fn create_dir(path: &str) {
-    fs::create_dir(path).expect("cannot create directory.");
+pub(crate) fn create_dir(path: &str) -> Result<(), String> {
+    match fs::create_dir(path) {
+        Ok(_) => Ok(()),
+        Err(why) => Err(format!("couldn't create directory because: {why}").into()),
+    }
 }
 
 #[tauri::command]
-pub(crate) fn remove_dir(path: &str) {
-    fs::remove_dir_all(path).expect("cannot delete directory.");
+pub(crate) fn remove_dir(path: &str) -> Result<(), String> {
+    match fs::remove_dir_all(path) {
+        Ok(_) => Ok(()),
+        Err(why) => Err(format!("couldn't remove directory because: {why}").into()),
+    }
 }
 
 #[tauri::command]
-pub(crate) fn write_file(path: &str, contents: &str) {
-    fs::write(path, contents).expect("cannot write to file.");
+pub(crate) fn write_file(path: &str, contents: &str) -> Result<(), String> {
+    match fs::write(path, contents) {
+        Ok(_) => Ok(()),
+        Err(why) => Err(format!("couldn't write file because: {why}").into()),
+    }
 }
 
 #[tauri::command]
-pub(crate) fn remove_file(path: &str) {
-    fs::remove_file(path).expect("cannot remove file.");
+pub(crate) fn remove_file(path: &str) -> Result<(), String> {
+    match fs::remove_file(path) {
+        Ok(_) => Ok(()),
+        Err(why) => Err(format!("couldn't remove file because: {why}").into()),
+    }
 }
 
 /// returns how many entries there are in the directory
@@ -135,6 +152,9 @@ pub(crate) fn entry_count_directory(path: &str) -> isize {
 }
 
 #[tauri::command]
-pub(crate) fn read_file(path: &str) -> String {
-    fs::read_to_string(path).expect("cannot read file")
+pub(crate) fn read_file(path: &str) -> Result<String, String> {
+    match fs::read_to_string(path) {
+        Ok(content) => Ok(content),
+        Err(why) => Err(format!("couldn't read file because: {why}").into()),
+    }
 }

@@ -23,7 +23,7 @@ class TauriInvoker {
     return this.invoke('remove_dir', { path });
   }
 
-  public async createDir(path: string) {
+  public async createDir(path: string): Promise<void> {
     return this.invoke('create_dir', { path });
   }
 
@@ -35,7 +35,7 @@ class TauriInvoker {
     return this.invoke('read_file', { path });
   }
 
-  public async openFolder(dir: string) {
+  public async openFolder(dir: string): Promise<void> {
     return this.invoke('open_folder', { dir });
   }
 
