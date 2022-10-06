@@ -77,6 +77,14 @@ class TauriInvoker {
   public async getLogPath(): Promise<string> {
     return this.invoke('custom_log_dir', { id: APP_NAME });
   }
+
+  public async startFarming(path: string, rewardAddress: string, plotSize: number): Promise<void> {
+    return this.invoke('farming', { path, rewardAddress, plotSize });
+  }
+
+  public async startNode(path: string, nodeName: string): Promise<void> {
+    return this.invoke('start_node', { path, nodeName });
+  }
 }
 
 export default TauriInvoker;

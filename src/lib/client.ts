@@ -169,8 +169,7 @@ export class Client {
    * @param {string} nodeName - local node name
    */
   public async startNode(path: string, nodeName: string): Promise<void> {
-    // TODO: consider moving inside TauriInvoker
-    await tauri.invoke('start_node', { path, nodeName });
+    await this.tauri.startNode(path, nodeName);
 
     // TODO: workaround in case node takes some time to fully start, should be replaced with tauri events
     await new Promise((resolve) => setTimeout(resolve, 7000));
@@ -211,7 +210,6 @@ export class Client {
       throw new Error('Tried to send empty reward address to backend!');
     }
 
-    // TODO: consider moving inside TauriInvoker
-    return tauri.invoke('farming', { path, rewardAddress, plotSize });
+    return this.tauri.startFarming(path, rewardAddress, plotSize);
   }
 }
