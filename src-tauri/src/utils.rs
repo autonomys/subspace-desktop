@@ -1,5 +1,5 @@
 use serde::Serialize;
-use std::fs::File;
+use std::fs;
 use std::io::prelude::*;
 use std::path::PathBuf;
 use std::process::Command;
@@ -84,7 +84,7 @@ pub(crate) fn custom_log_dir(id: &str) -> PathBuf {
 }
 
 #[tauri::command]
-pub(crate) fn create_file(path: &str, content: String) {
+pub(crate) fn create_config(path: &str, content: String) {
     let mut file = File::create(path).expect("can't create file");
     file.write_all(content.as_bytes())
         .expect("couldn't write file");
@@ -101,4 +101,40 @@ pub(crate) fn create_file(path: &str, content: String) {
         file.set_permissions(perms)
             .expect("failed to set permissions for the config");
     }
+}
+
+#[tauri::command]
+pub(crate) fn create_dir(path: &str) {
+    fs::create_dir(path).expect("cannot create directory.");
+}
+
+#[tauri::command]
+pub(crate) fn remove_dir(path: &str) {
+    fs::remove_dir_all(path).expect("cannot delete directory.");
+}
+
+#[tauri::command]
+pub(crate) fn write_file(path: &str, contents: &str) {
+    fs::write(path, contents).expect("cannot write to file.");
+}
+
+#[tauri::command]
+pub(crate) fn remove_file(path: &str) {
+    fs::remove_file(path).expect("cannot remove file.");
+}
+
+/// returns how many entries there are in the directory
+/// if there is an error reading the directory (directory does not exist), returns -1
+pub(crate) fn entry_count_directory(path: &str) -> usize {
+    let mut count = 0;
+    match fs::read_dir(path) {
+        Ok(dir) => count = dir.count(),
+        Err(_) => count = -1,
+    }
+    count
+}
+
+#[tauri::command]
+pub(crate) fn read_file(path: &str) -> String {
+    fs::read_to_string(path).expect("cannot read file")
 }

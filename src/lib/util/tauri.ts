@@ -51,12 +51,62 @@ export async function resetAndClear({
   await config.remove();
 }
 
-export async function writeFile(
+/**
+ * Utility to create the log file with restricted permissions
+ */
+export async function writeConfig(
   configFullPath: string,
   config: IConfig
 ): Promise<void> {
-  await invoke('create_file', {
+  await invoke('create_config', {
     path: configFullPath,
     content: JSON.stringify(config, null, 2)
   });
+}
+
+/**
+ * Utility to create a directory
+ */
+export async function createDir(path: string): Promise<void> {
+  await invoke('create_dir', { path });
+}
+
+/**
+ * Utility to remove a directory along with all its contents
+ */
+ export async function removeDir(path: string): Promise<void> {
+  await invoke('remove_dir', { path });
+}
+
+/**
+ * Utility to write to a file
+ */
+export async function writeFile(
+  path: string,
+  contents: string
+): Promise<void> {
+  await invoke('write_file', { path, contents });
+}
+
+/**
+ * Utility to remove a file
+ */
+export async function removeFile(path: string): Promise<void> {
+  await invoke('remove_file', { path });
+}
+
+/**
+ * Utility read a file
+ * @returns {string} contents of the file
+ */
+export async function readFile(path: string): Promise<string> {
+  return await invoke('read_file', { path });
+}
+
+/**
+ * Utility to get entry count in the given directory
+ * @returns {number} how many entries are there in the directory, -1 means directory does not exist
+ */
+export async function entryCountDirectory(path: string): Promise<number> {
+  return await invoke('entry_count_directory', { path });
 }

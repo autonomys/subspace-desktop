@@ -2,6 +2,7 @@ import * as tauri from '@tauri-apps/api';
 
 import { ChildReturnData } from './types';
 import * as applescript from './applescript';
+import { entryCountDirectory } from './util/tauri';
 
 export interface DriveStats {
   freeBytes: number
@@ -19,19 +20,10 @@ export interface TauriDriveStats {
  */
 export async function selectDir(defaultPath: undefined | string): Promise<string | null> {
   let exists = false;
-  if (defaultPath) exists = await dirExists(defaultPath);
+  if (defaultPath) exists = await entryCountDirectory(defaultPath) !== -1;
   if (!exists) defaultPath = undefined;
   const result = (await tauri.dialog.open({ directory: true, defaultPath })) as null | string;
   return result;
-}
-
-/**
- * Utility function to check if file directory exists
- * @param {string} dir - directory to check
- * @returns {boolean}
- */
-export async function dirExists(dir: string): Promise<boolean> {
-  return (await tauri.fs.readDir(dir, { recursive: false }).catch(console.error)) ? true : false;
 }
 
 // TODO: consider adding this as a method for SetupPlot (not used anywhere else)
@@ -62,7 +54,7 @@ export async function winregGet(subKey: string, value: string): Promise<string> 
 /**
  * Utility function to set data in Windows registry
  * @param {string} subKey - registry sub key, for example 'SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run'
- * @param {string} setKey - registry key to set value for 
+ * @param {string} setKey - registry key to set value for
  * @param {string} value
  * @returns {string} - result string
  */

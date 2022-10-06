@@ -125,6 +125,7 @@ import mnemonicModal from '../components/mnemonicModal.vue';
 import { useStore } from '../stores/store';
 import * as util from '../lib/util';
 import * as directoryDialogs from '../components/directoryDialogs';
+import { createDir, entryCountDirectory } from 'app/lib/util/tauri';
 
 const chartOptions: ApexOptions = {
   legend: { show: false },
@@ -248,27 +249,18 @@ export default defineComponent({
   },
   methods: {
     async confirmCreateDir() {
-      const dirExists = await native.dirExists(this.store.plotPath);
+      const file_count = await entryCountDirectory(this.store.plotPath);
 
-      if (dirExists) {
+      if (file_count !== -1) {
         util.infoLogger('SETUP PLOT | found the old plotting directory');
-        const files = await tauri.fs
-          .readDir(this.store.plotPath)
-          .catch((error) => {
-            util.errorLogger(error);
-          });
-
-        if (files) {
-          console.log('FILES ARE: :', files);
-          if (files.length === 0) {
-            directoryDialogs.existingDirectoryConfirm(this.store.plotPath, this.startPlotting);
-            // we are in FIRST TIME START, meaning there is are no existing plot
-            // if there are some files in this folder, it's weird
-          } else {
-            directoryDialogs.notEmptyDirectoryInfo(this.store.plotPath);
-          }
+        if (file_count === 0) {
+          directoryDialogs.existingDirectoryConfirm(this.store.plotPath, this.startPlotting);
+          // we are in FIRST TIME START, meaning there is are no existing plot
+          // if there are some files in this folder, it's weird
+        } else {
+          directoryDialogs.notEmptyDirectoryInfo(this.store.plotPath);
         }
-      } else if (!dirExists) {
+      } else {
         directoryDialogs.newDirectoryConfirm(this.store.plotPath, this.startPlotting);
       }
     },
@@ -310,7 +302,7 @@ export default defineComponent({
       await this.updateDriveStats();
     },
     async createDefaultPlotDir() {
-      await tauri.fs.createDir(this.store.plotPath).catch((error) => {
+      await createDir(this.store.plotPath).catch((error) => {
         util.errorLogger(error);
       });
     },

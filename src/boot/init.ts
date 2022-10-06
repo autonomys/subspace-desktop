@@ -12,6 +12,7 @@ import { useStore } from '../stores/store';
 import { appName, errorLogger, infoLogger, writeFile } from '../lib/util';
 import * as native from '../lib/native';
 import { initUpdater } from '../lib/updater';
+import { writeConfig } from 'app/lib/util/tauri';
 
 const LOCAL_RPC = process.env.LOCAL_API_WS || 'ws://localhost:9947';
 
@@ -28,7 +29,7 @@ export default boot(async ({ app }) => {
 
   // create Config instance and initialize it
   const configDir = await tauri.path.configDir();
-  const config = new Config({ fs: tauri.fs, appName, configDir, writeFile });
+  const config = new Config({ appName, configDir, writeConfig });
 
   try {
     await config.init();
@@ -72,7 +73,7 @@ export default boot(async ({ app }) => {
       const winAppPath = appPath.startsWith('\\\\?\\') ? appPath.replace('\\\\?\\', '') : appPath;
       osAutoLauncher = new WindowsAutoLauncher({ appPath: winAppPath, appName, native });
     } else {
-      osAutoLauncher = new LinuxAutoLauncher({ appName, appPath, configDir, fs: tauri.fs });
+      osAutoLauncher = new LinuxAutoLauncher({ appName, appPath, configDir });
     }
 
     const autoLauncher = new AutoLauncher({ config, osAutoLauncher });

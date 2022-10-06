@@ -105,7 +105,13 @@ async fn main() -> Result<()> {
                 utils::open_folder,
                 utils::get_disk_stats,
                 utils::get_this_binary,
-                utils::create_file,
+                utils::create_config,
+                utils::create_dir,
+                utils::remove_dir,
+                utils::write_file,
+                utils::remove_file,
+                utils::entry_count_directory,
+                utils::read_file,
             ],
             #[cfg(target_os = "windows")]
             tauri::generate_handler![
@@ -121,7 +127,13 @@ async fn main() -> Result<()> {
                 utils::get_disk_stats,
                 utils::get_this_binary,
                 utils::open_folder,
-                utils::create_file,
+                utils::create_config,
+                utils::create_dir,
+                utils::remove_dir,
+                utils::write_file,
+                utils::remove_file,
+                utils::entry_count_directory,
+                utils::read_file,
             ],
         )
         .build(ctx)

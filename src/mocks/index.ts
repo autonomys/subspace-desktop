@@ -1,5 +1,3 @@
-import * as fs from '@tauri-apps/api/fs';
-
 import FarmedBlockMock from './FarmedBlock.json';
 import { Client } from '../lib/client';
 import { IUtil } from '../lib/util/util';

@@ -1,9 +1,8 @@
-import * as fs from '@tauri-apps/api/fs';
-
 import * as native from './native';
 import { ChildReturnData } from './types';
 import { errorLogger } from './util';
 import Config from './config';
+import { createDir, entryCountDirectory, readFile, removeFile, writeFile } from './util/tauri';
 
 interface WinOrMacAutoLauncherProps {
   appName: string,
@@ -15,19 +14,16 @@ interface LinuxAutoLauncherProps {
   appName: string,
   appPath: string,
   configDir: string;
-  fs: typeof fs,
 }
 
 export class LinuxAutoLauncher {
   private appName: string;
   private appPath: string;
-  private fs: typeof fs;
   private configDir: string;
 
-  constructor({ appName, appPath, fs, configDir }: LinuxAutoLauncherProps) {
+  constructor({ appName, appPath, configDir }: LinuxAutoLauncherProps) {
     this.appName = appName;
     this.appPath = appPath;
-    this.fs = fs;
     this.configDir = configDir;
   }
 
@@ -43,7 +39,7 @@ export class LinuxAutoLauncher {
       Exec=${this.appPath}${hiddenArg}
       Icon=${this.appName}
     `;
-    await this.fs.writeFile({ contents, path: autostartAppFile });
+    await writeFile(autostartAppFile, contents);
     response.stdout.push('success');
     return response;
   }
@@ -51,7 +47,7 @@ export class LinuxAutoLauncher {
   public async disable(): Promise<ChildReturnData> {
     const autostartAppFile = this.getAutostartFilePath();
     const response: ChildReturnData = { stderr: [], stdout: [] };
-    await this.fs.removeFile(autostartAppFile);
+    await removeFile(autostartAppFile);
     response.stdout.push('success');
     return response;
   }
@@ -59,7 +55,7 @@ export class LinuxAutoLauncher {
   public async isEnabled(): Promise<boolean> {
     try {
       const autostartAppFile = this.getAutostartFilePath();
-      await this.fs.readTextFile(autostartAppFile);
+      await readFile(autostartAppFile);
       return true;
     } catch (error) {
       errorLogger(error);
@@ -74,9 +70,8 @@ export class LinuxAutoLauncher {
 
   private async createAutostartDir(): Promise<string> {
     const autostartDirectory = this.configDir + 'autostart/';
-    const existDir = await this.fs.readDir(autostartDirectory);
-    if (!existDir) {
-      await this.fs.createDir(autostartDirectory);
+    if (await entryCountDirectory(autostartDirectory) === -1) {
+      await createDir(autostartDirectory);
     }
     return autostartDirectory + this.appName + '.desktop';
   }
