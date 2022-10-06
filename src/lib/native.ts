@@ -2,7 +2,7 @@ import * as tauri from '@tauri-apps/api';
 
 import { ChildReturnData } from './types';
 import * as applescript from './applescript';
-import { entryCountDirectory } from './util/tauri';
+import TauriInvoker from './tauri';
 
 export interface DriveStats {
   freeBytes: number
@@ -18,9 +18,9 @@ export interface TauriDriveStats {
  * @param {undefined | string} defaultPath - plot path
  * @returns {null | string} - selected path
  */
-export async function selectDir(defaultPath: undefined | string): Promise<string | null> {
+export async function selectDir(defaultPath: undefined | string, tauriInvoker: TauriInvoker): Promise<string | null> {
   let exists = false;
-  if (defaultPath) exists = await entryCountDirectory(defaultPath) !== -1;
+  if (defaultPath) exists = await tauriInvoker.entryCountDirectory(defaultPath) !== -1;
   if (!exists) defaultPath = undefined;
   const result = (await tauri.dialog.open({ directory: true, defaultPath })) as null | string;
   return result;

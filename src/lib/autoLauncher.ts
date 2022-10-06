@@ -1,8 +1,7 @@
 import * as native from './native';
 import { ChildReturnData } from './types';
-import { errorLogger } from './util';
 import Config from './config';
-import { createDir, entryCountDirectory, readFile, removeFile, writeFile } from './util/tauri';
+import TauriInvoker from './tauri';
 
 interface WinOrMacAutoLauncherProps {
   appName: string,
@@ -14,17 +13,20 @@ interface LinuxAutoLauncherProps {
   appName: string,
   appPath: string,
   configDir: string;
+  tauri: TauriInvoker;
 }
 
 export class LinuxAutoLauncher {
   private appName: string;
   private appPath: string;
   private configDir: string;
+  private tauri: TauriInvoker;
 
-  constructor({ appName, appPath, configDir }: LinuxAutoLauncherProps) {
+  constructor({ appName, appPath, configDir, tauri }: LinuxAutoLauncherProps) {
     this.appName = appName;
     this.appPath = appPath;
     this.configDir = configDir;
+    this.tauri = tauri;
   }
 
   public async enable(minimized: boolean): Promise<ChildReturnData> {
@@ -39,7 +41,7 @@ export class LinuxAutoLauncher {
       Exec=${this.appPath}${hiddenArg}
       Icon=${this.appName}
     `;
-    await writeFile(autostartAppFile, contents);
+    await this.tauri.writeFile(autostartAppFile, contents);
     response.stdout.push('success');
     return response;
   }
@@ -47,7 +49,7 @@ export class LinuxAutoLauncher {
   public async disable(): Promise<ChildReturnData> {
     const autostartAppFile = this.getAutostartFilePath();
     const response: ChildReturnData = { stderr: [], stdout: [] };
-    await removeFile(autostartAppFile);
+    await this.tauri.removeFile(autostartAppFile);
     response.stdout.push('success');
     return response;
   }
@@ -55,10 +57,10 @@ export class LinuxAutoLauncher {
   public async isEnabled(): Promise<boolean> {
     try {
       const autostartAppFile = this.getAutostartFilePath();
-      await readFile(autostartAppFile);
+      await this.tauri.readFile(autostartAppFile);
       return true;
     } catch (error) {
-      errorLogger(error);
+      this.tauri.errorLogger(error);
       return false;
     }
   }
@@ -70,8 +72,8 @@ export class LinuxAutoLauncher {
 
   private async createAutostartDir(): Promise<string> {
     const autostartDirectory = this.configDir + 'autostart/';
-    if (await entryCountDirectory(autostartDirectory) === -1) {
-      await createDir(autostartDirectory);
+    if (await this.tauri.entryCountDirectory(autostartDirectory) === -1) {
+      await this.tauri.createDir(autostartDirectory);
     }
     return autostartDirectory + this.appName + '.desktop';
   }
@@ -161,6 +163,7 @@ export class WindowsAutoLauncher {
 interface AutoLauncherParams {
   config: Config;
   osAutoLauncher: MacOSAutoLauncher | WindowsAutoLauncher | LinuxAutoLauncher;
+  tauri: TauriInvoker;
 }
 
 /**
@@ -170,6 +173,7 @@ class AutoLauncher {
   private osAutoLauncher: MacOSAutoLauncher | WindowsAutoLauncher | LinuxAutoLauncher;
   private enabled = false;
   private config: Config;
+  private tauri: TauriInvoker;
 
   /**
    * Create AutoLauncher instance
@@ -177,9 +181,10 @@ class AutoLauncher {
    * @param {MacOSAutoLauncher | WindowsAutoLauncher | LinuxAutoLauncher} params.osAutoLauncher - internal auto launcher for particular OS
    * @param {Config} params.config - Config class instance to interact with app config file
    */
-  constructor({ config, osAutoLauncher }: AutoLauncherParams) {
+  constructor({ config, osAutoLauncher, tauri }: AutoLauncherParams) {
     this.config = config;
     this.osAutoLauncher = osAutoLauncher;
+    this.tauri = tauri;
   }
 
   // TODO: consider removing this method as redundant - call osAutoLauncher.isEnabled() directly
@@ -201,7 +206,7 @@ class AutoLauncher {
     const child = await this.osAutoLauncher.enable(true);
     this.enabled = await this.isEnabled();
     if (!this.enabled) {
-      errorLogger('ENABLE DID NOT WORK');
+      this.tauri.errorLogger('ENABLE DID NOT WORK');
     } else {
       await this.config.update({ launchOnBoot: true });
     }

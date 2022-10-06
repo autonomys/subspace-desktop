@@ -3,9 +3,9 @@ import pRetry, { FailedAttemptError } from 'p-retry';
 
 import { SyncState, FarmedBlock } from '../lib/types';
 import { Client } from '../lib/client';
-import { IUtil } from '../lib/util/util';
 import Config from '../lib/config';
 import { IBlockStorage } from '../lib/blockStorage';
+import TauriInvoker from '../lib/tauri';
 
 export type Status = 'idle' | 'startingNode' | 'syncing' | 'farming';
 
@@ -202,11 +202,10 @@ export const useStore = defineStore('store', {
      * Generate node name and save plot setup to config file
      * Update store 'error' property in case of failure
      * @param {Config} config - instance of Config class
-     * @param {IUtil} util - utilities module
+     * @param {string} nodeName - generated node name
      */
-    async confirmPlottingSetup(config: Config, util: IUtil) {
+    async confirmPlottingSetup(config: Config, nodeName: string) {
       try {
-        const nodeName = util.generateNodeName();
         await this.setNodeName(config, nodeName);
 
         await config.update({
@@ -275,9 +274,9 @@ export const useStore = defineStore('store', {
      * Start node and update app status
      * Update store 'error' property in case of failure
      * @param {Client} client - instance of Client class
-     * @param {IUtil} util - utilities module
+     * @param {TauriInvoker} tauri - tauri invoker
      */
-    async startNode(client: Client, util: IUtil) {
+    async startNode(client: Client, tauri: TauriInvoker) {
       try {
         if (this.nodeName && this.plotPath) {
           this.setStatus('startingNode');
@@ -286,7 +285,7 @@ export const useStore = defineStore('store', {
           this.setStatus('syncing');
         } else {
           // TODO: consider moving logging to client.ts
-          util.errorLogger('NODE START | node name and plot directory are required to start node');
+          tauri.errorLogger('NODE START | node name and plot directory are required to start node');
 
           this.setError({
             title: 'errorPage.startNodeFailed',
@@ -296,7 +295,7 @@ export const useStore = defineStore('store', {
         }
       } catch (error) {
         // TODO: consider moving logging to client.ts
-        util.errorLogger('NODE START | failed to start node');
+        tauri.errorLogger('NODE START | failed to start node');
 
         this.setError({
           title: 'errorPage.startNodeFailed',
@@ -310,10 +309,10 @@ export const useStore = defineStore('store', {
      * First 'syncing', then 'farming'
      * Update store 'error' property in case of failure
      * @param {Client} client - instance of Client class
-     * @param {IUtil} util - utilities module
+     * @param {TauriInvoker} tauri - tauri invoker
      * @param {IBlockStorage} blockStorage - local storage where farmed blocks are saved
      */
-    async startFarmer(client: Client, util: IUtil, blockStorage: IBlockStorage) {
+    async startFarmer(client: Client, tauri: TauriInvoker, blockStorage: IBlockStorage) {
       try {
         // TODO: consider refactoring statuses after Dashboard Plot component #294 is resolved
         this.setNetworkState('verifying');
@@ -323,7 +322,7 @@ export const useStore = defineStore('store', {
         await client.startFarming(this.plotPath, this.plotSizeGB);
 
         // TODO: consider moving logging to client.ts
-        util.infoLogger('farmer started');
+        tauri.infoLogger('farmer started');
 
         const syncState = await client.getSyncState();
         this.setSyncState(syncState);
@@ -362,11 +361,9 @@ export const useStore = defineStore('store', {
           newBlockHandler: this.updateBlockNum,
         });
 
-        // TODO: consider moving logging to client.ts
-        util.infoLogger('block subscription started');
+        tauri.infoLogger('block subscription started');
       } catch (error) {
-        // TODO: consider moving logging to client.ts
-        util.errorLogger('Farmer start error: ' + error as string);
+        tauri.errorLogger('Farmer start error: ' + error as string);
         this.setError({
           title: 'errorPage.startFarmerFailed',
           // TODO: replace default error message with specific one

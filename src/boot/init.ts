@@ -5,14 +5,13 @@ import * as tauri from '@tauri-apps/api';
 
 import messages from '../i18n';
 import { Client } from '../lib/client';
-import { createApi } from '../lib/util';
 import AutoLauncher, { MacOSAutoLauncher, LinuxAutoLauncher, WindowsAutoLauncher } from '../lib/autoLauncher';
 import Config from '../lib/config';
 import { useStore } from '../stores/store';
-import { appName, errorLogger, infoLogger, writeFile } from '../lib/util';
+import { appName, createApi } from '../lib/util';
 import * as native from '../lib/native';
 import { initUpdater } from '../lib/updater';
-import { writeConfig } from 'app/lib/util/tauri';
+import TauriInvoker from '../lib/tauri';
 
 const LOCAL_RPC = process.env.LOCAL_API_WS || 'ws://localhost:9947';
 
@@ -21,22 +20,28 @@ declare module '@vue/runtime-core' {
     $client: Client;
     $autoLauncher: AutoLauncher;
     $config: Config;
+    $tauri: TauriInvoker;
   }
 }
 
 export default boot(async ({ app }) => {
   const store = useStore();
 
+  // create TauriInvoker instance
+  const tauriInvoker = new TauriInvoker(tauri.invoke);
+  // make tauriInvoker available as global prop
+  app.config.globalProperties.$tauri = tauriInvoker;
+
   // create Config instance and initialize it
   const configDir = await tauri.path.configDir();
-  const config = new Config({ appName, configDir, writeConfig });
+  const config = new Config({ appName, configDir, tauri: tauriInvoker });
 
   try {
     await config.init();
     // make config available as global prop
     app.config.globalProperties.$config = config;
   } catch (error) {
-    errorLogger(error);
+    tauriInvoker.errorLogger(error);
     store.setError({ title: 'errorPage.initConfigFailed' });
   }
 
@@ -47,7 +52,7 @@ export default boot(async ({ app }) => {
   try {
     await initUpdater(tauri, store.setHasNewUpdate);
   } catch (error) {
-    errorLogger(error);
+    tauriInvoker.errorLogger(error);
     store.setError({ title: 'errorPage.initUpdaterFailed' });
   }
 
@@ -60,9 +65,9 @@ export default boot(async ({ app }) => {
   // create AutoLauncher instance and initialize it
   try {
     const osType = await tauri.os.type();
-    infoLogger('OS TYPE: ' + osType);
+    tauriInvoker.infoLogger('OS TYPE: ' + osType);
     const appPath = await tauri.invoke('get_this_binary') as string; // this is not the same as appDir: appPath -> appDir
-    infoLogger('get_this_binary : ' + appPath);
+    tauriInvoker.infoLogger('get_this_binary : ' + appPath);
 
     let osAutoLauncher;
 
@@ -73,16 +78,16 @@ export default boot(async ({ app }) => {
       const winAppPath = appPath.startsWith('\\\\?\\') ? appPath.replace('\\\\?\\', '') : appPath;
       osAutoLauncher = new WindowsAutoLauncher({ appPath: winAppPath, appName, native });
     } else {
-      osAutoLauncher = new LinuxAutoLauncher({ appName, appPath, configDir });
+      osAutoLauncher = new LinuxAutoLauncher({ appName, appPath, configDir, tauri: tauriInvoker });
     }
 
-    const autoLauncher = new AutoLauncher({ config, osAutoLauncher });
+    const autoLauncher = new AutoLauncher({ config, osAutoLauncher, tauri: tauriInvoker });
     await autoLauncher.init();
 
     // make autoLauncher available as global prop
     app.config.globalProperties.$autoLauncher = autoLauncher;
   } catch (error) {
-    errorLogger(error);
+    tauriInvoker.errorLogger(error);
     store.setError({ title: 'errorPage.initAutoLauncherFailed' });
   }
 

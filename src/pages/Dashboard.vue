@@ -58,7 +58,7 @@ export default defineComponent({
       },
     );
     if (!this.store.isFirstLoad) {
-      util.infoLogger('DASHBOARD | starting node');
+      this.$tauri.infoLogger('DASHBOARD | starting node');
       await this.store.startNode(this.$client, util);
       await this.store.startFarmer(this.$client, util, blockStorage);
     }

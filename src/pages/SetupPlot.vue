@@ -120,12 +120,10 @@ import { ApexOptions } from 'apexcharts';
 
 import { ChartDataType, StatsType } from '../lib/types';
 import * as native from '../lib/native';
-import * as plotDir from '../lib/plotDir';
 import mnemonicModal from '../components/mnemonicModal.vue';
 import { useStore } from '../stores/store';
 import * as util from '../lib/util';
 import * as directoryDialogs from '../components/directoryDialogs';
-import { createDir, entryCountDirectory } from 'app/lib/util/tauri';
 
 const chartOptions: ApexOptions = {
   legend: { show: false },
@@ -249,11 +247,11 @@ export default defineComponent({
   },
   methods: {
     async confirmCreateDir() {
-      const file_count = await entryCountDirectory(this.store.plotPath);
+      const fileCount = await this.$tauri.entryCountDirectory(this.store.plotPath);
 
-      if (file_count !== -1) {
-        util.infoLogger('SETUP PLOT | found the old plotting directory');
-        if (file_count === 0) {
+      if (fileCount !== -1) {
+        this.$tauri.infoLogger('SETUP PLOT | found the old plotting directory');
+        if (fileCount === 0) {
           directoryDialogs.existingDirectoryConfirm(this.store.plotPath, this.startPlotting);
           // we are in FIRST TIME START, meaning there is are no existing plot
           // if there are some files in this folder, it's weird
@@ -266,44 +264,46 @@ export default defineComponent({
     },
     async startPlotting() {
       try {
-        await plotDir.createPlotDir(this.store.plotPath);
-        util.infoLogger('SETUP PLOT | custom directory created');
+        await this.$tauri.createDir(this.store.plotPath);
+        this.$tauri.infoLogger('SETUP PLOT | custom directory created');
 
         if (!this.store.rewardAddress) {
-          util.infoLogger('SETUP PLOT | reward address was empty, creating a new one');
+          this.$tauri.infoLogger('SETUP PLOT | reward address was empty, creating a new one');
           await util.showModal(mnemonicModal, { handleConfirm: this.handleConfirm });
         } else {
-          util.infoLogger('SETUP PLOT | reward address was initialized before, proceeding to plotting');
+          this.$tauri.infoLogger('SETUP PLOT | reward address was initialized before, proceeding to plotting');
           await this.handleConfirm();
         }
       } catch (error) {
-        util.errorLogger(error);
+        this.$tauri.errorLogger(error);
         this.store.setError({ title: 'erroPage.startPlottingFailed' });
       }
     },
     async handleConfirm() {
-      await this.store.confirmPlottingSetup(this.$config, util);
+      const nodeName = util.generateNodeName();
+      await this.store.confirmPlottingSetup(this.$config, nodeName);
       this.$router.replace({ name: 'plottingProgress' });
     },
     async updateDriveStats() {
       const stats = await native.driveStats(this.store.plotPath);
-      util.infoLogger('Drive Stats -> free: ' + stats.freeBytes + '; total: ' + stats.totalBytes);
+      this.$tauri.infoLogger('Drive Stats -> free: ' + stats.freeBytes + '; total: ' + stats.totalBytes);
       this.driveStats = stats;
     },
     async selectDir() {
       const result = await native
-        .selectDir(this.store.plotPath)
+        .selectDir(this.store.plotPath, this.$tauri)
         .catch((error: unknown) => {
-          util.errorLogger(error);
+          this.$tauri.errorLogger(error);
         });
       if (result) {
         this.store.setPlotPath(result);
       }
       await this.updateDriveStats();
     },
+    // TODO: throw error and update state
     async createDefaultPlotDir() {
-      await createDir(this.store.plotPath).catch((error) => {
-        util.errorLogger(error);
+      await this.$tauri.createDir(this.store.plotPath).catch((error) => {
+        this.$tauri.errorLogger(error);
       });
     },
   }

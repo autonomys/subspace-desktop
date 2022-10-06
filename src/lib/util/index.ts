@@ -9,13 +9,9 @@ export {
   createApi,
   generateNodeName,
   getErrorMessage,
+  resetAndClear,
 } from './util';
 
 export {
   appName,
-  getLogPath,
-  errorLogger,
-  infoLogger,
-  resetAndClear,
-  writeFile,
-} from './tauri';
+} from '../tauri';

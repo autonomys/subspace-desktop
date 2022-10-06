@@ -3,12 +3,10 @@ import { Component } from 'vue';
 import * as process from 'process';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { generateSlug } from 'random-word-slugs';
+import { LocalStorage } from 'quasar';
 
-export interface IUtil {
-  generateNodeName: () => string;
-  errorLogger: (str: string) => Promise<void>;
-  infoLogger: (str: string) => Promise<void>;
-}
+import Config from '../config';
+import TauriInvoker from '../tauri';
 
 const nodeNameMaxLength = 64;
 
@@ -118,3 +116,23 @@ export function getErrorMessage(error: unknown): string | undefined {
 }
 
 export const PLOT_FOLDER = '/plots';
+
+/**
+ * Utility to reset the application, removes files from local storage, as well as config file
+ */
+ export async function resetAndClear({
+  localStorage,
+  tauri,
+  config,
+}: {
+  localStorage: LocalStorage;
+  tauri: TauriInvoker;
+  config: Config;
+}): Promise<void> {
+  await localStorage.clear();
+  const { plot } = await config.readConfigFile();
+  if (plot.location) {
+    await tauri.removeDir(plot.location);
+  }
+  await config.remove();
+}
