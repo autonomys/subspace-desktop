@@ -1,5 +1,6 @@
 use serde::Serialize;
 use std::fs;
+use std::fs::File;
 use std::io::prelude::*;
 use std::path::PathBuf;
 use std::process::Command;
@@ -125,13 +126,12 @@ pub(crate) fn remove_file(path: &str) {
 
 /// returns how many entries there are in the directory
 /// if there is an error reading the directory (directory does not exist), returns -1
-pub(crate) fn entry_count_directory(path: &str) -> usize {
-    let mut count = 0;
+#[tauri::command]
+pub(crate) fn entry_count_directory(path: &str) -> isize {
     match fs::read_dir(path) {
-        Ok(dir) => count = dir.count(),
-        Err(_) => count = -1,
+        Ok(dir) => dir.count() as isize,
+        Err(_) => -1,
     }
-    count
 }
 
 #[tauri::command]
