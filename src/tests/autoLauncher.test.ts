@@ -1,4 +1,4 @@
-import { configClassMock, tauriFsMock } from '../mocks';
+import { configClassMock, tauriInvokerMock } from '../mocks';
 import AutoLauncher, { LinuxAutoLauncher } from '../lib/autoLauncher';
 
 const appName = 'random app name';
@@ -6,14 +6,15 @@ const appPath = '/random-folder/';
 const osAutoLauncherParams = {
   appName,
   appPath,
-  fs: tauriFsMock,
-  configDir: '/random-dir/'
+  configDir: '/random-dir/',
+  tauri: tauriInvokerMock,
 };
 
 const osAutoLauncher = new LinuxAutoLauncher(osAutoLauncherParams);
 const params = {
   config: configClassMock,
   osAutoLauncher,
+  tauri: tauriInvokerMock,
 };
 
 // TODO: these tests and current AutoLauncher implementation require more refactoring

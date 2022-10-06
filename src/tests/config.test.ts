@@ -1,18 +1,16 @@
 import Config, { emptyConfig } from '../lib/config';
-import { tauriFsMock, configFileMock, configDir, appName } from '../mocks';
+import { configFileMock, configDir, appName, tauriInvokerMock } from '../mocks';
 
 const configFullPath = `${configDir}${appName}/${appName}.cfg`;
 
 const params = {
-  fs: tauriFsMock,
   appName,
   configDir,
-  errorLogger: jest.fn(),
-  writeFile: jest.fn(),
+  tauri: tauriInvokerMock,
 };
 
 // TODO: 
-// it will be nice to test with real files without mocking tauri.fs, 
+// it will be nice to test with real files, 
 // but at the moment it does not work in testing environment. 
 // Investigate if there is way to make it work
 describe('Config', () => {
@@ -42,25 +40,21 @@ describe('Config', () => {
 
   it('init method should create directory and config file if there is none', async () => {
     const config = new Config(params);
+    const createDirSpy = jest.spyOn(tauriInvokerMock, 'createDir');
 
     config.readConfigFile = jest.fn().mockRejectedValue(new Error);
     config['write'] = jest.fn().mockResolvedValue(null);
 
     await config.init();
 
-    expect(tauriFsMock.createDir).toHaveBeenCalledWith(config['configPath']);
+    expect(createDirSpy).toHaveBeenCalledWith(config['configPath']);
     expect(config['write']).toHaveBeenCalledWith(emptyConfig);
   });
 
   it('init method should throw error when failed to read config file and create config folder', async () => {
-    const error = 'cannot create folder';
-    const config = new Config({
-      ...params, fs: {
-        ...tauriFsMock,
-        createDir: jest.fn().mockRejectedValue(error),
-      }
-    });
-
+    const error = new Error('cannot create folder');
+    tauriInvokerMock.createDir = jest.fn().mockRejectedValue(error);
+    const config = new Config({...params});
     config.readConfigFile = jest.fn().mockRejectedValue(new Error);
 
     await expect(config.init()).rejects.toEqual(error);
@@ -90,18 +84,18 @@ describe('Config', () => {
 
   it('remove method should remove config file using tauri.fs method', async () => {
     const config = new Config(params);
-
+    const removeFileSpy = jest.spyOn(tauriInvokerMock, 'removeFile');
     await config.remove();
 
-    expect(tauriFsMock.removeFile).toHaveBeenCalledWith(configFullPath);
+    expect(removeFileSpy).toHaveBeenCalledWith(configFullPath);
   });
 
   it('readConfigFile method should read config file and return it as an object', async () => {
     const config = new Config(params);
-
+    tauriInvokerMock.readFile = jest.fn().mockResolvedValue(JSON.stringify(configFileMock));
     const result = await config.readConfigFile();
 
-    expect(tauriFsMock.readTextFile).toHaveBeenCalledWith(configFullPath);
+    expect(tauriInvokerMock.readFile).toHaveBeenCalledWith(configFullPath);
     expect(result).toEqual(configFileMock);
   });
 

@@ -14,7 +14,7 @@ import {
   FarmedBlockMock,
   configFileMock,
   clientMock,
-  utilMock,
+  tauriInvokerMock,
 } from '../mocks';
 import Config from '../lib/config';
 import { Client } from '../lib/client';
@@ -175,7 +175,7 @@ describe('Store', () => {
     store.setNodeName(configClassMock, 'random node name');
     store.setPlotPath('/random-dir');
 
-    await store.startNode(clientMock, utilMock);
+    await store.startNode(clientMock, tauriInvokerMock);
 
     // TODO: this method should update status only once:
     // expect(store.status).toBe('startingNode');
@@ -200,7 +200,7 @@ describe('Store', () => {
       }
     } as unknown as Client;
 
-    await store.startNode(client, utilMock);
+    await store.startNode(client, tauriInvokerMock);
 
     expect(store.error).toEqual({
       title: 'errorPage.startNodeFailed',
@@ -221,7 +221,7 @@ describe('Store', () => {
       }
     } as unknown as Client;
 
-    await store.startNode(client, utilMock);
+    await store.startNode(client, tauriInvokerMock);
 
     expect(store.error).toEqual({
       title: 'errorPage.startNodeFailed',
@@ -241,7 +241,7 @@ describe('Store', () => {
     store.setPlotPath(plotPath);
     store.setPlotSize(plotSize);
 
-    await store.startFarmer(clientMock, utilMock, blockStorageMock);
+    await store.startFarmer(clientMock, tauriInvokerMock, blockStorageMock);
 
     // TODO: this method should update status twice: first syncing, then farming
     // expect(setStatusSpy).toHaveBeenNthCalledWith(1, 'syncing');
@@ -268,7 +268,7 @@ describe('Store', () => {
 
     const store = useStore();
 
-    await store.startFarmer(client, utilMock, blockStorageMock);
+    await store.startFarmer(client, tauriInvokerMock, blockStorageMock);
 
     expect(store.error).toEqual({
       title: 'errorPage.startFarmerFailed',
@@ -288,7 +288,7 @@ describe('Store', () => {
 
     const store = useStore();
 
-    await store.startFarmer(client, utilMock, blockStorageMock);
+    await store.startFarmer(client, tauriInvokerMock, blockStorageMock);
 
     expect(store.error).toEqual({
       title: 'errorPage.startFarmerFailed',
@@ -308,7 +308,7 @@ describe('Store', () => {
 
     const store = useStore();
 
-    await store.startFarmer(client, utilMock, blockStorageMock);
+    await store.startFarmer(client, tauriInvokerMock, blockStorageMock);
 
     expect(store.error).toEqual({
       title: 'errorPage.startFarmerFailed',
@@ -328,7 +328,7 @@ describe('Store', () => {
 
     const store = useStore();
 
-    await store.startFarmer(client, utilMock, blockStorageMock);
+    await store.startFarmer(client, tauriInvokerMock, blockStorageMock);
 
     expect(store.error).toEqual({
       title: 'errorPage.startFarmerFailed',
@@ -341,17 +341,18 @@ describe('Store', () => {
     const plotSize = 10;
     const plotPath = '/random_dir';
     const rewardAddress = 'random address';
+    const nodeName = 'random generated name';
 
     const store = useStore();
     store.setPlotSize(plotSize);
     store.setPlotPath(plotPath);
     store.setRewardAddress(rewardAddress);
 
-    await store.confirmPlottingSetup(configClassMock, utilMock);
+    await store.confirmPlottingSetup(configClassMock, nodeName);
 
     // first node name is set (separate method which is also used elsewhere)
     expect(configClassMock.update).toHaveBeenNthCalledWith(1, {
-      nodeName: 'random generated name',
+      nodeName,
     });
 
     // then set plot and reward address
@@ -374,7 +375,7 @@ describe('Store', () => {
       }
     } as unknown as Config;
 
-    await store.confirmPlottingSetup(config, utilMock);
+    await store.confirmPlottingSetup(config, 'random generated name');
 
     expect(store.error).toEqual({
       title: 'errorPage.configUpdateFailed',

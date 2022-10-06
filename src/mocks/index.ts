@@ -1,6 +1,7 @@
 import FarmedBlockMock from './FarmedBlock.json';
 import { Client } from '../lib/client';
 import Config,  { emptyConfig } from '../lib/config';
+import TauriInvoker from '../lib/tauri';
 
 export { FarmedBlockMock };
 
@@ -47,4 +48,4 @@ export const clientMock = {
   startSubscription: jest.fn(),
 } as unknown as Client;
 
-// TODO: create TauriInvoker mock
+export const tauriInvokerMock = new TauriInvoker(jest.fn().mockResolvedValue({}));
