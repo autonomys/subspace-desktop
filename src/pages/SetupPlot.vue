@@ -277,7 +277,7 @@ export default defineComponent({
         }
       } catch (error) {
         this.$tauri.errorLogger(error);
-        this.store.setError({ title: 'erroPage.startPlottingFailed' });
+        this.store.setError({ title: 'errorPage.startPlottingFailed' });
       }
     },
     async handleConfirm() {

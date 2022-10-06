@@ -111,7 +111,7 @@ export default defineComponent({
           await process.relaunch();
         } catch (error) {
           this.$tauri.errorLogger(error);
-          this.store.setError({ title: 'erroPage.resetFailed' });
+          this.store.setError({ title: 'errorPage.resetFailed' });
         }
       });
     },
