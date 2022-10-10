@@ -17,27 +17,6 @@ pub(crate) struct DiskStats {
 }
 
 #[tauri::command]
-pub(crate) fn open_folder(dir: String) {
-    #[cfg(target_os = "windows")]
-    Command::new("explorer")
-        .arg(dir)
-        .spawn()
-        .expect("could not open the specified directory");
-
-    #[cfg(target_os = "macos")]
-    Command::new("open")
-        .arg(dir)
-        .spawn()
-        .expect("could not open the specified directory");
-
-    #[cfg(target_os = "linux")]
-    Command::new("xdg-open")
-        .arg(dir)
-        .spawn()
-        .expect("could not open the specified directory");
-}
-
-#[tauri::command]
 pub(crate) fn get_disk_stats(dir: String) -> DiskStats {
     debug!("{}", dir);
     let free: u64 = fs2::available_space(&dir).expect("error");
@@ -66,26 +45,32 @@ pub(crate) fn frontend_info_logger(message: &str) {
 }
 
 #[tauri::command]
-pub(crate) fn custom_log_dir(id: &str) -> PathBuf {
-    #[cfg(target_os = "macos")]
-    let path = dirs::home_dir().map(|dir| {
-        dir.join("Library/Logs").join(id)
-        // evaluates to: `~/Library/Logs/${bundle_name}/
-    });
-
-    #[cfg(target_os = "linux")]
-    let path = dirs::data_local_dir().map(|dir| dir.join(id).join("logs"));
-    // evaluates to: `~/.local/share/${bundle_name}/logs/
+pub(crate) fn open_log_dir() {
+    let path = custom_log_dir();
 
     #[cfg(target_os = "windows")]
-    let path = dirs::data_local_dir().map(|dir| dir.join(id).join("logs"));
-    // evaluates to: `C:/Users/Username/AppData/Local/${bundle_name}/logs/
+    Command::new("explorer")
+        .arg(path)
+        .spawn()
+        .expect("could not open the specified directory");
 
-    path.expect("log path generation should succeed")
+    #[cfg(target_os = "macos")]
+    Command::new("open")
+        .arg(path)
+        .spawn()
+        .expect("could not open the specified directory");
+
+    #[cfg(target_os = "linux")]
+    Command::new("xdg-open")
+        .arg(path)
+        .spawn()
+        .expect("could not open the specified directory");
 }
 
 #[tauri::command]
-pub(crate) fn create_config(path: &str, content: String) -> Result<(), String> {
+pub(crate) fn write_config(content: String) -> Result<(), String> {
+    let path = config_dir();
+
     match File::create(path) {
         Ok(mut file) => {
             file.write_all(content.as_bytes())
@@ -105,7 +90,27 @@ pub(crate) fn create_config(path: &str, content: String) -> Result<(), String> {
             }
             Ok(())
         }
-        Err(why) => Err(format!("couldn't create config because: {why}").into()),
+        Err(why) => Err(format!("couldn't create config because: {why}")),
+    }
+}
+
+#[tauri::command]
+pub(crate) fn read_config() -> Result<String, String> {
+    let path = config_dir();
+
+    match fs::read_to_string(path) {
+        Ok(content) => Ok(content),
+        Err(why) => Err(format!("couldn't read file because: {why}")),
+    }
+}
+
+#[tauri::command]
+pub(crate) fn remove_config() -> Result<(), String> {
+    let path = config_dir();
+
+    match fs::remove_file(path) {
+        Ok(_) => Ok(()),
+        Err(why) => Err(format!("couldn't remove file because: {why}")),
     }
 }
 
@@ -113,31 +118,34 @@ pub(crate) fn create_config(path: &str, content: String) -> Result<(), String> {
 pub(crate) fn create_dir(path: &str) -> Result<(), String> {
     match fs::create_dir(path) {
         Ok(_) => Ok(()),
-        Err(why) => Err(format!("couldn't create directory because: {why}").into()),
+        Err(why) => Err(format!("couldn't create directory because: {why}")),
     }
 }
 
 #[tauri::command]
 pub(crate) fn remove_dir(path: &str) -> Result<(), String> {
-    match fs::remove_dir_all(path) {
-        Ok(_) => Ok(()),
-        Err(why) => Err(format!("couldn't remove directory because: {why}").into()),
-    }
-}
+    let ctx = tauri::generate_context!(); // context is necessary to get bundle id
+    let id = &ctx.config().tauri.bundle.identifier;
+    let config_name = format!("{id}.cfg");
+    let white_list = vec!["plots", &config_name]; // files that we created
 
-#[tauri::command]
-pub(crate) fn write_file(path: &str, contents: &str) -> Result<(), String> {
-    match fs::write(path, contents) {
-        Ok(_) => Ok(()),
-        Err(why) => Err(format!("couldn't write file because: {why}").into()),
-    }
-}
+    let result = fs::read_dir(path).map(|dir| {
+        dir.filter_map(|res_entry| res_entry.ok())
+            .all(|entry| white_list.contains(&entry.file_name().to_str().unwrap()))
+    });
 
-#[tauri::command]
-pub(crate) fn remove_file(path: &str) -> Result<(), String> {
-    match fs::remove_file(path) {
-        Ok(_) => Ok(()),
-        Err(why) => Err(format!("couldn't remove file because: {why}").into()),
+    match result {
+        Ok(res) => {
+            if res {
+                match fs::remove_dir_all(path) {
+                    Ok(_) => Ok(()),
+                    Err(why) => Err(format!("couldn't remove directory because: {why}")),
+                }
+            } else {
+                Err(format!("there are unrecognized files in the directory: {path}. Aborting the operation for security reasons."))
+            }
+        }
+        Err(_) => Err(format!("couldn't read the directory to be removed")),
     }
 }
 
@@ -151,10 +159,35 @@ pub(crate) fn entry_count_directory(path: &str) -> isize {
     }
 }
 
-#[tauri::command]
-pub(crate) fn read_file(path: &str) -> Result<String, String> {
-    match fs::read_to_string(path) {
-        Ok(content) => Ok(content),
-        Err(why) => Err(format!("couldn't read file because: {why}").into()),
-    }
+pub(crate) fn custom_log_dir() -> PathBuf {
+    let ctx = tauri::generate_context!(); // context is necessary to get bundle id
+    let id = &ctx.config().tauri.bundle.identifier;
+
+    #[cfg(target_os = "macos")]
+    let path = dirs::home_dir().map(|dir| dir.join("Library/Logs").join(id));
+    // evaluates to: `~/Library/Logs/${bundle_name}/
+
+    #[cfg(target_os = "linux")]
+    let path = dirs::data_local_dir().map(|dir| dir.join(id).join("logs"));
+    // evaluates to: `~/.local/share/${bundle_name}/logs/
+
+    #[cfg(target_os = "windows")]
+    let path = dirs::data_local_dir().map(|dir| dir.join(id).join("logs"));
+    // evaluates to: `C:/Users/Username/AppData/Local/${bundle_name}/logs/
+
+    path.expect("Could not resolve custom log directory path!")
+}
+
+pub(crate) fn config_dir() -> PathBuf {
+    let ctx = tauri::generate_context!(); // context is necessary to get bundle id
+    let id = &ctx.config().tauri.bundle.identifier;
+
+    let config_dir = dirs::config_dir();
+    // * - **Linux:** Resolves to `$XDG_CONFIG_HOME` or `$HOME/.config`.
+    // * - **macOS:** Resolves to `$HOME/Library/Application Support`.
+    // * - **Windows:** Resolves to `{FOLDERID_RoamingAppData}`.
+
+    config_dir
+        .map(|dir| dir.join(id).join(format!("{id}.cfg")))
+        .expect("cannot resolve config directory")
 }

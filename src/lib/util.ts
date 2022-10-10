@@ -127,7 +127,7 @@ export function getErrorMessage(error: unknown): string | undefined {
   config: Config;
 }): Promise<void> {
   await localStorage.clear();
-  const { plot } = await config.readConfigFile();
+  const { plot } = await tauri.readConfig();
   if (plot.location) {
     await tauri.removeDir(plot.location);
   }

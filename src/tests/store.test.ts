@@ -136,7 +136,7 @@ describe('Store', () => {
     expect(store.nodeName).toBe('');
     expect(store.rewardAddress).toBe('');
 
-    await store.updateFromConfig(blockStorageMock, configClassMock);
+    await store.updateFromConfig(blockStorageMock, tauriInvokerMock);
 
     expect(store.plotSizeGB).toBe(configFileMock.plot.sizeGB);
     expect(store.plotPath).toBe(configFileMock.plot.location);
@@ -149,14 +149,9 @@ describe('Store', () => {
   it('updateFromConfig action should set error if config read fails', async () => {
     const errorMessage = 'random error message';
     const store = useStore();
-    const config = {
-      ...configClassMock,
-      readConfigFile() {
-        return Promise.reject(errorMessage);
-      }
-    } as unknown as Config;
+    const tauri = tauriInvokerMock;
 
-    await store.updateFromConfig(blockStorageMock, config);
+    await store.updateFromConfig(blockStorageMock, tauri);
 
     expect(store.error).toEqual({
       title: 'errorPage.configReadFailed',

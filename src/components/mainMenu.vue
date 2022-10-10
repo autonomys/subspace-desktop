@@ -117,10 +117,7 @@ export default defineComponent({
     },
     async exportLogs() {
       try {
-        // TODO: we only do getLogPath when opening folder - merge these together
-        const logPath = await this.$tauri.getLogPath();
-        this.$tauri.infoLogger('log path acquired:' + logPath);
-        await tauri.invoke('open_folder', { dir: logPath });
+        await this.$tauri.openLogDir();
       } catch (error) {
         this.$tauri.errorLogger(error);
         this.store.setError({ title: 'errorPage.getLogsFailed' });

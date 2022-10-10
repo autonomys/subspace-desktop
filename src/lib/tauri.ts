@@ -1,8 +1,7 @@
 import * as tauri from '@tauri-apps/api/tauri';
 
 import { IConfig } from './config';
-import { getErrorMessage } from './util';
-import { APP_NAME } from './constants';
+import { toFixed, getErrorMessage } from './util';
 
 // TODO: add doc comments
 class TauriInvoker {
@@ -12,38 +11,68 @@ class TauriInvoker {
     this.invoke = invoke;
   }
 
-  public async writeConfig(configFullPath: string, config: IConfig): Promise<void> {
-    return this.invoke('create_config', {
-      path: configFullPath,
+  /**
+   * Utility for creating/updating the config file
+   */
+  public async writeConfig(config: IConfig): Promise<void> {
+    return this.invoke('write_config', {
       content: JSON.stringify(config, null, 2)
     });
   }
 
+  /**
+   * Utility to read config file
+   * @returns {Config} - config object
+   */
+  public async readConfig(): Promise<IConfig> {
+    const result: string = await this.invoke('read_config');
+    const config: IConfig = JSON.parse(result);
+    // TODO: there maybe a better solution, or `sizeGB` should be string in the first place
+    config.plot.sizeGB = toFixed(Number(config.plot.sizeGB), 2);
+    return config;
+  }
+
+  /**
+   * Utility to remove the config file
+   */
+  public async removeConfig(): Promise<void> {
+    return this.invoke('remove_config');
+  }
+
+  /**
+   * Utility to remove the a directory recursively
+   */
   public async removeDir(path: string): Promise<void> {
     return this.invoke('remove_dir', { path });
   }
 
+  /**
+   * Utility to create a directory
+   */
   public async createDir(path: string): Promise<void> {
     return this.invoke('create_dir', { path });
   }
 
-  public async removeFile(path: string): Promise<void> {
-    return this.invoke('remove_file', { path });
+  /**
+   * Utility to create linux autostart file
+   */
+  public async createLinuxAutoLaunchFile(hidden: string): Promise<void> {
+    return this.invoke('create_linux_auto_launch_file', { hidden });
   }
 
-  public async readFile(path: string): Promise<string> {
-    return this.invoke('read_file', { path });
+  /**
+   * Utility to check if linux autostart file exists
+   * @returns {boolean} - `true` for file exists
+   */
+  public async linuxAutoLaunchFileExist(): Promise<boolean> {
+    return await this.invoke('linux_auto_launch_file_exist');
   }
 
-  public async openFolder(dir: string): Promise<void> {
-    return this.invoke('open_folder', { dir });
-  }
-
-  public async writeFile(
-    path: string,
-    contents: string
-  ): Promise<void> {
-    return this.invoke('write_file', { path, contents });
+  /**
+   * Utility to remove the linux autostart file
+   */
+  public async removeLinuxAutoLaunchFile(): Promise<void> {
+    return this.invoke('remove_linux_auto_launch_file');
   }
 
   /**
@@ -52,6 +81,15 @@ class TauriInvoker {
    */
   public async entryCountDirectory(path: string): Promise<number> {
     return this.invoke('entry_count_directory', { path });
+  }
+
+  /**
+   * Utility to check if directory exists
+   * the backend function returns -1 if directory does not exist
+   * @returns {boolean} true for directory exist
+   */
+  public async isDirExist(path: string): Promise<boolean> {
+    return (await this.invoke('entry_count_directory', { path }) as number) !== -1;
   }
 
   /**
@@ -74,14 +112,20 @@ class TauriInvoker {
    * Utility to get log file location
    * @returns {string} path - logs location
    */
-  public async getLogPath(): Promise<string> {
-    return this.invoke('custom_log_dir', { id: APP_NAME });
+  public async openLogDir(): Promise<string> {
+    return this.invoke('open_log_dir');
   }
 
+  /**
+   * Utility to start farming
+   */
   public async startFarming(path: string, rewardAddress: string, plotSize: number): Promise<void> {
     return this.invoke('farming', { path, rewardAddress, plotSize });
   }
 
+  /**
+   * Utility to start node
+   */
   public async startNode(path: string, nodeName: string): Promise<void> {
     return this.invoke('start_node', { path, nodeName });
   }

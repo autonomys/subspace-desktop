@@ -158,7 +158,7 @@ export default defineComponent({
       revealKey: false,
       validPath: true,
       driveStats: { freeBytes: 0, totalBytes: 0 },
-      chartOptions,
+      chartOptions
     };
   },
   computed: {
@@ -167,9 +167,11 @@ export default defineComponent({
         this.stats.utilizedGB,
         this.stats.freeGB,
         // small hack to make chart look better, otherwise plot size is not visible
-        this.store.plotSizeGB < 5 ? this.store.plotSizeGB + 5 :
-          this.store.plotSizeGB < 10 ? this.store.plotSizeGB + 3 :
-            this.store.plotSizeGB
+        this.store.plotSizeGB < 5
+          ? this.store.plotSizeGB + 5
+          : this.store.plotSizeGB < 10
+          ? this.store.plotSizeGB + 3
+          : this.store.plotSizeGB
       ];
     },
     stats(): StatsType {
@@ -231,6 +233,7 @@ export default defineComponent({
       await this.updateDriveStats();
       const path = (await tauri.path.dataDir()) + APP_NAME + PLOT_FOLDER;
       this.store.setPlotPath(path);
+      await this.$tauri.createDir(this.store.plotPath);
     } catch (error) {
       this.$tauri.errorLogger(error);
       this.store.setError({ title: 'errorPage.defaultErrorTitle' });
@@ -252,28 +255,41 @@ export default defineComponent({
   },
   methods: {
     async confirmDirectory() {
-      const fileCount = await this.$tauri.entryCountDirectory(this.store.plotPath);
-
-      if (fileCount !== -1) {
+      if (await this.$tauri.isDirExist(this.store.plotPath)) {
+        const fileCount = await this.$tauri.entryCountDirectory(
+          this.store.plotPath
+        );
         this.$tauri.infoLogger('SETUP PLOT | found the old plotting directory');
         if (fileCount === 0) {
-          directoryDialogs.existingDirectoryConfirm(this.store.plotPath, this.startPlotting);
+          directoryDialogs.existingDirectoryConfirm(
+            this.store.plotPath,
+            this.startPlotting
+          );
           // we are in FIRST TIME START, meaning there is are no existing plot
           // if there are some files in this folder, it's weird
         } else {
           directoryDialogs.notEmptyDirectoryInfo(this.store.plotPath);
         }
       } else {
-        directoryDialogs.newDirectoryConfirm(this.store.plotPath, this.createNewDirAndStartPlotting);
+        directoryDialogs.newDirectoryConfirm(
+          this.store.plotPath,
+          this.createNewDirAndStartPlotting
+        );
       }
     },
     async startPlotting() {
       try {
         if (!this.store.rewardAddress) {
-          this.$tauri.infoLogger('SETUP PLOT | reward address was empty, creating a new one');
-          await util.showModal(mnemonicModal, { handleConfirm: this.handleConfirm });
+          this.$tauri.infoLogger(
+            'SETUP PLOT | reward address was empty, creating a new one'
+          );
+          await util.showModal(mnemonicModal, {
+            handleConfirm: this.handleConfirm
+          });
         } else {
-          this.$tauri.infoLogger('SETUP PLOT | reward address was initialized before, proceeding to plotting');
+          this.$tauri.infoLogger(
+            'SETUP PLOT | reward address was initialized before, proceeding to plotting'
+          );
           await this.handleConfirm();
         }
       } catch (error) {
@@ -288,7 +304,12 @@ export default defineComponent({
     },
     async updateDriveStats() {
       const stats = await native.driveStats(this.store.plotPath);
-      this.$tauri.infoLogger('Drive Stats -> free: ' + stats.freeBytes + '; total: ' + stats.totalBytes);
+      this.$tauri.infoLogger(
+        'Drive Stats -> free: ' +
+          stats.freeBytes +
+          '; total: ' +
+          stats.totalBytes
+      );
       this.driveStats = stats;
     },
     async selectDir() {
@@ -311,7 +332,7 @@ export default defineComponent({
         this.$tauri.errorLogger(error);
         this.store.setError({ title: 'errorPage.createNewDirFailed' });
       }
-    },
+    }
   }
 });
 </script>

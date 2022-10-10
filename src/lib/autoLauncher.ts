@@ -31,7 +31,7 @@ export class LinuxAutoLauncher {
   }
 
   public async enable(minimized: boolean): Promise<ChildReturnData> {
-    const autostartAppFile = await this.createAutostartDir();
+    await this.createAutostartDir();
     const response: ChildReturnData = { stderr: [], stdout: [] };
     const hiddenArg = minimized ? ' --minimized' : '';
     const contents = `
@@ -42,23 +42,21 @@ export class LinuxAutoLauncher {
       Exec=${this.appPath}${hiddenArg}
       Icon=${this.appName}
     `;
-    await this.tauri.writeFile(autostartAppFile, contents);
+    await this.tauri.createLinuxAutoLaunchFile(hiddenArg);
     response.stdout.push('success');
     return response;
   }
 
   public async disable(): Promise<ChildReturnData> {
-    const autostartAppFile = this.getAutostartFilePath();
     const response: ChildReturnData = { stderr: [], stdout: [] };
-    await this.tauri.removeFile(autostartAppFile);
+    await this.tauri.removeLinuxAutoLaunchFile();
     response.stdout.push('success');
     return response;
   }
 
   public async isEnabled(): Promise<boolean> {
     try {
-      const autostartAppFile = this.getAutostartFilePath();
-      await this.tauri.readFile(autostartAppFile);
+      await this.tauri.linuxAutoLaunchFileExist();
       return true;
     } catch (error) {
       this.tauri.errorLogger(error);
@@ -66,17 +64,11 @@ export class LinuxAutoLauncher {
     }
   }
 
-  private getAutostartFilePath(): string {
-    const autostartAppFile = this.configDir + 'autostart/' + this.appName + '.desktop';
-    return autostartAppFile;
-  }
-
-  private async createAutostartDir(): Promise<string> {
+  private async createAutostartDir(): Promise<void> {
     const autostartDirectory = this.configDir + 'autostart/';
-    if (await this.tauri.entryCountDirectory(autostartDirectory) === -1) {
+    if (!(await this.tauri.isDirExist(autostartDirectory))) {
       await this.tauri.createDir(autostartDirectory);
     }
-    return autostartDirectory + this.appName + '.desktop';
   }
 }
 
@@ -238,7 +230,7 @@ class AutoLauncher {
    * Read config file and enable auto launcher if necessary
    */
   public async init(): Promise<void> {
-    const { launchOnBoot } = await this.config.readConfigFile();
+    const { launchOnBoot } = await this.tauri.readConfig();
     if (launchOnBoot) {
       // the app may be initialized before, but then user may have decided to move the app to another directory
       // in this case, we have to delete the previous autoLaunch entry, and create a new one

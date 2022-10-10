@@ -1,5 +1,5 @@
 import TauriInvoker from './tauri';
-import { toFixed, getErrorMessage } from './util';
+import { getErrorMessage } from './util';
 
 interface FilesParams {
   configDir: string;
@@ -41,13 +41,11 @@ export const emptyConfig: IConfig = {
  */
 class Config {
   private configPath: string;
-  private configFullPath: string;
   private tauri: TauriInvoker;
 
   constructor({ configDir, appName, tauri }: FilesParams) {
 
     this.configPath = `${configDir}${appName}`;
-    this.configFullPath = `${this.configPath}/${appName}.cfg`;
     this.tauri = tauri;
   }
 
@@ -56,7 +54,7 @@ class Config {
    */
   public async init(): Promise<void> {
     try {
-      await this.readConfigFile();
+      await this.tauri.readConfig();
     } catch {
       // means there were no config file
       await this.tauri.createDir(this.configPath)
@@ -75,7 +73,7 @@ class Config {
    * @returns {boolean}
    */
   public async validate(): Promise<boolean> {
-    const config = await this.readConfigFile();
+    const config = await this.tauri.readConfig();
     const { plot, rewardAddress, nodeName } = config;
     if (
       plot.location.length &&
@@ -92,19 +90,7 @@ class Config {
    * Remove config file from the file system. Used for reset
    */
   public async remove(): Promise<void> {
-    return this.tauri.removeFile(this.configFullPath);
-  }
-
-  /**
-   * Read config file
-   * @returns {Config} - config object
-   */
-  public async readConfigFile(): Promise<IConfig> {
-    const result = await this.tauri.readFile(this.configFullPath);
-    const config: IConfig = JSON.parse(result);
-    // TODO: there maybe a better solution, or `sizeGB` should be string in the first place
-    config.plot.sizeGB = toFixed(Number(config.plot.sizeGB), 2);
-    return config;
+    return this.tauri.removeConfig();
   }
 
   /**
@@ -112,7 +98,7 @@ class Config {
    * @param {IConfig} - config object to store as config file
    */
   private async write(config: IConfig): Promise<void> {
-    return this.tauri.writeConfig(this.configFullPath, config);
+    return this.tauri.writeConfig(config);
   }
 
   /**
@@ -120,7 +106,7 @@ class Config {
    * @param {ConfigUpdate} - object with properties to update in the config file
    */
   public async update(configUpdate: ConfigUpdate): Promise<void> {
-    const config = await this.readConfigFile();
+    const config = await this.tauri.readConfig();
 
     await this.write({
       ...config,

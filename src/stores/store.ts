@@ -242,9 +242,9 @@ export const useStore = defineStore('store', {
      * @param {IBlockStorage} blockStorage - local storage where farmed blocks are saved
      * @param {Config} config - instance of Config class
      */
-    async updateFromConfig(blockStorage: IBlockStorage, config: Config) {
+    async updateFromConfig(blockStorage: IBlockStorage, tauri: TauriInvoker) {
       try {
-        const { plot, nodeName, rewardAddress } = await config.readConfigFile();
+        const { plot, nodeName, rewardAddress } = await tauri.readConfig();
         this.plotSizeGB = plot.sizeGB;
         this.plotPath = plot.location;
         this.nodeName = nodeName;

@@ -20,7 +20,7 @@ export interface TauriDriveStats {
  */
 export async function selectDir(defaultPath: undefined | string, tauriInvoker: TauriInvoker): Promise<string | null> {
   let exists = false;
-  if (defaultPath) exists = await tauriInvoker.entryCountDirectory(defaultPath) !== -1;
+  if (defaultPath) exists = await tauriInvoker.isDirExist(defaultPath);
   if (!exists) defaultPath = undefined;
   const result = (await tauri.dialog.open({ directory: true, defaultPath })) as null | string;
   return result;

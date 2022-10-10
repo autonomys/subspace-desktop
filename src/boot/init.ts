@@ -47,7 +47,7 @@ export default boot(async ({ app }) => {
   }
 
   // set node name from config (empty string is default value)
-  const { nodeName } = (await config.readConfigFile());
+  const { nodeName } = (await tauriInvoker.readConfig());
   store.setNodeName(config, nodeName);
 
   try {
