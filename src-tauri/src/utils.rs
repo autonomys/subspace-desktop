@@ -145,7 +145,7 @@ pub(crate) fn remove_dir(path: &str) -> Result<(), String> {
                 Err(format!("there are unrecognized files in the directory: {path}. Aborting the operation for security reasons."))
             }
         }
-        Err(_) => Err(format!("couldn't read the directory to be removed")),
+        Err(_) => Err(("couldn't read the directory to be removed").into()),
     }
 }
 
