@@ -44,7 +44,7 @@ pub(crate) fn remove_linux_auto_launch_file(app_handle: tauri::AppHandle) -> Res
 fn linux_auto_launch_dir(app_handle: tauri::AppHandle) -> PathBuf {
     let id = &app_handle.config().tauri.bundle.identifier;
 
-    crate::utils::config_dir()
+    crate::utils::config_dir(app_handle)
         .join("autostart")
         .join(format!("{id}.desktop"))
 }
