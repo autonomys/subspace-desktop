@@ -85,7 +85,7 @@ export class Client {
     farmedBlockHandler: (block: FarmedBlock) => void;
     newBlockHandler: (blockNum: number) => void;
   }): Promise<void> {
-    const rewardAddress: string = (await this.tauri.readConfig()).rewardAddress;
+    const { rewardAddress } = (await this.config.readConfigFile());
 
     this.unsubscribe = await this.api.rpc.chain.subscribeNewHeads(
       async ({ hash, number }) => {
@@ -205,7 +205,7 @@ export class Client {
   public async startFarming(path: string, plotSizeGB: number): Promise<void> {
     // convert GB to Bytes
     const plotSize = Math.round(plotSizeGB * 1024 * 1024 * 1024);
-    const { rewardAddress } = (await this.tauri.readConfig());
+    const { rewardAddress } = (await this.config.readConfigFile());
     if (!rewardAddress) {
       throw new Error('Tried to send empty reward address to backend!');
     }

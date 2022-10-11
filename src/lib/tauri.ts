@@ -1,7 +1,7 @@
 import * as tauri from '@tauri-apps/api/tauri';
 
 import { IConfig } from './config';
-import { toFixed, getErrorMessage } from './util';
+import { getErrorMessage } from './util';
 
 // TODO: add doc comments
 class TauriInvoker {
@@ -22,14 +22,10 @@ class TauriInvoker {
 
   /**
    * Utility to read config file
-   * @returns {Config} - config object
+   * @returns {string} - stringified config object
    */
-  public async readConfig(): Promise<IConfig> {
-    const result: string = await this.invoke('read_config');
-    const config: IConfig = JSON.parse(result);
-    // TODO: there maybe a better solution, or `sizeGB` should be string in the first place
-    config.plot.sizeGB = toFixed(Number(config.plot.sizeGB), 2);
-    return config;
+  public async readConfig(): Promise<string> {
+    return this.invoke('read_config');
   }
 
   /**
@@ -65,7 +61,7 @@ class TauriInvoker {
    * @returns {boolean} - `true` for file exists
    */
   public async linuxAutoLaunchFileExist(): Promise<boolean> {
-    return await this.invoke('linux_auto_launch_file_exist');
+    return this.invoke('linux_auto_launch_file_exist');
   }
 
   /**

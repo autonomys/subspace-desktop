@@ -34,14 +34,6 @@ export class LinuxAutoLauncher {
     await this.createAutostartDir();
     const response: ChildReturnData = { stderr: [], stdout: [] };
     const hiddenArg = minimized ? ' --minimized' : '';
-    const contents = `
-      [Desktop Entry]
-      Type=Application
-      Name=${this.appName}
-      Comment=${this.appName} startup script
-      Exec=${this.appPath}${hiddenArg}
-      Icon=${this.appName}
-    `;
     await this.tauri.createLinuxAutoLaunchFile(hiddenArg);
     response.stdout.push('success');
     return response;
@@ -230,7 +222,7 @@ class AutoLauncher {
    * Read config file and enable auto launcher if necessary
    */
   public async init(): Promise<void> {
-    const { launchOnBoot } = await this.tauri.readConfig();
+    const { launchOnBoot } = await this.config.readConfigFile();
     if (launchOnBoot) {
       // the app may be initialized before, but then user may have decided to move the app to another directory
       // in this case, we have to delete the previous autoLaunch entry, and create a new one

@@ -31,7 +31,7 @@ q-menu(auto-close)
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { Dialog, Notify } from 'quasar';
-import { process, event, tauri } from '@tauri-apps/api';
+import { process, event } from '@tauri-apps/api';
 import { LocalStorage as localStorage } from 'quasar';
 
 import * as util from '../lib/util';

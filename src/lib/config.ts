@@ -1,5 +1,5 @@
 import TauriInvoker from './tauri';
-import { getErrorMessage } from './util';
+import { toFixed, getErrorMessage } from './util';
 
 interface FilesParams {
   configDir: string;
@@ -44,7 +44,6 @@ class Config {
   private tauri: TauriInvoker;
 
   constructor({ configDir, appName, tauri }: FilesParams) {
-
     this.configPath = `${configDir}${appName}`;
     this.tauri = tauri;
   }
@@ -73,7 +72,7 @@ class Config {
    * @returns {boolean}
    */
   public async validate(): Promise<boolean> {
-    const config = await this.tauri.readConfig();
+    const config = await this.readConfigFile();
     const { plot, rewardAddress, nodeName } = config;
     if (
       plot.location.length &&
@@ -94,6 +93,18 @@ class Config {
   }
 
   /**
+   * Read config file
+   * @returns {IConfig} - config object
+   */
+  public async readConfigFile(): Promise<IConfig> {
+    const result = await this.tauri.readConfig();
+    const config: IConfig = JSON.parse(result);
+    // TODO: there maybe a better solution, or `sizeGB` should be string in the first place
+    config.plot.sizeGB = toFixed(Number(config.plot.sizeGB), 2);
+    return config;
+  }
+
+  /**
    * Write config file to the file system
    * @param {IConfig} - config object to store as config file
    */
@@ -106,7 +117,7 @@ class Config {
    * @param {ConfigUpdate} - object with properties to update in the config file
    */
   public async update(configUpdate: ConfigUpdate): Promise<void> {
-    const config = await this.tauri.readConfig();
+    const config = await this.readConfigFile();
 
     await this.write({
       ...config,
