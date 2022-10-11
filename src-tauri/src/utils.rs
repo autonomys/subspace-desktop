@@ -45,8 +45,8 @@ pub(crate) fn frontend_info_logger(message: &str) {
 }
 
 #[tauri::command]
-pub(crate) fn open_log_dir() {
-    let path = custom_log_dir();
+pub(crate) fn open_log_dir(app_handle: tauri::AppHandle) {
+    let path = custom_log_dir(&app_handle.config().tauri.bundle.identifier);
 
     #[cfg(target_os = "windows")]
     Command::new("explorer")
@@ -68,8 +68,8 @@ pub(crate) fn open_log_dir() {
 }
 
 #[tauri::command]
-pub(crate) fn write_config(content: String) -> Result<(), String> {
-    let path = config_dir();
+pub(crate) fn write_config(content: String, app_handle: tauri::AppHandle) -> Result<(), String> {
+    let path = config_dir(app_handle);
 
     match File::create(path) {
         Ok(mut file) => {
@@ -95,8 +95,8 @@ pub(crate) fn write_config(content: String) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub(crate) fn read_config() -> Result<String, String> {
-    let path = config_dir();
+pub(crate) fn read_config(app_handle: tauri::AppHandle) -> Result<String, String> {
+    let path = config_dir(app_handle);
 
     match fs::read_to_string(path) {
         Ok(content) => Ok(content),
@@ -105,8 +105,8 @@ pub(crate) fn read_config() -> Result<String, String> {
 }
 
 #[tauri::command]
-pub(crate) fn remove_config() -> Result<(), String> {
-    let path = config_dir();
+pub(crate) fn remove_config(app_handle: tauri::AppHandle) -> Result<(), String> {
+    let path = config_dir(app_handle);
 
     match fs::remove_file(path) {
         Ok(_) => Ok(()),
@@ -124,28 +124,15 @@ pub(crate) fn create_dir(path: &str) -> Result<(), String> {
 
 #[tauri::command]
 pub(crate) fn remove_dir(path: &str) -> Result<(), String> {
-    let ctx = tauri::generate_context!(); // context is necessary to get bundle id
-    let id = &ctx.config().tauri.bundle.identifier;
-    let config_name = format!("{id}.cfg");
-    let white_list = vec!["plots", &config_name]; // files that we created
-
-    let result = fs::read_dir(path).map(|dir| {
-        dir.filter_map(|res_entry| res_entry.ok())
-            .all(|entry| white_list.contains(&entry.file_name().to_str().unwrap()))
-    });
-
-    match result {
-        Ok(res) => {
-            if res {
-                match fs::remove_dir_all(path) {
-                    Ok(_) => Ok(()),
-                    Err(why) => Err(format!("couldn't remove directory because: {why}")),
-                }
-            } else {
-                Err(format!("there are unrecognized files in the directory: {path}. Aborting the operation for security reasons."))
-            }
+    if !path.ends_with("plots") {
+        Err(format!(
+            "The given path is unrecognized: {path}. Aborting the operation."
+        ))
+    } else {
+        match fs::remove_dir_all(path) {
+            Ok(_) => Ok(()),
+            Err(why) => Err(format!("couldn't remove directory because: {why}")),
         }
-        Err(_) => Err(("couldn't read the directory to be removed").into()),
     }
 }
 
@@ -159,10 +146,7 @@ pub(crate) fn entry_count_directory(path: &str) -> isize {
     }
 }
 
-pub(crate) fn custom_log_dir() -> PathBuf {
-    let ctx = tauri::generate_context!(); // context is necessary to get bundle id
-    let id = &ctx.config().tauri.bundle.identifier;
-
+pub(crate) fn custom_log_dir(id: &str) -> PathBuf {
     #[cfg(target_os = "macos")]
     let path = dirs::home_dir().map(|dir| dir.join("Library/Logs").join(id));
     // evaluates to: `~/Library/Logs/${bundle_name}/
@@ -178,9 +162,8 @@ pub(crate) fn custom_log_dir() -> PathBuf {
     path.expect("Could not resolve custom log directory path!")
 }
 
-pub(crate) fn config_dir() -> PathBuf {
-    let ctx = tauri::generate_context!(); // context is necessary to get bundle id
-    let id = &ctx.config().tauri.bundle.identifier;
+pub(crate) fn config_dir(app_handle: tauri::AppHandle) -> PathBuf {
+    let id = &app_handle.config().tauri.bundle.identifier;
 
     let config_dir = dirs::config_dir();
     // * - **Linux:** Resolves to `$XDG_CONFIG_HOME` or `$HOME/.config`.

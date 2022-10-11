@@ -231,9 +231,8 @@ export default defineComponent({
   async mounted() {
     try {
       await this.updateDriveStats();
-      const path = (await tauri.path.dataDir()) + APP_NAME + PLOT_FOLDER;
+      const path = (await tauri.path.dataDir()) + APP_NAME;
       this.store.setPlotPath(path);
-      await this.$tauri.createDir(this.store.plotPath);
     } catch (error) {
       this.$tauri.errorLogger(error);
       this.store.setError({ title: 'errorPage.defaultErrorTitle' });
@@ -256,20 +255,10 @@ export default defineComponent({
   methods: {
     async confirmDirectory() {
       if (await this.$tauri.isDirExist(this.store.plotPath)) {
-        const fileCount = await this.$tauri.entryCountDirectory(
-          this.store.plotPath
+        directoryDialogs.existingDirectoryConfirm(
+          this.store.plotPath,
+          this.startPlotting
         );
-        this.$tauri.infoLogger('SETUP PLOT | found the old plotting directory');
-        if (fileCount === 0) {
-          directoryDialogs.existingDirectoryConfirm(
-            this.store.plotPath,
-            this.startPlotting
-          );
-          // we are in FIRST TIME START, meaning there is are no existing plot
-          // if there are some files in this folder, it's weird
-        } else {
-          directoryDialogs.notEmptyDirectoryInfo(this.store.plotPath);
-        }
       } else {
         directoryDialogs.newDirectoryConfirm(
           this.store.plotPath,
@@ -279,6 +268,9 @@ export default defineComponent({
     },
     async startPlotting() {
       try {
+        const path = this.store.plotPath + PLOT_FOLDER;
+        this.store.setPlotPath(path);
+        await this.$tauri.createDir(this.store.plotPath);
         if (!this.store.rewardAddress) {
           this.$tauri.infoLogger(
             'SETUP PLOT | reward address was empty, creating a new one'

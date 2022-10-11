@@ -2,11 +2,13 @@ use crate::utils::get_this_binary;
 use std::{fs, path::PathBuf};
 
 #[tauri::command]
-pub(crate) fn create_linux_auto_launch_file(hidden: &str) -> Result<(), String> {
-    let ctx = tauri::generate_context!(); // context is necessary to get bundle id
-    let id = &ctx.config().tauri.bundle.identifier;
+pub(crate) fn create_linux_auto_launch_file(
+    hidden: &str,
+    app_handle: tauri::AppHandle,
+) -> Result<(), String> {
+    let id = &app_handle.config().tauri.bundle.identifier;
 
-    let path = linux_auto_launch_dir();
+    let path = linux_auto_launch_dir(app_handle);
     let app_path = get_this_binary().to_str().unwrap().to_string();
     let contents = format!(
         "[Desktop Entry]
@@ -24,14 +26,14 @@ pub(crate) fn create_linux_auto_launch_file(hidden: &str) -> Result<(), String> 
 }
 
 #[tauri::command]
-pub(crate) fn linux_auto_launch_file_exist() -> bool {
-    let path = linux_auto_launch_dir();
+pub(crate) fn linux_auto_launch_file_exist(app_handle: tauri::AppHandle) -> bool {
+    let path = linux_auto_launch_dir(app_handle);
     fs::read(path).is_ok()
 }
 
 #[tauri::command]
-pub(crate) fn remove_linux_auto_launch_file() -> Result<(), String> {
-    let path = linux_auto_launch_dir();
+pub(crate) fn remove_linux_auto_launch_file(app_handle: tauri::AppHandle) -> Result<(), String> {
+    let path = linux_auto_launch_dir(app_handle);
 
     match fs::remove_file(path) {
         Ok(_) => Ok(()),
@@ -39,9 +41,8 @@ pub(crate) fn remove_linux_auto_launch_file() -> Result<(), String> {
     }
 }
 
-fn linux_auto_launch_dir() -> PathBuf {
-    let ctx = tauri::generate_context!(); // context is necessary to get bundle id
-    let id = &ctx.config().tauri.bundle.identifier;
+fn linux_auto_launch_dir(app_handle: tauri::AppHandle) -> PathBuf {
+    let id = &app_handle.config().tauri.bundle.identifier;
 
     crate::utils::config_dir()
         .join("autostart")

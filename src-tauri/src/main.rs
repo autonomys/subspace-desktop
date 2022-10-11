@@ -27,7 +27,8 @@ const KEEP_LAST_N_DAYS: usize = 7;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let log_dir = utils::custom_log_dir();
+    let ctx = tauri::generate_context!();
+    let log_dir = utils::custom_log_dir(&ctx.config().tauri.bundle.identifier);
     create_dir_all(log_dir.clone()).expect("path creation should always succeed");
 
     let mut file_appender = tracing_appender::rolling::daily(log_dir, "subspace-desktop.log");
@@ -152,7 +153,7 @@ async fn main() -> Result<()> {
                 windows::winreg_delete,
             ],
         )
-        .build(tauri::generate_context!())
+        .build(ctx)
         .expect("error while running tauri application");
 
     // running the application
