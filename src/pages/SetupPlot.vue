@@ -268,6 +268,7 @@ export default defineComponent({
     },
     async startPlotting() {
       try {
+        // creating additional subfolder '/plots' inside confirmed directory
         const path = this.store.plotPath + PLOT_FOLDER;
         this.store.setPlotPath(path);
         await this.$tauri.createDir(this.store.plotPath);

@@ -3,16 +3,24 @@ import * as tauri from '@tauri-apps/api/tauri';
 import { IConfig } from './config';
 import { getErrorMessage } from './util';
 
-// TODO: add doc comments
+/**
+ * Wrapper for tauri.invoke calls, 
+ * responsible for interaction with file system, logging, starting node and farmer, etc.
+ */
 class TauriInvoker {
   private invoke: typeof tauri.invoke;
 
+  /**
+   * Create TauriInvoker instance
+   * @param tauri.invoke - tauri method to send messages to backend
+   */
   public constructor(invoke: typeof tauri.invoke) {
     this.invoke = invoke;
   }
 
   /**
-   * Utility for creating/updating the config file
+   * Create/update the config file
+   * @param {IConfig} config - config object
    */
   public async writeConfig(config: IConfig): Promise<void> {
     return this.invoke('write_config', {
@@ -21,7 +29,7 @@ class TauriInvoker {
   }
 
   /**
-   * Utility to read config file
+   * Read config file
    * @returns {string} - stringified config object
    */
   public async readConfig(): Promise<string> {
@@ -29,35 +37,38 @@ class TauriInvoker {
   }
 
   /**
-   * Utility to remove the config file
+   * Remove the config file
    */
   public async removeConfig(): Promise<void> {
     return this.invoke('remove_config');
   }
 
   /**
-   * Utility to remove the a directory recursively
+   * Remove the a directory recursively
+   * @param {string} path - directory location
    */
   public async removeDir(path: string): Promise<void> {
     return this.invoke('remove_dir', { path });
   }
 
   /**
-   * Utility to create a directory
+   * Create a directory
+   * @param {string} path - directory location
    */
   public async createDir(path: string): Promise<void> {
     return this.invoke('create_dir', { path });
   }
 
   /**
-   * Utility to create linux autostart file
+   * Create linux autostart file
+   * @param {string} hidden - command argument to hide application on start
    */
   public async createLinuxAutoLaunchFile(hidden: string): Promise<void> {
     return this.invoke('create_linux_auto_launch_file', { hidden });
   }
 
   /**
-   * Utility to check if linux autostart file exists
+   * Check if linux autostart file exists
    * @returns {boolean} - `true` for file exists
    */
   public async linuxAutoLaunchFileExist(): Promise<boolean> {
@@ -65,14 +76,15 @@ class TauriInvoker {
   }
 
   /**
-   * Utility to remove the linux autostart file
+   * Remove the linux autostart file
    */
   public async removeLinuxAutoLaunchFile(): Promise<void> {
     return this.invoke('remove_linux_auto_launch_file');
   }
 
   /**
-   * Utility to get entry count in the given directory
+   * Get entry count in the given directory
+   * @param {string} path - directory location
    * @returns {number} how many entries are there in the directory, -1 means directory does not exist
    */
   public async entryCountDirectory(path: string): Promise<number> {
@@ -80,8 +92,8 @@ class TauriInvoker {
   }
 
   /**
-   * Utility to check if directory exists
-   * the backend function returns -1 if directory does not exist
+   * Check if directory exists, utilizing method above
+   * @param {string} path - directory location
    * @returns {boolean} true for directory exist
    */
   public async isDirExist(path: string): Promise<boolean> {
@@ -89,7 +101,8 @@ class TauriInvoker {
   }
 
   /**
-   * Utility wrapper for regular logging
+   * Regular logging
+   * @param {unknown} info - data to log
    */
   public async infoLogger(info: unknown): Promise<void> {
     const message = getErrorMessage(info);
@@ -97,7 +110,8 @@ class TauriInvoker {
   }
 
   /**
-   * Utility wrapper for logging errors
+   * Error logging
+   * @param {unknown} error - error to log
    */
   public async errorLogger(error: unknown): Promise<void> {
     const message = getErrorMessage(error);
@@ -105,7 +119,7 @@ class TauriInvoker {
   }
 
   /**
-   * Utility to get log file location
+   * Get log file location
    * @returns {string} path - logs location
    */
   public async openLogDir(): Promise<string> {
@@ -113,14 +127,19 @@ class TauriInvoker {
   }
 
   /**
-   * Utility to start farming
+   * Start farming
+   * @param {string} path - plot directory location
+   * @param {string} rewardAddress - address used to get farming rewards
+   * @param {number} plotSize - size of the plot used for farming
    */
   public async startFarming(path: string, rewardAddress: string, plotSize: number): Promise<void> {
     return this.invoke('farming', { path, rewardAddress, plotSize });
   }
 
   /**
-   * Utility to start node
+   * Start node
+   * @param {string} path - base directory
+   * @param {string} nodeName - node name (displayed in the app header and Telemetry)
    */
   public async startNode(path: string, nodeName: string): Promise<void> {
     return this.invoke('start_node', { path, nodeName });

@@ -37,7 +37,8 @@ export const emptyConfig: IConfig = {
 };
 
 /**
- * Methods for reading, initializing, updating or deleting config file
+ * Class responsible for reading, initializing, updating or deleting config file,
+ * uses TauriInvoker to interact with file system
  */
 class Config {
   private configPath: string;
