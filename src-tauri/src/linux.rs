@@ -12,11 +12,11 @@ pub(crate) fn create_linux_auto_launch_file(
     let app_path = get_this_binary().to_str().unwrap().to_string();
     let contents = format!(
         "[Desktop Entry]
-        Type=Application
-        Name={id}
-        Comment={id} startup script
-        Exec={app_path}{hidden}
-        Icon={id}"
+Type=Application
+Name={id}
+Comment={id} startup script
+Exec={app_path}{hidden}
+Icon={id}"
     );
 
     match fs::write(path, contents) {
@@ -44,7 +44,7 @@ pub(crate) fn remove_linux_auto_launch_file(app_handle: tauri::AppHandle) -> Res
 fn linux_auto_launch_dir(app_handle: tauri::AppHandle) -> PathBuf {
     let id = &app_handle.config().tauri.bundle.identifier;
 
-    crate::utils::config_dir(app_handle)
-        .join("autostart")
-        .join(format!("{id}.desktop"))
+    dirs::config_dir()
+        .map(|dir| dir.join("autostart").join(format!("{id}.desktop")))
+        .expect("could not resolve autostart path!")
 }

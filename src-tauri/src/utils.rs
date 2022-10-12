@@ -69,7 +69,7 @@ pub(crate) fn open_log_dir(app_handle: tauri::AppHandle) {
 
 #[tauri::command]
 pub(crate) fn write_config(content: String, app_handle: tauri::AppHandle) -> Result<(), String> {
-    let path = config_dir(app_handle);
+    let path = config_file_path(app_handle);
 
     match File::create(path) {
         Ok(mut file) => {
@@ -96,7 +96,7 @@ pub(crate) fn write_config(content: String, app_handle: tauri::AppHandle) -> Res
 
 #[tauri::command]
 pub(crate) fn read_config(app_handle: tauri::AppHandle) -> Result<String, String> {
-    let path = config_dir(app_handle);
+    let path = config_file_path(app_handle);
 
     match fs::read_to_string(path) {
         Ok(content) => Ok(content),
@@ -106,7 +106,7 @@ pub(crate) fn read_config(app_handle: tauri::AppHandle) -> Result<String, String
 
 #[tauri::command]
 pub(crate) fn remove_config(app_handle: tauri::AppHandle) -> Result<(), String> {
-    let path = config_dir(app_handle);
+    let path = config_file_path(app_handle);
 
     match fs::remove_file(path) {
         Ok(_) => Ok(()),
@@ -162,7 +162,7 @@ pub(crate) fn custom_log_dir(id: &str) -> PathBuf {
     path.expect("Could not resolve custom log directory path!")
 }
 
-pub(crate) fn config_dir(app_handle: tauri::AppHandle) -> PathBuf {
+pub(crate) fn config_file_path(app_handle: tauri::AppHandle) -> PathBuf {
     let id = &app_handle.config().tauri.bundle.identifier;
 
     let config_dir = dirs::config_dir();
