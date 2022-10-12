@@ -28,12 +28,17 @@ Icon={id}"
 #[tauri::command]
 pub(crate) fn linux_auto_launch_file_exist(app_handle: tauri::AppHandle) -> bool {
     let path = linux_auto_launch_dir(app_handle);
-    fs::read(path).is_ok()
+    path.exists()
 }
 
 #[tauri::command]
 pub(crate) fn remove_linux_auto_launch_file(app_handle: tauri::AppHandle) -> Result<(), String> {
     let path = linux_auto_launch_dir(app_handle);
+
+    // if there is no auto-start file, it means auto launch is already disabled
+    if !path.exists() {
+        return Ok(());
+    }
 
     match fs::remove_file(path) {
         Ok(_) => Ok(()),
