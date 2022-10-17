@@ -1,12 +1,10 @@
-import * as fs from '@tauri-apps/api/fs';
-
-import { toFixed, getErrorMessage } from './util/util';
+import TauriInvoker from './tauri';
+import { toFixed, getErrorMessage } from './util';
 
 interface FilesParams {
-  fs: typeof fs;
   configDir: string;
   appName: string;
-  writeFile: (configFullPath: string, config: IConfig) => Promise<void>;
+  tauri: TauriInvoker;
 }
 
 export interface Plot {
@@ -39,19 +37,16 @@ export const emptyConfig: IConfig = {
 };
 
 /**
- * Wrapper for tauri.fs methods to read, update or delete config file
+ * Class responsible for reading, initializing, updating or deleting config file,
+ * uses TauriInvoker to interact with file system
  */
 class Config {
-  private fs: typeof fs;
   private configPath: string;
-  private configFullPath: string;
-  private writeFile: (configFullPath: string, config: IConfig) => Promise<void>;
+  private tauri: TauriInvoker;
 
-  constructor({ fs, configDir, appName, writeFile }: FilesParams) {
-    this.fs = fs;
+  constructor({ configDir, appName, tauri }: FilesParams) {
     this.configPath = `${configDir}${appName}`;
-    this.configFullPath = `${this.configPath}/${appName}.cfg`;
-    this.writeFile = writeFile;
+    this.tauri = tauri;
   }
 
   /**
@@ -59,10 +54,10 @@ class Config {
    */
   public async init(): Promise<void> {
     try {
-      await this.readConfigFile();
+      await this.tauri.readConfig();
     } catch {
       // means there were no config file
-      await this.fs.createDir(this.configPath)
+      await this.tauri.createDir(this.configPath)
         // ignore error if folder exists otherwise throw error
         .catch((error) => {
           const message = getErrorMessage(error);
@@ -95,15 +90,15 @@ class Config {
    * Remove config file from the file system. Used for reset
    */
   public async remove(): Promise<void> {
-    await this.fs.removeFile(this.configFullPath);
+    return this.tauri.removeConfig();
   }
 
   /**
    * Read config file
-   * @returns {Config} - config object
+   * @returns {IConfig} - config object
    */
   public async readConfigFile(): Promise<IConfig> {
-    const result = await this.fs.readTextFile(this.configFullPath);
+    const result = await this.tauri.readConfig();
     const config: IConfig = JSON.parse(result);
     // TODO: there maybe a better solution, or `sizeGB` should be string in the first place
     config.plot.sizeGB = toFixed(Number(config.plot.sizeGB), 2);
@@ -115,7 +110,7 @@ class Config {
    * @param {IConfig} - config object to store as config file
    */
   private async write(config: IConfig): Promise<void> {
-    return this.writeFile(this.configFullPath, config);
+    return this.tauri.writeConfig(config);
   }
 
   /**

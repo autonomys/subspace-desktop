@@ -3,6 +3,8 @@
     windows_subsystem = "windows"
 )]
 
+#[cfg(target_os = "linux")]
+mod linux;
 #[cfg(target_os = "windows")]
 mod windows;
 
@@ -25,9 +27,8 @@ const KEEP_LAST_N_DAYS: usize = 7;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let ctx = tauri::generate_context!(); // context is necessary to get bundle id
-    let id = &ctx.config().tauri.bundle.identifier;
-    let log_dir = utils::custom_log_dir(id);
+    let ctx = tauri::generate_context!();
+    let log_dir = utils::custom_log_dir(&ctx.config().tauri.bundle.identifier);
     create_dir_all(log_dir.clone()).expect("path creation should always succeed");
 
     let mut file_appender = tracing_appender::rolling::daily(log_dir, "subspace-desktop.log");
@@ -94,34 +95,62 @@ async fn main() -> Result<()> {
             }
         })
         .invoke_handler(
-            #[cfg(not(target_os = "windows"))]
+            #[cfg(target_os = "macos")]
             tauri::generate_handler![
                 farmer::farming,
                 farmer::validate_reward_address,
                 node::start_node,
                 utils::frontend_error_logger,
                 utils::frontend_info_logger,
-                utils::custom_log_dir,
-                utils::open_folder,
+                utils::open_log_dir,
                 utils::get_disk_stats,
                 utils::get_this_binary,
-                utils::create_file,
+                utils::write_config,
+                utils::read_config,
+                utils::remove_config,
+                utils::create_dir,
+                utils::remove_dir,
+                utils::entry_count_directory,
+            ],
+            #[cfg(target_os = "linux")]
+            tauri::generate_handler![
+                farmer::farming,
+                farmer::validate_reward_address,
+                node::start_node,
+                utils::frontend_error_logger,
+                utils::frontend_info_logger,
+                utils::open_log_dir,
+                utils::get_disk_stats,
+                utils::get_this_binary,
+                utils::write_config,
+                utils::read_config,
+                utils::remove_config,
+                utils::create_dir,
+                utils::remove_dir,
+                utils::entry_count_directory,
+                linux::create_linux_auto_launch_file,
+                linux::linux_auto_launch_file_exist,
+                linux::remove_linux_auto_launch_file,
             ],
             #[cfg(target_os = "windows")]
             tauri::generate_handler![
-                windows::winreg_get,
-                windows::winreg_set,
-                windows::winreg_delete,
                 farmer::farming,
                 farmer::validate_reward_address,
                 node::start_node,
                 utils::frontend_error_logger,
                 utils::frontend_info_logger,
-                utils::custom_log_dir,
+                utils::open_log_dir,
                 utils::get_disk_stats,
                 utils::get_this_binary,
-                utils::open_folder,
-                utils::create_file,
+                utils::write_config,
+                utils::read_config,
+                utils::remove_config,
+                utils::create_dir,
+                utils::remove_dir,
+                utils::entry_count_directory,
+                windows::winreg_get,
+                windows::winreg_set,
+                windows::winreg_delete,
             ],
         )
         .build(ctx)

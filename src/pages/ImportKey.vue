@@ -42,7 +42,6 @@ q-page(padding)
 import { defineComponent, watch } from 'vue';
 import * as tauri from '@tauri-apps/api';
 import { useStore } from '../stores/store';
-import { errorLogger } from '../lib/util';
 
 export default defineComponent({
   setup() {
@@ -65,10 +64,11 @@ export default defineComponent({
   methods: {
     async validateAddress(addr: string): Promise<boolean> {
       try {
+        // TODO: consider moving inside TauriInvoker
         const result: boolean = await tauri.invoke('validate_reward_address', { addr });
         return result;
       } catch (error) {
-        errorLogger(error);
+        this.$tauri.errorLogger(error);
         return false;
       }
     },

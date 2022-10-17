@@ -4,11 +4,7 @@ q-menu(auto-close)
     q-item
       .row.items-center
         .col-auto.q-mr-md
-          q-toggle(
-            :disable="disableAutoLaunch"
-            @click="toggleClicked()"
-            v-model="launchOnStart"
-          )
+          q-toggle(@click="toggleClicked()" v-model="launchOnStart")
         .col
           p.text-grey(v-if="!launchOnStart") {{ $t('menu.autoStart') }}
           p.text-black(v-else) {{ $t('menu.autoStart') }}
@@ -35,10 +31,9 @@ q-menu(auto-close)
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { Dialog, Notify } from 'quasar';
-import { process, event, tauri } from '@tauri-apps/api';
+import { process, event } from '@tauri-apps/api';
 import { LocalStorage as localStorage } from 'quasar';
 
-import * as plotDir from '../lib/plotDir';
 import * as util from '../lib/util';
 import { useStore } from '../stores/store';
 
@@ -78,14 +73,14 @@ export default defineComponent({
         try {
           await this.$autoLauncher.enable();
         } catch (error) {
-          util.errorLogger(error);
+          this.$tauri.errorLogger(error);
           this.store.setError({ title: 'errorPage.enableAutoLauncherFailed' });
         }
       } else {
         try {
           await this.$autoLauncher.disable();
         } catch (error) {
-          util.errorLogger(error);
+          this.$tauri.errorLogger(error);
           this.store.setError({ title: 'errorPage.disableAutoLauncherFailed' });
         }
       }
@@ -108,25 +103,23 @@ export default defineComponent({
       }).onOk(async () => {
         try {
           await util.resetAndClear({
-            plotDir,
             localStorage,
+            tauri: this.$tauri,
             config: this.$config
           });
           await new Promise((resolve) => setTimeout(resolve, 1000));
           await process.relaunch();
         } catch (error) {
-          util.errorLogger(error);
-          this.store.setError({ title: 'erroPage.resetFailed' });
+          this.$tauri.errorLogger(error);
+          this.store.setError({ title: 'errorPage.resetFailed' });
         }
       });
     },
     async exportLogs() {
       try {
-        const log_path = await util.getLogPath();
-        util.infoLogger('log path acquired:' + log_path);
-        await tauri.invoke('open_folder', { dir: log_path });
+        await this.$tauri.openLogDir();
       } catch (error) {
-        util.errorLogger(error);
+        this.$tauri.errorLogger(error);
         this.store.setError({ title: 'errorPage.getLogsFailed' });
       }
     },

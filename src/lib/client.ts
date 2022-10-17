@@ -6,19 +6,20 @@ import type { EventRecord } from '@polkadot/types/interfaces/system';
 import { IU8a } from '@polkadot/types-codec/types';
 
 import * as process from 'process';
-import * as util from '../lib/util';
 import {
   FarmedBlock,
   SubPreDigest,
   SyncState,
 } from '../lib/types';
 import Config from './config';
+import TauriInvoker from './tauri';
 
 const SUNIT = 1000000000000000000n;
 
 interface ClientParams {
   api: ApiPromise;
   config: Config;
+  tauri: TauriInvoker;
 }
 
 // TODO: implement unit tests
@@ -28,15 +29,18 @@ export class Client {
   protected unsubscribe: tauri.event.UnlistenFn = () => null;
   private api: ApiPromise;
   private config: Config;
+  private tauri: TauriInvoker;
   /**
    * Create Client instance
    * @param {ClientParams} params
    * @param {ApiPromise} params.api - Polkadot.js RPC API instance
    * @param {Config} params.config - Config class instance to interact with app config file
+   * @param {TauriInvoker} params.tauri - tauri invoker (used for logging here)
    */
-  constructor({ api, config }: ClientParams) {
+  constructor({ api, config, tauri }: ClientParams) {
     this.api = api;
     this.config = config;
+    this.tauri = tauri;
   }
 
   /**
@@ -81,7 +85,7 @@ export class Client {
     farmedBlockHandler: (block: FarmedBlock) => void;
     newBlockHandler: (blockNum: number) => void;
   }): Promise<void> {
-    const rewardAddress: string = (await this.config.readConfigFile()).rewardAddress;
+    const { rewardAddress } = (await this.config.readConfigFile());
 
     this.unsubscribe = await this.api.rpc.chain.subscribeNewHeads(
       async ({ hash, number }) => {
@@ -121,14 +125,14 @@ export class Client {
    * Stop subscription for Subspace blocks, close connection to RPC, destroy Tauri, etc.
    */
   private stopSubscription() {
-    util.infoLogger('block subscription stop triggered');
+    this.tauri.infoLogger('block subscription stop triggered');
     this.unsubscribe();
     this.api.disconnect();
     try {
       this.clearTauriDestroy();
       window.removeEventListener('unload', this.stopSubscription);
     } catch (error) {
-      util.errorLogger(error);
+      this.tauri.errorLogger(error);
     }
   }
 
@@ -165,7 +169,7 @@ export class Client {
    * @param {string} nodeName - local node name
    */
   public async startNode(path: string, nodeName: string): Promise<void> {
-    await tauri.invoke('start_node', { path, nodeName });
+    await this.tauri.startNode(path, nodeName);
 
     // TODO: workaround in case node takes some time to fully start, should be replaced with tauri events
     await new Promise((resolve) => setTimeout(resolve, 7000));
@@ -206,6 +210,6 @@ export class Client {
       throw new Error('Tried to send empty reward address to backend!');
     }
 
-    return tauri.invoke('farming', { path, rewardAddress, plotSize });
+    return this.tauri.startFarming(path, rewardAddress, plotSize);
   }
 }

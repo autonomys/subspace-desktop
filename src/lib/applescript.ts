@@ -1,9 +1,9 @@
 
 import * as shell from '@tauri-apps/api/shell';
-import { errorLogger } from './util';
+import TauriInvoker from './tauri';
 import { ChildReturnData } from './types';
 
-export async function execString(command: string): Promise<ChildReturnData> {
+export async function execString(command: string, tauri: TauriInvoker): Promise<ChildReturnData> {
   const args = ['-e', command];
   console.log('Executing applescript:', args);
 
@@ -14,7 +14,7 @@ export async function execString(command: string): Promise<ChildReturnData> {
       console.log(`command finished with code ${data.code} and signal ${data.signal}`);
       res(returnData);
     });
-    child.on('error', error => errorLogger(`command error: "${error}"`));
+    child.on('error', error => tauri.errorLogger(`command error: "${error}"`));
     child.stdout.on('data', (line: string) => {
       returnData.stdout.push(line);
       console.log(`command stdout: "${line}"`);

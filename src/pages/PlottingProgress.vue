@@ -158,14 +158,14 @@ export default defineComponent({
     }
   },
   async mounted() {
-    util.infoLogger('PLOTTING PROGRESS | getting plot config');
+    this.$tauri.infoLogger('PLOTTING PROGRESS | getting plot config');
     // TODO: probably can combine these two:
     this.store.setFirstLoad();
     this.store.setPlottingRemaining(this.store.plotSizeGB);
-    util.infoLogger('PLOTTING PROGRESS | starting node');
-    await this.store.startNode(this.$client, util);
+    this.$tauri.infoLogger('PLOTTING PROGRESS | starting node');
+    await this.store.startNode(this.$client, this.$tauri);
     this.startTimers();
-    util.infoLogger('PLOTTING PROGRESS | starting plotting');
+    this.$tauri.infoLogger('PLOTTING PROGRESS | starting plotting');
     await this.startFarmer();
   },
   unmounted() {
@@ -173,7 +173,7 @@ export default defineComponent({
   },
   methods: {
     async startFarmer(): Promise<void> {
-      await this.store.startFarmer(this.$client, util, blockStorage);
+      await this.store.startFarmer(this.$client, this.$tauri, blockStorage);
       clearInterval(farmerTimer);
     },
     startTimers() {

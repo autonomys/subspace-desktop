@@ -50,7 +50,6 @@ q-layout(view="hHh lpr fFf")
 <script lang="ts">
 import { defineComponent, watch } from 'vue';
 import * as process from 'process';
-import * as util from '../lib/util';
 import MainMenu from '../components/mainMenu.vue';
 import { useStore } from '../stores/store';
 
@@ -64,14 +63,13 @@ export default defineComponent({
   data() {
     return {
       appVersion: '',
-      util,
       isEdittingName: false,
       oldNodeName: '',
     };
   },
   mounted() {
     this.appVersion = (process.env.APP_VERSION as string);
-    util.infoLogger('Version: ' + this.appVersion);
+    this.$tauri.infoLogger('Version: ' + this.appVersion);
 
     // if there is an error - redirect to error page
     watch(
@@ -92,7 +90,7 @@ export default defineComponent({
       // only restart if name has changed
       } else if (this.oldNodeName !== this.store.nodeName) {
         await this.store.setNodeName(this.$config, this.store.nodeName);
-        await this.store.startNode(this.$client, util);
+        await this.store.startNode(this.$client, this.$tauri);
       }
     },
     setEditName(value: boolean) {

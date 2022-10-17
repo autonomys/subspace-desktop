@@ -1,6 +1,5 @@
 import { LocalStorage } from 'quasar';
 import { FarmedBlock } from '../lib/types';
-import { errorLogger } from './util';
 
 export interface IBlockStorage {
   getStoredBlocks: () => FarmedBlock[];
@@ -9,16 +8,13 @@ export interface IBlockStorage {
 
 export function getStoredBlocks(): FarmedBlock[] {
   const mined: FarmedBlock[] = [];
-  try {
-    const blocks = LocalStorage.getItem('farmedBlocks');
-    if (!blocks) return [];
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    for (const [num, block] of Object.entries(blocks)) {
-      mined.push(block as FarmedBlock);
-    }
-  } catch (error) {
-    errorLogger(`Error reading stored blocks: ${error}`);
+  const blocks = LocalStorage.getItem('farmedBlocks');
+  if (!blocks) return [];
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  for (const [num, block] of Object.entries(blocks)) {
+    mined.push(block as FarmedBlock);
   }
+
   return mined;
 }
 

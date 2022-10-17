@@ -1,9 +1,7 @@
-import * as fs from '@tauri-apps/api/fs';
-
 import FarmedBlockMock from './FarmedBlock.json';
 import { Client } from '../lib/client';
-import { IUtil } from '../lib/util/util';
 import Config,  { emptyConfig } from '../lib/config';
+import TauriInvoker from '../lib/tauri';
 
 export { FarmedBlockMock };
 
@@ -50,17 +48,4 @@ export const clientMock = {
   startSubscription: jest.fn(),
 } as unknown as Client;
 
-export const utilMock = {
-  errorLogger: jest.fn(),
-  infoLogger: jest.fn(),
-  generateNodeName: jest.fn(() => 'random generated name'),
-} as unknown as IUtil;
-
-export const tauriFsMock = {
-  removeDir: jest.fn(),
-  createDir: jest.fn().mockResolvedValue({}),
-  removeFile: jest.fn(),
-  readTextFile: jest.fn().mockResolvedValue(JSON.stringify(configFileMock)),
-  writeFile: jest.fn().mockResolvedValue({}),
-  readDir: jest.fn().mockResolvedValue('/random-dir/'),
-} as unknown as typeof fs;
+export const tauriInvokerMock = new TauriInvoker(jest.fn().mockResolvedValue({}));

@@ -101,7 +101,7 @@ q-page.q-pa-lg.q-mr-lg.q-ml-lg
     .col-auto
       q-btn(
         :disable="(!validPath || store.plotSizeGB <= 0 || store.plotSizeGB > 100)"
-        @click="confirmCreateDir()"
+        @click="confirmDirectory()"
         color="blue-8"
         icon-right="downloading"
         :label="$t('setupPlot.start')"
@@ -120,11 +120,11 @@ import { ApexOptions } from 'apexcharts';
 
 import { ChartDataType, StatsType } from '../lib/types';
 import * as native from '../lib/native';
-import * as plotDir from '../lib/plotDir';
 import mnemonicModal from '../components/mnemonicModal.vue';
 import { useStore } from '../stores/store';
 import * as util from '../lib/util';
 import * as directoryDialogs from '../components/directoryDialogs';
+import { APP_NAME, PLOT_FOLDER } from '../lib/constants';
 
 const chartOptions: ApexOptions = {
   legend: { show: false },
@@ -158,7 +158,7 @@ export default defineComponent({
       revealKey: false,
       validPath: true,
       driveStats: { freeBytes: 0, totalBytes: 0 },
-      chartOptions,
+      chartOptions
     };
   },
   computed: {
@@ -167,9 +167,11 @@ export default defineComponent({
         this.stats.utilizedGB,
         this.stats.freeGB,
         // small hack to make chart look better, otherwise plot size is not visible
-        this.store.plotSizeGB < 5 ? this.store.plotSizeGB + 5 :
-          this.store.plotSizeGB < 10 ? this.store.plotSizeGB + 3 :
-            this.store.plotSizeGB
+        this.store.plotSizeGB < 5
+          ? this.store.plotSizeGB + 5
+          : this.store.plotSizeGB < 10
+          ? this.store.plotSizeGB + 3
+          : this.store.plotSizeGB
       ];
     },
     stats(): StatsType {
@@ -227,10 +229,14 @@ export default defineComponent({
     }
   },
   async mounted() {
-    await this.updateDriveStats();
-    const path = (await tauri.path.dataDir()) + util.appName + util.PLOT_FOLDER;
-    this.store.setPlotPath(path);
-    await this.createDefaultPlotDir();
+    try {
+      await this.updateDriveStats();
+      const path = (await tauri.path.dataDir()) + APP_NAME;
+      this.store.setPlotPath(path);
+    } catch (error) {
+      this.$tauri.errorLogger(error);
+      this.store.setError({ title: 'errorPage.defaultErrorTitle' });
+    }
   },
   async created() {
     this.$watch(
@@ -247,73 +253,79 @@ export default defineComponent({
     );
   },
   methods: {
-    async confirmCreateDir() {
-      const dirExists = await native.dirExists(this.store.plotPath);
-
-      if (dirExists) {
-        util.infoLogger('SETUP PLOT | found the old plotting directory');
-        const files = await tauri.fs
-          .readDir(this.store.plotPath)
-          .catch((error) => {
-            util.errorLogger(error);
-          });
-
-        if (files) {
-          console.log('FILES ARE: :', files);
-          if (files.length === 0) {
-            directoryDialogs.existingDirectoryConfirm(this.store.plotPath, this.startPlotting);
-            // we are in FIRST TIME START, meaning there is are no existing plot
-            // if there are some files in this folder, it's weird
-          } else {
-            directoryDialogs.notEmptyDirectoryInfo(this.store.plotPath);
-          }
-        }
-      } else if (!dirExists) {
-        directoryDialogs.newDirectoryConfirm(this.store.plotPath, this.startPlotting);
+    async confirmDirectory() {
+      if (await this.$tauri.isDirExist(this.store.plotPath)) {
+        directoryDialogs.existingDirectoryConfirm(
+          this.store.plotPath,
+          this.startPlotting
+        );
+      } else {
+        directoryDialogs.newDirectoryConfirm(
+          this.store.plotPath,
+          this.createNewDirAndStartPlotting
+        );
       }
     },
     async startPlotting() {
       try {
-        await plotDir.createPlotDir(this.store.plotPath);
-        util.infoLogger('SETUP PLOT | custom directory created');
-
+        // creating additional subfolder '/plots' inside confirmed directory
+        const path = this.store.plotPath + PLOT_FOLDER;
+        this.store.setPlotPath(path);
+        await this.$tauri.createDir(this.store.plotPath);
         if (!this.store.rewardAddress) {
-          util.infoLogger('SETUP PLOT | reward address was empty, creating a new one');
-          await util.showModal(mnemonicModal, { handleConfirm: this.handleConfirm });
+          this.$tauri.infoLogger(
+            'SETUP PLOT | reward address was empty, creating a new one'
+          );
+          await util.showModal(mnemonicModal, {
+            handleConfirm: this.handleConfirm
+          });
         } else {
-          util.infoLogger('SETUP PLOT | reward address was initialized before, proceeding to plotting');
+          this.$tauri.infoLogger(
+            'SETUP PLOT | reward address was initialized before, proceeding to plotting'
+          );
           await this.handleConfirm();
         }
       } catch (error) {
-        util.errorLogger(error);
-        this.store.setError({ title: 'erroPage.startPlottingFailed' });
+        this.$tauri.errorLogger(error);
+        this.store.setError({ title: 'errorPage.startPlottingFailed' });
       }
     },
     async handleConfirm() {
-      await this.store.confirmPlottingSetup(this.$config, util);
+      const nodeName = util.generateNodeName();
+      await this.store.confirmPlottingSetup(this.$config, nodeName);
       this.$router.replace({ name: 'plottingProgress' });
     },
     async updateDriveStats() {
       const stats = await native.driveStats(this.store.plotPath);
-      util.infoLogger('Drive Stats -> free: ' + stats.freeBytes + '; total: ' + stats.totalBytes);
+      this.$tauri.infoLogger(
+        'Drive Stats -> free: ' +
+          stats.freeBytes +
+          '; total: ' +
+          stats.totalBytes
+      );
       this.driveStats = stats;
     },
     async selectDir() {
       const result = await native
-        .selectDir(this.store.plotPath)
+        .selectDir(this.store.plotPath, this.$tauri)
         .catch((error: unknown) => {
-          util.errorLogger(error);
+          this.$tauri.errorLogger(error);
         });
       if (result) {
         this.store.setPlotPath(result);
       }
       await this.updateDriveStats();
     },
-    async createDefaultPlotDir() {
-      await tauri.fs.createDir(this.store.plotPath).catch((error) => {
-        util.errorLogger(error);
-      });
-    },
+    async createNewDirAndStartPlotting(): Promise<void> {
+      try {
+        await this.$tauri.createDir(this.store.plotPath);
+        this.$tauri.infoLogger('SETUP PLOT | custom directory created');
+        return this.startPlotting();
+      } catch (error) {
+        this.$tauri.errorLogger(error);
+        this.store.setError({ title: 'errorPage.createNewDirFailed' });
+      }
+    }
   }
 });
 </script>

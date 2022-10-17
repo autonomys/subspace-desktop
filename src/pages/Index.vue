@@ -44,15 +44,15 @@ export default defineComponent({
     try {
       this.checkDevAndDisableContextMenu();
       if (await this.$config.validate()) {
-        util.infoLogger('INDEX | NOT First Time RUN.');
+        this.$tauri.infoLogger('INDEX | NOT First Time RUN.');
         await this.store.updateFromConfig(blockStorage, this.$config);
         this.dashboard();
         return;
       }
-      util.infoLogger('validate failed, we should start from scratch');
+      this.$tauri.infoLogger('validate failed, we should start from scratch');
       this.firstLoad();
     } catch (e) {
-      util.infoLogger('config could not be read, starting from scratch');
+      this.$tauri.infoLogger('config could not be read, starting from scratch');
       this.firstLoad();
     }
   },
@@ -67,7 +67,9 @@ export default defineComponent({
       this.$router.replace({ name: 'dashboard' });
     },
     async firstLoad() {
-      util.infoLogger('INDEX | First Time RUN, resetting reward address');
+      this.$tauri.infoLogger(
+        'INDEX | First Time RUN, resetting reward address'
+      );
       // reset node name in case there is a leftover from prev launch (restart due to error)
       this.store.setNodeName(this.$config, '');
       const { launchOnBoot } = await this.$config.readConfigFile();

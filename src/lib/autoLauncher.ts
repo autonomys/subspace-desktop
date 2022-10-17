@@ -1,84 +1,66 @@
-import * as fs from '@tauri-apps/api/fs';
-
 import * as native from './native';
 import { ChildReturnData } from './types';
-import { errorLogger } from './util';
 import Config from './config';
+import TauriInvoker from './tauri';
 
 interface WinOrMacAutoLauncherProps {
   appName: string,
   appPath: string,
   native: typeof native;
+  tauri: TauriInvoker;
 }
 
 interface LinuxAutoLauncherProps {
   appName: string,
   appPath: string,
   configDir: string;
-  fs: typeof fs,
+  tauri: TauriInvoker;
 }
 
 export class LinuxAutoLauncher {
   private appName: string;
   private appPath: string;
-  private fs: typeof fs;
   private configDir: string;
+  private tauri: TauriInvoker;
 
-  constructor({ appName, appPath, fs, configDir }: LinuxAutoLauncherProps) {
+  constructor({ appName, appPath, configDir, tauri }: LinuxAutoLauncherProps) {
     this.appName = appName;
     this.appPath = appPath;
-    this.fs = fs;
     this.configDir = configDir;
+    this.tauri = tauri;
   }
 
   public async enable(minimized: boolean): Promise<ChildReturnData> {
-    const autostartAppFile = await this.createAutostartDir();
+    await this.createAutostartDir();
     const response: ChildReturnData = { stderr: [], stdout: [] };
     const hiddenArg = minimized ? ' --minimized' : '';
-    const contents = `
-      [Desktop Entry]
-      Type=Application
-      Name=${this.appName}
-      Comment=${this.appName} startup script
-      Exec=${this.appPath}${hiddenArg}
-      Icon=${this.appName}
-    `;
-    await this.fs.writeFile({ contents, path: autostartAppFile });
+    await this.tauri.createLinuxAutoLaunchFile(hiddenArg);
     response.stdout.push('success');
     return response;
   }
 
   public async disable(): Promise<ChildReturnData> {
-    const autostartAppFile = this.getAutostartFilePath();
     const response: ChildReturnData = { stderr: [], stdout: [] };
-    await this.fs.removeFile(autostartAppFile);
+    await this.tauri.removeLinuxAutoLaunchFile();
     response.stdout.push('success');
     return response;
   }
 
   public async isEnabled(): Promise<boolean> {
     try {
-      const autostartAppFile = this.getAutostartFilePath();
-      await this.fs.readTextFile(autostartAppFile);
+      await this.tauri.linuxAutoLaunchFileExist();
       return true;
     } catch (error) {
-      errorLogger(error);
+      this.tauri.errorLogger(error);
       return false;
     }
   }
 
-  private getAutostartFilePath(): string {
-    const autostartAppFile = this.configDir + 'autostart/' + this.appName + '.desktop';
-    return autostartAppFile;
-  }
-
-  private async createAutostartDir(): Promise<string> {
+  private async createAutostartDir(): Promise<void> {
     const autostartDirectory = this.configDir + 'autostart/';
-    const existDir = await this.fs.readDir(autostartDirectory);
-    if (!existDir) {
-      await this.fs.createDir(autostartDirectory);
+    if (!(await this.tauri.isDirExist(autostartDirectory))) {
+      await this.tauri.createDir(autostartDirectory);
     }
-    return autostartDirectory + this.appName + '.desktop';
   }
 }
 
@@ -86,11 +68,13 @@ export class MacOSAutoLauncher {
   private appName: string;
   private appPath: string;
   private native: typeof native;
+  private tauri: TauriInvoker;
 
-  constructor({ appName, appPath, native }: WinOrMacAutoLauncherProps) {
+  constructor({ appName, appPath, native, tauri }: WinOrMacAutoLauncherProps) {
     this.appName = appName;
     this.appPath = appPath;
     this.native = native;
+    this.tauri = tauri;
   }
 
   public async enable(minimized: boolean): Promise<ChildReturnData> {
@@ -100,15 +84,15 @@ export class MacOSAutoLauncher {
     const path = this.appPath.split('/Contents')[0];
     const isHiddenValue = minimized ? 'true' : 'false';
     const properties = `{path:"${path}", hidden:${isHiddenValue}, name:"${this.appName}"}`;
-    return this.native.execApplescriptCommand(`make login item at end with properties ${properties}`);
+    return this.native.execApplescriptCommand(`make login item at end with properties ${properties}`, this.tauri);
   }
 
   public async disable(): Promise<ChildReturnData> {
-    return this.native.execApplescriptCommand(`delete login item "${this.appName}"`);
+    return this.native.execApplescriptCommand(`delete login item "${this.appName}"`, this.tauri);
   }
 
   public async isEnabled(): Promise<boolean> {
-    const response: ChildReturnData = await this.native.execApplescriptCommand('get the name of every login item');
+    const response: ChildReturnData = await this.native.execApplescriptCommand('get the name of every login item', this.tauri);
     const loginList = response?.stdout[0]?.split(', ') || [];
     const exists = loginList.includes(this.appName);
     console.log('login Item Exists:', exists);
@@ -166,6 +150,7 @@ export class WindowsAutoLauncher {
 interface AutoLauncherParams {
   config: Config;
   osAutoLauncher: MacOSAutoLauncher | WindowsAutoLauncher | LinuxAutoLauncher;
+  tauri: TauriInvoker;
 }
 
 /**
@@ -175,6 +160,7 @@ class AutoLauncher {
   private osAutoLauncher: MacOSAutoLauncher | WindowsAutoLauncher | LinuxAutoLauncher;
   private enabled = false;
   private config: Config;
+  private tauri: TauriInvoker;
 
   /**
    * Create AutoLauncher instance
@@ -182,9 +168,10 @@ class AutoLauncher {
    * @param {MacOSAutoLauncher | WindowsAutoLauncher | LinuxAutoLauncher} params.osAutoLauncher - internal auto launcher for particular OS
    * @param {Config} params.config - Config class instance to interact with app config file
    */
-  constructor({ config, osAutoLauncher }: AutoLauncherParams) {
+  constructor({ config, osAutoLauncher, tauri }: AutoLauncherParams) {
     this.config = config;
     this.osAutoLauncher = osAutoLauncher;
+    this.tauri = tauri;
   }
 
   // TODO: consider removing this method as redundant - call osAutoLauncher.isEnabled() directly
@@ -206,7 +193,7 @@ class AutoLauncher {
     const child = await this.osAutoLauncher.enable(true);
     this.enabled = await this.isEnabled();
     if (!this.enabled) {
-      errorLogger('ENABLE DID NOT WORK');
+      this.tauri.errorLogger('ENABLE DID NOT WORK');
     } else {
       await this.config.update({ launchOnBoot: true });
     }
