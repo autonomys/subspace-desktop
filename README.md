@@ -3,6 +3,29 @@
 Standalone Desktop application for farming on Subspace Network (includes both node and farmer).
 Download and run this application to be a farmer on Subspace Network (currently on testnet).
 
+# Archive Notice :warning:
+As of 01-22-2024, this project has been archived and is no longer actively maintained.
+
+# What does this mean
+
+- **No Updates:** The repository will not be receiving any updates or accepting pull requests. The code is provided as-is.
+- **Read-Only:** The repository is now read-only. You can still fork, download, or star the repository.
+- **No Support:** We will no longer be responding to issues or questions regarding this project. However, you may still find community support through existing issues or outside forums.
+
+# Why is this project archived?
+
+This project is being archived due to the lack of a sustainable user community and our decision to concentrate our resources on more widely-used projects that are critical to our roadmap towards mainnet.
+
+We believe that focusing our efforts on projects with a broader user base and strategic importance will allow us to make a more significant impact and deliver better value to our community.
+
+# Looking Forward
+
+While this project is being archived, we encourage our vibrant community to take the reins! If you've found value in this project and have ideas for its evolution, we wholeheartedly support and encourage you to fork and develop your own versions. This is an opportunity for innovation and creativity – your contributions could lead to something even more impactful.
+
+For those who are looking for alternatives to this project, we recommend exploring [Space Acres](https://github.com/nazar-pc/space-acres), which provides similar functionalities.  Additionally, we invite you to follow our ongoing projects, which continue to build on the foundations we've laid here. Stay tuned for exciting developments on our journey towards mainnet!
+
+We extend our deepest gratitude to everyone who has contributed to and supported this project. Your engagement and feedback have been invaluable, and we look forward to seeing how the community takes these ideas forward in new and exciting directions.
+
 # OS Requirements
 Below is not necessarily strict boundaries, but rather what we have tested and confirmed so far.
 
